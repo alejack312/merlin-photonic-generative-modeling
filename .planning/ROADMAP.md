@@ -43,10 +43,13 @@ Plans:
   2. A fixed set of K bin-centers spanning the circles dataset's (x, y) region is defined and reproducible across runs.
   3. The real-data histogram (`p_real`) over the K bin-centers is precomputed once and its probabilities sum to 1.
   4. The closed-form MMD² between two probability vectors over the bin-centers computes a finite, non-negative value, using a kernel over bin-center coordinates.
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: TBD (assigned during plan-phase)
+- [ ] 02-01-PLAN.md — Setup (pytest + package scaffolding) + deterministic K=400 bin-centers (GEN-03)
+- [ ] 02-02-PLAN.md — Latent noise sampling/encoding (GEN-02)
+- [ ] 02-03-PLAN.md — Real-data histogram p_real (GEN-04)
+- [ ] 02-04-PLAN.md — Closed-form MMD² loss (GEN-05)
 
 ### Phase 3: End-to-End Training Run
 **Goal**: The generator trains end-to-end on real data with a loop that measurably decreases MMD — the explicit July 25, 2026 stall-risk checkpoint named in PROJECT.md.
@@ -107,7 +110,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Environment & Architecture Foundation | - | Complete | 2026-07-19 |
-| 2. Generator Data & Loss Infrastructure | 0/TBD | Not started | - |
+| 2. Generator Data & Loss Infrastructure | 0/4 | Not started | - |
 | 3. End-to-End Training Run | 0/TBD | Not started | - |
 | 4. Generative Quality | 0/TBD | Not started | - |
 | 5. Benchmarking | 0/TBD | Not started | - |
