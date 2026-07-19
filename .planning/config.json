@@ -1,0 +1,10 @@
+{
+  "workflow": {
+    "mode": "interactive",
+    "depth": "comprehensive",
+    "parallel_execution": true
+  },
+  "planning": {
+    "commit_docs": true
+  }
+}
