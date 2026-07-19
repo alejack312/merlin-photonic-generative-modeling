@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 ## Current Position
 
 Phase: 2 of 6 (Generator Data & Loss Infrastructure)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-07-19 — Roadmap created; Phase 1 (environment + architecture decision) confirmed complete
+Plan: 02 of 4 (latent noise sampling, GEN-02) implemented; 03 and 04 not started
+Status: 02-01 (bin-centers) and 02-02 (noise sampling) implemented and passing pytest, both with SUMMARY.md written; still uncommitted — commit before starting 02-03
+Last activity: 2026-07-19 — Implemented and reviewed GEN-02 (generator/noise.py, tests/test_noise.py); found and fixed a pytest.approx/grad-tensor test bug (see 02-02-SUMMARY.md and ~/.claude/learnings/2026-07-19-pytest-approx-misuse-grad-tensor.md)
 
-Progress: [██░░░░░░░░] ~17% (1/6 phases complete)
+Progress: [███░░░░░░░] ~25% (1/6 phases complete, phase 2 ~50% through its 4 plans)
 
 ## Performance Metrics
 
@@ -45,6 +45,7 @@ Recent decisions affecting current work:
 - Phase 1: Extend quickstart classifier into an MMD generator (not reproduce a catalog paper directly) — reuses owner's MMD/generative-modeling background, gives a natural comparison point.
 - Phase 1: Generator output = full-distribution/histogram matching via closed-form MMD² — avoids collapsing the circles' two-ring target into its empty middle, avoids non-differentiable discrete sampling.
 - Phase 1: Python 3.12 venv used instead of system default 3.13 — required by MerLin's `torch<2.13` + `python<=3.12` constraints.
+- Phase 2 (02-02): Tensor-value pytest assertions use `torch.allclose`/`torch.equal`, never `pytest.approx` — `pytest.approx` without `==` doesn't compare anything, and its internal handling breaks on tensors with `requires_grad=True` (which any `QuantumLayer` output has). Full detail: `~/.claude/learnings/2026-07-19-pytest-approx-misuse-grad-tensor.md`.
 
 ### Pending Todos
 
