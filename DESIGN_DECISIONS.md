@@ -34,3 +34,14 @@ This is the same kernel/bandwidth machinery from the prior IQP-MMD work, just we
 - Latent noise distribution and dimensionality (`input_size` for `z`).
 
 **Decided by:** Alejandro Jackson, informed by this conversation. Superseding note: if this doesn't work in practice (e.g. bin resolution turns out too coarse to represent the rings, or training the circuit against this loss doesn't converge), that's a reason to revisit — record the outcome here, don't silently swap approaches.
+
+---
+
+## 2026-07-19 — Follow-up: the three "still open" items above, resolved during Phase 2 discussion
+
+Full detail in [`.planning/phases/02-generator-data-loss-infrastructure/02-CONTEXT.md`](.planning/phases/02-generator-data-loss-infrastructure/02-CONTEXT.md). Summary:
+
+- **Bin-center layout:** K≈400 (20×20), uniform grid, data bounding box + padding, fully deterministic. Ring-aware density considered and rejected as unnecessary complexity for this timeline.
+- **Kernel/bandwidth:** Gaussian kernel over **Euclidean** distance between bin-centers (`exp(-‖cᵢ-cⱼ‖²/(2σ²))`) — not the Hamming-distance kernel from the prior IQP-MMD project (`iqp-mmd-barren-plateau/src/iqp_bp/mmd/kernel.py`), which operates on binary bitstrings and doesn't port to continuous coordinates. Bandwidth: swept across a few σ values rather than one fixed number, carrying forward that project's `AC12 Bandwidth Sweep` finding that MMD² can look good while the learned distribution still fails to match target structure.
+- **Latent noise:** Normal distribution at MerLin's own default scale (`std=2π`), **not** the `[0,1]` normalization the quickstart classifier used — that was quickstart.py's own choice, not a MerLin requirement (verified: `_build_simple_circuit`'s `angle_encoding_scale` defaults to `1.0`, no auto-rescaling). Dimensionality starts at 2 (matching the classifier's verified `input_size`), explicitly a Phase 3/4 tuning knob, not a Phase 2 correctness requirement.
+- **New finding, not previously known:** MerLin ships a purpose-built `merlin.models.photonic_generator.PhotonicGenerator` class (`NormalLatent`, `VectorAdapter`, multi-head support) for exactly this generative-model pattern, and `QuantumLayer.simple()`'s `output_size` parameter is independent of `input_size` (regrouped via `ModGrouping`) — meaning `output_size = K` is directly achievable. Both are research pointers for Phase 2 implementation, not yet confirmed as the chosen implementation path.
