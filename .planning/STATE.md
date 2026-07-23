@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 ## Current Position
 
 Phase: 2 of 6 (Generator Data & Loss Infrastructure)
-Plan: 02 of 4 (latent noise sampling, GEN-02) implemented; 03 and 04 not started
-Status: 02-01 (bin-centers) and 02-02 (noise sampling) implemented and passing pytest, both with SUMMARY.md written; still uncommitted — commit before starting 02-03
-Last activity: 2026-07-19 — Implemented and reviewed GEN-02 (generator/noise.py, tests/test_noise.py); found and fixed a pytest.approx/grad-tensor test bug (see 02-02-SUMMARY.md and ~/.claude/learnings/2026-07-19-pytest-approx-misuse-grad-tensor.md)
+Plan: 03 of 4 (p_real histogram, GEN-04) implemented; 04 (MMD² loss, GEN-05) not started
+Status: 02-01, 02-02, 02-03 implemented and passing pytest (8/8 across tests/), all with SUMMARY.md written; still uncommitted — commit before starting 02-04
+Last activity: 2026-07-19 — Implemented and reviewed GEN-04 (generator/data.py, tests/test_p_real.py); fixed 3 fatal bugs in load_circles_data (undefined-name annotations, wrong make_circles/train_test_split unpacking, independently-refit MinMaxScaler), a third pytest.approx recurrence, and a real make_circles non-determinism gap (see 02-03-SUMMARY.md)
 
-Progress: [███░░░░░░░] ~25% (1/6 phases complete, phase 2 ~50% through its 4 plans)
+Progress: [████░░░░░░] ~33% (1/6 phases complete, phase 2 75% through its 4 plans)
 
 ## Performance Metrics
 
