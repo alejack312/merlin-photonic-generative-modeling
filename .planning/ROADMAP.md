@@ -60,10 +60,10 @@ Plans:
   1. The training loop runs to completion without errors, using the `QuantumLayer` generator, precomputed `p_real`, and the MMD² loss from Phase 2.
   2. The loss curve shows a real, observable decreasing trend across epochs (not flat, not diverging).
   3. This phase's success criteria are met on or before July 25, 2026 — if not, the historical PennyLane stall pattern is recurring and must be named plainly per PROJECT.md.
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 03-01: TBD (assigned during plan-phase)
+- [ ] 03-01-PLAN.md — Wire Phase 2 modules into train.py, run 300-epoch training, verify decreasing MMD trend via scripted check
 
 ### Phase 4: Generative Quality
 **Goal**: The trained generator's samples are recognizable to a human as approximating the circles dataset's two-ring shape — not just a loss number going down.
