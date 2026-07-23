@@ -13,10 +13,10 @@
 ### Generator Architecture
 
 - [x] **GEN-01**: Generator output-representation decided (full-distribution/histogram MMD matching, not single-point averaging or discrete sampling) — see [DESIGN_DECISIONS.md](../DESIGN_DECISIONS.md)
-- [ ] **GEN-02**: Latent noise sampled and encoded as `QuantumLayer` input each training step
-- [ ] **GEN-03**: Fixed set of K bin-centers defined, spanning the circles data's (x, y) region
-- [ ] **GEN-04**: Real-data histogram (`p_real`) precomputed once over the K bin-centers
-- [ ] **GEN-05**: Closed-form MMD² loss implemented between the model's probability-vector output (`q`) and `p_real`, using a kernel over bin-center coordinates
+- [x] **GEN-02**: Latent noise sampled and encoded as `QuantumLayer` input each training step
+- [x] **GEN-03**: Fixed set of K bin-centers defined, spanning the circles data's (x, y) region
+- [x] **GEN-04**: Real-data histogram (`p_real`) precomputed once over the K bin-centers
+- [x] **GEN-05**: Closed-form MMD² loss implemented between the model's probability-vector output (`q`) and `p_real`, using a kernel over bin-center coordinates
 - [ ] **GEN-06**: Training loop runs end-to-end, producing a real (even if rough) MMD-decreasing run
 - [ ] **GEN-07**: Generator's samples visibly approximate the two-ring circles shape
 
@@ -55,10 +55,10 @@
 | ENV-01 | Phase 1 | Complete |
 | ENV-02 | Phase 1 | Complete |
 | GEN-01 | Phase 1 | Complete |
-| GEN-02 | Phase 2 | Pending |
-| GEN-03 | Phase 2 | Pending |
-| GEN-04 | Phase 2 | Pending |
-| GEN-05 | Phase 2 | Pending |
+| GEN-02 | Phase 2 | Complete |
+| GEN-03 | Phase 2 | Complete |
+| GEN-04 | Phase 2 | Complete |
+| GEN-05 | Phase 2 | Complete |
 | GEN-06 | Phase 3 | Pending |
 | GEN-07 | Phase 4 | Pending |
 | BMK-01 | Phase 5 | Pending |
@@ -69,10 +69,10 @@
 | DOC-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 15 total (3 already complete: ENV-01, ENV-02, GEN-01)
+- v1 requirements: 15 total (7 complete: ENV-01, ENV-02, GEN-01 through GEN-05)
 - Mapped to phases: 15/15 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-19*
-*Last updated: 2026-07-19 after roadmap creation — all v1 requirements mapped to Phases 1-6*
+*Last updated: 2026-07-19 after Phase 2 completion — GEN-02 through GEN-05 verified (24/24 tests passing)*

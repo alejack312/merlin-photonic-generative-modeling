@@ -13,7 +13,7 @@ Extend MerLin's quickstart circles-dataset classifier into an MMD-trained photon
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Environment & Architecture Foundation** - MerLin environment verified working; generator's output-representation approach decided
-- [ ] **Phase 2: Generator Data & Loss Infrastructure** - Noise encoding, bin-centers, real histogram, and MMD² loss built and independently verified
+- [x] **Phase 2: Generator Data & Loss Infrastructure** - Noise encoding, bin-centers, real histogram, and MMD² loss built and independently verified
 - [ ] **Phase 3: End-to-End Training Run** - Training loop runs and MMD measurably decreases (the July 25 stall-risk checkpoint)
 - [ ] **Phase 4: Generative Quality** - Generated samples visibly approximate the circles dataset's two-ring shape
 - [ ] **Phase 5: Benchmarking** - Model performance quantified and compared against MerLin's photonic QGAN reproduction
@@ -44,12 +44,13 @@ Plans:
   3. The real-data histogram (`p_real`) over the K bin-centers is precomputed once and its probabilities sum to 1.
   4. The closed-form MMD² between two probability vectors over the bin-centers computes a finite, non-negative value, using a kernel over bin-center coordinates.
 **Plans**: 4 plans
+**Status**: Complete (2026-07-19)
 
 Plans:
-- [ ] 02-01-PLAN.md — Setup (pytest + package scaffolding) + deterministic K=400 bin-centers (GEN-03)
-- [ ] 02-02-PLAN.md — Latent noise sampling/encoding (GEN-02)
-- [ ] 02-03-PLAN.md — Real-data histogram p_real (GEN-04)
-- [ ] 02-04-PLAN.md — Closed-form MMD² loss (GEN-05)
+- [x] 02-01-PLAN.md — Setup (pytest + package scaffolding) + deterministic K=400 bin-centers (GEN-03)
+- [x] 02-02-PLAN.md — Latent noise sampling/encoding (GEN-02)
+- [x] 02-03-PLAN.md — Real-data histogram p_real (GEN-04)
+- [x] 02-04-PLAN.md — Closed-form MMD² loss (GEN-05)
 
 ### Phase 3: End-to-End Training Run
 **Goal**: The generator trains end-to-end on real data with a loop that measurably decreases MMD — the explicit July 25, 2026 stall-risk checkpoint named in PROJECT.md.
@@ -110,7 +111,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Environment & Architecture Foundation | - | Complete | 2026-07-19 |
-| 2. Generator Data & Loss Infrastructure | 0/4 | Not started | - |
+| 2. Generator Data & Loss Infrastructure | 4/4 | Complete | 2026-07-19 |
 | 3. End-to-End Training Run | 0/TBD | Not started | - |
 | 4. Generative Quality | 0/TBD | Not started | - |
 | 5. Benchmarking | 0/TBD | Not started | - |

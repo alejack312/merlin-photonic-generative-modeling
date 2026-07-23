@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Phase 2 — Generator Data & Loss Infrastructure
+**Current focus:** Phase 3 — End-to-End Training Run (next up)
 
 ## Current Position
 
-Phase: 2 of 6 (Generator Data & Loss Infrastructure)
-Plan: 03 of 4 (p_real histogram, GEN-04) implemented; 04 (MMD² loss, GEN-05) not started
-Status: 02-01, 02-02, 02-03 implemented and passing pytest (8/8 across tests/), all with SUMMARY.md written; still uncommitted — commit before starting 02-04
-Last activity: 2026-07-19 — Implemented and reviewed GEN-04 (generator/data.py, tests/test_p_real.py); fixed 3 fatal bugs in load_circles_data (undefined-name annotations, wrong make_circles/train_test_split unpacking, independently-refit MinMaxScaler), a third pytest.approx recurrence, and a real make_circles non-determinism gap (see 02-03-SUMMARY.md)
+Phase: 2 of 6 (Generator Data & Loss Infrastructure) — COMPLETE
+Plan: 4 of 4 done (bin-centers, noise, p_real, MMD²) — all with SUMMARY.md written
+Status: Full tests/ suite passes 24/24 across all four plans together. Still uncommitted — commit before starting Phase 3 (/gsd:plan-phase 3)
+Last activity: 2026-07-19 — Implemented and reviewed GEN-05 (generator/mmd.py, tests/test_mmd.py); fixed a numpy-vs-torch differentiability bug (would have silently severed gradient flow to the QuantumLayer), a broken test file (wrong import, undefined name, duplicate QuantumLayer instances defeating the gradient-flow check), and two measured torch.cdist float32 tolerance issues (see 02-04-SUMMARY.md)
 
-Progress: [████░░░░░░] ~33% (1/6 phases complete, phase 2 75% through its 4 plans)
+Progress: [███░░░░░░░] ~33% (2/6 phases complete)
 
 ## Performance Metrics
 
@@ -46,6 +46,8 @@ Recent decisions affecting current work:
 - Phase 1: Generator output = full-distribution/histogram matching via closed-form MMD² — avoids collapsing the circles' two-ring target into its empty middle, avoids non-differentiable discrete sampling.
 - Phase 1: Python 3.12 venv used instead of system default 3.13 — required by MerLin's `torch<2.13` + `python<=3.12` constraints.
 - Phase 2 (02-02): Tensor-value pytest assertions use `torch.allclose`/`torch.equal`, never `pytest.approx` — `pytest.approx` without `==` doesn't compare anything, and its internal handling breaks on tensors with `requires_grad=True` (which any `QuantumLayer` output has). Full detail: `~/.claude/learnings/2026-07-19-pytest-approx-misuse-grad-tensor.md`.
+- Phase 2 (02-04): `generator/mmd.py`'s `mmd2`/`gaussian_kernel_matrix` must be pure `torch` (`cdist`/`exp`/`@`), never `numpy` — `q` comes from a trainable `QuantumLayer` forward pass, and any numpy operation on it severs PyTorch's autograd graph, silently producing a loss that looks fine (finite, non-negative) but never actually trains the circuit.
+- Phase 2 (02-04): `torch.cdist(x, x)` is not bit-exact symmetric and its diagonal is not bit-exact 0 (float32 cancellation in its internal distance formula) — both get amplified by a Gaussian kernel's `/(2σ²)` at small σ. Measured: ~1e-6 symmetry / ~5e-4 diagonal noise from cdist itself, ~1e-5 / ~3e-4 after the kernel at σ=0.02. Use `atol=1e-4`/`1e-3` on symmetry/diagonal checks over such a kernel, not `torch.allclose` defaults.
 
 ### Pending Todos
 
