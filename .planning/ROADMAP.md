@@ -73,10 +73,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Generated samples, plotted, visibly form two rings resembling the circles dataset's shape (not a blob, not concentrated in the empty middle).
   2. Any hyperparameter or architecture tuning needed to reach recognizable output is documented.
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD (assigned during plan-phase)
+- [ ] 04-01-PLAN.md — Visualize sigma=0.1 checkpoint (scatter + heatmap + ring/gap metric), decide if sweep needed
+- [ ] 04-02-PLAN.md — Conditional: full SIGMA_GRID sweep (5 values) if 04-01 decision says sweep-needed
+- [ ] 04-03-PLAN.md — Document tuning path, human-verify checkpoint confirming GEN-07
 
 ### Phase 5: Benchmarking
 **Goal**: The model's performance is honestly quantified and situated against a reference point, not presented as a bare "it trained."
