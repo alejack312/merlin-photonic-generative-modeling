@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-07-19)
 ## Current Position
 
 Phase: 4 of 6 (Generative Quality) — IN PROGRESS
-Plan: 1 of 3 done (04-01: visualize sigma=0.1 checkpoint + checkpoint decision) — SUMMARY.md written
-Status: Full tests/ suite passes 32/32 (Phase 2's 24 + Phase 3's 4 + Phase 4's 4). sigma=0.1 checkpoint visualized (results/phase4_scatter_comparison.png, results/phase4_heatmap_comparison.png); owner's checkpoint decision: sweep-needed (ring_mass=0.602/0.572, gap_mass=0.034/0.030 — diffuse, not ring-concentrated). Plan 04-02 (full SIGMA_GRID sweep) is next.
-Last activity: 2026-07-24 — Completed 04-01-PLAN.md (generator/visualize.py, tests/test_visualize.py, visualize.py, results/phase4_*). Blocking checkpoint resolved: sweep-needed.
+Plan: 2 of 3 done (04-02: full SIGMA_GRID sweep) — SUMMARY.md written
+Status: Full tests/ suite passes 32/32 (unchanged by this plan). All 5 SIGMA_GRID values ([0.02, 0.05, 0.1, 0.2, 0.4]) retrained fresh, epochs/lr/batch_size fixed at Phase 3's values; results/phase4_sweep_metrics.csv and results/phase4_sweep_comparison.png produced. Combined figure shows all 5 sigmas as diffuse scatter, none clearly ring-like (sigma=0.1 has the highest ring_mass=0.616 of the 5, still visually diffuse) — this evidence carries into Plan 04-03's final GEN-07 checkpoint, which is next.
+Last activity: 2026-07-25 — Completed 04-02-PLAN.md (sweep.py, results/phase4_sigma_*_checkpoint.pt x5, results/phase4_sweep_metrics.csv, results/phase4_sweep_comparison.png). No blocking checkpoint in this plan (autonomous).
 
-Progress: [█████░░░░░] ~50% (3/6 phases complete, Phase 4 plan 1/3 done)
+Progress: [█████░░░░░] ~55% (3/6 phases complete, Phase 4 plan 2/3 done)
 
 ## Performance Metrics
 
@@ -51,6 +51,8 @@ Recent decisions affecting current work:
 - Phase 3 (03-01): Batch-reduction strategy (average per-sample MMD² losses across a batch of fresh `z`, one shared θ, DESIGN_DECISIONS.md 2026-07-24) is now empirically validated, not just literature-motivated — real run produced a statistically clean decreasing trend (p≈1e-128) at the first-attempt lr=0.01, no LR escalation needed.
 - Phase 3 (03-01): lr=0.01 (quickstart.py-informed default) was sufficient on the first real run — the planned lr=0.05/0.1 escalation path for a possible flat first attempt was not exercised.
 - Phase 4 (04-01): Checkpoint decision — sigma=0.1's generated distribution is not ring-like enough (diffuse scatter/heatmap, ring_mass=0.602/0.572 exact/sampled, gap_mass=0.034/0.030); owner selected **sweep-needed**, so Plan 04-02's full SIGMA_GRID sweep (~12 min, all 5 sigma values, fixed epochs/lr/batch_size) is required before Plan 04-03's final GEN-07 checkpoint.
+- Phase 4 (04-02): Full sweep completed — none of the 5 SIGMA_GRID values produced a visually ring-like generated distribution (all diffuse across the square); sigma=0.1 has the highest ring_mass (0.616) but is still not clean. Plan 04-03's final GEN-07 checkpoint must weigh this combined evidence, not just one sigma.
+- Phase 4 (04-02): Backgrounded ~12-14 min training scripts did not reliably survive across tool-call turns in this execution environment (process was silently killed mid-sweep with no captured error). `sweep.py` was made resumable (skip retraining a sigma whose checkpoint already exists) as the general-purpose fix — worth reusing this pattern for any future long-running script in this repo rather than relying on a single uninterrupted backgrounded run.
 
 ### Pending Todos
 
@@ -60,10 +62,10 @@ None yet.
 
 - **Stall-risk checkpoint RESOLVED**: July 25, 2026 was the explicit deadline for Phase 3 (End-to-End Training Run) — a historical stall pattern (prior PennyLane track stalled since May 2026). A real, working end-to-end training run with checked-in evidence (results/phase3_*) was completed 2026-07-24, one day ahead of the deadline. GEN-06 met.
 - **Note for Phase 4**: the self-explanation checkpoint for train_step's mechanism required one correction (owner's first attempt conflated this project's continuous latent-noise MMD with a prior project's binary-bitstring MMD kernel) before the owner could explain it correctly. Worth double-checking this distinction stays clear going into Phase 4's evaluation work, which will build directly on the same MMD machinery.
-- **Phase 4 in progress**: 04-01 done, sweep-needed decision recorded. Plan 04-02 (SIGMA_GRID sweep) must run next, followed by Plan 04-03 (final GEN-07 human-verification checkpoint) before Phase 4 can be closed out.
+- **Phase 4 in progress**: 04-01 and 04-02 done. Plan 04-03 (final GEN-07 human-verification checkpoint) is next and last for Phase 4 — it must review the combined sweep evidence (results/phase4_sweep_comparison.png, results/phase4_sweep_metrics.csv), which shows no sigma value producing a clean ring structure. This is a real, substantive finding the owner needs to weigh at that checkpoint (accept diffuse output as the honest result, or consider further changes) — not a formality.
 
 ## Session Continuity
 
-Last session: 2026-07-24
-Stopped at: Completed 04-01-PLAN.md (visualize sigma=0.1 checkpoint); checkpoint decision recorded as sweep-needed. Ready for /gsd:plan-phase or execute of 04-02 (SIGMA_GRID sweep).
+Last session: 2026-07-25
+Stopped at: Completed 04-02-PLAN.md (full SIGMA_GRID sweep). Ready for execute of 04-03 (final GEN-07 human-verification checkpoint).
 Resume file: None
