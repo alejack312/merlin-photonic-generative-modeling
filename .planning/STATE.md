@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Phase 3 — End-to-End Training Run (next up)
+**Current focus:** Phase 4 — Generative Quality (next up)
 
 ## Current Position
 
@@ -63,5 +63,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-07-24
-Stopped at: Completed 03-01-PLAN.md (Phase 3, End-to-End Training Run) — GEN-06 met
+Stopped at: Phase 3 verified (gsd-verifier: 6/6 must-haves, VERIFICATION.md passed) and closed out. Ready for /gsd:plan-phase 4.
 Resume file: None

@@ -17,7 +17,7 @@
 - [x] **GEN-03**: Fixed set of K bin-centers defined, spanning the circles data's (x, y) region
 - [x] **GEN-04**: Real-data histogram (`p_real`) precomputed once over the K bin-centers
 - [x] **GEN-05**: Closed-form MMD² loss implemented between the model's probability-vector output (`q`) and `p_real`, using a kernel over bin-center coordinates
-- [ ] **GEN-06**: Training loop runs end-to-end, producing a real (even if rough) MMD-decreasing run
+- [x] **GEN-06**: Training loop runs end-to-end, producing a real (even if rough) MMD-decreasing run
 - [ ] **GEN-07**: Generator's samples visibly approximate the two-ring circles shape
 
 ### Benchmark
@@ -59,7 +59,7 @@
 | GEN-03 | Phase 2 | Complete |
 | GEN-04 | Phase 2 | Complete |
 | GEN-05 | Phase 2 | Complete |
-| GEN-06 | Phase 3 | Pending |
+| GEN-06 | Phase 3 | Complete |
 | GEN-07 | Phase 4 | Pending |
 | BMK-01 | Phase 5 | Pending |
 | BMK-02 | Phase 5 | Pending |
@@ -69,10 +69,10 @@
 | DOC-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 15 total (7 complete: ENV-01, ENV-02, GEN-01 through GEN-05)
+- v1 requirements: 15 total (8 complete: ENV-01, ENV-02, GEN-01 through GEN-06)
 - Mapped to phases: 15/15 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-19*
-*Last updated: 2026-07-19 after Phase 2 completion — GEN-02 through GEN-05 verified (24/24 tests passing)*
+*Last updated: 2026-07-24 after Phase 3 completion — GEN-06 verified (28/28 tests passing; real 300-epoch run, decreasing_trend_check passed=True, relative_drop=0.62)*

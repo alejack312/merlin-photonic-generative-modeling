@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Environment & Architecture Foundation** - MerLin environment verified working; generator's output-representation approach decided
 - [x] **Phase 2: Generator Data & Loss Infrastructure** - Noise encoding, bin-centers, real histogram, and MMD² loss built and independently verified
-- [ ] **Phase 3: End-to-End Training Run** - Training loop runs and MMD measurably decreases (the July 25 stall-risk checkpoint)
+- [x] **Phase 3: End-to-End Training Run** - Training loop runs and MMD measurably decreases (the July 25 stall-risk checkpoint)
 - [ ] **Phase 4: Generative Quality** - Generated samples visibly approximate the circles dataset's two-ring shape
 - [ ] **Phase 5: Benchmarking** - Model performance quantified and compared against MerLin's photonic QGAN reproduction
 - [ ] **Phase 6: Documentation & Publication** - README, public repo, technical note, and portfolio case study ready to share
@@ -61,9 +61,10 @@ Plans:
   2. The loss curve shows a real, observable decreasing trend across epochs (not flat, not diverging).
   3. This phase's success criteria are met on or before July 25, 2026 — if not, the historical PennyLane stall pattern is recurring and must be named plainly per PROJECT.md.
 **Plans**: 1 plan
+**Status**: Complete (2026-07-24)
 
 Plans:
-- [ ] 03-01-PLAN.md — Wire Phase 2 modules into train.py, run 300-epoch training, verify decreasing MMD trend via scripted check
+- [x] 03-01-PLAN.md — Wire Phase 2 modules into train.py, run 300-epoch training, verify decreasing MMD trend via scripted check
 
 ### Phase 4: Generative Quality
 **Goal**: The trained generator's samples are recognizable to a human as approximating the circles dataset's two-ring shape — not just a loss number going down.
@@ -112,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 |-------|----------------|--------|-----------|
 | 1. Environment & Architecture Foundation | - | Complete | 2026-07-19 |
 | 2. Generator Data & Loss Infrastructure | 4/4 | Complete | 2026-07-19 |
-| 3. End-to-End Training Run | 0/TBD | Not started | - |
+| 3. End-to-End Training Run | 1/1 | Complete | 2026-07-24 |
 | 4. Generative Quality | 0/TBD | Not started | - |
 | 5. Benchmarking | 0/TBD | Not started | - |
 | 6. Documentation & Publication | 0/TBD | Not started | - |
