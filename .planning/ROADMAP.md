@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Environment & Architecture Foundation** - MerLin environment verified working; generator's output-representation approach decided
 - [x] **Phase 2: Generator Data & Loss Infrastructure** - Noise encoding, bin-centers, real histogram, and MMD² loss built and independently verified
 - [x] **Phase 3: End-to-End Training Run** - Training loop runs and MMD measurably decreases (the July 25 stall-risk checkpoint)
-- [ ] **Phase 4: Generative Quality** - Generated samples visibly approximate the circles dataset's two-ring shape
+- [~] **Phase 4: Generative Quality** - CONCLUDED, GEN-07 NOT MET (owner-confirmed 2026-07-25) — best result is a real, documented improvement, not two recognizable rings
 - [ ] **Phase 5: Benchmarking** - Model performance quantified and compared against MerLin's photonic QGAN reproduction
 - [ ] **Phase 6: Documentation & Publication** - README, public repo, technical note, and portfolio case study ready to share
 
@@ -71,14 +71,15 @@ Plans:
 **Depends on**: Phase 3
 **Requirements**: GEN-07
 **Success Criteria** (what must be TRUE):
-  1. Generated samples, plotted, visibly form two rings resembling the circles dataset's shape (not a blob, not concentrated in the empty middle).
-  2. Any hyperparameter or architecture tuning needed to reach recognizable output is documented.
-**Plans**: 3 plans
+  1. Generated samples, plotted, visibly form two rings resembling the circles dataset's shape (not a blob, not concentrated in the empty middle). **NOT MET** — best result (natural-order correspondence, ring_mass=0.691) is a real, mechanistically-understood improvement over the documented baseline (ring_mass=0.609), owner-confirmed as "quite an improvement... still not two distinct rings."
+  2. Any hyperparameter or architecture tuning needed to reach recognizable output is documented. **MET** — see `results/phase4_summary.md`, `DESIGN_DECISIONS.md`, `.planning/STATE.md`.
+**Plans**: 3 plans, plus 2 ad hoc (non-GSD) tuning axes (batch-size sweep, natural-order spatial correspondence)
+**Status**: CONCLUDED 2026-07-25 — GEN-07 not met, owner's explicit instruction: "GEN-07 not met, move to Phase 5."
 
 Plans:
-- [ ] 04-01-PLAN.md — Visualize sigma=0.1 checkpoint (scatter + heatmap + ring/gap metric), decide if sweep needed
-- [ ] 04-02-PLAN.md — Conditional: full SIGMA_GRID sweep (5 values) if 04-01 decision says sweep-needed
-- [ ] 04-03-PLAN.md — Document tuning path, human-verify checkpoint confirming GEN-07
+- [x] 04-01-PLAN.md — Visualize sigma=0.1 checkpoint (scatter + heatmap + ring/gap metric), decide if sweep needed
+- [x] 04-02-PLAN.md — Conditional: full SIGMA_GRID sweep (5 values) if 04-01 decision says sweep-needed
+- [x] 04-03-PLAN.md — Document tuning path, human-verify checkpoint confirming GEN-07 (result: not met)
 
 ### Phase 5: Benchmarking
 **Goal**: The model's performance is honestly quantified and situated against a reference point, not presented as a bare "it trained."
