@@ -88,10 +88,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. At least one benchmark/comparison metric (e.g. a held-out MMD statistic) is computed and reported for the trained generator.
   2. A qualitative or quantitative comparison against MerLin's photonic QGAN reproduction (paper #16, adversarial loss) is documented.
-**Plans**: TBD
+**Plans**: 1 plan
+**Status**: Not started
 
 Plans:
-- [ ] 05-01: TBD (assigned during plan-phase)
+- [ ] 05-01-PLAN.md — Held-out MMD² statistic (trained/untrained/floor baselines) + timed wall-clock/param-count instrumentation + citation-ready phase5_summary.md with BMK-02 qualitative fallback comparison against MerLin's photonic QGAN reproduction
 
 ### Phase 6: Documentation & Publication
 **Goal**: The project is packaged into artifacts the owner can explain unaided — to Vincent Espitalier, in the Quandela pipeline, and in a portfolio — before September 1, 2026.
