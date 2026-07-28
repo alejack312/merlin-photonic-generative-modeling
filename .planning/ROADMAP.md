@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Generator Data & Loss Infrastructure** - Noise encoding, bin-centers, real histogram, and MMD² loss built and independently verified
 - [x] **Phase 3: End-to-End Training Run** - Training loop runs and MMD measurably decreases (the July 25 stall-risk checkpoint)
 - [~] **Phase 4: Generative Quality** - CONCLUDED, GEN-07 NOT MET (owner-confirmed 2026-07-25) — best result is a real, documented improvement, not two recognizable rings
-- [ ] **Phase 5: Benchmarking** - Model performance quantified and compared against MerLin's photonic QGAN reproduction
+- [x] **Phase 5: Benchmarking** - Model performance quantified and compared against MerLin's photonic QGAN reproduction
 - [ ] **Phase 6: Documentation & Publication** - README, public repo, technical note, and portfolio case study ready to share
 
 ## Phase Details
@@ -89,10 +89,10 @@ Plans:
   1. At least one benchmark/comparison metric (e.g. a held-out MMD statistic) is computed and reported for the trained generator.
   2. A qualitative or quantitative comparison against MerLin's photonic QGAN reproduction (paper #16, adversarial loss) is documented.
 **Plans**: 1 plan
-**Status**: Not started
+**Status**: Complete (2026-07-29) — BMK-01 met (held-out MMD² trained=0.0125±0.0003 vs untrained=0.0360±0.0048 vs floor=0.0114); BMK-02 met via explicitly-flagged qualitative fallback (QGAN reproduction trains on a different data domain, no matched metric possible without out-of-scope work)
 
 Plans:
-- [ ] 05-01-PLAN.md — Held-out MMD² statistic (trained/untrained/floor baselines) + timed wall-clock/param-count instrumentation + citation-ready phase5_summary.md with BMK-02 qualitative fallback comparison against MerLin's photonic QGAN reproduction
+- [x] 05-01-PLAN.md — Held-out MMD² statistic (trained/untrained/floor baselines) + timed wall-clock/param-count instrumentation + citation-ready phase5_summary.md with BMK-02 qualitative fallback comparison against MerLin's photonic QGAN reproduction
 
 ### Phase 6: Documentation & Publication
 **Goal**: The project is packaged into artifacts the owner can explain unaided — to Vincent Espitalier, in the Quandela pipeline, and in a portfolio — before September 1, 2026.
@@ -118,8 +118,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 1. Environment & Architecture Foundation | - | Complete | 2026-07-19 |
 | 2. Generator Data & Loss Infrastructure | 4/4 | Complete | 2026-07-19 |
 | 3. End-to-End Training Run | 1/1 | Complete | 2026-07-24 |
-| 4. Generative Quality | 0/TBD | Not started | - |
-| 5. Benchmarking | 0/TBD | Not started | - |
+| 4. Generative Quality | 3/3 | Concluded (GEN-07 not met) | 2026-07-25 |
+| 5. Benchmarking | 1/1 | Complete | 2026-07-29 |
 | 6. Documentation & Publication | 0/TBD | Not started | - |
 
 ## Notes on Depth

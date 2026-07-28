@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-07-19)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Phase 5 — Benchmarking. Plan 05-01 (BMK-01/BMK-02) COMPLETE. Phase 4 CONCLUDED 2026-07-25 — GEN-07 not met (owner-confirmed).
+**Current focus:** Phase 6 — Documentation & Publication (not yet started). Phase 5 (Benchmarking) VERIFIED COMPLETE 2026-07-29 (6/6 must-haves, gsd-verifier).
 
 ## Current Position
 
-Phase: 5 of 6 (Benchmarking) — Plan 05-01 complete
+Phase: 6 of 6 (Documentation & Publication) — NOT STARTED
 Phase 4 (Generative Quality) is CLOSED. All 3 formal plans done (04-01, 04-02, 04-03) plus 2 ad hoc tuning axes (batch-size sweep, "option 3" natural-order correspondence). Final checkpoint (04-03) taken 2026-07-25: owner's verbatim response — **"GEN-07 not met, move to Phase 5."** `results/phase4_summary.md` and `.planning/phases/04-generative-quality/04-03-SUMMARY.md` record the full evidence and verdict.
 Status: Phase 5 Plan 05-01 (only plan in the phase) executed end-to-end and complete. BMK-01 (held-out MMD² statistic, bracketed by untrained and real-vs-real floor baselines) and BMK-02 (qualitative fallback comparison against MerLin's photonic QGAN reproduction, paper #16) both delivered. Results: held-out MMD²=0.0125±0.0003 (trained) vs 0.0360±0.0048 (untrained) vs 0.0114 (floor) — training clearly helped and the trained generator is close to the real-data floor by this metric. ring_mass=0.6833±0.0073/gap_mass=0.0514±0.0035 re-measured, consistent with Phase 4's honest "not met" framing (a good MMD² number does not by itself mean clean ring structure). Training cost measured for the first time in this repo: 425.93s wall-clock, 220 parameters. BMK-02 fallback path used and explicitly flagged (QGAN reproduction trains on 8x8 digit images, not circles — no matched numeric comparison possible without BMK-03-scoped new work); qualitative comparison table + reproduction's own reported SSIM=0.570575 cited with its Adam/SPSA caveat. `results/phase5_summary.md` is citation-ready for Phase 6. Full detail: `.planning/phases/05-benchmarking/05-01-SUMMARY.md`.
-Last activity: 2026-07-29 — Executed and committed all of Plan 05-01 (`99dd94d` benchmark.py, `dfcd2c0` benchmark_timing.py, `07d4f93` phase5_summary.md). All 48 existing tests still pass (no changes to `generator/`). Phase 5 has only one planned plan (05-01) — phase is now functionally complete pending owner review/checkpoint before moving to Phase 6.
+Last activity: 2026-07-29 — Phase 5 executed and verified. Plan 05-01 committed (`99dd94d` benchmark.py, `dfcd2c0` benchmark_timing.py, `07d4f93` phase5_summary.md, `eebe48c` SUMMARY.md/STATE.md). gsd-verifier scored 6/6 must-haves (`.planning/phases/05-benchmarking/05-VERIFICATION.md`, status: passed) — re-ran `benchmark.py` live and cross-checked `benchmark_timing.py`'s logic/output against committed CSVs, confirmed no fabricated numbers. All 48 existing tests still pass (no changes to `generator/`). `/review`'s branch-diff model does not apply to this repo's direct-to-master workflow (no PR/feature branch this phase, consistent with Phases 1-4) — skipped as inapplicable, gsd-plan-checker + gsd-verifier serve as this phase's quality gate. ROADMAP.md and REQUIREMENTS.md updated: Phase 5 marked Complete, BMK-01/BMK-02 marked Complete.
 
-Progress: [███████░░░] ~70% (3/6 phases fully complete; Phase 4 concluded but NOT successful — GEN-07 not met, honestly documented; Phase 5 Plan 05-01 complete — BMK-01/BMK-02 both delivered)
+Progress: [████████░░] ~80% (4/6 phases fully complete: 1, 2, 3, 5; Phase 4 concluded but NOT successful — GEN-07 not met, honestly documented; Phase 6 not started)
 
 ## Performance Metrics
 
@@ -71,12 +71,12 @@ None yet.
 - **Stall-risk checkpoint RESOLVED**: July 25, 2026 was the explicit deadline for Phase 3 (End-to-End Training Run) — a historical stall pattern (prior PennyLane track stalled since May 2026). A real, working end-to-end training run with checked-in evidence (results/phase3_*) was completed 2026-07-24, one day ahead of the deadline. GEN-06 met.
 - **Note for Phase 4**: the self-explanation checkpoint for train_step's mechanism required one correction (owner's first attempt conflated this project's continuous latent-noise MMD with a prior project's binary-bitstring MMD kernel) before the owner could explain it correctly. Worth double-checking this distinction stays clear going into Phase 4's evaluation work, which will build directly on the same MMD machinery.
 - **Phase 4 CLOSED, GEN-07 not met (owner-confirmed 2026-07-25)**: three tuning axes tried (sigma sweep, batch sweep, option 3 natural-order correspondence). Best result: ring_mass 0.609 → 0.691 — a real, mechanistically-verified improvement, but not two recognizable rings. Full evidence in `results/phase4_summary.md`. Phase 5's benchmarking work is therefore against an imperfect generator, and that context must carry forward honestly into Phase 5's write-up, not be implied away.
-- **Phase 5 Plan 05-01 COMPLETE (2026-07-29)**: BMK-01 and BMK-02 both delivered, `results/phase5_summary.md` citation-ready for Phase 6. No further plans currently defined for Phase 5 — next step is an owner review/checkpoint of Phase 5's results before moving to Phase 6 (documentation/case study), not more benchmarking work.
+- **Phase 5 VERIFIED COMPLETE (2026-07-29)**: BMK-01 and BMK-02 both delivered and independently verified (6/6 must-haves, gsd-verifier re-ran scripts live), `results/phase5_summary.md` citation-ready for Phase 6. Next step: Phase 6 (Documentation & Publication) — `/gsd:discuss-phase 6` or `/gsd:plan-phase 6`.
 
 ## Session Continuity
 
 Last session: 2026-07-29
-Stopped at: Phase 5 Plan 05-01 executed and committed in full (benchmark.py, benchmark_timing.py, results/phase5_benchmark_metrics.csv, results/phase5_training_cost.csv, results/phase5_summary.md — commits 99dd94d/dfcd2c0/07d4f93). `.planning/phases/05-benchmarking/05-01-SUMMARY.md` and this STATE.md update are pending commit.
+Stopped at: Phase 5 (Benchmarking) fully executed, verified, and closed. `.planning/phases/05-benchmarking/05-VERIFICATION.md` (status: passed, 6/6), ROADMAP.md, REQUIREMENTS.md, and this STATE.md updated to reflect Phase 5 completion — pending commit.
 Prior context (Phase 4, for reference): Sigma sweep (04-02), ad hoc batch-size sweep, and "option 3" (natural-order spatial correspondence — K=462, radius/center-of-mass rank pairing) all tried. Option 3 was the best result (ring_mass 0.609 → 0.691) but still owner-judged not ring-like. Full narrative: DESIGN_DECISIONS.md's three 2026-07-25 entries.
-Resume by: owner review of Phase 5's results (`results/phase5_summary.md`), then either close Phase 5 or proceed to Phase 6 (documentation/case study) depending on the owner's read of the benchmarking numbers.
-Resume file: .planning/phases/05-benchmarking/05-01-SUMMARY.md
+Resume by: starting Phase 6 (Documentation & Publication) — `/gsd:discuss-phase 6` to gather context on README/technical-note/case-study format and tone, then `/gsd:plan-phase 6`. Requirements: DOC-01 (README), DOC-02 (public repo), DOC-03 (technical note to Vincent Espitalier), DOC-04 (portfolio case study).
+Resume file: .planning/phases/05-benchmarking/05-VERIFICATION.md

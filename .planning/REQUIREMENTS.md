@@ -22,8 +22,8 @@
 
 ### Benchmark
 
-- [ ] **BMK-01**: At least one benchmark/comparison metric reported (e.g. held-out MMD statistic)
-- [ ] **BMK-02**: Qualitative or quantitative comparison noted against MerLin's photonic QGAN reproduction (paper #16, adversarial loss instead of MMD)
+- [x] **BMK-01**: At least one benchmark/comparison metric reported (e.g. held-out MMD statistic)
+- [x] **BMK-02**: Qualitative or quantitative comparison noted against MerLin's photonic QGAN reproduction (paper #16, adversarial loss instead of MMD)
 
 ### Documentation & Deliverables
 
@@ -60,19 +60,19 @@
 | GEN-04 | Phase 2 | Complete |
 | GEN-05 | Phase 2 | Complete |
 | GEN-06 | Phase 3 | Complete |
-| GEN-07 | Phase 4 | Pending |
-| BMK-01 | Phase 5 | Pending |
-| BMK-02 | Phase 5 | Pending |
+| GEN-07 | Phase 4 | Not met (concluded) |
+| BMK-01 | Phase 5 | Complete |
+| BMK-02 | Phase 5 | Complete |
 | DOC-01 | Phase 6 | Pending |
 | DOC-02 | Phase 6 | Pending |
 | DOC-03 | Phase 6 | Pending |
 | DOC-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 15 total (8 complete: ENV-01, ENV-02, GEN-01 through GEN-06)
+- v1 requirements: 15 total (10 complete: ENV-01, ENV-02, GEN-01 through GEN-06, BMK-01, BMK-02; 1 not met: GEN-07)
 - Mapped to phases: 15/15 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-19*
-*Last updated: 2026-07-24 after Phase 3 completion — GEN-06 verified (28/28 tests passing; real 300-epoch run, decreasing_trend_check passed=True, relative_drop=0.62)*
+*Last updated: 2026-07-29 after Phase 5 completion — BMK-01/BMK-02 verified (held-out MMD² trained=0.0125±0.0003 vs untrained=0.0360±0.0048 vs floor=0.0114; BMK-02 qualitative fallback explicitly flagged in results/phase5_summary.md)*
