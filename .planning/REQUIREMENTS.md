@@ -27,10 +27,10 @@
 
 ### Documentation & Deliverables
 
-- [ ] **DOC-01**: README documenting problem, approach, and results (numbers/plots, not just prose)
-- [ ] **DOC-02**: Public GitHub repo (github.com/alejack312) with working, runnable code
-- [ ] **DOC-03**: Short technical note (3–5 sentences) ready to send to Vincent Espitalier
-- [ ] **DOC-04**: Portfolio case study drafted (IQP-MMD case-study format)
+- [x] **DOC-01**: README documenting problem, approach, and results (numbers/plots, not just prose)
+- [x] **DOC-02**: Public GitHub repo (github.com/alejack312) with working, runnable code — repo prepared, LICENSE'd, pushed; visibility flip to public is the owner's manual step (locked scope decision, 06-CONTEXT.md)
+- [x] **DOC-03**: Short technical note (3–5 sentences) ready to send to Vincent Espitalier
+- [x] **DOC-04**: Portfolio case study drafted (IQP-MMD case-study format) — built as an interactive TSX page in the alejandro-jackson portfolio repo
 
 ## v2 Requirements
 
@@ -63,16 +63,16 @@
 | GEN-07 | Phase 4 | Not met (concluded) |
 | BMK-01 | Phase 5 | Complete |
 | BMK-02 | Phase 5 | Complete |
-| DOC-01 | Phase 6 | Pending |
-| DOC-02 | Phase 6 | Pending |
-| DOC-03 | Phase 6 | Pending |
-| DOC-04 | Phase 6 | Pending |
+| DOC-01 | Phase 6 | Complete |
+| DOC-02 | Phase 6 | Complete |
+| DOC-03 | Phase 6 | Complete |
+| DOC-04 | Phase 6 | Complete |
 
 **Coverage:**
-- v1 requirements: 15 total (10 complete: ENV-01, ENV-02, GEN-01 through GEN-06, BMK-01, BMK-02; 1 not met: GEN-07)
+- v1 requirements: 15 total (14 complete: ENV-01, ENV-02, GEN-01 through GEN-06, BMK-01, BMK-02, DOC-01 through DOC-04; 1 not met: GEN-07)
 - Mapped to phases: 15/15 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-19*
-*Last updated: 2026-07-29 after Phase 5 completion — BMK-01/BMK-02 verified (held-out MMD² trained=0.0125±0.0003 vs untrained=0.0360±0.0048 vs floor=0.0114; BMK-02 qualitative fallback explicitly flagged in results/phase5_summary.md)*
+*Last updated: 2026-07-29 after Phase 6 completion — DOC-01 through DOC-04 verified (README + LICENSE + docs/ pushed to origin/master, private pending owner's manual visibility flip; technical note drafted; portfolio case study built as an interactive TSX page in the alejandro-jackson repo, 15/15 must-haves verified by gsd-verifier)*
