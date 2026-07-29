@@ -20,6 +20,24 @@ Full detail: [`.planning/milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md
 
 </details>
 
+### Phase 7: Mechanism Validation (not yet assigned to a milestone)
+
+**Goal:** Test the two concrete follow-ups flagged by the v1.0 self-audit as unresolved about the natural-order-correspondence result (ring_mass 0.609→0.691) — whether the claimed mechanism actually holds, and whether an unrelated confound (stale sigma) explains part of the improvement instead.
+**Depends on:** Phase 6 (uses `NaturallyOrderedGenerator`, `natural_sorted_centers`, the Phase 4 sigma-sweep pattern)
+**Requirements:** None yet — this phase predates a formal requirements pass; scoped directly from `.planning/milestones/v1.0-MILESTONE-AUDIT.md`'s tracked backlog.
+**Plans:** 2 plans (2 waves, sequential — 07-02 depends on 07-01 per the roadmap's stated experiment order)
+
+Plans:
+- [ ] 07-01-PLAN.md — Neighbor-locality test (Method B, Jacobian-based): `generator/neighbor_locality.py` + `neighbor_locality_test.py`, 20 fresh random parameter draws + 1 trained-checkpoint supplementary draw
+- [ ] 07-02-PLAN.md — Sigma re-sweep: `sigma_resweep.py`, same SIGMA_GRID as Phase 4 re-trained against the K=462 natural-order grid, compared side-by-side against Phase 4's K=400 numbers
+
+**Details:**
+Two experiments, in this order:
+1. **Neighbor-locality test** — does `NaturallyOrderedGenerator`'s output have the property the correspondence-fix mechanism assumes: that list-neighbors (under the radius/center-of-mass ordering) move together more than random pairs when the circuit's parameters are nudged? Method B (Jacobian-based): compute `J = ∂q/∂θ` via autograd at several random parameter draws, compare `cosine_similarity(J[i,:], J[j,:])` for adjacent vs. random index pairs.
+2. **Sigma re-sweep** — rerun Phase 4's `sweep.py` pattern (same `SIGMA_GRID`, same resumable-checkpoint structure) against the K=462 natural-order grid instead of the old K=400 grid, to check whether sigma=0.1 is still the best choice or whether the never-re-swept bandwidth was masking/inflating the correspondence fix's apparent benefit.
+
+Not yet assigned to a v1.1 or later milestone — added directly to the roadmap per owner's explicit `/gsd:add-phase` request, continuing phase numbering from v1.0 rather than restarting at 1.
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -30,5 +48,6 @@ Full detail: [`.planning/milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md
 | 4. Generative Quality | v1.0 | 3/3 | Concluded (GEN-07 not met) | 2026-07-25 |
 | 5. Benchmarking | v1.0 | 1/1 | Complete | 2026-07-29 |
 | 6. Documentation & Publication | v1.0 | 2/2 | Complete | 2026-07-29 |
+| 7. Mechanism Validation | (unassigned) | 0/2 | Planned, not started | - |
 
-No milestone currently in progress. Run `/gsd:new-milestone` to scope the next one.
+No milestone currently in progress; Phase 7 added ahead of milestone scoping. Run `/gsd:new-milestone` to formally scope v1.1 around it, or continue ad hoc.

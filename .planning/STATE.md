@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-07-29)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v1.0 shipped 2026-07-29. No milestone currently in progress.
+**Current focus:** v1.0 shipped 2026-07-29. Phase 7 (Mechanism Validation) added 2026-07-29, not yet assigned to a milestone.
 
 ## Current Position
 
 Milestone: v1.0 Photonic Generator — SHIPPED 2026-07-29 (tag: v1.0)
-Phase: None active — 6/6 phases complete or honestly concluded.
-Status: Ready for `/gsd:new-milestone` when the owner has a next goal, or done if the project concludes here.
+Phase: 7 (Mechanism Validation) — added, not yet planned. Owner directed: implement directly (Jacobian-based neighbor-locality test, method B), ad hoc — no formal `/gsd:plan-phase` requested yet.
+Status: Ready to implement Phase 7's two experiments (neighbor-locality test, then sigma re-sweep), or run `/gsd:plan-phase 7` first if formal planning is wanted after all.
 
 Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative)
 
@@ -38,11 +38,16 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 - Backgrounded long-running training/build scripts did not reliably survive across tool-call turns in this execution environment — resumable scripts (skip-if-checkpoint-exists) are the general-purpose fix, reusable for any future long-running work here.
 - Windows Next.js builds that fail mid-trace-collection with ENOENT/MODULE_NOT_FOUND on files just written are often disk-space exhaustion, not a code bug — check `df -h` before debugging the diff (full pattern: `~/.claude/learnings/2026-07-29-windows-nextjs-build-disk-space.md`).
 
+### Roadmap Evolution
+
+- Phase 7 added 2026-07-29: Mechanism Validation — neighbor-locality test (Jacobian-based) + sigma re-sweep against the K=462 grid, scoped from the v1.0 self-audit's tracked backlog. Not yet assigned to a milestone; added via `/gsd:add-phase` continuing numbering from v1.0 rather than restarting.
+
 ### Pending Todos
 
 - Owner: flip GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`)
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`)
-- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the neighbor-locality test and post-fix sigma re-sweep that would confirm or overturn the natural-order-correspondence mechanism story; the deferred IQP→photonic circuit mapping project.
+- Phase 7 (Mechanism Validation): implement the neighbor-locality test, then the sigma re-sweep — in progress, ad hoc per owner's direction
+- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the deferred IQP→photonic circuit mapping project.
 
 ### Blockers/Concerns
 
