@@ -103,10 +103,11 @@ Plans:
   2. A public GitHub repo (github.com/alejack312) contains working, runnable code and is publicly accessible.
   3. A 3-5 sentence technical note is drafted and ready to send to Vincent Espitalier.
   4. A portfolio case study is drafted in the IQP-MMD case-study format.
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD (assigned during plan-phase)
+- [ ] 06-01-PLAN.md — README, LICENSE, docs/ move, technical note (merlin-quantum-case-study repo; DOC-01, DOC-02, DOC-03)
+- [ ] 06-02-PLAN.md — Portfolio case study TSX page + registration (alejandro-jackson repo; DOC-04)
 
 ## Progress
 
@@ -120,7 +121,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. End-to-End Training Run | 1/1 | Complete | 2026-07-24 |
 | 4. Generative Quality | 3/3 | Concluded (GEN-07 not met) | 2026-07-25 |
 | 5. Benchmarking | 1/1 | Complete | 2026-07-29 |
-| 6. Documentation & Publication | 0/TBD | Not started | - |
+| 6. Documentation & Publication | 0/2 | Planned, not started | - |
 
 ## Notes on Depth
 
