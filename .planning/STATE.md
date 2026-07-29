@@ -10,10 +10,10 @@ See: .planning/PROJECT.md (updated 2026-07-29)
 ## Current Position
 
 Milestone: v1.0 Photonic Generator — SHIPPED 2026-07-29 (tag: v1.0)
-Phase: 7 (Mechanism Validation) — added, not yet planned. Owner directed: implement directly (Jacobian-based neighbor-locality test, method B), ad hoc — no formal `/gsd:plan-phase` requested yet.
-Status: Ready to implement Phase 7's two experiments (neighbor-locality test, then sigma re-sweep), or run `/gsd:plan-phase 7` first if formal planning is wanted after all.
+Phase: 7 (Mechanism Validation) — Plan 01 (neighbor-locality test, Method B) complete. Plan 02 (sigma re-sweep) not yet started.
+Status: Neighbor-locality test executed and committed. Measured result: pooled mean_diff=+0.0096 and trained-checkpoint mean_diff=+0.0402 both fail the locked 0.10 effect-size bar despite the pooled result clearing p<0.05 alone (see 07-01-SUMMARY.md and results/phase7_neighbor_locality_summary.md). Interpretation is intentionally left for the owner — not yet done. Sigma re-sweep (Phase 7's second experiment) is next if the owner proceeds.
 
-Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative)
+Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 is post-v1.0 mechanism-validation work, tracked separately above.
 
 ## Performance Metrics
 
@@ -37,6 +37,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 - `torch.cdist` symmetry/diagonal float32 noise (~1e-6/~5e-4) needs `atol=1e-4`/`1e-3` in tests over a Gaussian kernel at small σ, not `torch.allclose` defaults.
 - Backgrounded long-running training/build scripts did not reliably survive across tool-call turns in this execution environment — resumable scripts (skip-if-checkpoint-exists) are the general-purpose fix, reusable for any future long-running work here.
 - Windows Next.js builds that fail mid-trace-collection with ENOENT/MODULE_NOT_FOUND on files just written are often disk-space exhaustion, not a code bug — check `df -h` before debugging the diff (full pattern: `~/.claude/learnings/2026-07-29-windows-nextjs-build-disk-space.md`).
+- `torch.func.functional_call` + `jacrev` against MerLin's `QuantumLayer` silently produces an all-zero Jacobian: `QuantumLayer` reads trainable parameters from a plain Python list (`quantum_layer.thetas`) populated once at construction, not from named-parameter attributes on each call, so `functional_call`'s attribute substitution never reaches it. Fix: also monkey-patch `quantum_layer.thetas` inside the `jacrev`-traced closure (see `generator/neighbor_locality.py`'s `compute_jacobian` docstring). Worth knowing before any future `torch.func` differentiation against a MerLin `QuantumLayer`.
 
 ### Roadmap Evolution
 
@@ -46,7 +47,8 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 
 - Owner: flip GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`)
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`)
-- Phase 7 (Mechanism Validation): implement the neighbor-locality test, then the sigma re-sweep — in progress, ad hoc per owner's direction
+- Owner: interpret the neighbor-locality test result (`results/phase7_neighbor_locality_summary.md`'s "Interpretation" section is intentionally left blank — pooled mean_diff=+0.0096 and trained-checkpoint mean_diff=+0.0402 both fail the locked 0.10 effect-size bar)
+- Phase 7 (Mechanism Validation): sigma re-sweep (Plan 02, not yet started) — the second of the two experiments, per owner's ad hoc direction
 - Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the deferred IQP→photonic circuit mapping project.
 
 ### Blockers/Concerns
@@ -56,5 +58,5 @@ None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-
 ## Session Continuity
 
 Last session: 2026-07-29
-Stopped at: v1.0 milestone archived and tagged.
-Resume by: `/gsd:new-milestone` if there's a next goal for this project, otherwise nothing further is planned.
+Stopped at: Completed 07-01-PLAN.md (neighbor-locality test). Owner interpretation of the result is pending.
+Resume by: sigma re-sweep (Phase 7's second experiment) if the owner proceeds, or `/gsd:new-milestone` for a next goal.
