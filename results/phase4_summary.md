@@ -23,10 +23,13 @@ Three tuning axes were tried, in order, each because the previous one's owner-re
 |---|---|---|---|---|---|
 | cheap check (04-01) | 400 | 0.1 | 32 | 0.602 (exact) / 0.572 (sampled) | 0.034 / 0.030 |
 | SIGMA_GRID sweep best (04-02, sigma=0.1) | 400 | 0.1 | 32 | 0.616 | — |
-| batch sweep best (batch=32, reused 04-02 checkpoint) | 400 | 0.1 | 32 | 0.609 | 0.035 |
-| batch=64 | 400 | 0.1 | 64 | 0.610 | 0.063 |
-| batch=128 | 400 | 0.1 | 128 | 0.618 | 0.077 |
+| batch sweep best (batch=32, reused 04-02 checkpoint) | 400 | 0.1 | 32 | 0.609 | 0.034 |
+| batch=16 | 400 | 0.1 | 16 | 0.489 | 0.115 |
+| batch=64 | 400 | 0.1 | 64 | 0.581 | 0.066 |
+| batch=128 | 400 | 0.1 | 128 | 0.605 | 0.071 |
 | **option 3 (natural order)** | **462** | **0.1** | **32** | **0.691** | **0.048** |
+
+**Correction (2026-07-29):** the batch=64/128 rows above originally read 0.610/0.063 and 0.618/0.077, and the batch=16 row was missing entirely. At first I thought those numbers were right because they came from the actual `batch_sweep.py` run at the time this summary was written. But I realized, on reconciling against the committed `results/phase4_batch_sweep_metrics.csv`, that they don't match its contents (0.581/0.066 and 0.605/0.071) — `batch_sweep.py` draws fresh, unseeded latent samples on every invocation, so a later rerun (for a different check, after this summary's prose was already written) silently overwrote the CSV with new numbers without the table being updated to match. The CSV is the source of truth here since it's the checked-in artifact; the table above now matches it. This doesn't change the conclusion — batch=32 is still the best of the four, and no batch size looks meaningfully closer to two rings — but the earlier batch=64/128 numbers should not be cited as-is.
 
 Option 3's ring_mass is stable across latent draws (20 fresh samples: 0.684 ± 0.008, range 0.670–0.698), non-overlapping with the prior best's range (0.613 ± 0.004, range 0.604–0.621) — the gap is not a single-sample artifact.
 
