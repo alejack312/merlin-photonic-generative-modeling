@@ -104,11 +104,11 @@ Plans:
   3. A 3-5 sentence technical note is drafted and ready to send to Vincent Espitalier.
   4. A portfolio case study is drafted in the IQP-MMD case-study format.
 **Plans**: 2 plans
-**Status**: In progress (1/2) — 06-01 complete 2026-07-29 (README/LICENSE/docs-move/technical-note, pushed to origin/master, repo left PRIVATE for owner's manual toggle)
+**Status**: Complete (2026-07-29) — 06-01 (README/LICENSE/docs-move/technical-note, pushed to origin/master, repo left PRIVATE for owner's manual toggle) and 06-02 (portfolio case-study TSX page, alejandro-jackson repo, owner-approved live) both done
 
 Plans:
 - [x] 06-01-PLAN.md — README, LICENSE, docs/ move, technical note (merlin-quantum-case-study repo; DOC-01, DOC-02, DOC-03)
-- [ ] 06-02-PLAN.md — Portfolio case study TSX page + registration (alejandro-jackson repo; DOC-04)
+- [x] 06-02-PLAN.md — Portfolio case study TSX page + registration (alejandro-jackson repo; DOC-04)
 
 ## Progress
 
@@ -122,7 +122,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. End-to-End Training Run | 1/1 | Complete | 2026-07-24 |
 | 4. Generative Quality | 3/3 | Concluded (GEN-07 not met) | 2026-07-25 |
 | 5. Benchmarking | 1/1 | Complete | 2026-07-29 |
-| 6. Documentation & Publication | 1/2 | In progress | - |
+| 6. Documentation & Publication | 2/2 | Complete | 2026-07-29 |
 
 ## Notes on Depth
 
