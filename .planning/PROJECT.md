@@ -2,11 +2,13 @@
 
 ## What This Is
 
-A photonic quantum machine learning project built on MerLin (Quandela's PyTorch-based photonic QML framework): extending MerLin's quickstart circles-dataset classifier into an MMD-trained generative model. It reuses MMD-loss and generative-eval methodology from a prior IQP (gate-model) generative modeling project, applied here to a photonic circuit instead. Built as a credential and portfolio piece ahead of conversations with Vincent Espitalier and a Spring 2027 Quandela placement search.
+A photonic quantum machine learning project built on MerLin (Quandela's PyTorch-based photonic QML framework): an MMD-trained generative model on MerLin's `QuantumLayer`, learning the sklearn `circles` dataset's two-ring shape via a closed-form MMD² loss over spatial bin-centers, with a custom radius/center-of-mass output-correspondence fix (K=462, no `ModGrouping` fold) as the project's key technical contribution. Reuses MMD-loss and generative-eval methodology from a prior IQP (gate-model) generative modeling project, applied here to a photonic circuit instead. Built as a credential and portfolio piece ahead of conversations with Vincent Espitalier and a Spring 2027 Quandela placement search.
 
 ## Core Value
 
 A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before September 1, 2026 — one the owner can explain unaided to Vincent Espitalier or in an interview. Explainability and a real end-to-end run matter more than polish or an ambitious result.
+
+**Shipped as v1.0 on 2026-07-29**, 10 days after project start, well ahead of the Sept 1 deadline. Core value held throughout: every honest result (including GEN-07 not fully met) was reported plainly, not glossed over, and a full self-audit before shipping caught and fixed real claim-strength issues rather than letting them ship silently.
 
 ## Requirements
 
@@ -14,55 +16,61 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 - ✓ MerLin installed in a version-compatible environment (Python 3.12 venv; MerLin caps Python at 3.10–3.12, torch <2.13) — 2026-07-19
 - ✓ Quickstart classifier (circles dataset) runs end-to-end; confirmed gradients flow through the quantum layer via PyTorch's autograd — 2026-07-19
-- ✓ Generator output-representation architecture decided: full-distribution/histogram matching via closed-form MMD², not single-point averaging or discrete sampling — see [DESIGN_DECISIONS.md](../DESIGN_DECISIONS.md) — 2026-07-19
+- ✓ Generator output-representation architecture decided: full-distribution/histogram matching via closed-form MMD², not single-point averaging or discrete sampling — 2026-07-19
+- ✓ Latent noise sampling + encoding as `QuantumLayer` input — 2026-07-19 (`generator/noise.py`)
+- ✓ Fixed set of K bin-centers spanning the circles data's (x, y) region — 2026-07-19 (`generator/bin_centers.py`, K=400; later K=462 for the natural-order variant)
+- ✓ Real-data histogram (`p_real`) precomputed once over the K bin-centers — 2026-07-19 (`generator/data.py`)
+- ✓ Closed-form MMD² loss between the model's probability-vector output and `p_real` — 2026-07-19 (`generator/mmd.py`)
+- ✓ Training loop runs end-to-end with a real, scripted-verified MMD-decreasing run — 2026-07-24, one day ahead of the July 25 stall-risk checkpoint
+- ✓ Held-out benchmark metric reported and qualitative QGAN comparison documented — 2026-07-29 (`results/phase5_summary.md`)
+- ✓ README, public-repo prep, technical note, and portfolio case study — 2026-07-29 (v1.0)
+- **~ Generator's samples visibly approximate the two-ring circles shape — NOT MET, 2026-07-25.** Best result (natural-order correspondence, ring_mass=0.609→0.691) is a real, mechanistically-motivated improvement, not two recognizable rings. Owner-confirmed verdict, honestly documented rather than reframed as success. See `.planning/milestones/v1.0-ROADMAP.md` Phase 4 detail.
 
 ### Active
 
-- [ ] Latent noise sampling + encoding as `QuantumLayer` input (generator's forward pass)
-- [ ] Fixed set of K bin-centers defined, spanning the circles data's (x, y) region
-- [ ] Real-data histogram (`p_real`) precomputed once over the K bin-centers
-- [ ] Closed-form MMD² loss implemented between the model's probability-vector output (`q`) and `p_real`, using a kernel over bin-center coordinates
-- [ ] Training loop runs end-to-end with a real (even if rough) MMD-decreasing run
-- [ ] Generator's samples visibly approximate the two-ring circles shape
-- [ ] At least one benchmark/comparison metric reported (held-out MMD statistic, and/or qualitative comparison against MerLin's own photonic QGAN reproduction — paper #16 in its catalog, which uses adversarial loss instead of MMD)
-- [ ] README documenting problem, approach, and results (numbers/plots, not just prose)
-- [ ] Public GitHub repo (github.com/alejack312) with working, runnable code
-- [ ] Short technical note (3–5 sentences) ready to send to Vincent Espitalier
-- [ ] Portfolio case study drafted (IQP-MMD case-study format)
+None — v1.0 shipped with all requirements addressed (satisfied or honestly concluded not-met). No v1.1 currently scoped.
 
 ### Out of Scope
 
-- **Reproducing the IQP gate-model circuits directly in MerLin** — no established IQP→linear-optics reduction exists; doing this honestly would be original theoretical research, not an extension. Parked as its own post-Sept-1 project, sequenced right after this one — see [Post_Sept1_IQP_Photonic_Plan.md](../Post_Sept1_IQP_Photonic_Plan.md).
-- **PennyLane independent contributions** — parked, sequenced after the IQP-photonic project (decided 2026-07-19, per SMART spec).
-- **ket.jl / SDP self-study** — informal free-time research only, no artifact expected, doesn't compete with the sequence above.
-- **Weighted-average → single continuous point output mapping** — rejected: collapses multimodal targets (circles' two rings) into their midpoint, a region with zero real density. See [DESIGN_DECISIONS.md](../DESIGN_DECISIONS.md).
-- **Discrete `shots`-based sampling for the generator** — rejected: not differentiable through standard autograd without an additional estimator (e.g. REINFORCE, Gumbel-softmax), not worth the added complexity for this timeline.
-- **Exact replication of MerLin's photonic QGAN paper's full MNIST-patch dataset/architecture** — treated as a stretch goal if time allows (targeted for the Aug 8 milestone), not a hard requirement; the core deliverable uses the simpler circles dataset already in the quickstart.
+- **Reproducing the IQP gate-model circuits directly in MerLin** — no established IQP→linear-optics reduction exists; doing this honestly would be original theoretical research, not an extension. Parked as its own post-Sept-1 project — see [Post_Sept1_IQP_Photonic_Plan.md](../Post_Sept1_IQP_Photonic_Plan.md).
+- **PennyLane independent contributions** — parked, sequenced after the IQP-photonic project.
+- **ket.jl / SDP self-study** — informal free-time research only, no artifact expected.
+- **Weighted-average → single continuous point output mapping** — rejected: collapses multimodal targets (circles' two rings) into their midpoint, a region with zero real density.
+- **Discrete `shots`-based sampling for the generator** — rejected: not differentiable through standard autograd without an additional estimator.
+- **Exact replication of MerLin's photonic QGAN paper's full MNIST-patch dataset/architecture (BMK-03)** — not pursued this milestone; shipped without it. Candidate for a future milestone if the apples-to-apples comparison becomes worth the added scope.
+- **Ablation isolating fold-removal from correspondence-redesign, a direct neighbor-locality test on the circuit's raw outputs, and a post-fix sigma re-sweep** — all identified during the v1.0 self-audit as the concrete follow-ups that would either confirm or overturn the natural-order-correspondence mechanism story; documented as backlog (case study's "What I'd Do Next"), not attempted — would reopen a closed phase.
 
 ## Context
 
-- **Deadline pressure:** Hard deadline September 1, 2026, driven by a warm contact (Vincent Espitalier) and the Quandela Spring 2027 placement pipeline. MerLin experience is a stated gap in current Quandela positioning.
-- **Historical stall pattern:** A prior self-directed track (PennyLane) has been stalled since May 2026. July 25, 2026 is explicitly flagged in the SMART spec as "not a formality" — if there's no end-to-end run by then, that's the same stall pattern recurring and must be named plainly, not glossed over.
+- **Shipped:** v1.0 complete 2026-07-29. 6 phases, 11 plans, 51 commits, 1,648 LOC Python, 10 days start-to-ship.
+- **Deadline pressure (resolved):** Hard deadline was September 1, 2026, driven by a warm contact (Vincent Espitalier) and the Quandela Spring 2027 placement pipeline. Shipped ~5 weeks early.
+- **Historical stall pattern (did not recur):** A prior self-directed track (PennyLane) had been stalled since May 2026. The July 25, 2026 stall-risk checkpoint (Phase 3, end-to-end training run) was met a day early — the pattern did not repeat here.
 - **Prior relevant expertise:** PyTorch; MMD-loss and generative-modeling experience from an IQP-MMD project; general quantum ML fluency; IQP circuits and barren-plateau research.
-- **MerLin specifics (verified empirically, not just from docs):** `ML.QuantumLayer.simple(input_size, output_size)` returns a probability distribution over `output_size` measurement outcomes — non-negative, rows sum to exactly 1. `forward()` also accepts `shots`/`sampling_method` for literal discrete sampling instead of the exact expectation (rejected for this project — see Out of Scope).
-- **Reproduced-papers catalog (21 papers)** was checked directly — none reproduce IQP circuits. Closest neighbors: photonic QGAN (#16, adversarial loss, Sedrakyan & Salavrakos 2024) and QSSL (#14, contrastive loss, Jaderberg et al. 2021).
-- **Repo state:** `quickstart.py` (verified working), `requirements.txt`, `.gitignore`, `CLAUDE.md` (collaboration rules for this project), `MerLin_SMART_Spec_Sept1.md`, `DESIGN_DECISIONS.md`, `Post_Sept1_IQP_Photonic_Plan.md`. Local git repo initialized, no commits yet. Python 3.12 venv with `merlin 0.4.0`, `torch 2.12.1+cpu`.
+- **MerLin specifics (verified empirically, not just from docs):** `ML.QuantumLayer.simple(input_size, output_size)` returns a probability distribution over `output_size` measurement outcomes — non-negative, rows sum to exactly 1. MerLin also ships its own `PhotonicGenerator`/`NormalLatent`/`OutputAdapter` classes (`merlin.models.photonic_generator`) — this project used `NormalLatent` directly but hand-rolled the training loop and output-correspondence logic, since the built-in `VectorAdapter` doesn't solve the correspondence problem this project's radius/center-of-mass fix addresses (confirmed via the v1.0 self-audit).
+- **Reproduced-papers catalog (21 papers)** checked directly — none reproduce IQP circuits. Closest neighbors: photonic QGAN (#16, adversarial loss, Sedrakyan & Salavrakos 2024) and QSSL (#14, contrastive loss, Jaderberg et al. 2021).
+- **Post-shipment self-audit:** A directed Codex (gpt-5.5) deep audit against MerLin's local package source and the sibling IQP-MMD project's Obsidian vault found and the project fixed: a backwards tau/sigma direction claim, a misattributed statistic, stale batch-sweep numbers, a factually wrong claim about the sibling project's exact-MMD path, a silent-mismatch footgun in `NaturallyOrderedGenerator`, and an unsupported "reproducible" claim. Full record: `.planning/milestones/v1.0-MILESTONE-AUDIT.md`.
+- **Known open items (owner's manual steps):** flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`); send the drafted technical note to Vincent Espitalier.
 
 ## Constraints
 
-- **Timeline**: Hard deadline Sept 1, 2026; Jul 25, 2026 is a critical early checkpoint (historical stall point) — a milestone, not a suggestion.
-- **Tech stack**: Python 3.10–3.12 only (MerLin's `pyproject.toml` caps here; the machine's default `python` is 3.13, which is unsupported — the project venv pins 3.12). `torch<2.13`, `perceval-quandela>=1.2.1`.
-- **Collaboration process** (see [CLAUDE.md](../CLAUDE.md)): core conceptual/design decisions require the owner's own attempt or explanation before full implementation is written; self-explanation checkpoints occur at each SMART-spec milestone; no silent unilateral design decisions.
-- **Scope discipline**: single project only, sized to fit the window — not a multi-paper reproduction, not a stretch for impressiveness.
+- **Timeline**: Hard deadline Sept 1, 2026 — met with runway to spare. Jul 25, 2026 stall-risk checkpoint — met one day early.
+- **Tech stack**: Python 3.10–3.12 only (MerLin's `pyproject.toml` caps here). `torch<2.13`, `perceval-quandela>=1.2.1`.
+- **Collaboration process** (see [CLAUDE.md](../CLAUDE.md)): core conceptual/design decisions require the owner's own attempt or explanation before full implementation is written; self-explanation checkpoints occur at each SMART-spec milestone; no silent unilateral design decisions. Held throughout — including a corrected self-explanation attempt at the Phase 3 checkpoint (owner's first attempt conflated this project's continuous-distribution MMD with the prior project's bitstring MMD, caught and corrected before proceeding).
+- **Scope discipline**: single project, sized to fit the window — held. BMK-03 and the IQP→photonic mapping project both stayed parked rather than scope-creeping into v1.0.
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Extend quickstart classifier into an MMD generator (SMART spec option b), rather than reproduce a catalog paper directly (option a) | Best reuses the owner's actual specialized background (MMD/generative modeling); gives a natural comparison point against MerLin's own photonic QGAN reproduction (adversarial loss) | — Pending |
-| Generator output = full-distribution/histogram matching via closed-form MMD² (not single-point averaging, not discrete sampling) | Avoids collapsing circles' two-ring (multimodal) target into its empty middle; avoids the non-differentiability of discrete sampling; reuses the exact closed-form MMD² formula from the owner's prior IQP-MMD work | — Pending |
-| IQP→photonic circuit mapping parked to a dedicated post-Sept-1 project, sequenced before PennyLane | Genuinely interesting, but no established IQP→linear-optics reduction exists — doing it honestly is original research, too heavy/risky for this deadline. Explicit three-track relapse risk flagged for when Sept 1 arrives. | — Pending |
+| Extend quickstart classifier into an MMD generator (SMART spec option b), rather than reproduce a catalog paper directly | Best reuses the owner's actual specialized background (MMD/generative modeling); gives a natural comparison point against MerLin's own photonic QGAN reproduction | ✓ Good — shipped, gave a genuine second demonstration of the "low loss ≠ learned structure" lesson from the prior IQP-MMD project |
+| Generator output = full-distribution/histogram matching via closed-form MMD² (not single-point averaging, not discrete sampling) | Avoids collapsing circles' two-ring (multimodal) target into its empty middle; avoids the non-differentiability of discrete sampling | ✓ Good — verified working end-to-end, no regressions found in the self-audit |
+| IQP→photonic circuit mapping parked to a dedicated post-Sept-1 project | No established IQP→linear-optics reduction exists — doing it honestly is original research, too heavy/risky for this deadline | ✓ Good — stayed parked, did not scope-creep into v1.0 |
 | Python 3.12 venv instead of system default Python 3.13 | MerLin's `torch<2.13` + `python>=3.10,<=3.12` constraints would break dependency resolution on 3.13 | ✓ Good — verified working |
+| Batch-averaged per-sample MMD² training step, not batch=1 | MMD-based generative training is noise-sensitive at small batch sizes; a noisy batch=1 curve threatened the July 25 checkpoint being defensibly true | ✓ Good in practice, ⚠️ revisit framing — empirically validated (clean decreasing trend, p≈1e-128), but the self-audit found this objective is provably an upper bound on the marginal-distribution MMD² (Jensen's inequality on the convex kernel term), not identical to it — documented as a caveat in DESIGN_DECISIONS.md, not reversed |
+| Natural-order correspondence fix (K=462, radius-sorted bins, no `ModGrouping` fold) over increasing `input_size` (diagnosed counterproductive) or a point-averaging fallback (rejected in Phase 1) | The circuit's raw output index has no designed relationship to the (x,y) grid by default; radius-sorting turns 44 disjoint target fragments into ~6 contiguous bands | ⚠️ Revisit — real, measured improvement (ring_mass 0.609→0.691), but the self-audit found the causal mechanism (why reordering helps) is asserted, not demonstrated; concrete follow-up tests documented as backlog, not yet run |
+| GEN-07 concluded "not met" rather than reframed or re-scoped | Owner's explicit instruction: "GEN-07 not met, move to Phase 5" — per PROJECT.md's founding "don't gloss over it" rule | ✓ Good — held the line through Phase 5/6 and the case study, no softening under publication pressure |
+| Portfolio case study built as a full interactive TSX page in a separate repo (alejandro-jackson), not a markdown file here | Matched the actual reference format (`iqp-mmd.tsx`) the owner intended, not the initially-assumed markdown convention | ✓ Good — shipped, owner-approved live, cross-linked from all other case studies |
+| Self-directed post-ship audit (Codex/gpt-5.5) against MerLin's source and the sibling project's vault | Owner requested an independent check before calling the project truly done | ✓ Good — found real issues (not manufactured ones); every finding was either fixed or honestly caveated before archiving |
 
 ---
-*Last updated: 2026-07-19 after synthesis from MerLin_SMART_Spec_Sept1.md, DESIGN_DECISIONS.md, and prior conversation (no fresh interview run — see project's own AskUserQuestion decision to synthesize existing docs instead)*
+*Last updated: 2026-07-29 after v1.0 milestone completion*
