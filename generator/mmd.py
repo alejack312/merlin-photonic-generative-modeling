@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 #  a bandwidth sweep, not one fixed value. Not locked; Phase 4 will evaluate these against actual ring recovery.

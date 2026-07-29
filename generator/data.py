@@ -19,7 +19,7 @@ def load_circles_data() -> tuple[torch.Tensor, torch.Tensor]:
     train_test_split's seed fixed, since the split seed only controls how an
     already-random X gets partitioned, not X's contents."""
     X, y = make_circles(n_samples=400, random_state=42)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, _, _ = train_test_split(X, y, test_size=0.2, random_state=42)
 
     min_vals = X_train.min(axis=0, keepdims=True)
     max_vals = X_train.max(axis=0, keepdims=True)

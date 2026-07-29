@@ -54,7 +54,7 @@ Train the generator (the GEN-07 checkpoint variant, K=462, radius-sorted bins):
 python natural_order_train.py
 ```
 
-Earlier variants (`train.py`, `generator/train.py`) reproduce the K=400 baseline used for comparison. Run the test suite as the runnable-code check:
+`train.py` (root) reproduces the K=400 baseline used for comparison — `generator/train.py` is the library module it imports from (`build_generator`, `train_step`), not an independently runnable script. Run the test suite as the runnable-code check:
 
 ```bash
 python -m pytest -q

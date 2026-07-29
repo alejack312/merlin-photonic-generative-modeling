@@ -79,6 +79,15 @@ def test_gradient_reaches_quantum_layer_through_permutation():
     assert any(p.grad is not None and torch.any(p.grad != 0) for p in params)
 
 
+def test_input_size_mismatch_raises_clear_error():
+    # Guards against the silent-mismatch footgun: natural_sorted_centers()'s
+    # 462-cell grid and sample_latent()'s dim are both hardcoded to LATENT_DIM
+    # independently of this constructor's input_size arg, so a mismatch must
+    # fail loudly here rather than producing a wrong-width tensor downstream.
+    with pytest.raises(ValueError, match="input_size"):
+        NaturallyOrderedGenerator(input_size=5)
+
+
 def test_batch_rows_are_independent():
     # Guards against a broadcasting/indexing bug in raw[:, self.perm] silently
     # mixing rows: each row must equal the wrapper run on that row alone.

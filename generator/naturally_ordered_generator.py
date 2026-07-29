@@ -19,10 +19,23 @@ class NaturallyOrderedGenerator(nn.Module):
     Note: state_dict keys here ("perm", "base.quantum_layer.*") differ from
     build_generator()'s bare keys, so existing Phase 4 checkpoints are not
     loadable into this wrapper. Intentional — every Phase 4 variant trains fresh.
+
+    input_size must equal LATENT_DIM: natural_sorted_centers()'s 462-cell grid
+    (rows=21, cols=22) and generator/noise.py's sample_latent() both hardcode
+    their own dimensions independently of whatever is passed here, so a
+    different input_size would silently produce a width or latent-dim
+    mismatch elsewhere instead of a clear error at construction time.
     """
 
     def __init__(self, input_size: int = LATENT_DIM):
         super().__init__()
+        if input_size != LATENT_DIM:
+            raise ValueError(
+                f"NaturallyOrderedGenerator requires input_size == LATENT_DIM "
+                f"({LATENT_DIM}); got {input_size}. natural_sorted_centers()'s "
+                f"462-cell grid and generator/noise.py's sample_latent() are "
+                f"both hardcoded to LATENT_DIM and do not follow this parameter."
+            )
         self.base = ML.QuantumLayer.simple(input_size=input_size, output_size=None)
         perm = fock_state_sort_order(self.base.quantum_layer.output_keys)
         # buffer, not parameter: moves with .to(), persists in state_dict, no grad

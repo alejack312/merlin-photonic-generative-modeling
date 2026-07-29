@@ -70,8 +70,12 @@ def main():
     trained_results = measure(trained, p_real_test, centers, kernel_matrix)
     untrained_results = measure(untrained, p_real_test, centers, kernel_matrix)
 
-    # Floor: deterministic, no generator, no loop -- real-vs-real MMD^2 ceiling
-    # of "as good as real data" for this exact split.
+    # "Floor" here is an empirical partition-noise reference for this exact
+    # split (p_real_train vs p_real_test), deterministic, no generator, no
+    # loop -- NOT a mathematical lower bound. The true floor is 0 (a
+    # generator identical to p_real_test scores exactly 0); this number only
+    # says how much MMD^2 the train/test split itself carries before any
+    # generator is involved.
     mmd_floor = mmd2(p_real_train, p_real_test, kernel_matrix).item()
 
     print("=== Phase 5 benchmark: held-out MMD^2 (sigma=%.2f, N_DRAWS=%d) ===" % (SIGMA, N_DRAWS))
