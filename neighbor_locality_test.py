@@ -81,7 +81,7 @@ def run_trained_checkpoint():
 
 
 def write_csv(per_draw_rows, pooled_result, trained_result):
-    fieldnames = ["draw_idx", "adj_mean", "rand_mean", "mean_diff", "p_value", "min_effect", "passed"]
+    fieldnames = ["draw_idx", "adj_mean", "rand_mean", "mean_diff", "sign_agrees", "p_value", "min_effect", "passed"]
     with open(f"{RESULTS_DIR}/phase7_neighbor_locality_metrics.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -91,12 +91,13 @@ def write_csv(per_draw_rows, pooled_result, trained_result):
                 "adj_mean": row["adj_mean"],
                 "rand_mean": row["rand_mean"],
                 "mean_diff": row["mean_diff"],
+                "sign_agrees": row["sign_agrees"],
                 "p_value": "",
                 "min_effect": "",
                 "passed": "",
             })
-        writer.writerow({"draw_idx": "pooled", **pooled_result})
-        writer.writerow({"draw_idx": "trained_checkpoint", **trained_result})
+        writer.writerow({"draw_idx": "pooled", "sign_agrees": "", **pooled_result})
+        writer.writerow({"draw_idx": "trained_checkpoint", "sign_agrees": "", **trained_result})
 
 
 def write_summary(pooled_result, n_agree, trained_result):
@@ -110,6 +111,16 @@ def write_summary(pooled_result, n_agree, trained_result):
         f"| {pooled_result['adj_mean']:.6f} | {pooled_result['rand_mean']:.6f} | "
         f"{pooled_result['mean_diff']:.6f} | {pooled_result['p_value']:.6e} | "
         f"{pooled_result['min_effect']} | {pooled_result['passed']} |"
+    )
+    lines.append(
+        "\n**Methodology caveat (adversarial-review finding, 2026-07-29):** the pooled "
+        "p-value above treats all 9,220 pooled pairs as independent, but within one draw "
+        "adjacent-pair cosines share rows (pair i,i+1 and i+1,i+2 both use row i+1), so "
+        "they are autocorrelated, not i.i.d. -- pooling likely overstates the effective "
+        "sample size and understates the true p-value. This does not change the verdict: "
+        "`passed` is decided by the `min_effect=0.10` bar, which the pooled result misses "
+        "by a wide margin (`mean_diff=0.0096`) independent of the p-value's validity. Read "
+        "the p-value as supporting evidence, not a standalone significance claim.\n"
     )
     lines.append("\n## Per-draw robustness\n")
     lines.append(f"{n_agree}/20 draws individually show adjacent-mean > random-mean.\n")

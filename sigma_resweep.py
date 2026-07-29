@@ -38,7 +38,7 @@ from generator.train import train_step
 from generator.visualize import sample_points, ring_band_metrics
 
 EPOCHS = 300  # held fixed at Phase 4's value -- isolates sigma as the one variable
-LR = 0.01     # under test
+LR = 0.01     # held fixed at Phase 4's value -- sigma is the only variable under test here
 BATCH_SIZE = 32
 RESULTS_DIR = "results"
 
@@ -50,11 +50,21 @@ def train_all_sigmas(centers, p_real):
     Resumable: if a sigma's checkpoint already exists on disk (e.g. a prior
     run of this script was interrupted partway through the sweep), that
     sigma is NOT retrained -- its already-completed, already-fresh-init
-    checkpoint is loaded instead, only to recompute its metrics row."""
+    checkpoint is loaded instead, only to recompute its metrics row.
+
+    Reproducibility note (adversarial-review finding, 2026-07-29): the
+    per-sigma init is seeded deterministically by grid index below. Without
+    this, a resumed run would draw a DIFFERENT random init for any sigma
+    retrained after the resume point than an uninterrupted run would have --
+    same checkpoint filename, silently different local optimum, no warning.
+    Seeding here makes a resumed run reproduce an uninterrupted run's result
+    exactly for every sigma, whether loaded from checkpoint or freshly
+    trained."""
     rows = []
-    for sigma in SIGMA_GRID:
+    for sigma_idx, sigma in enumerate(SIGMA_GRID):
         ckpt_path = f"{RESULTS_DIR}/phase7_sigma_{sigma}_checkpoint.pt"
-        generator = build_naturally_ordered_generator()  # K=462, fresh random init every sigma
+        torch.manual_seed(1000 + sigma_idx)  # deterministic per-sigma init -- see reproducibility note above
+        generator = build_naturally_ordered_generator()  # K=462, fresh (but seeded) random init every sigma
 
         if os.path.exists(ckpt_path):
             print(f"--- sigma={sigma} (checkpoint already exists, skipping retrain) ---")

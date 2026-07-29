@@ -37,6 +37,8 @@
 |---|---|---|---|---|---|
 | 0.016075 | 0.006523 | 0.009551 | 8.351025e-03 | 0.1 | False |
 
+**Methodology caveat (adversarial-review finding, 2026-07-29):** the pooled p-value above treats all 9,220 pooled pairs as independent, but within one draw adjacent-pair cosines share rows (pair i,i+1 and i+1,i+2 both use row i+1), so they are autocorrelated, not i.i.d. -- pooling likely overstates the effective sample size and understates the true p-value. This does not change the verdict: `passed` is decided by the `min_effect=0.10` bar, which the pooled result misses by a wide margin (`mean_diff=0.0096`) independent of the p-value's validity. Read the p-value as supporting evidence, not a standalone significance claim.
+
 ## Per-draw robustness
 
 13/20 draws individually show adjacent-mean > random-mean.

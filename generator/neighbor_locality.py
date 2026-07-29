@@ -62,6 +62,12 @@ def adjacent_and_random_cosines(J: torch.Tensor, seed: int | None = None) -> tup
     evidence AGAINST the mechanism claim, not for it. Do not use .abs().
     """
     K = J.shape[0]
+    if K < 4:
+        raise ValueError(
+            f"K={K} is too small: no non-adjacent row pairs exist (abs(i-j) > 1 "
+            "is unsatisfiable for K < 4), so the random-pair rejection sampling "
+            "below would loop forever."
+        )
     adj_i = torch.arange(K - 1)
     adj_cos = Fnn.cosine_similarity(J[adj_i], J[adj_i + 1], dim=1)
 
