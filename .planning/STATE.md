@@ -47,8 +47,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 
 ### Pending Todos
 
-- Owner: flip GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`)
-- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — note the technical note predates Phase 7's findings (neighbor-locality mechanism unconfirmed, ring/gap tradeoff at K=462); consider whether it needs a Phase 7 addendum before sending
+- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`, Phase 7 addendum already written in) — owner plans to send 2026-07-31
 - Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the deferred IQP→photonic circuit mapping project.
 
 ### Blockers/Concerns
