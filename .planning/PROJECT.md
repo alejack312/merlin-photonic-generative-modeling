@@ -10,6 +10,17 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 **Shipped as v1.0 on 2026-07-29**, 10 days after project start, well ahead of the Sept 1 deadline. Core value held throughout: every honest result (including GEN-07 not fully met) was reported plainly, not glossed over, and a full self-audit before shipping caught and fixed real claim-strength issues rather than letting them ship silently.
 
+## Current Milestone: v2.0 IQP → Photonic Encoding
+
+**Goal:** Determine whether IQP's structural properties (trainability, sampling hardness) survive translation into a photonic/linear-optical ansatz — this milestone covers literature scoping and, if viable, a defensible on-paper encoding design. Implementation, the trainability/hardness study, and write-up are deliberately deferred to a follow-on milestone, per the source plan doc's own caveat that it "will get re-planned once Phase 0 lands."
+
+**Target features:**
+- Literature scoping: search for existing IQP↔linear-optics or IQP↔continuous-variable constructions; time-boxed go/no-go verdict
+- Prerequisite confirmation: Perceval low-level circuit API fluency (beyond `QuantumLayer.simple()`); prior IQP/barren-plateau notes compiled as qubit-side baseline
+- On-paper encoding design (contingent on a "go" verdict): map IQP's commuting diagonal gates + Hadamard-basis conjugation onto phase shifters, beamsplitters, and photon-number measurement — written down and defensible before any implementation
+
+**Source doc:** [Post_Sept1_IQP_Photonic_Plan.md](../Post_Sept1_IQP_Photonic_Plan.md) — full 5-phase research plan (this milestone covers Phase 0-1 only)
+
 ## Requirements
 
 ### Validated
@@ -28,7 +39,10 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 ### Active
 
-None — v1.0 shipped with all requirements addressed (satisfied or honestly concluded not-met). No v1.1 currently scoped.
+- [ ] Literature search conducted for existing IQP↔linear-optics or IQP↔CV constructions, time-boxed, go/no-go verdict documented either way
+- [ ] Perceval low-level circuit API fluency confirmed (manual construction with phase shifters/beamsplitters, not just the high-level wrapper)
+- [ ] Prior IQP + barren-plateau notes/results compiled into one reference doc as the qubit-side baseline
+- [ ] On-paper IQP→photonic encoding mapping designed and documented, defensible unaided, contingent on a "go" verdict from the literature search
 
 ### Out of Scope
 
@@ -71,6 +85,8 @@ None — v1.0 shipped with all requirements addressed (satisfied or honestly con
 | GEN-07 concluded "not met" rather than reframed or re-scoped | Owner's explicit instruction: "GEN-07 not met, move to Phase 5" — per PROJECT.md's founding "don't gloss over it" rule | ✓ Good — held the line through Phase 5/6 and the case study, no softening under publication pressure |
 | Portfolio case study built as a full interactive TSX page in a separate repo (alejandro-jackson), not a markdown file here | Matched the actual reference format (`iqp-mmd.tsx`) the owner intended, not the initially-assumed markdown convention | ✓ Good — shipped, owner-approved live, cross-linked from all other case studies |
 | Self-directed post-ship audit (Codex/gpt-5.5) against MerLin's source and the sibling project's vault | Owner requested an independent check before calling the project truly done | ✓ Good — found real issues (not manufactured ones); every finding was either fixed or honestly caveated before archiving |
+| Started v2.0 (IQP→photonic) on 2026-07-30, overriding the plan doc's "not before Sept 2, 2026" gate | v1.0's dev work is fully complete (shipped 2026-07-29, Phase 7 closed 2026-07-30); only two owner-only manual steps remain (flip repo public, send note to Vincent) and ample runway remains before Sept 1 — owner explicitly chose to proceed rather than wait | — Pending |
+| v2.0 roadmap scoped to Phase 0-1 only (literature scoping + encoding design), not all 5 plan-doc phases | The plan doc itself says it "will get re-planned once Phase 0 lands" — Phase 0 is an explicit go/no-go gate, so committing implementation/study/write-up phases now would plan against an unknown | — Pending |
 
 ---
 *Last updated: 2026-07-29 after v1.0 milestone completion*
