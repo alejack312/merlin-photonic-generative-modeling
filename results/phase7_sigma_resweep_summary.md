@@ -24,4 +24,21 @@ Separately: every K=462 `ring_mass` value in this table is higher than its corre
 
 ## Interpretation
 
-_Owner interpretation pending — see .planning/phases/07-mechanism-validation/07-RESEARCH.md and DESIGN_DECISIONS.md's 2026-07-29 correction for the confound question this experiment addresses, and results/phase7_neighbor_locality_summary.md (07-01) for the companion mechanism-test result. This file reports the measured sigma-sweep comparison only; per this project's CLAUDE.md, the owner writes the interpretation before it is folded into any published doc._
+**Confound question (this experiment's primary purpose):** sigma=0.1 remains the
+K=462 argmax by a wide margin (next-best is sigma=0.05, 0.0898 lower). Stale
+sigma is not a confound in the reported ring_mass 0.609→0.691 improvement --
+re-tuning at the correct K=462 grid width does not surface a better bandwidth
+than the one every reported K=462 result already used.
+
+**K=400 vs K=462, all sigmas:** ring_mass improved at 4 of 5 sigma values
+(exception: sigma=0.02, which went 0.4588→0.4425, slightly worse). But this is
+not a clean improvement -- `gap_mass` (mass in the dead zone between the two
+rings, where lower is better) got *worse* at every single sigma value, with no
+exceptions. So going from K=400 to K=462 is a tradeoff, not a strict win: more
+mass correctly concentrated on the rings, but also more mass leaking into the
+gap, at every bandwidth tested. This is consistent with the K=462 natural-order
+generator producing a broader, less-concentrated output distribution overall
+compared to K=400, rather than a distribution that is simply "better" in every
+respect. Whether the ring_mass gain outweighs the gap_mass cost is a judgment
+call about which metric matters more for this project's goals, not something
+resolved by this experiment.
