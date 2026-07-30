@@ -54,4 +54,25 @@ Single-instance measurement at the actual trained theta whose ring_mass=0.691 is
 
 ## Interpretation
 
-_Owner interpretation pending -- see .planning/phases/07-mechanism-validation/07-RESEARCH.md for the mechanism claim under test and DESIGN_DECISIONS.md's 2026-07-29 correction for full context. This file reports the measured numbers only; per this project's CLAUDE.md, the owner writes the interpretation before it is folded into any published doc._
+Adjacent bins show a small, statistically detectable tendency toward more-similar
+parameter-sensitivity than random bin pairs -- the pooled result does clear the
+p<0.05 significance bar (p=0.0084), and the trained checkpoint even more so
+(p=0.0187). But the effect is too small to be practically meaningful: the pooled
+`mean_diff=0.0096` misses the locked `min_effect=0.10` bar by roughly 10x, and
+only 13/20 draws individually agree in direction (a bare majority, not a strong
+or consistent effect). This is exactly why the check is two-condition rather than
+a bare p-value: at N=9,220 pooled pairs, almost any nonzero effect clears p<0.05,
+so significance alone would have been a misleading bar here.
+
+**Conclusion:** this test does not support the correspondence-fix mechanism's
+assumption that list-neighbors (under the radius/center-of-mass ordering) "move
+together" in any substantial way when the circuit's parameters are perturbed.
+The effect exists and is real, but it is roughly an order of magnitude too small
+to explain -- on its own -- why natural ordering improved ring_mass from 0.609 to
+0.691. The mechanism behind that improvement remains unconfirmed by this test;
+whatever is driving it, it is not primarily "neighboring output bins share
+parameter-sensitivity structure" at a practically meaningful level. (Also see the
+methodology caveat above: even the p-value should be read cautiously, since it
+assumes independence between pooled samples that doesn't fully hold -- so the
+"statistically significant" claim itself is on softer ground than the two-condition
+check's failure on effect-size grounds alone already implies.)
