@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-07-29)
 
 Milestone: v1.0 Photonic Generator — SHIPPED 2026-07-29 (tag: v1.0)
 Phase: 7 (Mechanism Validation) — COMPLETE. Both plans executed, gsd-verifier passed 10/10 must-haves, gstack `/review` adversarial pass ran (Codex timed out, Claude subagent fallback per skill policy) and found 4 issues, all resolved: K<4 hang guard, misleading LR comment, and sign_agrees CSV column auto-fixed; deterministic per-sigma resweep seeding and a pooled-p-value independence caveat applied after owner approval via AskUserQuestion.
-Status: Neighbor-locality test executed and committed. Measured result: pooled mean_diff=+0.0096 and trained-checkpoint mean_diff=+0.0402 both fail the locked 0.10 effect-size bar despite the pooled result clearing p<0.05 alone (see 07-01-SUMMARY.md and results/phase7_neighbor_locality_summary.md). Sigma re-sweep executed and committed: K=462 argmax is sigma=0.1 (ring_mass=0.7145), matching the bandwidth already in use for every reported K=462 result — no other tested sigma value beats it (see 07-02-SUMMARY.md and results/phase7_sigma_resweep_summary.md). Interpretation of both results is intentionally left for the owner — not yet done.
+Status: Neighbor-locality test executed and committed. Measured result: pooled mean_diff=+0.0096 and trained-checkpoint mean_diff=+0.0402 both fail the locked 0.10 effect-size bar despite the pooled result clearing p<0.05 alone (see 07-01-SUMMARY.md and results/phase7_neighbor_locality_summary.md). Sigma re-sweep executed and committed: K=462 argmax is sigma=0.1 (ring_mass=0.7145), matching the bandwidth already in use for every reported K=462 result — no other tested sigma value beats it (see 07-02-SUMMARY.md and results/phase7_sigma_resweep_summary.md). Owner interpretation of both results is now written into both summary docs (commits 1d7b113, ca6d295) — Phase 7 is fully closed. Neighbor-locality conclusion: the effect is real (p=0.0084 pooled) but ~10x too small to be practically meaningful (mean_diff=0.0096 vs. min_effect=0.10) — the correspondence-fix mechanism is not confirmed by this test. Sigma re-sweep conclusion: no stale-sigma confound (sigma=0.1 remains the K=462 argmax by a wide margin), but K=400→K=462 is a tradeoff, not a clean win — gap_mass worsened at every single sigma even as ring_mass improved at 4/5.
 
 Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 is post-v1.0 mechanism-validation work, tracked separately above.
 
@@ -48,8 +48,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 ### Pending Todos
 
 - Owner: flip GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`)
-- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`)
-- Owner: interpret both Phase 7 results together — neighbor-locality test (`results/phase7_neighbor_locality_summary.md`'s "Interpretation" section: pooled mean_diff=+0.0096 and trained-checkpoint mean_diff=+0.0402 both fail the locked 0.10 effect-size bar) and sigma re-sweep (`results/phase7_sigma_resweep_summary.md`'s "Interpretation" section: K=462 argmax is sigma=0.1, matching the bandwidth already in use — no re-tuning indicated)
+- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — note the technical note predates Phase 7's findings (neighbor-locality mechanism unconfirmed, ring/gap tradeoff at K=462); consider whether it needs a Phase 7 addendum before sending
 - Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the deferred IQP→photonic circuit mapping project.
 
 ### Blockers/Concerns
@@ -59,5 +58,5 @@ None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-
 ## Session Continuity
 
 Last session: 2026-07-30
-Stopped at: Phase 7 fully executed, verified (10/10 must-haves, gsd-verifier), and code-reviewed (gstack `/review`, adversarial fixes applied and re-tested — 53/53 tests pass). Phase marked complete in ROADMAP.md/STATE.md. Owner interpretation of both Phase 7 results is the only remaining open item.
-Resume by: owner's interpretation pass on both Phase 7 results (`results/phase7_neighbor_locality_summary.md` and `results/phase7_sigma_resweep_summary.md`), or `/gsd:new-milestone` for a next goal.
+Stopped at: Phase 7 fully complete — executed, verified (10/10 must-haves, gsd-verifier), code-reviewed (gstack `/review`, adversarial fixes applied and re-tested, 53/53 tests pass), and interpreted (owner wrote both interpretations through two rounds of Claude checking the framing against the actual numbers per this project's CLAUDE.md rule; final versions committed 1d7b113, ca6d295). Nothing left queued in Phase 7.
+Resume by: `/gsd:new-milestone` for a next goal, or the two remaining owner-only todos above (flip repo public, send technical note to Vincent — consider a Phase 7 addendum first).
