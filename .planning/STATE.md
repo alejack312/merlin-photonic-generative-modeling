@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-29)
+See: .planning/PROJECT.md (updated 2026-07-30)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v1.0 shipped 2026-07-29. Phase 7 (Mechanism Validation) added 2026-07-29, completed and verified 2026-07-30, not yet assigned to a milestone.
+**Current focus:** v1.0 shipped 2026-07-29. Phase 7 (Mechanism Validation) closed 2026-07-30. v2.0 (IQP → Photonic Encoding) roadmap created 2026-07-30 — 2 phases (8: Literature Scoping & Prerequisites, 9: Encoding Design), 11 requirements, 100% coverage.
 
 ## Current Position
 
 Milestone: v2.0 IQP → Photonic Encoding — started 2026-07-30 (v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30)
-Phase: Not started (defining requirements)
+Phase: 8 (Literature Scoping & Prerequisites) — not yet planned
 Plan: —
-Status: Defining requirements. Milestone started by owner's explicit choice to override the source plan doc's "not before Sept 2, 2026" gate — v1.0 dev work is fully complete, only two owner-only manual steps remain (flip repo public, send technical note to Vincent). Roadmap scoped to Phase 0-1 of the 5-phase plan doc only (literature scoping + on-paper encoding design); implementation/trainability-study/write-up deliberately deferred pending Phase 0's go/no-go verdict.
+Status: Roadmap created. Milestone started by owner's explicit choice to override the source plan doc's "not before Sept 2, 2026" gate — v1.0 dev work is fully complete, only two owner-only manual steps remain (flip repo public, send technical note to Vincent). Roadmap scoped to exactly 2 phases matching the source plan doc's own Phase 0 (Literature Scoping) and Phase 1 (Encoding Design); implementation/trainability-study/write-up (v2 requirements: IMPL-01/02, STUDY-01/02, WRITE-01) deliberately deferred pending Phase 8's go/no-go verdict (LIT-04). Phase 9 (Encoding Design) is sequentially contingent on Phase 8 concluding "go" — will not be planned/executed if Phase 8 concludes "not ready."
 
-Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed. v2.0 progress tracked fresh below once roadmap lands.
+Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed. v2.0: [░░░░░░░░░░] 0% — roadmap just landed, no plans written yet.
 
 ## Performance Metrics
 
@@ -41,23 +41,27 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 - `torch.func.functional_call` + `jacrev` against MerLin's `QuantumLayer` silently produces an all-zero Jacobian: `QuantumLayer` reads trainable parameters from a plain Python list (`quantum_layer.thetas`) populated once at construction, not from named-parameter attributes on each call, so `functional_call`'s attribute substitution never reaches it. Fix: also monkey-patch `quantum_layer.thetas` inside the `jacrev`-traced closure (see `generator/neighbor_locality.py`'s `compute_jacobian` docstring). Worth knowing before any future `torch.func` differentiation against a MerLin `QuantumLayer`.
 - Resumable per-run scripts that draw random inits from the global unseeded RNG (e.g. `torch.randn` without a preceding `torch.manual_seed`) are not actually reproducible across a resume: completed steps skip the RNG draw on reload, so any step retrained after a resume point diverges silently from what an uninterrupted run would have produced. Seed deterministically per resumable unit (e.g. `torch.manual_seed(base + index)`) if resume-reproducibility matters — caught by adversarial code review in Phase 7, fixed in `sigma_resweep.py`.
 - Pooling non-independent samples (e.g. adjacent-pair cosine similarities that share a row with their neighbor) into a single significance test overstates effective sample size and can make a p-value look stronger than it is — worth a stated caveat rather than a silent pooled claim; doesn't necessarily change a verdict decided by a separate effect-size threshold, but should be flagged.
+- v2.0 encoding target is discrete-variable (DV, Fock-space: phase shifters/beamsplitters/photon-counting), not continuous-variable (CV, squeezed states/homodyne) — no published DV construction exists (genuinely novel), whereas Douce et al. (2017) already proved the CV-IQP hardness result (reproduction, not invention); DV also preserves IQP's native discrete bitstring-sampling character.
 
 ### Roadmap Evolution
 
 - Phase 7 added 2026-07-29: Mechanism Validation — neighbor-locality test (Jacobian-based) + sigma re-sweep against the K=462 grid, scoped from the v1.0 self-audit's tracked backlog. Not yet assigned to a milestone; added via `/gsd:add-phase` continuing numbering from v1.0 rather than restarting.
-- v2.0 IQP → Photonic Encoding started 2026-07-30 via `/gsd:new-milestone`, continuing phase numbering from Phase 7 (new phases start at 8). Source: `Post_Sept1_IQP_Photonic_Plan.md`'s pre-existing 5-phase research plan, scoped to Phase 0-1 (literature scoping + encoding design) only for this milestone.
+- v2.0 IQP → Photonic Encoding started 2026-07-30 via `/gsd:new-milestone`, continuing phase numbering from Phase 7 (new phases start at 8).
+- v2.0 roadmap created 2026-07-30: exactly 2 phases (8: Literature Scoping & Prerequisites; 9: Encoding Design), derived directly from this milestone's 11 v1 requirements — matching the source plan doc's own Phase 0/Phase 1 split, not the doc's full 5-phase scope. Phase 9 is sequentially dependent on Phase 8's LIT-04 go/no-go verdict. 100% requirement coverage validated (11/11 mapped, no orphans). v2 requirements (IMPL-01/02, STUDY-01/02, WRITE-01) explicitly deferred, not phased.
 
 ### Pending Todos
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`, Phase 7 addendum already written in) — owner plans to send 2026-07-31
-- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; the deferred IQP→photonic circuit mapping project.
+- Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`)
+- Next: `/gsd:plan-phase 8` to plan Literature Scoping & Prerequisites
+- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; v2.0's deferred Phases 2-4 (implementation, trainability/hardness study, write-up), contingent on this milestone's findings.
 
 ### Blockers/Concerns
 
-None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings) are resolved or honestly documented as closed — see `.planning/milestones/v1.0-ROADMAP.md` and `.planning/milestones/v1.0-MILESTONE-AUDIT.md`.
+None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings) are resolved or honestly documented as closed — see `.planning/milestones/v1.0-ROADMAP.md` and `.planning/milestones/v1.0-MILESTONE-AUDIT.md`. One live contingency to track going forward: Phase 9 (Encoding Design) does not proceed if Phase 8 concludes "not ready" on LIT-04 — that would be a valid, honestly-reportable milestone outcome, not a blocker to work around.
 
 ## Session Continuity
 
 Last session: 2026-07-30
-Stopped at: v2.0 milestone kicked off via `/gsd:new-milestone` — PROJECT.md and STATE.md updated, research/requirements/roadmap in progress.
-Resume by: continue the `/gsd:new-milestone` flow (research → requirements → roadmap), or after it lands, `/gsd:plan-phase 8`. The two owner-only v1.0 todos (flip repo public, send technical note to Vincent) remain open and are independent of this milestone.
+Stopped at: v2.0 roadmap created — ROADMAP.md (Phases 8-9 appended), STATE.md, and REQUIREMENTS.md traceability all written.
+Resume by: `/gsd:plan-phase 8`. The two owner-only v1.0 todos (flip repo public, send technical note to Vincent) remain open and are independent of this milestone.

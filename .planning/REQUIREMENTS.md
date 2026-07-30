@@ -60,23 +60,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LIT-01 | TBD | Pending |
-| LIT-02 | TBD | Pending |
-| LIT-03 | TBD | Pending |
-| LIT-04 | TBD | Pending |
-| PREQ-01 | TBD | Pending |
-| PREQ-02 | TBD | Pending |
-| ENC-01 | TBD | Pending |
-| ENC-02 | TBD | Pending |
-| ENC-03 | TBD | Pending |
-| ENC-04 | TBD | Pending |
-| ENC-05 | TBD | Pending |
+| LIT-01 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| LIT-02 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| LIT-03 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-07-30) |
+| LIT-04 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| PREQ-01 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| PREQ-02 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| ENC-01 | Phase 9: Encoding Design | Pending |
+| ENC-02 | Phase 9: Encoding Design | Pending |
+| ENC-03 | Phase 9: Encoding Design | Pending |
+| ENC-04 | Phase 9: Encoding Design | Pending |
+| ENC-05 | Phase 9: Encoding Design | Pending |
 
 **Coverage:**
 - v1 requirements: 11 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 11 ⚠️ (expected — roadmapper fills this in next)
+- Mapped to phases: 11/11 ✓
+- Unmapped: 0 ✓ no orphans
 
 ---
 *Requirements defined: 2026-07-30*
-*Last updated: 2026-07-30 after initial definition*
+*Last updated: 2026-07-30 after roadmap creation (Phases 8-9)*
