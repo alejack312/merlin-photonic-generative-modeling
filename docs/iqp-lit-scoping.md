@@ -30,3 +30,54 @@ The paper swaps every DV ingredient for a continuous-quadrature counterpart:
 ### Why this does NOT hand us a Fock-space/photon-number construction
 
 This is the paragraph that matters most for positioning Phase 9, so it's stated plainly: everything above is built in the **continuous-quadrature** formalism — squeezed light, homodyne detection of `p̂`/`q̂`, GKP bosonic-qubit encoding. That is a different physical encoding from a **Fock-space/photon-number** linear-optical circuit — phase shifters, beamsplitters, and photon-counting detectors, which is what Perceval and MerLin actually simulate. The paper contains no mention anywhere of photon-number states, Fock-basis measurement, or discrete linear-optical networks; its notion of "continuous variable" is squarely the quadrature tradition (Menicucci, van Loock, GKP-style bosonic codes), not the (much less common, and unrelated) sense in which someone might loosely call "many photon-number levels" continuous. Concretely: this paper's `q̂`/`p̂` are continuous real-valued operators with no discrete eigenspectrum, whereas Fock-space encodings work entirely with discrete photon-count eigenstates `|0⟩, |1⟩, |2⟩, ...`. **These are two different formalisms that happen to share the word "continuous-variable photonics" as an umbrella term, and they must not be conflated in either direction** — a DV/Fock-space IQP analogue is not something this paper already proves, disproves, or even gestures at; it would have to be built from scratch, which is exactly Phase 9's job.
+
+## Literature Search (LIT-01)
+
+### Starting point: 08-RESEARCH.md's existing WebSearch pass
+
+`.planning/phases/08-literature-scoping-prerequisites/08-RESEARCH.md` already ran a WebSearch-based scan before this document was written. For reference, its query list and findings:
+
+**Direct keyword queries tried:**
+- `IQP linear optics boson sampling discrete variable photonic`
+- `"instantaneous quantum polynomial" linear optical circuit photon counting hardness`
+- `linear optical circuit commuting phase gates sampling hardness photon number basis "IQP"`
+
+**Structural-analogue queries tried:**
+- Commuting-diagonal-gates and Hadamard-conjugation framing (via the Douce et al. read itself, which cites the DV IQP definition it builds from — no separate DV-linear-optics paper cited there)
+- Boson sampling / Gaussian boson sampling adjacency
+
+**What it surfaced:** boson sampling and Gaussian boson sampling papers (permanent-based hardness, structurally different from IQP's commuting-diagonal-gate argument); Jabbour & Novo (arXiv:2310.06034, CV/Gaussian non-linearity-layering complexity, not DV/Fock); "Unified boson sampling" (PRR 7, L042068, merges DV scattershot + CV Gaussian boson sampling, no IQP connection); and standard qubit-native DV-IQP theory papers (Bremner-Jozsa-Shepherd lineage). None matched. That pass's own stated caveat: a single WebSearch scan is not exhaustive and doesn't by itself satisfy LIT-04's "cite both a constructive and a disconfirming search pass" bar — it explicitly recommended a follow-up pass with different phrasing and, ideally, citation-chasing.
+
+### Independent second pass (this document, run 2026-08-03)
+
+This repo's execution environment does not expose a WebSearch/WebFetch tool, so this second pass used a different, arguably stronger method than WebSearch: direct live queries against the **arXiv API** (`export.arxiv.org/api/query`) for keyword search, plus the **Semantic Scholar Graph API** for citation-chasing (pulling arXiv:1607.07605's actual citing-paper and cited-reference lists — the exact "what cites Douce et al." check `08-RESEARCH.md`'s Open Questions section flagged as worth doing but hadn't done). This is a genuinely different tool and a genuinely different query set from the first pass, not a restatement of it.
+
+**1. Citation-chase: who cites Douce et al. (arXiv:1607.07605), and what does it itself cite?**
+
+Queried Semantic Scholar for all citing papers (51 returned, spanning 2017-2026) and all references Douce et al. cites. The citing-paper list spans continuous-variable quantum computing, Gaussian boson sampling, GKP-code, and photonic-QML topics (e.g. "Continuous-Variable Quantum Encoding Techniques," "Resources for Bosonic Quantum Computational Advantage," "Strawberry Fields: A Software Platform for Photonic Quantum Computing," "A Convolutional Approach for Discrete-Variable Quantum Systems"). None of the 51 citing papers, and none of Douce et al.'s own references (standard DV-IQP theory citations — Bremner-Jozsa-Shepherd lineage, `PostBQP` complexity-class papers), constructs or proposes a Fock-space/photon-number linear-optical IQP analogue. **Result: no match, no impossibility result, in either direction of the citation graph.**
+
+**2. Alternate-phrasing keyword queries (arXiv API, different wording than 08-RESEARCH.md's list):**
+
+| Query | Results | What surfaced |
+|---|---|---|
+| `"sampling complexity" AND "linear optical" AND "commuting"` | 0 | Nothing |
+| `"photon number" AND IQP AND hardness` | 1 | "Gaussian Boson Sampling to Accelerate NP-Complete Vertex-Minor Graph Classification" (2024) — a GBS application paper, not an IQP construction |
+| `"discrete variable" AND "instantaneous quantum computing"` | 1 | Douce et al. itself only — no other paper uses this exact phrase pairing |
+| `IQP AND "linear optic"` | 3 | Two unrelated qubit-supremacy/complexity papers (2018, 2014) + the Boson Sampling Born Machine paper (2026, flagged below) |
+| `IQP AND "boson sampling"` | 11 | Mostly standard quantum-supremacy/complexity theory papers; two directly relevant recent hits (flagged below) |
+| `IQP AND Perceval` | 0 | Nothing |
+| `"photon counting" AND "commuting" AND "diagonal gates"` | 0 | Nothing |
+| `"Fock" AND "Hadamard" AND "sampling hardness"` | 0 | Nothing |
+
+**3. Targeted recent-preprint check (2024-2026), per the plan's explicit ask:**
+
+Two papers surfaced that are worth flagging explicitly as the closest hits either search pass has found — neither is a match for LIT-01's specific ask, but both are directly relevant context:
+
+- **Kurkin, Chabaud, Kolarovszki, Bakó, Zimborás, Dunjko, "Universality of Classically Trainable, Quantum-Deployed Boson-Sampling Generative Models," arXiv:2603.11014 (Mar 2026).** Introduces the "Boson Sampling Born Machine" (BSBM), explicitly built as a linear-optical analogue of the IQP-QCBM (IQP quantum-circuit Born machine) train-classically/deploy-quantumly paradigm. Checked its reference list via Semantic Scholar (20 references) — it does **not** cite Douce et al., and its hardness argument comes from **standard boson sampling's permanent-based hardness** (Aaronson-Arkhipov lineage), not from constructing an IQP-equivalent circuit class (commuting diagonal gates + Hadamard-conjugated measurement) in Fock space. So: not a match for LIT-01 (it doesn't build IQP's defining structure in Fock space), but it is the single closest piece of literature found connecting IQP-style generative-modeling structure to a photon-counting/linear-optical substrate — worth Phase 9 being aware of and citing, even though it answers a different question (Born-machine trainability/universality via boson-sampling hardness, not a DV-IQP hardness construction via IQP's own commuting-gate argument).
+- **"Matrix product state approach to lossy boson sampling and noisy IQP sampling," arXiv:2510.24137 (Oct 2025).** Studies classical simulability of noisy/lossy boson sampling and noisy IQP sampling side-by-side using a shared MPS-based simulation technique, but treats them as two separate sampling models under a shared method — it does not construct or claim any structural correspondence between IQP and boson sampling. Not a match, not an impossibility result, not a partial lead — a coincidental methodological pairing.
+
+**Second-pass conclusion:** this pass corroborates 08-RESEARCH.md's original finding rather than changing it — no DV/Fock-space linear-optical construction of IQP's specific structure (input in a fixed basis, commuting diagonal gates, Hadamard-conjugated measurement) exists in the literature, and no impossibility/no-go result against such a construction exists either, across both a keyword scan with different phrasing and a full citation-graph chase in both directions from Douce et al. The one addition this pass makes to the evidence base is the BSBM paper above — a very recent, closely-adjacent-but-structurally-distinct piece of work the owner should weigh before finalizing the verdict, since it shows IQP-style generative-modeling ideas are already being actively extended into linear optics (via boson sampling's own hardness, not a DV-IQP construction) — relevant context for how Phase 9's contribution would be positioned, even though it doesn't change the underlying "nothing found, no impossibility" conclusion.
+
+### LIT-03 coverage note
+
+MerLin's own reproduced-papers catalog check (LIT-03) was already completed and verified 2026-07-30 per `.planning/REQUIREMENTS.md` — all 21 titles in `merlinquantum.ai/0.4/reproduced_papers/` were enumerated directly, and none are IQP-adjacent. That check stands as-is and required no re-verification in this pass; it's cited here only for completeness of the phase's overall literature coverage.
