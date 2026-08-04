@@ -33,6 +33,19 @@ import numpy as np
 #     a single photon).
 #   - Two indistinguishable photons, one per input port, on a 50/50 BS ->
 #     Hong-Ou-Mandel dip: P(1,1)=0, P(0,2)=P(2,0)=0.5.
+#   - A Mach-Zehnder-style BS.H() -> PS(theta) -> BS.H() construction on a
+#     single photon: PS's phase is invisible to a Fock-basis (photon-number)
+#     measurement without a second beamsplitter to interfere against, but once
+#     that second BS is there, the phase visibly and predictably steers where
+#     the photon comes out. Derivation: BS.H() is the real Hadamard matrix
+#     1/sqrt(2)*[[1,1],[1,-1]], and PS(theta) applies a bare phase e^{i*theta}
+#     to mode 0. Starting from input (1,0), the first BS.H() gives amplitudes
+#     (1,1)/sqrt(2); PS(theta) gives (e^{i*theta},1)/sqrt(2); the second
+#     BS.H() gives ((e^{i*theta}+1)/2, (e^{i*theta}-1)/2). So:
+#       P(|1,0>) = |e^{i*theta}+1|^2/4 = cos^2(theta/2)
+#       P(|0,1>) = |e^{i*theta}-1|^2/4 = sin^2(theta/2)
+#     theta=0 -> fully constructive on mode 0 (P(1,0)=1); theta=pi/2 -> 50/50;
+#     theta=pi -> fully flipped to mode 1 (P(0,1)=1).
 #
 # Debugging notes from the owner's live attempt (worth keeping — see
 # 08-02-SUMMARY.md for the full writeup):
@@ -52,6 +65,49 @@ def build_circuit():
     circuit = pcvl.Circuit(2)
     circuit.add(0, pcvl.BS.H())
     return circuit
+
+
+def build_mzi_circuit(theta):
+    """Mach-Zehnder-style circuit: BS.H() -> PS(theta) on mode 0 -> BS.H().
+    Demonstrates that PS's phase value visibly and predictably changes the
+    output distribution once there's a second beamsplitter to interfere
+    against (unlike a bare PS, whose phase is invisible to a Fock-basis
+    photon-number measurement with no interferometer)."""
+    circuit = pcvl.Circuit(2)
+    circuit.add(0, pcvl.BS.H())
+    circuit.add(0, pcvl.PS(theta))
+    circuit.add(0, pcvl.BS.H())
+    return circuit
+
+
+def run_mzi_analyzer(theta):
+    """Build the MZI circuit/processor for a given theta, run a single-photon
+    input through one Analyzer call, and return (analyzer, dist) where dist
+    is {BasicState: probability}."""
+    circuit = build_mzi_circuit(theta)
+    processor = pcvl.Processor("SLOS", circuit)
+
+    input_states = [pcvl.BasicState([1, 0])]
+
+    ca = Analyzer(processor, input_states, "*")
+    ca.compute()
+
+    output_states = ca.output_states_list
+    row = ca.distribution[0]
+    dist = {state: complex(prob).real for state, prob in zip(output_states, row)}
+    return ca, dist
+
+
+def check_mzi(dist, theta):
+    """Closed-form check: P(|1,0>) = cos^2(theta/2), P(|0,1>) = sin^2(theta/2)."""
+    p_10 = dist.get(pcvl.BasicState([1, 0]), 0.0)
+    p_01 = dist.get(pcvl.BasicState([0, 1]), 0.0)
+    expected_p_10 = np.cos(theta / 2) ** 2
+    expected_p_01 = np.sin(theta / 2) ** 2
+    return (
+        np.isclose(p_10, expected_p_10, atol=TOLERANCE)
+        and np.isclose(p_01, expected_p_01, atol=TOLERANCE)
+    )
 
 
 def run_analyzer():
@@ -122,6 +178,19 @@ def main():
 
     assert single_photon_pass, "Single-photon 50/50 split did not match closed-form prediction"
     assert hom_pass, "Hong-Ou-Mandel dip did not match closed-form prediction"
+
+    print()
+    mzi_thetas = [0, np.pi / 2, np.pi]
+    mzi_passes = []
+    for theta in mzi_thetas:
+        _, mzi_dist = run_mzi_analyzer(theta)
+        mzi_pass = check_mzi(mzi_dist, theta)
+        mzi_passes.append(mzi_pass)
+        print(f"MZI (BS.H->PS(theta={theta:.4f})->BS.H) distribution: {mzi_dist}")
+        print(f"closed-form check: {'PASS' if mzi_pass else 'FAIL'}")
+        print()
+
+    assert all(mzi_passes), "MZI interference distribution did not match closed-form prediction for all theta values"
 
     return
 

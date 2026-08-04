@@ -1,11 +1,18 @@
 import sys
 import os
 
+import numpy as np
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from perceval_fluency_demo import run_analyzer, check_single_photon, check_hom_dip
+from perceval_fluency_demo import (
+    run_analyzer,
+    check_single_photon,
+    check_hom_dip,
+    run_mzi_analyzer,
+    check_mzi,
+)
 
 
 def test_single_photon_50_50_split():
@@ -28,3 +35,13 @@ def test_distributions_sum_to_one():
     _, single_photon_dist, hom_dist = run_analyzer()
     assert sum(single_photon_dist.values()) == pytest.approx(1.0, abs=1e-9)
     assert sum(hom_dist.values()) == pytest.approx(1.0, abs=1e-9)
+
+
+@pytest.mark.parametrize("theta", [0, np.pi / 2, np.pi])
+def test_mzi_interference(theta):
+    """BS.H() -> PS(theta) -> BS.H() on a single photon matches the
+    closed-form interference prediction P(1,0)=cos^2(theta/2),
+    P(0,1)=sin^2(theta/2) across a sweep of theta values (fully
+    constructive, 50/50, fully flipped)."""
+    _, mzi_dist = run_mzi_analyzer(theta)
+    assert check_mzi(mzi_dist, theta)
