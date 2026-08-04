@@ -11,15 +11,15 @@ Requirements for this milestone (v2.0). Each maps to roadmap phases (continuing 
 
 *A quick verification pass during requirements-gathering (2026-07-30) already corroborates the "no DV construction exists, only Douce et al.'s CV extension" finding via three independent checks — see PROJECT.md Context. This does not replace the formal Phase 0 work below (full-text Douce et al. read, systematic time-boxed search), which should still run to the rigor the plan doc and PITFALLS.md's anti-premature-closure guidance calls for.*
 
-- [ ] **LIT-01**: Literature search conducted (beyond the CV precedent already found) for any existing discrete-variable/Fock-space linear-optical construction of IQP
-- [ ] **LIT-02**: Douce et al. (PRL 118, 070503, 2017, arXiv:1607.07605) reviewed in full text (not abstract-level only) so the DV design can be correctly positioned against the existing CV precedent
+- [x] **LIT-01**: Literature search conducted (beyond the CV precedent already found) for any existing discrete-variable/Fock-space linear-optical construction of IQP — complete 2026-08-04, two independent passes (`08-RESEARCH.md` WebSearch + `docs/iqp-lit-scoping.md` arXiv-API/Semantic-Scholar citation-graph), no construction and no impossibility result found either way
+- [x] **LIT-02**: Douce et al. (PRL 118, 070503, 2017, arXiv:1607.07605) reviewed in full text (not abstract-level only) so the DV design can be correctly positioned against the existing CV precedent — complete 2026-08-04, `docs/iqp-lit-scoping.md`
 - [x] **LIT-03**: MerLin's own reproduced-papers catalog checked for IQP-adjacency — verified 2026-07-30, all 21 titles enumerated directly from `merlinquantum.ai/0.4/reproduced_papers/`, none relate to IQP
-- [ ] **LIT-04**: Go/no-go verdict on Phase 1 (encoding design) written down explicitly, time-boxed — "not ready" is a valid, reportable outcome if nothing viable is found
+- [x] **LIT-04**: Go/no-go verdict on Phase 1 (encoding design) written down explicitly, time-boxed — "not ready" is a valid, reportable outcome if nothing viable is found — complete 2026-08-04, verdict: **Go**, `docs/iqp-lit-scoping.md`
 
 ### Prerequisites
 
-- [ ] **PREQ-01**: Perceval low-level circuit API fluency confirmed via a working manual circuit build (`Circuit`, `PS`, `BS`, `BasicState`, `Analyzer`) — demonstrated, not just read about
-- [ ] **PREQ-02**: Prior IQP + barren-plateau notes/results compiled into one reference doc as the qubit-side baseline for later comparison
+- [x] **PREQ-01**: Perceval low-level circuit API fluency confirmed via a working manual circuit build (`Circuit`, `PS`, `BS`, `BasicState`, `Analyzer`) — demonstrated, not just read about — complete 2026-08-04, `perceval_fluency_demo.py` (single-photon split, Hong-Ou-Mandel dip, and PS-driven Mach-Zehnder interference, all closed-form verified)
+- [x] **PREQ-02**: Prior IQP + barren-plateau notes/results compiled into one reference doc as the qubit-side baseline for later comparison — complete 2026-08-04, `docs/iqp-baseline.md`
 
 ### Encoding Design
 
@@ -60,12 +60,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| LIT-01 | Phase 8: Literature Scoping & Prerequisites | Pending |
-| LIT-02 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| LIT-01 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
+| LIT-02 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
 | LIT-03 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-07-30) |
-| LIT-04 | Phase 8: Literature Scoping & Prerequisites | Pending |
-| PREQ-01 | Phase 8: Literature Scoping & Prerequisites | Pending |
-| PREQ-02 | Phase 8: Literature Scoping & Prerequisites | Pending |
+| LIT-04 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) — Go |
+| PREQ-01 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
+| PREQ-02 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
 | ENC-01 | Phase 9: Encoding Design | Pending |
 | ENC-02 | Phase 9: Encoding Design | Pending |
 | ENC-03 | Phase 9: Encoding Design | Pending |

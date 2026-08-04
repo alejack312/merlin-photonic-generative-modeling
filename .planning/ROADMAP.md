@@ -49,12 +49,13 @@ Not yet assigned to a v1.1 or later milestone — added directly to the roadmap 
 **Goal:** Determine whether a discrete-variable (DV, Fock-space) linear-optical construction of IQP is worth designing at all — and confirm the technical/reference prerequisites that any subsequent design work depends on.
 **Depends on:** None (new milestone; builds on v1.0's already-installed MerLin/Perceval environment, no code dependency on Phase 7)
 **Requirements:** LIT-01, LIT-02, LIT-03, LIT-04, PREQ-01, PREQ-02
-**Plans:** 3 plans (1 wave, fully parallel)
+**Plans:** 4 plans (1 wave, fully parallel; 08-04 added as gap closure)
 
 Plans:
-- [ ] 08-01-PLAN.md — Literature scoping & go/no-go verdict: Douce et al. summary (LIT-02), extended literature search (LIT-01), owner-authored go/no-go verdict (LIT-04) -> `docs/iqp-lit-scoping.md`
-- [ ] 08-02-PLAN.md — PREQ-01 Perceval fluency demo: attempt-first checkpoint, then manual Circuit/PS/BS/BasicState/Analyzer demo verified against closed-form predictions -> `perceval_fluency_demo.py`
-- [ ] 08-03-PLAN.md — PREQ-02 baseline doc: compile sibling-project IQP structure/hardness + barren-plateau trainability notes -> `docs/iqp-baseline.md`
+- [x] 08-01-PLAN.md — Literature scoping & go/no-go verdict: Douce et al. summary (LIT-02), extended literature search (LIT-01), owner-authored go/no-go verdict (LIT-04) -> `docs/iqp-lit-scoping.md` — **Go**
+- [x] 08-02-PLAN.md — PREQ-01 Perceval fluency demo: attempt-first checkpoint, then manual Circuit/PS/BS/BasicState/Analyzer demo verified against closed-form predictions -> `perceval_fluency_demo.py`
+- [x] 08-03-PLAN.md — PREQ-02 baseline doc: compile sibling-project IQP structure/hardness + barren-plateau trainability notes -> `docs/iqp-baseline.md`
+- [x] 08-04-PLAN.md — Gap closure: PS (phase shifter) was never exercised in the PREQ-01 demo; added a BS.H()->PS(theta)->BS.H() Mach-Zehnder example with a closed-form interference check -> `perceval_fluency_demo.py`, `tests/test_perceval_fluency_demo.py`
 
 **Success Criteria:**
 1. A go/no-go verdict on Phase 9 (encoding design) is written down explicitly, citing both constructive and disconfirming search passes, with the stated time-box honored — "not ready" counted as a valid, reportable outcome if nothing viable is found (LIT-01, LIT-04)
@@ -88,7 +89,7 @@ Plans:
 | 5. Benchmarking | v1.0 | 1/1 | Complete | 2026-07-29 |
 | 6. Documentation & Publication | v1.0 | 2/2 | Complete | 2026-07-29 |
 | 7. Mechanism Validation | (unassigned) | 2/2 | Complete — verified 10/10, owner interpretation pending | 2026-07-30 |
-| 8. Literature Scoping & Prerequisites | v2.0 | 0/3 | Planned | — |
-| 9. Encoding Design | v2.0 | 0/? | Not started (contingent on Phase 8 "go" verdict) | — |
+| 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
+| 9. Encoding Design | v2.0 | 0/? | Not started — unblocked by Phase 8's Go verdict | — |
 
-v2.0 roadmap created 2026-07-30, continuing phase numbering from Phase 7 (starts at 8) per owner's explicit scoping decision. Phase 8 planned 2026-07-31: 3 plans, 1 wave (fully parallel — no cross-plan file overlap). Next: `/gsd:execute-phase 8`.
+v2.0 roadmap created 2026-07-30, continuing phase numbering from Phase 7 (starts at 8) per owner's explicit scoping decision. Phase 8 planned 2026-07-31: 3 plans, 1 wave (fully parallel — no cross-plan file overlap). Phase 8 completed 2026-08-04: all 4 plans executed (08-04 added as gap closure for PREQ-01's missed PS primitive), fully verified (10/10 must-haves). LIT-04 verdict: **Go** — Phase 9 (Encoding Design) is unblocked. Next: `/gsd:plan-phase 9`.
