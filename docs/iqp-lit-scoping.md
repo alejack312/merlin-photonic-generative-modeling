@@ -81,3 +81,24 @@ Two papers surfaced that are worth flagging explicitly as the closest hits eithe
 ### LIT-03 coverage note
 
 MerLin's own reproduced-papers catalog check (LIT-03) was already completed and verified 2026-07-30 per `.planning/REQUIREMENTS.md` — all 21 titles in `merlinquantum.ai/0.4/reproduced_papers/` were enumerated directly, and none are IQP-adjacent. That check stands as-is and required no re-verification in this pass; it's cited here only for completeness of the phase's overall literature coverage.
+
+## Go/No-Go Verdict
+
+**Verdict: Go — proceed to Phase 9 (Encoding Design).**
+
+This is stated in the owner's own words: after reading Kurkin et al.'s Boson Sampling Born Machine paper (arXiv:2603.11014) in full — not just the abstract, fetched and read in full via PDF extraction, prompted by it being the closest tangential hit surfaced above — the owner's conclusion was **"No blocking impossibility, let's proceed."**
+
+**Reasoning, per the owner:**
+
+Per the locked bar in `08-CONTEXT.md`, "Go" requires only the absence of a blocking impossibility result — a full constructive mapping is explicitly not required at this stage, since building one is Phase 9's own job. Across both search passes on record above:
+
+- The first pass (`08-RESEARCH.md`'s original WebSearch-based scan, cited in the "Starting point" subsection above) found boson sampling, Gaussian boson sampling, and standard DV-IQP theory papers, but no DV/Fock-space IQP construction and no impossibility result.
+- The second, independently-conducted pass (this document's arXiv-API + Semantic-Scholar-citation-graph search, cited above) corroborated that finding rather than changing it — including a full citation-graph chase in both directions from Douce et al. (2017) — and surfaced no construction and no impossibility result either.
+
+Combined with the Douce et al. summary above, which establishes that the one existing IQP-hardness-in-photonics result (the CV-quadrature construction) is built in a formalism — continuous-quadrature squeezed-light/homodyne — that is fundamentally distinct from Fock-space/photon-number linear optics and neither proves nor disproves anything about the DV/Fock-space case, there is no evidence anywhere in the literature searched that a DV/Fock-space IQP construction is impossible.
+
+The owner explicitly considered and set aside the Kurkin et al. BSBM paper as grounds for a "promising but needs more time" verdict instead of "Go." Having read the full paper, the owner confirmed it borrows IQP-QCBM's classically-trainable/quantum-deployed *training and deployment recipe*, but transplants that recipe onto boson-sampling's own separate, pre-existing hardness lineage (Aaronson-Arkhipov permanent-hardness) — it does not build IQP's own defining structure (input in a fixed basis, commuting diagonal gates, Hadamard-conjugated measurement) inside Fock space. It therefore doesn't constitute a partial or ambiguous lead worth deeper follow-up before proceeding; it's directly relevant context for how Phase 9's contribution should be positioned (worth citing there), but it doesn't change the underlying "nothing found, no impossibility" conclusion that is the actual gating question here.
+
+**What this verdict does not claim:** neither search pass was an exhaustive manual literature crawl, so there remains some residual risk that a deeper pass would surface something. That risk is accepted as a stated caveat, per `08-CONTEXT.md`'s own framing that a full constructive mapping — and, implicitly, a fully exhaustive literature sweep — is not the bar for this gate.
+
+**Outcome:** LIT-04 is satisfied. Phase 8 is complete. Phase 9 (Encoding Design) is unblocked and can be planned via `/gsd:plan-phase 9`.
