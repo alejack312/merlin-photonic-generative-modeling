@@ -69,7 +69,13 @@ Plans:
 **Goal:** Produce a defensible, on-paper mapping from IQP's structure onto Perceval's DV/Fock-space primitives — the milestone's actual novel-contribution deliverable.
 **Depends on:** Phase 8 — contingent entirely on LIT-04's verdict being "go"; does not start if Phase 8 concludes "not ready"
 **Requirements:** ENC-01, ENC-02, ENC-03, ENC-04, ENC-05
-**Plans:** Not yet planned — run `/gsd:plan-phase 9` after Phase 8 completes with a "go" verdict
+**Plans:** 4 plans (4 waves, sequential — attempt-first cadence per `09-CONTEXT.md`: each of ENC-01/ENC-03/ENC-04 gates on an owner attempt + self-explanation checkpoint before the next piece starts)
+
+Plans:
+- [ ] 09-01-PLAN.md — ENC-01 ingredient-level mapping: owner picks encoding scheme + attempts mapping, then Claude writes equation-level derivation + n=2-3 worked example -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
+- [ ] 09-02-PLAN.md — ENC-03 basis correspondence: owner attempts bidirectional bitstring<->Fock mapping, then Claude writes falsifiable correspondence incl. out-of-subspace handling -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
+- [ ] 09-03-PLAN.md — ENC-04 validation plan + toy check: owner attempts validation design, then Claude implements and actually runs the n=2-3 photonic-vs-qubit distribution comparison -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
+- [ ] 09-04-PLAN.md — ENC-02 positioning against Douce et al. (hedged tone) + final document assembly and phase paperwork -> `docs/iqp-photonic-encoding.md`
 
 **Success Criteria:**
 1. An on-paper mapping from IQP's commuting diagonal gates + Hadamard-basis conjugation to phase shifters, beamsplitters, and photon-number measurement is written in raw Perceval vocabulary, not MerLin's high-level builder DSL (ENC-01)
@@ -90,6 +96,6 @@ Plans:
 | 6. Documentation & Publication | v1.0 | 2/2 | Complete | 2026-07-29 |
 | 7. Mechanism Validation | (unassigned) | 2/2 | Complete — verified 10/10, owner interpretation pending | 2026-07-30 |
 | 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
-| 9. Encoding Design | v2.0 | 0/? | Not started — unblocked by Phase 8's Go verdict | — |
+| 9. Encoding Design | v2.0 | 0/4 | Planned — 4 plans, 4 waves, ready for `/gsd:execute-phase 9` | — |
 
-v2.0 roadmap created 2026-07-30, continuing phase numbering from Phase 7 (starts at 8) per owner's explicit scoping decision. Phase 8 planned 2026-07-31: 3 plans, 1 wave (fully parallel — no cross-plan file overlap). Phase 8 completed 2026-08-04: all 4 plans executed (08-04 added as gap closure for PREQ-01's missed PS primitive), fully verified (10/10 must-haves). LIT-04 verdict: **Go** — Phase 9 (Encoding Design) is unblocked. Next: `/gsd:plan-phase 9`.
+v2.0 roadmap created 2026-07-30, continuing phase numbering from Phase 7 (starts at 8) per owner's explicit scoping decision. Phase 8 planned 2026-07-31: 3 plans, 1 wave (fully parallel — no cross-plan file overlap). Phase 8 completed 2026-08-04: all 4 plans executed (08-04 added as gap closure for PREQ-01's missed PS primitive), fully verified (10/10 must-haves). LIT-04 verdict: **Go** — Phase 9 (Encoding Design) is unblocked. Phase 9 planned 2026-08-05: 4 plans, 4 waves, sequential (attempt-first cadence — ENC-01 -> ENC-03 -> ENC-04 each gate on an owner attempt + self-explanation checkpoint, ENC-02+ENC-05 assembled in the final wave). Next: `/gsd:execute-phase 9`.
