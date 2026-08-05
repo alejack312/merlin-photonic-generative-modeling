@@ -41,8 +41,8 @@ def test_state_prep_gives_50_50_split():
     circuit.add(0, build_state_prep_circuit(n))
     circuit.add(0, build_readout_circuit(n))
     dist = _run_and_collect(circuit, all_h_input(n))
-    p_h = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
-    p_v = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_h = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_v = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
     assert np.isclose(p_h, 0.5, atol=TOLERANCE)
     assert np.isclose(p_v, 0.5, atol=TOLERANCE)
 
@@ -56,8 +56,8 @@ def test_diagonal_layer_is_identity_at_theta_zero():
     circuit.add(0, build_diagonal_layer_circuit(n, [0.0]))
     circuit.add(0, build_readout_circuit(n))
     dist = _run_and_collect(circuit, all_h_input(n))
-    p_h = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
-    p_v = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_h = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_v = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
     assert np.isclose(p_h, 0.5, atol=TOLERANCE)
     assert np.isclose(p_v, 0.5, atol=TOLERANCE)
 
@@ -65,12 +65,13 @@ def test_diagonal_layer_is_identity_at_theta_zero():
 @pytest.mark.parametrize("theta", [0.0, 0.3, np.pi / 6, np.pi / 4, np.pi / 2, np.pi])
 def test_full_pipeline_single_qubit_matches_closed_form(theta):
     """Full ENC-01 pipeline (prep -> diagonal(theta) -> conjugation -> readout)
-    for one qubit matches the empirically-confirmed closed form P(H)=sin^2(theta),
-    P(V)=cos^2(theta)."""
+    for one qubit matches the empirically-confirmed closed form P(H)=cos^2(theta),
+    P(V)=sin^2(theta) -- H=(0,1), V=(1,0), verified against a bare PBS with
+    pure H/V input (Plan 09-02)."""
     n = 1
     _, dist = run_full_circuit(n, [theta])
-    p_h = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
-    p_v = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_h = dist.get(str(pcvl.BasicState([0, 1])), 0.0)
+    p_v = dist.get(str(pcvl.BasicState([1, 0])), 0.0)
     expected = expected_single_qubit_probs(theta)
     assert np.isclose(p_h, expected["H"], atol=TOLERANCE)
     assert np.isclose(p_v, expected["V"], atol=TOLERANCE)

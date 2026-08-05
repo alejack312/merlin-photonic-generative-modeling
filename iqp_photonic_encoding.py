@@ -35,16 +35,18 @@ import numpy as np
 #     required before Analyzer/Processor.probs() can report which polarization
 #     state was measured, in the same way perceval_fluency_demo.py's PS
 #     needed a second beamsplitter to become visible.
-#   - Empirically confirmed input/output basis-index convention (verified, not
-#     assumed): starting from |H> and running through
-#     HWP(pi/8) -> WP(theta,0) -> HWP(pi/8) -> PBS, the two readout ports give
-#     P(|H> port) = sin^2(theta), P(|V> port) = cos^2(theta). This is the
-#     abstract derivation's H*D(theta)*H = [[cos(theta), i*sin(theta)],
-#     [i*sin(theta), cos(theta)]] result, with Perceval's internal {P:H}/{P:V}
-#     amplitude-index assignment fixing which physical port carries which label
-#     -- the operator structure (Hadamard-sandwiched diagonal phase) is exactly
-#     as derived; only the H<->port-index correspondence is an implementation
-#     convention, confirmed empirically here rather than assumed.
+#   - Empirically confirmed port<->polarization convention (verified via a
+#     bare PBS with no other gates, pure |H> and pure |V> input): output pair
+#     (0,1) = H, output pair (1,0) = V. (An earlier version of this module
+#     had this backwards -- self-consistent within its own H/V labels, so it
+#     didn't affect any numerical test result, but the labels didn't match
+#     true physical polarization. Corrected in Plan 09-02 after the owner's
+#     ENC-03 attempt prompted a direct check.) Combined with the abstract
+#     derivation HWP(pi/8)->WP(theta,0)->HWP(pi/8) = Had.diag(e^{i*theta},
+#     e^{-i*theta}).Had = [[cos(theta), i*sin(theta)],[i*sin(theta),
+#     cos(theta)]], and this port<->polarization convention, the readout
+#     probabilities are P(H port=(0,1)) = cos^2(theta), P(V port=(1,0)) =
+#     sin^2(theta).
 #
 # Generator-weight scope (stated limitation, per 09-01-PLAN.md Task 2): these
 # functions implement and test weight-1 (single-qubit) IQP generators only.
@@ -148,9 +150,11 @@ def run_full_circuit(n, thetas):
 
 def expected_single_qubit_probs(theta):
     """Closed-form, empirically-confirmed marginal for one qubit: P(H) =
-    sin^2(theta), P(V) = cos^2(theta), from HWP(pi/8) -> WP(theta,0) ->
-    HWP(pi/8) -> PBS starting from |H>."""
-    return {"H": np.sin(theta) ** 2, "V": np.cos(theta) ** 2}
+    cos^2(theta), P(V) = sin^2(theta), from HWP(pi/8) -> WP(theta,0) ->
+    HWP(pi/8) -> PBS starting from |H>. (H/V corrected in Plan 09-02 -- see
+    the port<->polarization convention note above the module docstring's
+    Perceval API facts.)"""
+    return {"H": np.cos(theta) ** 2, "V": np.sin(theta) ** 2}
 
 
 def expected_joint_distribution(n, thetas):
@@ -170,17 +174,18 @@ def expected_joint_distribution(n, thetas):
 
 
 def basic_state_to_bitstring(state, n):
-    """Converts a 2n-mode readout BasicState (each qubit pair is [1,0]='H' or
-    [0,1]='V') to an n-character 'H'/'V' bitstring. Returns None if the state
-    has any qubit pair outside the single-photon computational subspace
-    (bunched/lost photons) -- ENC-03's out-of-subspace case."""
+    """Converts a 2n-mode readout BasicState (each qubit pair is [0,1]='H' or
+    [1,0]='V' -- verified against a bare PBS with pure H/V input, Plan 09-02)
+    to an n-character 'H'/'V' bitstring. Returns None if the state has any
+    qubit pair outside the single-photon computational subspace (bunched/lost
+    photons) -- ENC-03's out-of-subspace case."""
     modes = [state[i] for i in range(2 * n)]
     bits = []
     for k in range(n):
         pair = (modes[2 * k], modes[2 * k + 1])
-        if pair == (1, 0):
+        if pair == (0, 1):
             bits.append("H")
-        elif pair == (0, 1):
+        elif pair == (1, 0):
             bits.append("V")
         else:
             return None

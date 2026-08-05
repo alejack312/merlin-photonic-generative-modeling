@@ -130,8 +130,10 @@ _, dist = run_full_circuit(n=2, thetas=[0.3, 1.1])
 #  '|0,1,1,0>': 0.724887, '|0,1,0,1>': 0.187781}
 
 expected = expected_joint_distribution(n=2, thetas=[0.3, 1.1])
-# {'HH': 0.069364, 'HV': 0.017969, 'VH': 0.724887, 'VV': 0.187781}
+# {'HH': 0.187781, 'HV': 0.724887, 'VH': 0.017969, 'VV': 0.069364}
 ```
+
+(Bitstring labels use the verified convention `H=(0,1)`, `V=(1,0)` — see the port↔polarization correction below. The raw Perceval output above is unchanged by that correction; only which label attaches to which outcome changed.)
 
 These match to floating-point precision (`tests/test_iqp_photonic_encoding.py`'s parametrized product-distribution test, which also checks `n=3` with three independent generators). Two things this concretely confirms, not just for the marginal per-qubit phase-to-probability relationship but for the *joint* two- and three-qubit state:
 
@@ -144,7 +146,9 @@ The per-qubit closed form underlying both: starting from `|H⟩`, `HWP(π/8)·WP
 Had · diag(e^{iθ},e^{-iθ}) · Had = [[cos θ, i sin θ], [i sin θ, cos θ]]
 ```
 
-giving `P(stay) = cos²θ`, `P(flip) = sin²θ` in the abstract `{index0, index1}` ordering. `tests/test_iqp_photonic_encoding.py` confirms empirically which physical port (`H` or `V`) corresponds to which slot in Perceval's internal convention — verified directly (`P(H) = sin²θ`, `P(V) = cos²θ` for this component ordering) rather than assumed, per this repo's standing practice of checking Perceval's actual behavior instead of guessing from general LOQC knowledge.
+giving `P(stay) = cos²θ`, `P(flip) = sin²θ` in the abstract `{index0, index1}` ordering. Which physical port is which required a direct check, not an assumption: a bare `PBS()` with no other gates, fed pure `|H⟩` or pure `|V⟩`, gives `H → (0,1)`, `V → (1,0)` (deterministically, to floating-point precision). Combining that with the abstract result above: **`P(H) = cos²θ`, `P(V) = sin²θ`.**
+
+*Correction (Plan 09-02):* an earlier version of this document and `iqp_photonic_encoding.py` had this port↔polarization assignment backwards — self-consistent within its own labels (so no numerical test result was ever wrong), but the "H"/"V" tags didn't match true physical polarization. Caught during the ENC-03 attempt-first checkpoint when the owner asked which output pair was really H, prompting the direct bare-`PBS` check above. Fixed in both the module and its tests (`tests/test_iqp_photonic_encoding.py`'s parametrized closed-form test now reads `H` from `BasicState([0,1])` and `V` from `BasicState([1,0])`); all 12 tests still pass, since the fix is a consistent relabeling, not a change to the underlying physics.
 
 ### Relation to the owner's Task 1 attempt
 
@@ -157,6 +161,8 @@ ENC-01 is implemented and tested: `iqp_photonic_encoding.py` (state-prep/diagona
 ### Self-Explanation Checkpoint (Task 3)
 
 Per this repo's CLAUDE.md self-explanation checkpoints, the owner was asked to explain, unaided: (1) why the photonic realization of the diagonal layer actually commutes, and (2) what Hadamard-conjugation is physically doing and what the weight-2 case costs. Full Q&A recorded below, following this project's established pattern of documenting the actual back-and-forth rather than only the polished result.
+
+*Note (added in Plan 09-02):* the `P(H)`/`P(V)` labels quoted in this transcript use the port↔polarization convention believed correct at the time (`H=(1,0)`, `V=(0,1)`) — since corrected to `H=(0,1)`, `V=(1,0)` after direct verification (see Ingredient 1's "Correction" note above). The transcript is left as an accurate record of what was actually said; only the physics discussed (phase → population imbalance) is what matters here, and that reasoning is unaffected by which physical port carries which label.
 
 **Round 1 — initial answers restated the qubit-side abstraction rather than the photonic mechanism**, and contained one physical misconception:
 - Commutativity: initially restated "diagonal in the Z-basis, all pairwise commuting" without connecting it to the actual `WP` construction — flagged as not yet meeting the bar, since it doesn't distinguish *why this specific realization* inherits the property.
