@@ -25,11 +25,11 @@ Requirements for this milestone (v2.0). Each maps to roadmap phases (continuing 
 
 *Contingent on LIT-04 = "go."*
 
-- [ ] **ENC-01**: On-paper mapping defined: IQP's commuting diagonal gates + Hadamard-basis conjugation → phase shifters, beamsplitters, photon-number measurement, written in raw Perceval vocabulary (not MerLin's high-level builder DSL)
-- [ ] **ENC-02**: Mapping explicitly positioned against the Douce et al. CV precedent — how the DV approach differs and why it's a distinct contribution, not a restatement
-- [ ] **ENC-03**: Basis correspondence stated concretely between qubit computational-basis bitstrings and photonic Fock-state/photon-count outcomes — a falsifiable mapping, not hand-wavy analogy
-- [ ] **ENC-04**: A stated falsifiable check for the mapping (e.g., a small-scale classical comparison plan) — even though it isn't run until a future implementation phase, the design must be checkable in principle
-- [ ] **ENC-05**: Mapping documented in `docs/iqp-photonic-encoding.md`, defensible unaided by the owner — same bar as the v1.0 self-explanation checkpoints
+- [x] **ENC-01**: On-paper mapping defined: IQP's commuting diagonal gates + Hadamard-basis conjugation → phase shifters, beamsplitters, photon-number measurement, written in raw Perceval vocabulary (not MerLin's high-level builder DSL) — complete 2026-08-05, polarization encoding (`HWP`/`WP`/`PBS`), weight-1 generators derived, implemented, and tested; weight-2 derived on paper only, `docs/iqp-photonic-encoding.md`
+- [x] **ENC-02**: Mapping explicitly positioned against the Douce et al. CV precedent — how the DV approach differs and why it's a distinct contribution, not a restatement — complete 2026-08-05, `docs/iqp-photonic-encoding.md` ENC-02 section (hedged tone, honest parallel on the multi-qubit case noted alongside the contrast)
+- [x] **ENC-03**: Basis correspondence stated concretely between qubit computational-basis bitstrings and photonic Fock-state/photon-count outcomes — a falsifiable mapping, not hand-wavy analogy — complete 2026-08-05, `bitstring_to_fock`/`fock_to_bitstring` in `iqp_photonic_encoding.py`, out-of-subspace handling for all four invalid patterns, round-trip falsifiability test
+- [x] **ENC-04**: A stated falsifiable check for the mapping (e.g., a small-scale classical comparison plan) — even though it isn't run until a future implementation phase, the design must be checkable in principle — complete 2026-08-05, actually run (not just planned): TVD ~1e-16 at n=2,3 for weight-1 generators, ten orders of magnitude under the 1e-6 threshold
+- [x] **ENC-05**: Mapping documented in `docs/iqp-photonic-encoding.md`, defensible unaided by the owner — same bar as the v1.0 self-explanation checkpoints — complete 2026-08-05, full document assembled (intro, ENC-01 through ENC-04, Conclusion and Open Questions), final self-explanation checkpoint passed
 
 ## v2 Requirements
 
@@ -66,11 +66,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIT-04 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) — Go |
 | PREQ-01 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
 | PREQ-02 | Phase 8: Literature Scoping & Prerequisites | Complete (2026-08-04) |
-| ENC-01 | Phase 9: Encoding Design | Pending |
-| ENC-02 | Phase 9: Encoding Design | Pending |
-| ENC-03 | Phase 9: Encoding Design | Pending |
-| ENC-04 | Phase 9: Encoding Design | Pending |
-| ENC-05 | Phase 9: Encoding Design | Pending |
+| ENC-01 | Phase 9: Encoding Design | Complete (2026-08-05) |
+| ENC-02 | Phase 9: Encoding Design | Complete (2026-08-05) |
+| ENC-03 | Phase 9: Encoding Design | Complete (2026-08-05) |
+| ENC-04 | Phase 9: Encoding Design | Complete (2026-08-05) |
+| ENC-05 | Phase 9: Encoding Design | Complete (2026-08-05), pending final self-explanation checkpoint |
 
 **Coverage:**
 - v1 requirements: 11 total

@@ -1,10 +1,21 @@
 # IQP → Photonic (DV/Fock-Space) Encoding
 
-This document is a design/mapping deliverable, checkable in principle at small scale (n=2-3) — it is not a peer-review-grade hardness proof. The goal is a defensible, on-paper correspondence between IQP's structure and Perceval's discrete-variable (Fock-space) primitives, rigorous enough to state and check, not a claim of a new complexity-theoretic result.
+**What this is:** an on-paper mapping from IQP's structure (fixed-basis input, commuting Z-diagonal gates, Hadamard-basis conjugation) onto Perceval's discrete-variable (DV, Fock-space) primitives — phase shifters, beamsplitters, photon-number measurement — built and checked at small scale (n=2-3). This is Phase 9's deliverable in the `v2.0 IQP → Photonic Encoding` milestone, and the milestone's actual novel-contribution piece.
 
-**Contents:** ENC-01 (ingredient-level mapping) · ENC-02 (positioning against Douce et al.) · ENC-03 (basis correspondence) · ENC-04 (validation plan + toy check)
+**What this is not:** a peer-review-grade complexity-theoretic hardness proof. `.planning/REQUIREMENTS.md`'s Out-of-Scope table excludes a formal reduction proof from this milestone on purpose — this document is a design/mapping exercise, checkable in principle and actually checked at small scale, not a claim that IQP's photonic sampling hardness has been formally established. Every claim below is stated at the strength the underlying work actually supports; ENC-02 states this limitation again, explicitly, at the point where overclaiming risk is highest.
 
-<!-- ENC-02 inserted here by 09-04 -->
+**Prerequisite reading:**
+- [`docs/iqp-baseline.md`](iqp-baseline.md) — the qubit-side IQP recipe (`|+⟩` prep, `MultiRZ` diagonal layer, Hadamard-conjugated measurement) and the Van den Nest cosine-formula classical-training trick this document's ENC-04 section references.
+- [`docs/iqp-lit-scoping.md`](iqp-lit-scoping.md) — the full Douce et al. (2017) CV-IQP hardness summary this document's ENC-02 section positions against, plus the literature-search verdict that unblocked this phase.
+
+**How to read this document:** ENC-01 through ENC-04 build on each other in order — ENC-01 fixes the encoding scheme and derives the mapping, ENC-02 positions it against the one existing adjacent result in the literature, ENC-03 states how to translate between qubit bitstrings and photonic measurement outcomes, and ENC-04 actually runs a small-scale comparison to check the whole thing holds together. Each section's "Owner's Attempt" subsection records the actual attempt-first Q&A that shaped it, including wrong turns and corrections, per this project's standing practice of keeping negative/partial results visible rather than smoothing them over.
+
+**Contents:**
+- [ENC-01: Ingredient-Level Mapping](#enc-01-ingredient-level-mapping)
+- [ENC-02: Positioning Against Douce et al. (2017)](#enc-02-positioning-against-douce-et-al-2017)
+- [ENC-03: Basis Correspondence](#enc-03-basis-correspondence)
+- [ENC-04: Validation Plan and Toy-Scale Check](#enc-04-validation-plan-and-toy-scale-check)
+- [Conclusion and Open Questions](#conclusion-and-open-questions)
 
 ## ENC-01: Ingredient-Level Mapping
 
@@ -176,6 +187,35 @@ Per this repo's CLAUDE.md self-explanation checkpoints, the owner was asked to e
 - *"The operators on different qubits' modes automatically commute because the gates are 1-mode components that have no way to touch the other qubit's mode. If it is the same qubit, they commute because they are diagonal matrices in the same fixed basis."* — correct, and correctly distinguishes the two different reasons (disjoint tensor factors vs. diagonal-matrix multiplication) rather than conflating them.
 - *"The hadamard-conjugation makes the invisible phase convert into a visible difference, like `|+⟩` converting into `|0⟩` or `|1⟩`."* — the core mechanism (phase → visible population difference) is correct; the closing analogy overstates it into a deterministic collapse. The corrected version: the post-conjugation state is `α|H⟩+β|V⟩` with `|α|²=sin²θ`, `|β|²=cos²θ` — a superposition with unequal weights, not a collapse to a single definite state, except at the special angles `θ=0` or `θ=π`.
 
+## ENC-02: Positioning Against Douce et al. (2017)
+
+*Note on tone: per this project's standing constraint (a master's student's own work, using an LLM collaborator, ahead of a conversation with a Quandela researcher), this section deliberately hedges. Claims here are stated at the strength the actual work supports — no more.*
+
+### What Douce et al. established
+
+Douce, Markham, Kashefi, Diamanti, Coudreau, Milman, van Loock, Ferrini, "Continuous-Variable Instantaneous Quantum Computing is hard to sample," PRL 118, 070503 (2017), arXiv:1607.07605 (full summary: `docs/iqp-lit-scoping.md`) ports DV IQP's hardness argument into a **continuous-quadrature** substrate: each mode starts finitely squeezed in `p̂`, a middle layer of `q̂`-diagonal gates is applied (commuting for the same structural reason DV's Z-diagonal gates commute), and the readout is homodyne detection of `p̂`. Their Hadamard-basis-conjugation analogue — the Fourier operator `F̂ = e^{i(π/4)(p̂²+q̂²)}` — is realized not as a native gate but via a **measurement-based teleportation gadget**, post-selected on a specific homodyne outcome.
+
+### How this DV/Fock-space mapping differs
+
+This document works entirely in a different formalism: **discrete photon-number (Fock) states**, not continuous quadratures. Concretely, this mapping's primitives (`WP`, `PBS`, photon-counting) have no continuous-quadrature counterpart in Perceval at all — `09-RESEARCH.md` confirmed by direct inspection that Perceval ships zero CV primitives (no `squeez`, `homodyne`, `displac`, or `quadrature` matches anywhere in the installed package). This isn't a stylistic restatement of Douce et al. in different notation; it's a genuinely different toolkit answering a structurally analogous question.
+
+The clearest point of contrast: this mapping's single-qubit Hadamard-conjugation is a **native, deterministic unitary** — `HWP(π/8)`, a single wave plate, exact and verified directly against Perceval's installed matrix (Ingredient 1, above). Douce et al.'s conjugate-basis operator, by contrast, is not a native gate at all — it only exists as a post-selected measurement outcome of a teleportation circuit. Where their construction needs a whole probabilistic gadget to realize *any* Hadamard-like step, this construction gets the single-qubit case essentially for free.
+
+### Where the honest parallel exists
+
+That contrast doesn't extend to the multi-qubit case, and stating that plainly matters more than the flattering half of the comparison above. This mapping's weight-2 generator realization (Ingredient 2's `heralded_cz`-based construction) is itself **probabilistic and measurement-conditioned** — success only on a specific herald click pattern, exactly the same character ("this operation isn't a native unitary, it's realized via measurement and only works some of the time") that Douce et al.'s Fourier gadget has. So the honest position is not "this DV approach avoids Douce et al.'s measurement-based-gadget problem" — it's narrower: **this scheme's single-qubit conjugation avoids it, while its multi-qubit entangling structure inherits a version of the same character**, via a different specific mechanism (heralded linear-optical CZ vs. post-selected CV teleportation) and a different underlying reason (KLM-type no-go for deterministic linear-optical entangling gates vs. CV Fourier-gadget construction).
+
+### What is, and isn't, a contribution here
+
+This document is a **design/mapping exercise, checkable in principle at small scale** — not a peer-review-grade complexity-theoretic reduction proof, and not a claim that IQP's photonic hardness has been formally established. `.planning/REQUIREMENTS.md`'s Out-of-Scope table already excludes a formal reduction proof from this milestone; this section states that limitation directly rather than letting the document's technical register imply more rigor than it delivers. What ENC-01/ENC-03/ENC-04 actually establish: a concrete, equation-derived, Perceval-native mapping for the weight-1 case, empirically confirmed to reproduce the exact qubit-side distribution at `n=2-3` — a real, checked result, but a small-scale design validation, not a hardness proof.
+
+### Open questions and limitations, collected
+
+- **Generator-weight scope.** Weight-1 generators are fully derived, implemented, and empirically validated (ENC-01, ENC-04). Weight-2 generators are derived on paper only (Ingredient 2), realize a single fixed angle (`π/4`) rather than an arbitrary θ, and were never implemented or run — ENC-04's clean result says nothing about whether this piece behaves as claimed.
+- **Success-probability figure unverified.** The specific success probability of Perceval's `heralded_cz` (the Knill CZ construction, arXiv:quant-ph/0110144) was not independently recomputed from its source in this phase; commonly-cited literature figures (1/9, ~2/27) are for the same general gate family, not confirmed for this exact implementation (Plan 09-01).
+- **Toy-check scope.** ENC-04's `n=2,3` validation covers weight-1 generators only, under an idealized, lossless `SLOS` simulation — it says nothing about `n>3`, weight-2 generators, or behavior under realistic loss/noise.
+- **General-`n` scaling.** This mapping is stated for general `n` in principle, but only concretely instantiated and checked at `n=2-3`; nothing here demonstrates the construction scales practically to circuit sizes relevant to a hardness claim.
+
 ## ENC-03: Basis Correspondence
 
 ### Owner's Attempt
@@ -302,3 +342,17 @@ Final interpretation, in two parts:
 2. Initial second half — *"I believe this will extend to generators of higher weight, so we should be good"* — flagged as an unsupported extrapolation, corrected. Weight-1 (`WP(θ,0)`) and weight-2 (`heralded_cz`) aren't the same mechanism at different sizes: weight-1 is exact and deterministic for any angle; weight-2 is probabilistic (herald-conditioned) and, per ENC-01's own derivation, only realizes one fixed angle (`π/4`), not an arbitrary θ. A clean match on the deterministic, arbitrary-angle case provides no evidence about the probabilistic, fixed-angle case, because they don't share the property this test actually checked. Corrected final answer: *"Nothing, we'll have to see via heralding."* — the weight-2 mechanism remains genuinely untested; ENC-04's result is silent on it, not quietly reassuring about it.
 
 **Standing scope of what ENC-04 actually established:** the photonic mapping reproduces the exact qubit-side IQP distribution to floating-point precision, for weight-1-only generator sets, at `n=2` and `n=3`. It says nothing about weight-2 generators, `n>3`, or any property beyond what these two specific circuits and generator sets exercise.
+
+## Conclusion and Open Questions
+
+**What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
+
+**What it does not establish** — the full honesty ledger, collected in one place from across ENC-01 through ENC-04:
+
+- **Generator-weight scope.** Weight-1 generators: fully derived, implemented, and validated. Weight-2 generators (`exp(iθZ_iZ_j)`): derived on paper only, via a `PBS`-mediated conversion to dual rail's `heralded_cz`, realizing a single fixed angle (`π/4`) rather than an arbitrary θ — never implemented, never run. ENC-04's clean validation result says nothing about whether this piece behaves as claimed.
+- **`heralded_cz`'s success probability is unverified for this exact gate.** The Knill CZ construction it implements (arXiv:quant-ph/0110144) was confirmed real by reading Perceval's source directly, but its numeric success probability was not independently recomputed; commonly-cited literature figures (1/9, ~2/27) are for the same general gate family, not this specific implementation.
+- **Toy-check scope.** ENC-04 validated `n=2` and `n=3`, weight-1 generators only, under an idealized, lossless `SLOS` simulation. It says nothing about larger `n`, weight-2 generators, or behavior under realistic loss/noise.
+- **General-`n` scaling is stated, not demonstrated.** The mapping's ingredients are defined for general `n`, but only concretely instantiated and checked at `n=2-3`. Nothing here shows the construction scales practically to circuit sizes that would matter for an actual hardness claim.
+- **This is a design/mapping exercise, not a hardness proof.** Per `.planning/REQUIREMENTS.md`'s explicit Out-of-Scope exclusion, no formal complexity-theoretic reduction is claimed or attempted here.
+
+**What would need to happen next**, if this mapping were carried into a future implementation phase (already deferred per the `v2.0` roadmap's `IMPL-01/02`, `STUDY-01/02`, `WRITE-01`): implementing and empirically checking the weight-2 `heralded_cz` construction; extending the toy check past `n=3`; and deciding whether the fixed-`π/4`-angle limitation on weight-2 generators needs a different construction, or whether IQP generator sets restricted to that one angle (plus arbitrary weight-1 angles) are an acceptable scope for a first implementation.
