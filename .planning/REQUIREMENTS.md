@@ -70,7 +70,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENC-02 | Phase 9: Encoding Design | Complete (2026-08-05) |
 | ENC-03 | Phase 9: Encoding Design | Complete (2026-08-05) |
 | ENC-04 | Phase 9: Encoding Design | Complete (2026-08-05) |
-| ENC-05 | Phase 9: Encoding Design | Complete (2026-08-05), pending final self-explanation checkpoint |
+| ENC-05 | Phase 9: Encoding Design | Complete (2026-08-05) |
 
 **Coverage:**
 - v1 requirements: 11 total
