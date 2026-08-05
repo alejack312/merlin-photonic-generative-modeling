@@ -1,21 +1,12 @@
 # Stack Research
 
-**Domain:** Quantum computing research (photonic QML) — literature scoping + on-paper encoding design for an IQP-to-photonics mapping. No implementation phase in this milestone.
-**Researched:** 2026-07-30
-**Confidence:** MEDIUM-HIGH (Perceval API verified against installed version + current docs; literature findings verified across multiple independent papers, but literature scoping is never exhaustive by nature — treat the "no DV mapping found" conclusion as this milestone's own Phase 0 starting point, not a closed case)
+**Domain:** Photonic quantum computing implementation — weight-2 IQP generator via heralded CZ (Perceval/MerLin)
+**Researched:** 2026-08-05
+**Confidence:** HIGH (all claims verified by reading installed `perceval-quandela==1.2.4` source directly and by running it against the actual gate instance — not recalled from training data)
 
 ## Headline finding (answers the downstream consumer's key question)
 
-**No existing published construction maps IQP circuits onto discrete-variable (Fock-basis) linear optics** — the physical model MerLin/Perceval actually uses (phase shifters, beamsplitters, photon-number-resolving detection). This milestone's "invent, don't just reproduce" framing in `Post_Sept1_IQP_Photonic_Plan.md` still holds.
-
-However, **partial, directly relevant prior art exists one layer over, in continuous-variable (CV) optics**:
-
-- **Douce, Markham, Kashefi, Diamanti, Coudreau, Milman, van Loock, Ferrini, "Continuous-Variable Instantaneous Quantum Computing is hard to sample,"** *PRL* 118, 070503 (2017), [arXiv:1607.07605](https://arxiv.org/abs/1607.07605). This is a real IQP→photonics reduction — it defines **CV-IQP**, an IQP analogue built from squeezed states and finitely-resolved homodyne detection, and proves a hardness-of-sampling result that survives the CV translation (with squeezing scaling logarithmically in circuit size, i.e. polynomial energy cost — the CV analogue of the boson-sampling noise/loss degradation problem this milestone's Phase 3 asks about).
-- This is **not directly portable** to Perceval/MerLin: it's Gaussian-state/homodyne CV optics, not Fock-state/photon-counting DV optics. Perceval and MerLin are DV. Treat Douce et al. as the closest known analogue and a template for *how to structure a hardness argument under photonic translation*, not as a construction to reproduce as-is.
-- **Adjacent but non-equivalent:** Park & Oh, "Matrix product state approach to lossy boson sampling and noisy IQP sampling" ([arXiv:2510.24137](https://arxiv.org/abs/2510.24137), Oct 2025, rev. Jul 2026) analyzes IQP sampling and boson sampling **as parallel case studies under one MPS simulation toolkit**, not as physically equivalent systems. Useful for understanding how the two hardness stories are compared in current literature, not a mapping.
-- **Adjacent, worth reading for methodology (not mapping):** Gottlieb, Faraji, Mezher, Ventura, Mansfield, Salavrakos, "Efficient training of photonic quantum generative models" ([arXiv:2603.08793](https://arxiv.org/abs/2603.08793), Mar 2026, rev. Jul 2026) — appears to be Quandela-affiliated (author list matches Quandela researchers), studies MMD-trained photon-native generative models where deployment = boson sampling. This is the closest thing to a "sibling" of the owner's own v1.0 MerLin project and may cite/be cited by whatever the owner finds on trainability of photonic ansätze — worth a citation-chase step in Phase 0, separate from the IQP question specifically.
-
-**Practical consequence for the plan:** Phase 0 (literature scoping) is not a quick confirm-and-move-on — it should explicitly (a) read Douce et al. in full to extract which structural ideas transfer to DV Fock-basis (e.g., how they define the analogue of "diagonal commuting gates" and "Hadamard-basis conjugation" for continuous quadratures — the owner's Phase 1 will need a DV-native version of the same two ingredients), and (b) forward/backward citation-chase Douce et al. (2017, well-cited) for any follow-up work that specifically targets DV/Fock optics, since a 2017 paper is old enough that someone may have since asked exactly this milestone's question. Do this chase via Semantic Scholar's citation graph (see Development Tools below) before concluding the DV gap is genuinely open.
+The weight-2 construction already derived on paper (PBS → `heralded_cz` → PBS, realizing `exp(iπ/4·Z_i·Z_j)` via `CZ = exp(iπ/4·(I − Z_i − Z_j + Z_i·Z_j))`) needs **no new library** — `perceval.components.core_catalog.heralded_cz.HeraldedCzItem` is a complete, ready-to-instantiate Knill CZ gate already shipped in the installed Perceval version. It is reachable either via `pcvl.catalog['heralded cz']` or the direct import. Verified empirically (source read + live run) that its herald success probability is a uniform **2/27 ≈ 0.074074** across all 4 computational-basis inputs on this exact installed gate instance — this is a measured number for the gate as it ships, not a cited literature figure.
 
 ## Recommended Stack
 
@@ -23,83 +14,85 @@ However, **partial, directly relevant prior art exists one layer over, in contin
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| perceval-quandela | 1.2.4 (installed; current as of 2026-07-02 release) | Low-level photonic circuit construction (`Circuit`, `comp.PS`, `comp.BS`, `BasicState`, `Processor`, `Analyzer`, `Sampler`) | Already installed and pinned in `requirements.txt`; this is the actual substrate MerLin sits on, and Phase 1's encoding design must be expressible in Perceval's primitives to be implementable in a later milestone. No version bump needed. |
-| merlinquantum | 0.4.0 (installed) | Photonic QML layer wrapper (already used in v1.0 via `QuantumLayer.simple()`) | Not directly needed for this milestone's two tasks (scoping + on-paper design don't require running code), but keep installed/pinned since Phase 2 (deferred) will need it and version drift between now and then should be tracked. |
-| Python | 3.10–3.12 (repo venv) | Runtime | Matches existing repo constraint; Perceval 1.2.4 supports up to 3.14 so no compatibility pressure to upgrade. |
+| perceval-quandela | 1.2.4 (installed, unchanged) | `Circuit`, `Experiment`, `Processor`, catalog gates | Already the project's substrate; `heralded_cz` ships in this exact installed version — verified by reading `venv/Lib/site-packages/perceval/components/core_catalog/heralded_cz.py` directly, not assumed from docs/training data. |
+| `perceval.components.core_catalog.HeraldedCzItem` (via `pcvl.catalog['heralded cz']`) | shipped with 1.2.4 | The Knill CZ gate itself: 6-mode circuit, 2 dual-rail qubit ports + 2 herald ancilla modes | This is the literal object the paper design already named (`heralded_cz`, Knill CZ, arXiv:quant-ph/0110144 — confirmed as the `article_ref` in the source file). Reimplementing the beamsplitter angles by hand would forgo Quandela's already-verified construction and its correct convention-adjusted phase placement (see "What NOT to Use"). |
+| `pcvl.Processor("SLOS", ...)` + `Processor.probs()` with `compute_physical_logical_perf(True)` | installed | Run the gate, get both the output distribution and the herald/post-selection success rate in one call | `logical_perf` in the returned dict *is* the empirical success probability the milestone wants measured for this specific gate instance — no separate probability-computation code needed. Confirmed by source read of `perceval/runtime/processor.py::probs()` and `perceval/simulators/simulator.py`, and by a live run (see "Verified Behavior" below). |
 
-### Supporting Libraries (for the literature-scoping task specifically)
+### Supporting APIs (for integration with `iqp_photonic_encoding.py`)
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `arxiv` (PyPI: `arxiv`, by lukasschwab) | latest (2.x) | Programmatic arXiv search/metadata pull | If the owner wants a reusable, scriptable search across many query variants (e.g. sweeping "IQP linear optics," "IQP boson sampling," "commuting diagonal gates photonic") rather than one-off web searches. Optional — see "What NOT to Use" below. |
-| Semantic Scholar API (no library needed — plain `requests` against `api.semanticscholar.org/graph/v1`) | current, free tier (no key required; key optional for higher rate limit) | Citation-graph traversal: find what cites/is-cited-by Douce et al. 2017 and Bremner-Montanaro-Shepherd's original IQP hardness paper | This is the single most valuable literature tool for this milestone's actual open question ("has anyone extended Douce et al. to DV/Fock optics since 2017?") — citation-chasing beats keyword search for finding follow-on work to a specific known paper. |
+| API | Purpose | When to Use |
+|-----|---------|-------------|
+| `Experiment.add_herald(mode, expected, name=None, location=PortLocation.IN_OUT)` | Declares a mode as a herald requiring an exact photon count (0 or 1) on input and/or output | Only needed if hand-building the CZ circuit from `item.build_circuit()` (bare `Circuit`, no ports/heralds). Not needed if using `item.build_experiment()` — heralds are already declared. |
+| `Processor.add(mode_mapping, component)` | Composes a sub-`Processor`/`Circuit`/component into a larger `Processor` at a given mode offset | **Verified empirically**: passing a `Processor` built from `item.build_experiment()` as `component` correctly carries its 2 heralds through into the outer processor's herald set (auto-appended past the outer processor's declared mode-of-interest count — e.g. a 6-mode outer processor got heralds re-indexed to modes 6,7). This is the clean composition pattern — see "Integration Pattern" below. |
+| `perceval.simulators.Simulator.prob_amplitude(input_state, output_state)` | Returns the complex amplitude (not just `|amplitude|²`) for a specific input→output Fock-state pair | `Processor.probs()` only returns probabilities (phase-blind) — verifying the CZ's signature `-1` phase kickback on `|1,1⟩` (vs. `+1` on `|00⟩,|01⟩,|10⟩`) requires reading the amplitude directly via `Simulator`, built from `expe.unitary_circuit()` (or the merged full circuit), not via `Processor.probs()`. |
+| `pcvl.BasicState([...])` | Fock-state input construction | Same object the module already uses; dual-rail qubit state `|0⟩ = [1,0]`, `|1⟩ = [0,1]` per mode pair — matches `HeraldedCzItem`'s port convention (`ctrl` = modes 0,1; `data` = modes 2,3 within its own local numbering). |
 
-### Development Tools
+## Verified Behavior (`heralded_cz`, read from source + live run against installed 1.2.4)
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| Web search (Claude/browser) + arXiv abstract pages | Ad hoc literature scoping | Sufficient for the breadth-first part of Phase 0 (this research already did a first pass — see findings above). Don't build tooling around this; a milestone this narrowly scoped (2 tasks, no code) doesn't justify a search pipeline. |
-| Semantic Scholar web UI (semanticscholar.org) citation graph view | Manual citation-chase on Douce et al. 2017 and Bremner-Montanaro-Shepherd | Faster than the API for a one-time, small citation walk (dozens of papers, not hundreds) — use the API only if the citation list turns out large enough to need filtering/scripting. |
-| Perceval `Circuit`, `comp.PS`/`comp.BS`, `BasicState`, `Processor`, `Analyzer`, `Sampler` classes (already installed) | Reference for Phase 1's on-paper design — even though Phase 1 doesn't write code, the encoding must be describable in terms these classes actually support | Confirmed current: `perceval.Circuit(m)` for an m-mode circuit, `c.add((i,j), comp.BS())` / `c.add(i, comp.PS(Parameter(...)))` for manual placement, `pcvl.BasicState('|0,2,0,1>')` or `BasicState([0,2,0,1])` for Fock-state inputs, `Processor("SLOS", circuit).with_input(...)` to bind input+circuit, `Analyzer` for full output-distribution tables, `Sampler` for finite-shot sampling. Source: [Perceval v0.13 circuits docs](https://perceval.quandela.net/docs/v0.13/circuits.html), [Perceval v0.13 tutorial](https://perceval.quandela.net/docs/v0.13/notebooks/Tutorial.html). |
+**Circuit shape** (from `heralded_cz.py`, `HeraldedCzItem.build_experiment`):
+- 6 total modes. `build_circuit()` returns a bare `Circuit(6)`; `build_experiment()` wraps it and adds:
+  - `Port(Encoding.DUAL_RAIL, 'ctrl')` at mode 0 → occupies modes **0,1**
+  - `Port(Encoding.DUAL_RAIL, 'data')` at mode 2 → occupies modes **2,3**
+  - `add_herald(4, 1)` and `add_herald(5, 1)` → modes **4,5**, each requiring **exactly 1 photon on both input and output** for the gate to have "worked"
+- Confirmed via `HeraldedCzItem().build_experiment()`: `.heralds == {4: 1, 5: 1}`, `.in_heralds == {4: 1, 5: 1}`, `.m == 4` (modes of interest, heralds excluded), `.circuit_size == 6`.
 
-## Installation
+**Success signal (concretely, how to read it):**
+- On the *raw* 6-mode circuit (no `Processor`/heralds abstraction), "success" = exactly 1 photon detected on mode 4 AND exactly 1 photon detected on mode 5 in the output Fock state. Any other photon count on those two modes (0, 2, bunched, etc.) is a **failure** branch — the gate did not implement CZ on that shot/term.
+- Using `Processor` (recommended — do this, not manual post-selection): declaring the heralds via `add_herald`/`build_experiment()` and calling `.probs()` **automatically discards the failure branches** from the returned `results` distribution (`keep_heralds(False)` is set internally) and reports the aggregate success weight in `global_perf`/`logical_perf`. You never have to manually filter mode-4/mode-5 photon counts yourself.
+- `physical_perf` vs `logical_perf`: for a noiseless (perfect-source) simulation as used here, `physical_perf = 1.0` always; `logical_perf` is the actual herald/post-selection acceptance probability — this is the number to report as "the empirically measured success probability for this gate instance."
 
-No new installs required for this milestone's two tasks (literature scoping, on-paper design) — both are non-code deliverables.
+**Measured success probability** (live run, `Processor.probs()` with `compute_physical_logical_perf(True)`, all 4 computational-basis dual-rail inputs):
 
-```bash
-# Already present in requirements.txt — nothing to add for Phase 0/1 of this milestone.
-# Optional, only if the owner wants scriptable arXiv search instead of ad hoc web search:
-pip install arxiv
-```
+| ctrl,data input | output (prob 1 conditioned on success) | `logical_perf` |
+|---|---|---|
+| \|0⟩\|0⟩ → `[1,0,1,0]` | `[1,0,1,0]` | 0.07407407... |
+| \|0⟩\|1⟩ → `[1,0,0,1]` | `[1,0,0,1]` | 0.07407407... |
+| \|1⟩\|0⟩ → `[0,1,1,0]` | `[0,1,1,0]` | 0.07407407... |
+| \|1⟩\|1⟩ → `[0,1,0,1]` | `[0,1,0,1]` | 0.07407407... |
 
-Do not add anything to `requirements.txt` for this milestone unless Phase 2 (deferred, minimal implementation) actually starts — adding deps now for work that may not happen creates version-drift risk for no benefit.
+**= 2/27 ≈ 0.074074, uniform across all 4 inputs.** This is the milestone's own measured number, not a cited figure — worth stating explicitly in the eventual write-up as "measured for this installed gate instance," since the general Knill-CZ family has multiple published variants (1/9, 2/27, etc. depending on ancilla count and specific beamsplitter angles) and citing a literature number without running it would violate this milestone's stated scope ("not just cite literature figures").
 
-## Alternatives Considered
+**Phase behavior**: `Processor.probs()` cannot show the `-1` phase on `|1,1⟩` because probabilities are phase-blind (each output state above has probability 1, both for the identity-passing inputs and for `|1,1⟩`). To confirm the CZ sign, use `Simulator.prob_amplitude()` on the *un-heralded* full circuit and manually restrict to the terms where modes 4,5 both carry exactly 1 photon — e.g. compare `prob_amplitude(BasicState([0,1,0,1,1,1]), BasicState([0,1,0,1,1,1]))` (the `|1,1⟩` + herald-photon input/output term) against `prob_amplitude` for `|0,1,1,0,1,1⟩` etc., and check the relative sign flips between the `|1,1⟩` term and the three others. This has not yet been run — flagged as the next concrete implementation step, not a research gap.
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|--------------------------|
-| Ad hoc web search + direct arXiv abstract fetch for Phase 0 | `arxiv` Python library scripted search | If the owner wants a persistent, rerunnable search log (e.g. to show search queries/results as part of the milestone's paper trail for defensibility to Vincent) — a script is more auditable than ad hoc browsing. Not necessary for correctness, only for documentation rigor. |
-| Semantic Scholar for citation-chasing | Google Scholar (manual, no API) | Google Scholar has broader coverage and is fine for a single manual check, but has no stable free API and aggressively rate-limits scraping — use it as a spot-check, not a primary tool. |
-| Perceval low-level API (`Circuit`/`comp.PS`/`comp.BS`) for Phase 1's design vocabulary | Strawberry Fields / Xanadu's photonic SDK | Strawberry Fields is CV-native (squeezed states, homodyne) and would actually be the *better* match if the owner decides to pursue the CV-IQP (Douce et al.) direction instead of a DV/Fock mapping — flag this as a live fork-in-the-road for Phase 1, not a settled choice. See "Stack Patterns by Variant" below. |
-| Qiskit's `qiskit.circuit.library.IQP` class as the qubit-side reference implementation | PennyLane's IQP embedding utilities, or IQPopt (JAX-based, arXiv:2501.04776) | The owner already has Qiskit/PennyLane-adjacent fluency per project context. Qiskit ships a canonical `IQP` circuit class (see [IBM Quantum docs](https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.IQP)) that's a good, minimal, well-documented reference for "what does textbook IQP actually look like as a circuit" when writing the Phase 1 mapping spec. IQPopt is a JAX package purpose-built for *training/optimizing* large IQP circuits at scale (barren-plateau-style studies) — more relevant to the deferred Phase 3 (trainability study) than to this milestone's scoping/design tasks. Don't install either now; both are reference reading, not runtime dependencies for Phase 0/1. |
+## Integration Pattern (for `iqp_photonic_encoding.py`)
+
+The existing module encodes each qubit as one polarization mode + one vacuum-partner mode (2 modes/qubit), converting polarization ↔ dual-rail only at final readout via `build_readout_circuit`'s per-qubit `PBS()`. The weight-2 construction requires the **same PBS conversion done mid-circuit**, only on the two qubits participating in the `Z_i·Z_j` term, sandwiching the `heralded_cz` sub-circuit:
+
+1. `PBS()` on qubit `i`'s polarization mode and qubit `j`'s polarization mode — same primitive `build_readout_circuit` already uses, just applied to 2 qubits instead of all `n`, and mid-pipeline instead of at the end. This converts each qubit's single polarization mode into a genuine 2-mode dual-rail pair, matching `heralded_cz`'s `ctrl`/`data` port convention.
+2. Compose `pcvl.Processor("SLOS", pcvl.catalog['heralded cz'].build_experiment())` into the larger multi-qubit processor via `.add(mode_mapping, sub_proc)` at the mode offset where qubit `i`'s and `j`'s (now-dual-rail) 4 modes live. **Verified empirically**: this correctly propagates the 2 new herald modes into the outer processor's herald set (they get appended after the outer processor's existing modes-of-interest, not overwritten) — no manual `add_herald` bookkeeping required on the outer processor.
+3. `PBS()` again (PBS is its own inverse for this purpose — same component, applied a second time) to convert the two qubits back from dual-rail to single polarization mode, so any subsequent weight-1 diagonal-layer gates or the final conjugation/readout stage can continue operating in the module's existing 2-modes/qubit polarization convention.
+4. The 2 herald ancilla modes are new modes at the *end* of the full circuit's mode numbering (not interleaved) — plan the full-circuit mode budget as `2n` (existing per-qubit polarization+vacuum layout) `+ 2` per weight-2 term applied (each `heralded_cz` insertion adds exactly 2 new herald modes).
+
+This composition (`Processor.add()` with a sub-`Processor`) is the correct level to work at — do not try to manually merge `heralded_cz`'s bare `Circuit(6)` into a hand-built bigger `Circuit` and then bolt heralds on separately; `build_experiment()` + `Processor.add()` keeps port/herald metadata attached and was the path actually verified to work.
 
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
 |-------|-----|--------------|
-| Strawberry Fields as a *runtime* dependency for this milestone | This milestone has no code deliverable — adding a second photonic framework (on top of Perceval/MerLin) before even knowing whether the target is DV or CV is premature. It also duplicates Perceval's role and would fragment the eventual Phase 2 implementation across two SDKs. | Keep Strawberry Fields as *reading material only* (its docs are a clean reference for CV gate vocabulary) until Phase 1 concludes whether the mapping is DV or CV. |
-| A dedicated literature-review tool/framework (e.g. LitLLM, reference managers, systematic-review software) | This is a scoped, time-boxed literature check per the plan doc ("Time-box this — if nothing viable turns up in a defined window, this track isn't ready"), not a systematic review. Standing up review tooling is scope creep for a milestone whose own finish criteria are modest. | Web search + a handful of targeted arXiv/Semantic Scholar lookups, written up directly in the milestone's Phase 0 findings doc. |
-| Treating Douce et al. (2017) as "the answer" and skipping straight to reproduce-and-extend | It's CV, not DV — MerLin/Perceval are DV/Fock-basis. Conflating the two physical models would produce a Phase 1 design that can't actually be built in Perceval later, which is exactly the "invent nothing, then discover it doesn't fit the toolchain" failure mode this research is meant to prevent. | Use Douce et al. as a structural template (how they defined CV analogues of "commuting diagonal gates" and "basis-conjugation") and translate that structure into DV/Fock primitives explicitly, as its own Phase 1 step — don't assume translation is free. |
-| Bumping `perceval-quandela`/`merlinquantum`/`torch` versions as part of this milestone | No code runs in Phase 0/1; version bumps belong with the actual implementation milestone (Phase 2, deferred) so they can be tested against real usage, not speculatively bumped now. | Leave `requirements.txt` untouched until Phase 2 begins; re-check current versions at that point since more releases will have shipped by then. |
-
-## Stack Patterns by Variant
-
-**If Phase 1 concludes the encoding should be DV/Fock-basis (the "native MerLin" path):**
-- Design vocabulary: Perceval's `Circuit`, `comp.PS` (phase shifter), `comp.BS` (beamsplitter), `BasicState` (Fock input), `Analyzer`/`Sampler` (photon-number measurement).
-- Because no published DV mapping exists (per the headline finding), this is genuinely the milestone's "actual novel contribution," as the plan doc already anticipates — budget Phase 1 accordingly, don't expect to find shortcuts mid-design.
-
-**If Phase 1 concludes the encoding should follow the CV-IQP precedent (Douce et al.) instead:**
-- This would be a *scope change* from the plan doc's implicit assumption (MerLin/Perceval, which is DV) — flag it explicitly rather than silently pivoting, since it would mean either (a) reproduce-and-extend Douce et al. directly in a CV framework (Strawberry Fields, not Perceval), or (b) attempt a DV/Fock discretization of the CV-IQP construction, which is itself a novel step needing its own justification.
-- Either sub-path is a bigger scope decision than this STACK.md should make — surface it as an explicit fork for the roadmap/requirements step, not something to resolve here.
+| `CatalogItem.build_processor()` | **Deprecated** as of Perceval 1.2.0 (confirmed: `@deprecated(reason="Use build_experiment instead", version="1.2.0")` decorator directly on the method in `component_catalog.py`) — will emit a deprecation warning and may be removed in a future release. | `item.build_experiment()` wrapped in `pcvl.Processor(backend, experiment)` — functionally identical, not deprecated. |
+| Hand-deriving/re-decomposing the Knill CZ's beamsplitter network from the arXiv:quant-ph/0110144 paper | `HeraldedCzItem` already implements this exact reference (confirmed `article_ref` field) with correctly convention-adjusted phase placement — the source file's own comment notes a deliberate deviation from the paper's phase-shifter placement (mode 3 vs mode 1) "due to a different convention for the beamsplitters." Reimplementing risks silently reintroducing a sign/convention bug that Quandela already resolved. | `pcvl.catalog['heralded cz']` as-is. |
+| `perceval.components.core_catalog.PostProcessedCzItem` (also present in the catalog, confirmed in `core_catalog/__init__.py`) | This is a *different* gate family — post-selection on the computational-subspace output pattern itself (no ancilla herald modes, no independent success/failure signal to measure), not the ancilla-heralded Knill construction the paper design already committed to. Swapping to it mid-implementation would silently change what's being measured and contradict the already-derived operator identity in the docs. | Stay with `HeraldedCzItem` — it's the gate the paper design already named. |
+| Feeding a *parameterized* angle into `heralded_cz` expecting a continuously-tunable `Z_i·Z_j` phase | `HeraldedCzItem.build_circuit(**kwargs)` **ignores all kwargs** — `theta1`/`theta2` are hardcoded class constants (`math.acos(...)`), confirmed by reading the source; there is no angle parameter exposed. | This matches the paper design's own stated limitation (fixed π/4 angle only, via the operator identity, with any other Z-phase correction applied separately through the already-implemented `WP(theta,0)` weight-1 gate). Don't spend implementation time looking for a parameterized variant — none exists in this catalog item. |
 
 ## Version Compatibility
 
 | Package A | Compatible With | Notes |
 |-----------|------------------|-------|
-| perceval-quandela==1.2.4 | Python 3.10–3.14 | Repo venv (3.10–3.12) is well within range; no compatibility risk for this milestone's scoping/design work (which doesn't even require running Perceval, only knowing its primitives). |
-| merlinquantum==0.4.0 | torch<2.13 (repo constraint), perceval-quandela>=1.2.1 | Installed torch is 2.12.1 — inside the `<2.13` ceiling. Not exercised in this milestone but noted for continuity into the deferred Phase 2. |
+| perceval-quandela==1.2.4 | Python 3.10–3.14 (repo venv 3.12) | No change from v2.0 milestone research — same installed version covers this milestone's needs; `heralded_cz` is not a new-in-1.2.4 addition requiring a bump, just previously unused. |
+| `pcvl.catalog['heralded cz']` | Same package, no separate install | Confirmed live: `pcvl.catalog` is a `Catalog` instance populated at import time from `core_catalog.catalog_items`; `'heralded cz' in pcvl.catalog` returns `True` with no extra setup. |
 
 ## Sources
 
-- [arXiv:1607.07605](https://arxiv.org/abs/1607.07605) — Douce, Markham, Kashefi et al., "Continuous-Variable Instantaneous Quantum Computing is hard to sample," PRL 118, 070503 (2017). HIGH confidence (peer-reviewed, WebFetch-verified abstract).
-- [arXiv:2510.24137](https://arxiv.org/abs/2510.24137) — Park & Oh, "Matrix product state approach to lossy boson sampling and noisy IQP sampling" (Oct 2025, rev. Jul 2026). MEDIUM confidence (WebFetch-verified abstract; preprint, not yet confirmed peer-reviewed venue).
-- [arXiv:2603.08793](https://arxiv.org/abs/2603.08793) — Gottlieb, Faraji, Mezher, Ventura, Mansfield, Salavrakos, "Efficient training of photonic quantum generative models" (Mar 2026, rev. Jul 2026). MEDIUM confidence (metadata verified; full text not fetched — page limit hit).
-- [Perceval v0.13 circuits documentation](https://perceval.quandela.net/docs/v0.13/circuits.html) and [tutorial](https://perceval.quandela.net/docs/v0.13/notebooks/Tutorial.html) — HIGH confidence, cross-checked against locally installed `perceval-quandela==1.2.4` in the repo venv.
-- [PyPI: perceval-quandela](https://pypi.org/project/perceval-quandela/) — HIGH confidence, confirms 1.2.4 released 2026-07-02, i.e. currently the latest release (repo is not on a stale version).
-- [IBM Quantum docs: qiskit.circuit.library.IQP](https://docs.quantum.ibm.com/api/qiskit/qiskit.circuit.library.IQP) — HIGH confidence, official docs, useful as the owner's qubit-side reference implementation.
-- [arXiv:2501.04776](https://arxiv.org/abs/2501.04776) — "IQPopt: Fast optimization of instantaneous quantum polynomial circuits in JAX." MEDIUM confidence (abstract-level only); relevant to deferred Phase 3, not Phase 0/1.
-- Local repo files verified directly: `requirements.txt`, installed `venv/Lib/site-packages` (perceval-quandela 1.2.4, merlinquantum 0.4.0, torch 2.12.1) — HIGH confidence, ground truth.
+- `venv/Lib/site-packages/perceval/components/core_catalog/heralded_cz.py` — HIGH confidence, read directly (ground truth for circuit construction, herald modes, fixed angles).
+- `venv/Lib/site-packages/perceval/components/core_catalog/__init__.py` — HIGH confidence, confirms `HeraldedCzItem` and `PostProcessedCzItem` are separate catalog entries.
+- `venv/Lib/site-packages/perceval/components/component_catalog.py` — HIGH confidence, confirms `build_processor()` deprecation and `CatalogItem` interface.
+- `venv/Lib/site-packages/perceval/components/port.py` — HIGH confidence, confirms `Port`/`Herald`/`Encoding.DUAL_RAIL` semantics.
+- `venv/Lib/site-packages/perceval/components/experiment.py` — HIGH confidence, confirms `add_herald()` signature and `m`/`m_in`/`circuit_size` semantics.
+- `venv/Lib/site-packages/perceval/runtime/processor.py` and `runtime/abstract_processor.py` — HIGH confidence, confirms `Processor.add()`, `Processor.probs()`, `compute_physical_logical_perf()`.
+- `venv/Lib/site-packages/perceval/simulators/simulator.py` and `simulator_interface.py` — HIGH confidence, confirms `logical_perf`/`physical_perf` semantics (post-selection performance vs. photon-detection-filter performance) and `prob_amplitude()`.
+- Live execution against installed `perceval-quandela==1.2.4` in `./venv` — HIGH confidence, ground truth: measured 2/27 ≈ 0.074074 success probability, confirmed `Processor.add()` correctly propagates sub-processor heralds into a composed outer processor.
+- Existing project module `iqp_photonic_encoding.py` — HIGH confidence, read directly to determine integration surface (polarization/dual-rail conventions, existing PBS usage pattern).
 
 ---
-*Stack research for: IQP → photonic circuit encoding (literature scoping + on-paper design milestone)*
-*Researched: 2026-07-30*
+*Stack research for: weight-2 IQP generator implementation via Perceval's `heralded_cz`*
+*Researched: 2026-08-05*

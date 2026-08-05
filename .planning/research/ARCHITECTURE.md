@@ -1,251 +1,107 @@
-# Architecture Research
+# Architecture Research: Weight-2 IQP Generator Integration
 
-**Domain:** Photonic quantum computing (Perceval/MerLin) — module/code-boundary planning for an IQP-to-photonics encoding-design milestone. No implementation in this milestone; this documents where the *eventual* code will live and which API layer it will use, so Phase 1's on-paper design is written in directly-transcribable terms.
-**Researched:** 2026-07-30
-**Confidence:** HIGH (all claims below verified against the actually-installed packages in this repo's venv — `perceval-quandela==1.2.4`, `merlinquantum==0.4.0` — by reading source and running a live Perceval circuit/Processor/Analyzer round-trip, not from training-data recall or docs alone)
+**Domain:** Photonic QML (Perceval), extending an existing tested weight-1 module with a `heralded_cz`-based weight-2 generator
+**Researched:** 2026-08-05
+**Confidence:** HIGH — all claims below verified by direct inspection of the installed `perceval-quandela` source and by running the actual catalog primitive (`perceval.components.catalog['heralded cz']`) in this repo's `venv`, not assumed from docs or training data.
 
-## Answering the four research questions directly
+**Note on this file:** supersedes the previous (2026-07-30) version of this file, which was written before v2.0's implementation existed and proposed a `iqp_photonic/` package structure that was never adopted — the actual v2.0 deliverable is a single flat module, `iqp_photonic_encoding.py`, plus `tests/test_iqp_photonic_encoding.py` and `docs/iqp-photonic-encoding.md`. This file is scoped narrowly to the v2.1 weight-2 question and is grounded in that actual codebase, read directly.
 
-1. **New work should live in a new top-level module, sibling to `generator/`, not nested inside it.** Recommend `iqp_photonic/` at repo root. Reasoning in "Recommended Project Structure" below.
-2. **Confirmed: MerLin wraps Perceval, at a specific and narrow point.** MerLin ships its own circuit-description DSL (`CircuitBuilder` + a `merlin.core.circuit.Circuit` metadata container of `Rotation`/`BeamSplitter`/`GenericInterferometer` objects) that *compiles down to* a real `perceval.Circuit` via `CircuitBuilder.to_pcvl_circuit()`. Separately, `merlin.QuantumLayer.__init__` accepts a raw `pcvl.Circuit` directly (`circuit=` kwarg) as a first-class, fully-supported alternative to the builder — this is the manual-construction code path, not an unofficial escape hatch. See "Perceval vs. MerLin API Boundary" below for the concrete mechanics.
-3. **No built-in Perceval object represents a qubit-gate-model circuit for direct structural comparison.** Perceval's only qubit-circuit bridge (`QiskitConverter`, in the separate `perceval-interop` package, not installed) converts a qubit circuit into a *generic* dual-rail-encoded photonic `Processor` with ancilla photons for CNOTs — a different, heavier embedding than the bespoke IQP-specific structural mapping this milestone is designing, and not what Phase 2 needs. The idiomatic approach for Phase 2's "reduces to known/classically-checkable behavior" check is **two independent classical computations diffed against each other**, not a circuit conversion. Detailed in "Anti-Patterns" and "Integration Points" below.
-4. **No new dependencies needed for this milestone (Phase 0/1, docs only).** For the deferred Phase 2 implementation, raw Perceval circuit construction (`Circuit`, `PS`, `BS`, `BasicState`, `Processor`, `Analyzer`) needs nothing beyond what's already installed — verified by running a live example (below). The qubit-IQP reference side needs no new dependency either; IQP's own algebraic structure (`H^⊗n · D · H^⊗n`) is directly computable with plain NumPy at the small system sizes a brute-force sanity check requires. Do not add Qiskit or `perceval-interop` speculatively — see "Anti-Patterns."
+## Summary Answer
 
-## Standard Architecture
+`heralded_cz` needs 2 extra internal modes beyond the 4 dual-rail modes it acts on, but Perceval's `Processor` abstraction manages those extra modes automatically — they never enter the module's existing 2n-mode logical port numbering. The existing 2n-mode-per-qubit layout is already dual-rail-shaped (`build_readout_circuit`'s `PBS()` on ports `(2k, 2k+1)` is exactly a polarization→dual-rail conversion), so no renumbering of qubit ports is needed. The real architectural fork is different: **weight-1's pipeline is `Circuit`-only (a single unitary matrix), but any circuit containing a heralded gate cannot be represented as a plain `pcvl.Circuit` — it must be composed as a `pcvl.Processor`.** That forces a second, parallel top-level pipeline function (`Processor`-composed) for weight-2, while every existing weight-1 *builder* function (`build_state_prep_circuit`, `build_diagonal_layer_circuit`, `build_conjugation_circuit`, `build_readout_circuit`) is reused unmodified — they're all valid inputs to `Processor.add()`.
 
-### System Overview (current repo, both milestones)
+## Verified Facts About `heralded_cz`
 
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         Repo root (Python)                            │
-├─────────────────────────────┬──────────────────────────────────────┤
-│   generator/  (v1.0, shipped)│   iqp_photonic/  (v2.0, this milestone)│
-│   MMD-trained photonic       │   IQP→photonic encoding research —    │
-│   generative model on        │   literature scoping (Phase 0/8) +    │
-│   QuantumLayer.simple()      │   on-paper design (Phase 1/9) now;    │
-│                               │   minimal implementation (Phase 2)    │
-│                               │   and trainability study (Phase 3)    │
-│                               │   deferred to a future milestone      │
-├─────────────────────────────┴──────────────────────────────────────┤
-│                    merlin (merlinquantum==0.4.0)                     │
-│  ┌────────────────────┐   ┌──────────────────────────────────────┐  │
-│  │ CircuitBuilder DSL   │   │ QuantumLayer(circuit=<pcvl.Circuit>) │  │
-│  │ (.simple(), declar-  │──▶│ raw-circuit path — v2.0's future      │  │
-│  │ ative add_rotations/ │   │ code path once Phase 2 starts         │  │
-│  │ add_superpositions)  │   │                                        │  │
-│  └──────────┬───────────┘   └───────────────┬──────────────────────┘  │
-│             │ .to_pcvl_circuit()             │ both converge here      │
-│             ▼                                ▼                        │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │           merlin/pcvl_pytorch/ — SLOS/TorchScript bridge        │  │
-│  │  Converts a pcvl.Circuit's unitary + Fock input/output basis    │  │
-│  │  into differentiable permanent-based probability tensors.       │  │
-│  │  This is the actual simulation engine; both circuit sources     │  │
-│  │  (builder-compiled or hand-built) go through it identically.    │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-├───────────────────────────────────────────────────────────────────┤
-│                  perceval (perceval-quandela==1.2.4)                 │
-│  Circuit, PS, BS, BasicState, Processor, Simulator, Analyzer,        │
-│  Sampler — the actual linear-optical primitives and exact/           │
-│  finite-shot simulators. Independent of MerLin; usable standalone    │
-│  for Phase 2's non-differentiable brute-force sanity check.          │
-└───────────────────────────────────────────────────────────────────┘
-```
+Confirmed by running `perceval.components.catalog['heralded cz']` directly in this repo's venv:
 
-### Component Responsibilities
+| Fact | Value | How verified |
+|---|---|---|
+| Logical (data) modes | 4 — two dual-rail qubits | `catalog['heralded cz'].build_experiment().m == 4` |
+| Internal circuit width | 6 | `catalog['heralded cz'].build_circuit().m == 6` |
+| Herald modes | 2, at internal circuit indices 4,5 | `Processor(...).heralds == {4: 1, 5: 1}` — success requires exactly 1 photon in each herald mode |
+| Gate realized | Knill CZ (arXiv:quant-ph/0110144) | `catalog['heralded cz'].article_ref` |
+| Success probability | ≈0.07407 = **2/27** exactly | measured directly via `Processor.probs()['global_perf']` on a `\|1,0,1,0>` dual-rail input — independently confirms the literature figure `docs/iqp-photonic-encoding.md` had flagged as unverified (lines 184, 216, 381) |
+| Success-probability retrieval | `Processor.probs()` returns `{'results': {...conditional dist...}, 'global_perf': <success prob>}` | run directly, output captured |
+| Herald-mode bookkeeping when composed into a larger `Processor` | Automatic — parent `Processor.m` (logical port count) is unchanged after `p.add(mode_mapping, heralded_cz_experiment)`; `p.circuit_size` grows by 2, `p.heralds` gains the new pair | verified: built a 4-mode weight-1-shaped `Processor`, added the heralded_cz experiment at modes `[0,1,2,3]`, confirmed `p.m` stayed 4 while `circuit_size` went from 4 to 6 |
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| `perceval.Circuit` / `PS` / `BS` | Ground-truth linear-optical circuit description: modes, phase shifters, beamsplitters, placed manually by mode index | `c = pcvl.Circuit(n_modes); c.add(i, pcvl.PS(phi)); c.add((i,j), pcvl.BS())` |
-| `perceval.BasicState` | Fock-space input/output state (photon occupation per mode) | `pcvl.BasicState([1,0,1,0])` |
-| `perceval.Processor` + `Simulator`/`Analyzer`/`Sampler` | Exact or finite-shot simulation of a circuit against a bound input state; `Analyzer` produces a full output probability table over specified `BasicState`s — the tool for Phase 2's brute-force check | `p = pcvl.Processor("SLOS", circuit); p.with_input(input_state); pcvl.algorithm.Analyzer(p, output_states).compute()` |
-| `merlin.builder.CircuitBuilder` | Declarative, auto-parameter-tracking circuit assembly (what v1.0's `.simple()` uses internally) | `.add_rotations(...)`, `.add_superpositions(...)`, `.to_pcvl_circuit()` |
-| `merlin.algorithms.QuantumLayer` | Differentiable PyTorch module wrapping a circuit (from a builder, a raw `pcvl.Circuit`, or a `pcvl.Experiment`) plus an input state and measurement strategy | `ML.QuantumLayer(circuit=my_pcvl_circuit, input_state=..., trainable_parameters=[...], input_parameters=[...])` |
-| `merlin.pcvl_pytorch` | Low-level permanent-computation bridge (SLOS, TorchScript-compiled) converting a circuit's unitary + Fock basis into a differentiable probability tensor | Internal; not called directly by user code — `QuantumLayer` invokes it |
+**Practical consequence:** you never manually allocate ancilla/herald modes in the module's public API — `Processor.add()` does it. This directly answers "does heralded_cz require additional modes beyond the 2n-mode layout": yes, internally (2 per CZ application), but they're invisible to and don't renumber the existing per-qubit port convention, provided composition happens at the `Processor` level rather than by hand-concatenating a 6-mode unitary into a flat `Circuit`.
 
-## Recommended Project Structure
+## Why the Existing 2n-Mode Layout Already Fits
 
-This milestone (literature scoping + on-paper design) produces **no code under this structure yet** — it is a documentation deliverable. The structure below is the target layout Phase 1's design doc should be written *against*, so a future implementation milestone can transcribe it directly without a redesign pass.
+`heralded_cz` acts on 4 dual-rail modes — 2 per qubit. The module's existing layout already reserves exactly 2 modes per qubit: port `2k` (polarization-carrying) and port `2k+1` (vacuum partner, currently unused until `build_readout_circuit`'s final `PBS()`). `PBS()` converts a polarization superposition on mode `2k` into a spread across the pair `(2k, 2k+1)` — that pair **is** the qubit's dual-rail representation. So converting qubit `i` and qubit `j` to dual rail for a CZ application uses their existing mode pairs `(2i, 2i+1)` and `(2j, 2j+1)` — no new modes needed for the conversion itself, only for the herald ancillas inside `heralded_cz`, which `Processor.add()` handles as shown above.
 
-```
-merlin-quantum-case-study/
-├── generator/                    # v1.0, shipped — untouched by v2.0
-│   └── ...                       # (existing MMD generator modules)
-├── iqp_photonic/                 # v2.0 — NEW top-level module, sibling to generator/
-│   ├── __init__.py
-│   ├── qubit_iqp.py              # (future) qubit-side reference: build & exactly
-│   │                              #   evaluate small IQP circuits via H^⊗n D H^⊗n
-│   │                              #   in plain NumPy — the "known/classically-
-│   │                              #   checkable" baseline for Phase 2
-│   ├── encoding.py                # (future) Phase 1's design turned into code:
-│   │                              #   functions mapping IQP structural parameters
-│   │                              #   (num modes, diagonal-gate angles) onto a
-│   │                              #   pcvl.Circuit built from PS/BS primitives
-│   ├── compare.py                 # (future) Phase 2's sanity-check harness: run
-│   │                              #   both sides at small n, diff distributions
-│   │                              #   (this is where the qubit-bitstring ↔
-│   │                              #   photonic-Fock-state label correspondence
-│   │                              #   defined in Phase 1's design gets used)
-│   └── trainability.py            # (future, Phase 3 — do not build this milestone)
-├── docs/
-│   ├── iqp-baseline.md            # THIS milestone: compiled prior IQP +
-│   │                              #   barren-plateau notes (Active requirement #3)
-│   └── iqp-photonic-encoding.md   # THIS milestone: the on-paper mapping design
-│                                  #   itself (Active requirement #4) — the actual
-│                                  #   novel-contribution deliverable
-├── .planning/research/            # literature-scoping findings (this research pass)
-└── tests/
-    └── test_iqp_photonic_*.py     # (future) mirrors generator/'s one-file-per-
-                                   #   module test convention once Phase 2 starts
-```
+This means weight-2 does not require a layout change (e.g., 3n modes, or moving vacuum-partner modes) — it requires an *early* `PBS` conversion on the qubit pair (mid-circuit, not just at final readout), the `heralded_cz` insertion, then a `PBS` conversion back to polarization so the rest of the pipeline (conjugation, readout) is unaffected.
 
-### Structure Rationale
+## Why Weight-2 Cannot Reuse `build_full_circuit`'s Circuit-Concatenation Pattern
 
-- **`iqp_photonic/` as a new top-level sibling module, not `generator/iqp_photonic/`:** the two milestones have genuinely different core values — v1.0 is "a working, benchmarked MMD generative model"; v2.0 is "does IQP's structure survive photonic translation," a trainability/hardness research question. They share no runtime code path: `generator/`'s bin-centers, MMD-loss, and natural-order correspondence machinery are all specific to the histogram-matching generative task and have no role in a gradient-variance-vs-system-size study or a classical-vs-photonic distribution diff. Nesting under `generator/` would imply a dependency or extension relationship that doesn't exist and would force future readers to untangle unrelated concerns inside one package. The existing repo already uses flat top-level modules (`generator/`, `docs/`, `tests/`) rather than a nested `src/` tree, so a new sibling module matches convention.
-- **`docs/iqp-baseline.md` and `docs/iqp-photonic-encoding.md` under the existing `docs/`:** the repo already uses `docs/` for durable reference material (`raster-order.md`, `mmd-loss.md` from v1.0) rather than `.planning/`, which is scoped to phase/milestone process artifacts. The two Active requirements that are genuinely durable knowledge (compiled IQP/barren-plateau baseline; the encoding design itself) belong there for the same reason v1.0's mechanism docs do — they're referenced by future code and by the eventual write-up, not just by this milestone's planning process.
-- **`compare.py` living inside `iqp_photonic/`, not a top-level script:** unlike v1.0's `benchmark.py`/`sweep.py` pattern (top-level scripts for one-off analysis runs), the classical-vs-photonic comparison is core validation logic Phase 2 depends on directly (it's the "verify it reduces to known IQP behavior" gate) — it belongs in the importable package, with a thin top-level script (if wanted) calling into it, matching how `generator/train.py` is importable and `train.py` at repo root is a thin caller.
+`build_full_circuit` (`iqp_photonic_encoding.py:111-124`) builds one `pcvl.Circuit(2n)` by calling `circuit.add(port, component)` repeatedly, and `run_full_circuit` wraps that single `Circuit` in a `Processor` only at the very end, purely to run it. This works because every weight-1 component (`HWP`, `WP`, `PBS`) is a plain unitary — a `Circuit` is just a unitary matrix, with no concept of post-selection or heralding.
 
-## Perceval vs. MerLin API Boundary
+`heralded_cz`'s catalog item is not exposed as a plain unitary in the way the module needs it: `build_circuit()` gives the raw 6-mode unitary but leaves herald-mode bookkeeping (which modes are heralds, what pattern counts as success, how to compute `global_perf`) entirely on the caller. `build_experiment()`/`build_processor()` give that bookkeeping for free, but return `Experiment`/`Processor` objects, not `Circuit`. `Processor.add()`'s own docstring confirms it accepts "a unitary circuit... a non-unitary component... a processor" — i.e. it is the composition primitive spanning both worlds. A flat `Circuit` cannot hold a non-unitary/heralded component at all.
 
-### The actual relationship (verified against installed source, not assumed)
+**Conclusion:** weight-2's top-level pipeline builder must construct a `pcvl.Processor` from the start (composed via `Processor.add()` calls), not a `pcvl.Circuit`. This is a second, parallel pipeline function alongside `build_full_circuit`/`run_full_circuit` — not a modification of them.
 
-MerLin (`merlinquantum==0.4.0`) is built **on top of** Perceval (`perceval-quandela==1.2.4`) — it does not reimplement linear optics. Concretely:
+## Integration Points With Existing Code (Verified Against Actual `iqp_photonic_encoding.py`)
 
-- `merlin.core.circuit.Circuit` is **MerLin's own metadata container** (a dataclass holding a list of `Rotation`/`BeamSplitter`/`GenericInterferometer`/`EntanglingBlock` objects) — it is **not** a `perceval.Circuit` and has no simulation capability of its own. Do not confuse the two; they share the class name `Circuit` but live in different modules (`merlin.core.circuit.Circuit` vs. `perceval.components.linear_circuit.Circuit`, exposed as `pcvl.Circuit`). This is a real naming collision worth flagging for whoever writes Phase 2's code — always import Perceval as `pcvl` and never do `from merlin.core.circuit import Circuit` in the same file as `from perceval import Circuit`.
-- `merlin.builder.CircuitBuilder` is MerLin's **declarative DSL layer**: `.add_rotations(...)`, `.add_superpositions(...)`, `.add_entangling_layer(...)` build up the MerLin-native `Circuit` metadata object, tracking which parameters are trainable vs. input-driven automatically. `QuantumLayer.simple()` — what v1.0 used exclusively — calls this builder internally and never exposes a raw `pcvl.Circuit` to user code.
-- `CircuitBuilder.to_pcvl_circuit()` is the actual compilation step: it walks the MerLin `Circuit`'s component list and emits a real `perceval.Circuit`, translating each MerLin component 1:1 (`Rotation` → `pcvl.PS`, `BeamSplitter` → `pcvl.BS`, `GenericInterferometer` → a Perceval `GenericInterferometer` built from an MZI or "bell" factory). This confirms MerLin's abstractions sit **strictly above** Perceval's circuit primitives — one level of indirection, not a parallel implementation.
-- `merlin.algorithms.QuantumLayer.__init__` accepts **exactly one** of three mutually exclusive circuit sources (source-verified, `layer.py:109-135`): `builder: CircuitBuilder`, `circuit: pcvl.Circuit`, or `experiment: pcvl.Experiment`. The `circuit=` path is what "manual circuit construction with phase shifters/beamsplitters" concretely means in code — it is a fully documented, first-class constructor argument, not an internal/private workaround.
-- Underneath both paths, `merlin/pcvl_pytorch/` (`slos_torchscript.py`, `noisy_slos.py`, `locirc_to_tensor.py`) is the actual simulation engine: it takes the resolved Perceval circuit's unitary and the bound Fock input/output state space and computes permanents (SLOS algorithm, TorchScript-compiled) to produce a differentiable probability tensor. This is identical regardless of whether the circuit came from a builder or was hand-built — the builder/raw-circuit distinction only affects *how the circuit's structure was described*, not how it's simulated.
+| Existing function | Reused as-is for weight-2? | How |
+|---|---|---|
+| `build_state_prep_circuit(n)` | Yes, unmodified | Returns `Circuit(2n)`; add via `processor.add(0, build_state_prep_circuit(n))` — `Processor.add` explicitly accepts a unitary `Circuit` |
+| `build_diagonal_layer_circuit(n, thetas)` | Yes, unmodified — and it's also where the CZ single-qubit corrections live | Ingredient 2's operator identity (`exp(iπ/4·Z_iZ_j) = CZ · exp(iπ/4·Z_i) · exp(iπ/4·Z_j)` up to global phase, `docs/iqp-photonic-encoding.md` lines 117-121) needs `WP(π/4, 0)` on each qubit in a CZ pair. Since `WP(θ,0)` gates are diagonal and additive (`exp(iaZ)·exp(ibZ) = exp(i(a+b)Z)`), the correction is just `thetas[i] += π/4`, `thetas[j] += π/4` *before* calling the existing function — no new phase-gate code needed |
+| `build_conjugation_circuit(n)` | Yes, unmodified | Same composition pattern as state prep |
+| `build_readout_circuit(n)` | Yes, unmodified | Final `PBS` per qubit — unaffected because weight-2's own PBS conversions happen mid-circuit and convert back to polarization before this stage runs |
+| `all_h_input(n)` | Yes, unmodified | Input-state convention doesn't change |
+| `basic_state_to_bitstring` / `fock_to_bitstring` | Yes, unmodified, conditional on correctness of the mid-circuit PBS round-trip | Decode logic never needs to know a CZ happened, provided weight-2's own PBS-back-conversion restores the same per-qubit `(2k,2k+1)` polarization convention before the final readout stage — worth its own explicit round-trip check (see Build Order step 2), not assumed |
+| `exact_qubit_iqp_distribution(n, thetas)` | No — needs a new sibling function for weight-2 validation | Current implementation only sums weight-1 `Z_k` phase terms (lines 235-273); a weight-2 reference needs to also add `Z_i*Z_j` eigenvalue terms for CZ pairs before the Hadamard/probability step |
+| `build_full_circuit` / `run_full_circuit` | No — parallel functions, not modifications | Weight-1's `Circuit`-only representation structurally cannot carry a heralded component (see above) |
 
-### What "manual circuit construction" concretely looks like as code
+## New Components Needed
 
-Two distinct code paths exist depending on whether differentiability/training is needed — both use the same Perceval object vocabulary:
+1. **`build_cz_insertion(n, i, j)`** (naming illustrative) — a `Processor`-composable unit implementing Ingredient 2's mechanism: `PBS` on qubit `i`'s pair, `PBS` on qubit `j`'s pair (convert both to dual rail), the catalog's `heralded_cz` experiment across those 4 modes, then `PBS` back on both pairs (return to polarization). Likely itself assembled as a small `Processor`/`Experiment`, since it mixes plain `PBS` circuits with the non-unitary `heralded_cz` catalog item.
 
-**Path A — raw Perceval only (no MerLin), for Phase 2's non-differentiable classical-behavior check:**
-```python
-import perceval as pcvl
+2. **`build_full_circuit_weight2(n, thetas, cz_pairs)`** — the new top-level `Processor`-composed pipeline: state prep → adjusted diagonal layer (weight-1 `thetas` plus `π/4` corrections folded in per CZ pair) → for each pair in `cz_pairs`, insert `build_cz_insertion` at that pair's ports → conjugation → readout. Returns a `Processor`, not a `Circuit`.
 
-n_modes = 4
-circuit = pcvl.Circuit(n_modes)
-circuit.add(0, pcvl.PS(phi=some_angle))          # phase shifter, single mode
-circuit.add((1, 2), pcvl.BS())                   # beamsplitter, mode pair
-# ... place remaining PS/BS per the Phase 1 design spec, by explicit mode index
+3. **`run_full_circuit_weight2(n, thetas, cz_pairs)`** — runs the above via `Processor.probs()` (not `Analyzer`, which was built around the module's existing single-`Circuit`+`Processor`-wrap pattern; `Processor.probs()` already returns both the herald-conditional distribution and `global_perf` directly, as verified above). Should return three things, not two: the conditional distribution (analogous to `run_full_circuit`'s `dist`), the herald `global_perf` (success probability — new, no weight-1 analogue), and the module's existing out-of-subspace `residual` concept (still worth checking empirically for weight-2 rather than assuming zero, since weight-2 mixes photons across qubit pairs in a way weight-1 never does).
 
-input_state = pcvl.BasicState([1, 0, 1, 0])       # Fock-space input
-processor = pcvl.Processor("SLOS", circuit)
-processor.with_input(input_state)
+4. **`exact_qubit_iqp_distribution_weight2(n, thetas, cz_pairs)`** (or an additive optional parameter on the existing function) — qubit-side reference distribution including `Z_i*Z_j` phase terms, needed as the ENC-04-style ground truth for weight-2 validation. Decide up front: model only CZ (θ fixed at π/4, matching what `heralded_cz` actually realizes) rather than an arbitrary-angle two-qubit term — per `docs/iqp-photonic-encoding.md` line 121, the catalog gate is fixed, so the reference should match exactly, or the validation comparison is apples-to-oranges.
 
-output_states = [pcvl.BasicState([...]), ...]     # the states to compare against
-analyzer = pcvl.algorithm.Analyzer(processor, output_states)
-analyzer.compute()                                 # exact output distribution
-```
-Verified working end-to-end against the installed `perceval-quandela==1.2.4` (a live 2-mode PS+BS circuit through `Processor` + `Analyzer` was run during this research pass and produced the expected symmetric two-photon interference distribution).
+## Data Flow Changes
 
-**Path B — wrapped in MerLin, once/if the design needs to be trainable (a later milestone, not this one):**
-```python
-import perceval as pcvl
-import merlin as ML
+- **Mode count:** the logical port count stays `2n` for the pipeline's public interface (matches weight-1) — heralds are internal-only, hidden by `Processor`. No change to any function's `n`-based mode arithmetic.
+- **Readout/decode logic:** unchanged in principle, but the weight-2 pipeline's PBS-back-conversion after each CZ pair must be verified (not assumed) to restore the exact same 2-mode-per-qubit polarization convention weight-1 relies on — analogous to ENC-03's existing round-trip test.
+- **New data surfaced:** `global_perf` (herald success probability) is genuinely new, with no weight-1 equivalent. It is not the same thing as the existing out-of-subspace `residual` (a post-hoc property of decoded Fock outcomes) — per the module's established convention (explicit residual reporting, never silently renormalized — `docs/iqp-photonic-encoding.md` lines 254, 299), `global_perf` must be surfaced explicitly alongside the conditional distribution, not folded into or confused with `residual`. Keep them as two clearly separate return fields.
+- **Validation metric implication:** TVD between the weight-2 photonic distribution and the qubit-side reference should be computed on the herald-conditional distribution (`Processor.probs()['results']`, already renormalized by Perceval) against the exact-CZ qubit-side reference, with `global_perf` reported alongside as a separate honest datum — not folded into the TVD comparison itself. Mirrors the existing pattern of reporting `residual` alongside, not folded into, TVD in `photonic_iqp_distribution`/ENC-04.
 
-circuit = pcvl.Circuit(n_modes)
-# ... same manual PS/BS placement as Path A ...
+## Suggested Build Order
 
-layer = ML.QuantumLayer(
-    circuit=circuit,
-    input_state=pcvl.BasicState([1, 0, 1, 0]),
-    trainable_parameters=["theta"],   # Perceval parameter-name prefixes to expose to autograd
-    input_parameters=["px"],          # prefixes used for classical (angle) encoding, if any
-)
-```
-This is the path v1.0's code never used (it only called `.simple()`), so it is genuinely new ground for this repo — but it is a documented, supported constructor path, not experimental API surface.
+1. **De-risk the primitive standalone, no integration.** Reproduce this research's own verification (n=2 bare dual-rail `Processor` around `catalog['heralded cz']`, confirm `global_perf ≈ 2/27`, confirm the CZ truth table on `|1,0,1,0>`-style dual-rail inputs) as an actual test, independent of the rest of the module. Cheap, isolates the highest-uncertainty piece (does the catalog gate really behave as ENC-01 assumed) before touching any existing code, and directly resolves the "success-probability unverified" flag currently open in `docs/iqp-photonic-encoding.md`.
+2. **Build `build_cz_insertion`** (PBS-wrap + `heralded_cz` + PBS-unwrap) as an isolated `Processor`-composable unit at the module's existing `(2i,2i+1)`/`(2j,2j+1)` port convention. Test its polarization-basis truth table directly (not yet embedded in a full IQP pipeline) — confirms the mid-circuit PBS round-trip claim above.
+3. **Compose `build_full_circuit_weight2`/`run_full_circuit_weight2`** from existing weight-1 builders + step 2's insertion, via `Processor.add()`. No changes to any existing weight-1 function.
+4. **Extend the qubit-side reference** (`exact_qubit_iqp_distribution_weight2` or an additive parameter) to include CZ terms, matching the fixed-π/4 realization only.
+5. **Weight-2 TVD validation**, ENC-04-style, at small `n` (2-3 qubits, one CZ pair) — report TVD on the conditional distribution plus `global_perf` and `residual` as separate honest fields, following the existing module's reporting convention exactly.
+6. **Full regression run** of the existing 26-test suite (`pytest tests/test_iqp_photonic_encoding.py -v`) after each of steps 2-4, to catch any accidental signature change to a reused weight-1 function early. Since every new function is additive, this should stay green throughout — if it doesn't, that's a signal a "reuse" step accidentally mutated a shared function instead of composing around it.
 
-**Recommendation for Phase 1's design doc:** write the mapping in terms of Path A's vocabulary (`pcvl.Circuit`/`PS`/`BS`/`BasicState`) since that's the minimal, framework-agnostic description of the actual linear-optical circuit. Whether it later gets wrapped in `ML.QuantumLayer` (Path B) is an implementation-time decision for a deferred trainability-study milestone, not something Phase 1's design needs to settle now.
+## Anti-Patterns to Avoid
 
-## Architectural Patterns
+### Anti-Pattern: Manually managing herald ancilla modes by hand-extending a flat `Circuit`
+**What people might do:** keep `build_full_circuit`'s single-`Circuit`-concatenation style by manually widening the circuit to `2n+2` modes per CZ pair and adding `catalog['heralded cz'].build_circuit()`'s raw 6-mode unitary directly.
+**Why it's wrong:** `build_circuit()` gives the *unconditional* unitary including the herald modes as ordinary output modes — heralding (post-select on the herald outcome, compute success probability, renormalize) would have to be reimplemented entirely by hand, duplicating what `Processor`/`Experiment` already do correctly, and entangling herald-mode indices into the module's clean `2n`-port qubit convention.
+**Do this instead:** compose at the `Processor` level using `build_experiment()`/`build_processor()` and `Processor.add()`, exactly as verified above — let Perceval track heralds and `global_perf`.
 
-### Pattern 1: Two-sided independent classical evaluation (for Phase 2's sanity check)
+### Anti-Pattern: Silently renormalizing away herald failure
+**What people might do:** report only the herald-conditional distribution (`Processor.probs()['results']`) and drop `global_perf`, since it's "just" a success probability.
+**Why it's wrong:** contradicts this module's own established, explicitly-stated policy (`docs/iqp-photonic-encoding.md` line 254) of never silently discarding/renormalizing probability mass without reporting it — `global_perf` is exactly the kind of number that policy exists to surface, and is also the number needed to finally resolve the "success probability unverified for this exact gate" flag currently open in that document.
 
-**What:** Instead of converting one circuit representation into the other, compute each side's output probability distribution independently at a small system size, then numerically diff the two distributions against an explicitly-defined label correspondence.
-**When to use:** Any time a novel encoding claims to "reduce to" or "preserve the structure of" a known circuit family — the honest verification is agreement between two independently-derived ground truths, not a single converted artifact that could itself be buggy.
-**Trade-offs:** Requires defining the qubit-bitstring ↔ photonic-Fock-state correspondence explicitly as part of the design (this is real design work, not a formality) — but that correspondence is something Phase 1's spec needs to state anyway to be implementable, so this isn't extra scope, just making an implicit step explicit and load-bearing.
-
-**Example (conceptual, not yet code — this is what Phase 2, deferred, will build):**
-```python
-# Qubit side: IQP circuit is H^⊗n · D · H^⊗n where D is diagonal in the
-# computational basis. At small n this is directly computable with NumPy —
-# no qiskit/qutip dependency needed.
-qubit_probs = evaluate_iqp_classically(diagonal_angles, n_qubits=3)
-
-# Photonic side: the Phase 1 encoding, simulated exactly via Perceval.
-photonic_probs = analyzer_output_from(encoding_circuit, input_state)
-
-# The correspondence (defined by Phase 1's design) maps qubit bitstrings
-# to the photonic circuit's relevant BasicState outputs.
-compare_distributions(qubit_probs, photonic_probs, correspondence_map)
-```
-
-### Pattern 2: Builder DSL for structured/repeating layers vs. raw Circuit for bespoke placement
-
-**What:** MerLin's `CircuitBuilder` is optimized for regular, repeating layer structures (trainable entangling layers, uniform angle encodings) — it auto-generates parameter names and tracks trainable/input prefixes for you. Raw `pcvl.Circuit` construction is for bespoke, irregular placement where each phase shifter/beamsplitter's position is dictated by a specific structural mapping (exactly this milestone's situation: IQP's diagonal-gate-per-qubit + paired Hadamard-basis-conjugation structure doesn't match any of the builder's generic layer templates).
-**When to use:** Builder DSL when the circuit is "N repeated units of a standard block" (what v1.0 needed); raw Perceval when the circuit's structure *is* the research question (what v2.0 needs).
-**Trade-offs:** Raw construction means no automatic parameter-prefix bookkeeping — `trainable_parameters`/`input_parameters` prefixes must be tracked and passed to `QuantumLayer` explicitly if/when Path B is used later.
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Reaching for `perceval-interop`'s `QiskitConverter` as the Phase 2 comparison tool
-
-**What people do:** See "convert a qubit circuit to a photonic one" and assume that's the tool for "compare against qubit IQP."
-**Why it's wrong:** `QiskitConverter` (in the separate, not-installed `perceval-interop` package) performs a *generic* dual-rail encoding of an arbitrary qubit circuit — 2 modes per qubit plus ancilla photons implementing CNOTs via heralding/post-selection. That is a completely different, much heavier embedding than the bespoke structural mapping (diagonal gates → phase shifters, Hadamard conjugation → beamsplitters) this milestone is designing. Using it would validate a different circuit than the one Phase 1 actually designs, and would silently add an unrelated dependency and a resource-hungry heralded-gate construction to what should be a small brute-force sanity check.
-**Do this instead:** Independent evaluation on both sides (Pattern 1 above) with an explicit, small system size. No circuit-conversion library is needed for this milestone's goals at all.
-
-### Anti-Pattern 2: Treating `merlin.core.circuit.Circuit` and `perceval.Circuit` as the same type
-
-**What people do:** Assume "Circuit" means the same thing across an import boundary, especially since MerLin's builder API is the only thing v1.0's code ever touched.
-**Why it's wrong:** They are unrelated classes with the same name in different packages; MerLin's is a plain metadata container with no simulation behavior, Perceval's is the real linear-optical circuit object with a unitary and simulation support. Passing one where the other is expected fails loudly (attribute errors), but silent confusion during design-doc writing (e.g., describing "add a PS to the Circuit" without specifying which) can lead to an ambiguous spec that reads correctly but isn't directly transcribable to code.
-**Do this instead:** In Phase 1's design doc and any future code, always write `pcvl.Circuit`/`import perceval as pcvl` explicitly when referring to the actual photonic circuit; never write bare "Circuit" in the spec.
-
-### Anti-Pattern 3: Installing Qiskit or `perceval-interop` speculatively during this milestone
-
-**What people do:** Reach for a qubit-circuit-framework dependency "just in case" the design or comparison needs it later.
-**Why it's wrong:** This milestone (Phase 0/1, per PROJECT.md) is docs-only — no code runs. Adding dependencies now, before Phase 2 (deferred, not yet planned) confirms what's actually needed, creates version-drift risk for a benefit that may never materialize, matching the same discipline `STACK.md` already states for `requirements.txt`.
-**Do this instead:** Leave `requirements.txt` untouched. When a future milestone actually starts Phase 2, re-derive the dependency need from what the finalized design doc requires (very likely: nothing beyond NumPy for the qubit-side reference, already a transitive dependency via SciPy/scikit-learn).
-
-## Integration Points
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `generator/` ↔ `iqp_photonic/` | None — no shared imports, no shared runtime state | Deliberate: different research questions, different core values (per PROJECT.md's Current Milestone framing). If a genuine shared utility emerges later (e.g., a common Perceval-circuit-rendering helper), promote it to a small top-level `photonic_utils/` module rather than importing across the two research modules directly — but don't build this preemptively; no such need exists yet. |
-| `iqp_photonic/encoding.py` ↔ `perceval` | Direct — builds a `pcvl.Circuit` from Perceval primitives per the Phase 1 design spec | This is the primary, unavoidable dependency; Phase 1's design doc should be written precisely enough that this file is close to a direct transcription. |
-| `iqp_photonic/qubit_iqp.py` ↔ `numpy` | Direct — computes `H^⊗n · D · H^⊗n` and resulting output probabilities via plain linear algebra | No qubit-framework dependency (Qiskit/PennyLane/QuTiP) needed at the small system sizes ("small enough to brute-force compare" per the plan doc) this check requires. |
-| `iqp_photonic/compare.py` ↔ both of the above | Imports both, applies the Phase 1-defined bitstring↔Fock-state correspondence, diffs distributions | The correspondence-definition step is itself part of Phase 1's design deliverable, not something to improvise during Phase 2 implementation. |
-| `iqp_photonic/` ↔ `merlin.QuantumLayer` | Deferred — only relevant once/if a future trainability-study milestone needs differentiability | Not exercised by Phase 0/1 or even Phase 2's sanity check (which only needs exact, non-differentiable simulation via `pcvl.Processor`/`Analyzer`). |
-
-### External Services
-
-None. All work is local simulation (Perceval's `SLOS`/permanent-based exact simulator for small photon numbers) — no cloud QPU access (`cloud.quandela.com`) is in scope for this milestone or the deferred phases described in the plan doc.
-
-## System-Size Scaling Considerations (domain-specific — not user-count scaling)
-
-The relevant "scale" axis for this domain is number of modes/photons (photonic side) and number of qubits (gate-model side), not users/traffic. Included because it directly affects what "small enough to brute-force compare" (Phase 2, deferred) can mean, and should inform Phase 1's design about what system sizes are even checkable later.
-
-| Scale | Photonic-side cost | Qubit-side cost | Implication |
-|-------|--------------------|--------------------|-------------|
-| n ≤ ~4–6 modes/qubits | Exact permanent computation (`Analyzer`) is fast, full output table enumerable | Exact `2^n`-dimensional statevector via NumPy is trivial | This is the regime Phase 2's brute-force sanity check should target — both sides fully exact and cheap. |
-| n ~ 8–14 | Permanent computation cost grows combinatorially (photon-number/mode-count dependent); still tractable for a handful of runs, not a sweep | `2^n` statevector still fine up to ~20-25 qubits in plain NumPy | Plausible upper bound for a deferred Phase 3 (trainability/gradient-variance) sweep across "system size," if that phase is ever planned. |
-| Large n (barren-plateau asymptotic regime) | Out of scope — exact simulation infeasible; would need the same finite-shot/`Sampler`-based statistical approach real barren-plateau studies use | Out of scope for brute-force; would need qubit-side gradient-variance estimation matching the owner's prior IQP work | Not this milestone's concern (Phase 0/1 only) — flagged here only so Phase 1's design doc doesn't accidentally assume asymptotic claims are checkable via the same brute-force method as the small-n sanity check. |
+### Anti-Pattern: Extrapolating weight-1's exactness threshold blindly, in either direction
+**What people might do:** either assume weight-2 can't be validated to the same `TVD < 1e-6` bar as weight-1 (since it's "probabilistic"), or ignore `global_perf`'s own precision when claiming validation success.
+**Why it's wrong:** `docs/iqp-photonic-encoding.md`'s own ENC-04 self-explanation checkpoint (lines 341-343) already flags the naive "weight-1 matched exactly, so weight-2 will too" extrapolation as unsupported reasoning, precisely because it treats a deterministic and a probabilistic mechanism as interchangeable. But conditioning on herald success is just Bayes' rule over Perceval's exact `SLOS` simulation — so the *conditional* distribution should still match the exact-CZ qubit-side reference to floating-point precision, and `TVD < 1e-6` remains the right bar for that comparison. What must not be silently assumed is that `global_perf` itself reproduces 2/27 to the same precision once composed inside the full n-qubit pipeline (as opposed to the standalone-primitive check in Build Order step 1) — that should be asserted explicitly in the weight-2 validation, not taken on faith from the isolated test.
 
 ## Sources
 
-- `venv/Lib/site-packages/merlin/algorithms/layer.py` (installed `merlinquantum==0.4.0`, lines 93–300, 2010–2100) — `QuantumLayer.__init__` signature and `.simple()` implementation, read directly. HIGH confidence (primary source, matches installed version).
-- `venv/Lib/site-packages/merlin/builder/circuit_builder.py` — `CircuitBuilder` and `to_pcvl_circuit()` compilation logic, read directly. HIGH confidence.
-- `venv/Lib/site-packages/merlin/core/circuit.py` — MerLin's own `Circuit` metadata container, read directly (confirms it is distinct from `perceval.Circuit`). HIGH confidence.
-- `venv/Lib/site-packages/merlin/algorithms/layer_utils.py` (lines 467–780) — `validate_and_resolve_circuit_source`, `resolve_circuit`, `prepare_input_state`, read directly; confirms the three mutually-exclusive circuit sources (`builder`/`circuit`/`experiment`). HIGH confidence.
-- Live verification run in this repo's venv: constructed a 2-mode `pcvl.Circuit` with `PS`+`BS`, bound via `pcvl.Processor("SLOS", circuit)`, computed exact output distribution via `pcvl.algorithm.Analyzer` — produced the expected symmetric Hong-Ou-Mandel-style two-photon distribution. HIGH confidence (executed against installed `perceval-quandela==1.2.4`, not assumed from docs).
-- [Perceval-Interop Qiskit converter docs](https://perceval.quandela.net/interopdocs/v1.1/notebooks/Qiskit_converter.html) — confirms the Qiskit bridge lives in a separate `perceval-interop` package (not installed in this repo) and performs dual-rail + ancilla-photon encoding, distinct from a bespoke structural mapping. MEDIUM-HIGH confidence (official docs, WebSearch-surfaced, not independently WebFetched in full).
-- `.planning/research/STACK.md` (this milestone's companion research file, already written) — cross-checked for consistency on Perceval API surface (`Circuit`, `PS`, `BS`, `BasicState`, `Processor`, `Analyzer`, `Sampler`) and the "no new dependencies this milestone" conclusion; both files independently arrived at the same recommendation. HIGH confidence (agreement between two independent research passes against the same installed environment).
-- `.planning/PROJECT.md` (Current Milestone, Requirements, Context sections) and `Post_Sept1_IQP_Photonic_Plan.md` — milestone scope, phase boundaries, and the explicit "Phase 0/1 only, re-plan after Phase 0" constraint that shapes why this doc treats Phase 2+ as deferred/future rather than in-scope. HIGH confidence (primary repo sources).
+- `perceval-quandela` installed package (version pinned in `requirements.txt`), inspected directly via this repo's `venv` — `Processor`, `Circuit`, `catalog['heralded cz']` behavior all confirmed by running code, not read from docs.
+- `C:\Users\cuqui\merlin-quantum-case-study\iqp_photonic_encoding.py` — full existing module, read directly.
+- `C:\Users\cuqui\merlin-quantum-case-study\docs\iqp-photonic-encoding.md` — design document, Ingredient 2 (weight-2 derivation) and its ENC-02/Conclusion open-questions sections.
+- `C:\Users\cuqui\merlin-quantum-case-study\tests\test_iqp_photonic_encoding.py` — existing 26-test suite structure (test names enumerated directly, not re-derived).
+- Catalog gate provenance: arXiv:quant-ph/0110144 (Knill, 2002), per `catalog['heralded cz'].article_ref`.
 
 ---
-*Architecture research for: IQP → photonic circuit encoding (literature scoping + on-paper design milestone)*
-*Researched: 2026-07-30*
+*Architecture research for: weight-2 IQP generator implementation (v2.1 milestone)*
+*Researched: 2026-08-05*

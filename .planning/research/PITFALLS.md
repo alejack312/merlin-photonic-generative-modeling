@@ -235,3 +235,175 @@ This project's stated bar is "explainable unaided to Vincent Espitalier" (a phot
 ---
 *Pitfalls research for: IQP → photonic circuit encoding (literature scoping + on-paper design)*
 *Researched: 2026-07-30*
+
+---
+
+# Pitfalls Research — v2.1 Addendum: Weight-2 Heralded CZ Implementation
+
+**Domain:** Heralded/probabilistic linear-optical two-qubit gates (Knill CZ / KLM family) in Perceval, integrated into the existing weight-1 photonic IQP encoding module (`iqp_photonic_encoding.py`)
+**Researched:** 2026-08-05
+**Confidence:** HIGH — the load-bearing claims below were verified by direct inspection of the installed `perceval-quandela` package source (`venv/Lib/site-packages/perceval/components/core_catalog/heralded_cz.py`, `experiment.py`) and by running small scripts against `catalog['heralded cz']` in this repo's own venv, not by citing secondhand literature. Literature figures (1/9, 2/27) are cited only where independently reproduced numerically in this venv.
+
+**Scope note:** This addendum covers the v2.1 milestone (implementing and measuring `heralded_cz`-based weight-2 generators, building on v2.0's shipped weight-1 module) and supersedes nothing above — the v2.0 pitfalls (literature scoping, encoding design) remain valid background. This section is scoped narrowly to the heralded-gate implementation/measurement task itself.
+
+## Critical Pitfalls
+
+### Pitfall 9: Conflating `.performance`/`global_perf` (herald success) with `.distribution`/`results` (conditional output)
+
+**What goes wrong:**
+Both `pcvl.algorithm.Analyzer` and `Processor.probs()` silently return an **already-renormalized, conditional-on-success distribution** as the main result. `Analyzer.distribution` sums to 1 by construction — it does NOT tell you how often the herald actually fires. The herald/success probability lives in a *separate* attribute (`Analyzer.performance`, or `Processor.probs()['global_perf']`) that is easy to never look at, especially since the project's existing weight-1 code (`iqp_photonic_encoding.py::run_full_circuit`) only ever reads `analyzer.distribution` — that pattern has no herald, so `.performance` was never relevant there.
+
+**Why it happens:**
+Weight-1 code was written and validated (ENC-04, TVD ~1e-16) against a deterministic, herald-free circuit where `performance == 1.0` always, so nothing forced acknowledging the attribute. Copy-pasting the same `run_full_circuit`-style helper for weight-2 will compute a distribution that looks perfectly normal (sums to 1, no errors) while quietly discarding the actual success-probability measurement the milestone exists to produce.
+
+**Verified in this repo's venv (2026-08-05):**
+```python
+exp = catalog['heralded cz'].build_experiment()
+proc = pcvl.Processor('SLOS', exp)
+analyzer = pcvl.algorithm.Analyzer(proc, [pcvl.BasicState([1,0,1,0])], '*')
+analyzer.compute()
+# analyzer.distribution -> conditional dist, sums to 1 (looks fine, tells you nothing about success rate)
+# analyzer.performance   -> 0.0740740740740741  (the actual herald success probability, 2/27)
+```
+`Processor.probs()` mirrors this exactly: `res['results']` is the conditional distribution, `res['global_perf']` is the physical success probability. With `proc.compute_physical_logical_perf(True)` set, it further splits into `physical_perf` (photon-loss/leakage in the whole unitary evolution — 1.0 here, since nothing is lost, just filtered) and `logical_perf` (herald-click-pattern + valid-dual-rail-output condition combined) — `global_perf = physical_perf * logical_perf` in this gate.
+
+**How to avoid:**
+Any weight-2 measurement helper must explicitly capture and return `analyzer.performance` (or `probs()['global_perf']`) as a first-class output, not an afterthought — treat "what's the success probability" as a separate return value from "what's the output distribution," never inferred from the distribution alone.
+
+**Warning signs:**
+A weight-2 result report that only shows a normalized output distribution with no separate success-probability number is the tell — if the milestone's actual deliverable ("measure `heralded_cz`'s success probability") can't be read directly off one specific field in the code's output, the measurement wasn't actually taken.
+
+**Phase to address:** The implementation/measurement phase itself (first thing built), not a later validation pass — the whole point of this milestone is this number.
+
+---
+
+### Pitfall 10: Manually constructing a `StateVector`/superposition input skips the automatic herald-ancilla injection that `BasicState` input gets for free
+
+**What goes wrong:**
+`Experiment.with_input` is multiply-dispatched by input type, and the two paths behave very differently:
+- `with_input(BasicState/FockState/list/tuple)` — you supply only the **logical** (non-herald) modes (`exp.m == 4` for `heralded cz`, not the internal `circuit_size == 6`); Perceval auto-inserts the ancilla herald photons at the internal herald mode positions (mode 4, 5) for you, and auto-sets `min_detected_photons_filter = input_state.n`.
+- `with_input(StateVector/SVDistribution/NoisyFockState)` — bypasses that convenience entirely. It asserts `svd.m == self.circuit_size` (the FULL internal size, 6, including herald modes) and raises `AssertionError` if you pass a 4-mode superposition. If you correctly pad it to 6 modes (manually adding the `,1,1` ancilla photons yourself), `probs()` will then raise a *different* error (`min_detected_photons_filter is not set`) because that auto-set only happens on the `LogicalState`/`BasicState` path.
+
+**Verified in this repo's venv:** both failure modes reproduced directly — a 4-mode `StateVector` raises `AssertionError: ... bad size (4), expected 6`; correctly padding to 6 modes and calling `probs()` without first calling `proc.min_detected_photons_filter(n)` raises `ValueError: The value of min_detected_photons is not set.`
+
+**Why it happens:**
+For a weight-2 IQP diagonal-phase generator, the interesting inputs are superpositions (the whole point of the `|+>`-conjugated middle layer), so this project *will* need `StateVector`/`SVDistribution` input at some point (e.g. to check the gate's action on a superposition directly, independent of the `Analyzer`'s automatic basis sweep) — unlike weight-1, where `all_h_input` only ever built pure computational-basis `BasicState`s and never hit this path.
+
+**How to avoid:** Prefer driving weight-2 experiments through `Analyzer(processor, [BasicState(...)], '*')` over the full logical basis (as weight-1 already does) rather than hand-building `StateVector` inputs — it's the same convenience path already proven in this codebase. If a direct `StateVector` input is genuinely needed, explicitly pad to `circuit_size` (not `exp.m`) with the herald ancilla counts, and explicitly call `min_detected_photons_filter(...)` first.
+
+**Warning signs:** An `AssertionError` about mode-size mismatch, or a `ValueError` about `min_detected_photons`, when testing a hand-built superposition input — both indicate the wrong `with_input` overload was hit, not a physics bug.
+
+**Phase to address:** Implementation phase, specifically whenever any test goes beyond the `Analyzer`-over-computational-basis pattern already established for weight-1.
+
+---
+
+### Pitfall 11: Assuming heralding == post-selection (or writing code that accidentally implements post-selection instead)
+
+**What goes wrong:**
+The project's own design doc (`docs/iqp-photonic-encoding.md`) already correctly distinguishes heralding (accept/reject based on ancilla-mode detector clicks, independent of the data-qubit measurement) from post-selection (accept/reject based on the data-mode measurement outcome itself) at the conceptual level — but that distinction has to survive into the actual measurement code, and it is easy to lose. `core_catalog.heralded_cz`'s `build_experiment()` adds heralds via `add_herald(4, 1)` / `add_herald(5, 1)` — these are genuinely separate ancilla modes (4, 5), disjoint from the 4 logical data modes (0-3: ctrl dual rail + data dual rail). But Perceval's `logical_perf`/`global_perf` in `Processor.probs()` actually bundles the herald condition together with a **second, distinct** filter: rejecting output patterns on the *data* modes that fall outside the valid dual-rail (exactly-one-photon-per-rail) subspace. That second filter is cheap to conflate with "post-selection" language but is not what this project means by post-selection avoidance.
+
+**Why it happens:**
+`logical_perf` sounds like it should be "the herald probability," but per the source it's actually P(herald clicks correctly AND output data state is a valid logical dual-rail state) — i.e., it already includes a portion that *is* a post-selection-like filter (on the data output), stacked with the true heralding filter (on the ancilla output). For an ideal, lossless gate acting on valid dual-rail inputs, the "bunched/leaked data output" component is typically zero or negligible so `logical_perf ≈` pure herald probability in practice — but that's a property of this specific gate/input regime, not a guarantee, and should be checked rather than assumed silently.
+
+**How to avoid:** When reporting "the herald success probability," explicitly decompose and state which Perceval-reported number is being cited (`physical_perf`, `logical_perf`, `global_perf`), and verify that no probability mass in the *rejected* set actually comes from the "data output outside valid dual-rail subspace" case rather than "herald ancilla modes didn't click." A cheap check: sum `analyzer.distribution` (or `probs()['results']`) restricted to malformed/bunched data-mode outcomes with the herald condition dropped, and confirm it's ~0 for the inputs actually used, before treating `logical_perf` as a pure heralding number.
+
+**Warning signs:** A reported success probability that doesn't match a hand re-derivation of "P(herald clicks)" from the raw (pre-filter) output distribution is the tell that some other filter (data-mode post-selection) snuck into the number.
+
+**Phase to address:** Measurement/validation phase — this is exactly the kind of subtle semantic gap the project has a track record of catching (the H/V port-labeling bug in weight-1 was caught the same way: a direct empirical check rather than trusting the API's naming).
+
+---
+
+### Pitfall 12: Assuming a single, input-independent success probability without checking it across the actual generator's input regime
+
+**What goes wrong:**
+Literature figures for the general Knill-CZ family (1/9 post-selected, ~2/27 heralded) are quoted for the gate acting generically — this project's actual use case is narrower: the gate is always preceded by `PBS` (polarization → dual rail) and followed by `PBS` (dual rail → polarization) at a fixed θ=π/4, inserted into a specific IQP diagonal layer where the "data" input arriving at the gate is always a **product of two independent `|+>`-derived single-qubit states** (from the state-prep + weight-1 diagonal layer), never an arbitrary two-qubit state. It would be a mistake to assume without checking that the measured success probability is the same across (a) computational basis inputs, (b) the actual `|+>`-family inputs this circuit produces, and (c) inputs after other weight-1 phases have already been applied.
+
+**Verified in this repo's venv (2026-08-05):** for all four computational-basis inputs (`|00>`,`|01>`,`|10>`,`|11>` in dual-rail), `global_perf` was identical to 10+ significant figures (≈0.074074074074074, i.e. 2/27 exactly) — consistent with this being an input-independent property of the *unitary* part of the gate (the herald condition is on ancilla modes only, decoupled from the data state, so this is expected for any gate design that's supposed to work as a general-purpose CZ). One superposition case (`ctrl=|+>, data=|0>`) also reproduced `global_perf ≈ 2/27`, consistent with input-independence — but this was only spot-checked, not exhaustively verified across entangling cases (e.g. `ctrl=|+>, data=|+>`).
+
+**How to avoid:** Explicitly measure (don't assume) the success probability using the actual inputs the weight-2 generator will see in the full pipeline (post-`PBS`, post-weight-1-layer states), not only bare computational-basis states — and state in the milestone's writeup whether it was found to be input-independent (expected, given the herald is decoupled from the data modes) or not, rather than silently generalizing from one spot-check.
+
+**Warning signs:** A single number reported for "the success probability" with no statement of which input(s) it was measured against.
+
+**Phase to address:** Validation phase, alongside the classical TVD sanity check (ENC-04-style extension).
+
+---
+
+### Pitfall 13: `heralded_cz`'s `build_circuit()` alone has no herald — only `build_experiment()`/`build_processor()` do
+
+**What goes wrong:**
+`catalog['heralded cz'].build_circuit()` returns a plain 6-mode `pcvl.Circuit` with **no heralds attached at all** — it's just the linear-optical unitary. The existing weight-1 module (`iqp_photonic_encoding.py`) is built entirely around composing raw `pcvl.Circuit` objects with `circuit.add(pos, component)` and wrapping the whole thing in a single `Processor("SLOS", circuit)` at the end. If weight-2 code follows that exact pattern — grabbing `build_circuit()` and splicing it into a bigger `Circuit(2n)` the same way `HWP`/`WP`/`PBS` are added today — the herald condition is silently dropped: the simulation will still run and produce *some* distribution, but it will be the **full, unheralded 6-mode unitary's raw output**, not the heralded, success-probability-weighted CZ. This would produce numbers that look plausible (no crash, a valid distribution) but are physically wrong for what the milestone needs.
+
+**Why it happens:** The catalog's `build_circuit()`/`build_experiment()`/`build_processor()` three-tier API (confirmed by direct inspection of `CatalogItem`) makes it easy to reach for the `Circuit`-returning method out of habit, since that's the type every other component in this project's existing code uses (`pcvl.HWP`, `pcvl.WP`, `pcvl.PBS` are all added directly as circuit components).
+
+**How to avoid:** Weight-2 code must use `build_experiment()` or `build_processor()` (which attach the `add_herald(4,1)`/`add_herald(5,1)` calls, per direct source read of `heralded_cz.py`), and compose it into the larger pipeline via `Processor.add(mode_mapping, component)` (which accepts a mode offset) rather than `Circuit.add`. This is a structural break from the pure-`Circuit`-composition style weight-1 uses — expect (and budget time for) an actual API-shape change, not a drop-in extension of `build_full_circuit`.
+
+**Warning signs:** A weight-2 run whose output distribution has support on more than the expected valid dual-rail computational states (e.g. bunched/leaked states appearing in the *conditional* result, or the "success probability" always coming out as 1.0) is the signature of an unheralded raw unitary being run instead of the actual heralded gate.
+
+**Phase to address:** Implementation phase — verify by construction, before running anything else on it, that the assembled processor's `heralds` property is non-empty (`{4: 1, 5: 1}` in the bare-gate case; renumbered once embedded).
+
+---
+
+### Pitfall 14: Mode-index renumbering when embedding a heralded sub-block breaks the existing `2*k`/`2*k+1` qubit-layout convention
+
+**What goes wrong:**
+`Experiment.m` (the mode count "of interest," i.e. what input/output BasicStates are indexed against) is defined as `self._m - len(self.heralds)` — heralded modes are silently excluded from the external numbering once a herald is added. `heralded_cz`'s bare `build_experiment()` has `circuit_size == 6` internally but `exp.m == 4` externally. The existing weight-1 layout convention (`iqp_photonic_encoding.py`'s docstring: "qubit k occupies 2 adjacent spatial modes, port 2*k and 2*k+1") is written entirely in terms of a flat `Circuit(2n)` with no heralds anywhere — there is no established convention yet in this codebase for how ancilla/herald modes interleave with that `2*k`/`2*k+1` numbering once weight-2 introduces 2 extra internal (herald) modes per CZ application, on top of the 4 dual-rail modes (2 qubits × 2 rails, from `PBS`-converting each qubit's existing 2-mode polarization block).
+
+**Why it happens:** Weight-1's mode-numbering convention was designed and validated before any herald/ancilla modes existed in the picture; nothing in the existing code or its tests exercises non-contiguous or herald-excluded mode numbering, so there's no established, tested pattern to reuse — it has to be designed fresh, and a naive port of the `2*k`/`2*k+1` convention will not automatically map input BasicStates and output readouts correctly around the herald-mode gap unless the offset arithmetic is worked out explicitly and tested.
+
+**How to avoid:** Before writing the full weight-2 circuit, write a small, throwaway script (mirroring the direct-inspection style already used for weight-1's H/V port-labeling check) that builds a 2-qubit `Processor` embedding `heralded_cz` via `Processor.add(mode_mapping, ...)`, confirms `processor.m` and `processor.heralds` match expectations, and round-trips a known computational-basis dual-rail input through it before extending `fock_to_bitstring`/`basic_state_to_bitstring`-equivalent helpers to the weight-2 case.
+
+**Warning signs:** Any weight-2 output-parsing helper that assumes a flat, contiguous `2n`-mode layout (like weight-1's `2*k`/`2*k+1` helpers) will either crash on an unexpected mode count or, worse, silently misparse herald-adjacent modes as if they were qubit modes — the latter is the dangerous case, since it fails quietly the same way the H/V labeling bug did.
+
+**Phase to address:** Implementation phase, as an explicit calibration/round-trip check before building the full weight-2 pipeline — same pattern that caught the weight-1 H/V bug (empirical check prompted by the owner's own attempt, not an assumption from the API docs).
+
+---
+
+## Technical Debt Patterns (v2.1 addendum)
+
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Reusing weight-1's `run_full_circuit`/`Analyzer`-only pattern verbatim for weight-2 without also capturing `.performance` | Fast to write, matches existing code style | Silently ships a measurement that never actually reports the herald probability — defeats the milestone's stated purpose | Never — this milestone's core deliverable IS the success-probability number |
+| Citing literature's 1/9 or 2/27 figures instead of measuring `global_perf`/`.performance` directly | Saves a few lines of code | Directly contradicts the milestone's explicit goal ("measure `heralded_cz`'s actual success probability... rather than relying on secondhand literature figures") and the project's own recorded open item that this figure is unverified for this exact gate | Never for the final reported number; fine only as a sanity-check upper/lower bound while debugging |
+| Treating `logical_perf` as if it were purely the herald probability without checking the data-output-validity component is negligible | One fewer verification step | Risk of quietly re-introducing post-selection semantics into a number meant to represent pure heralding | Acceptable only after the negligibility check (Pitfall 11) has actually been run once and recorded |
+| Testing only computational-basis inputs, generalizing to "the success probability is 0.074, period" | Simpler test matrix | Overclaims input-independence without exhaustively checking the entangling-input case this circuit will actually see | Acceptable as an interim finding IF explicitly flagged as not-yet-exhaustive, per this project's honest-reporting norm |
+
+## Integration Gotchas (v2.1 addendum)
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|-------------------|
+| `catalog['heralded cz']` → existing `Circuit(2n)`-based pipeline | Grabbing `build_circuit()` (no heralds) and `circuit.add()`-splicing it in, matching the `HWP`/`WP`/`PBS` pattern already in `iqp_photonic_encoding.py` | Use `build_experiment()`/`build_processor()` and `Processor.add(mode_mapping, component)`; verify `processor.heralds` is non-empty post-assembly |
+| `Analyzer`/`Processor.probs()` output → weight-1-style `dist = {state: prob}` extraction | Reusing `run_full_circuit`'s dict-comprehension verbatim, which only reads `analyzer.distribution`/`res['results']` | Also capture `analyzer.performance` / `res['global_perf']` (and, if `compute_physical_logical_perf(True)` is set, `physical_perf`/`logical_perf` separately) as an explicit, separate return value |
+| Superposition test inputs for the weight-2 gate | Hand-building a `StateVector` at the gate's *logical* mode count (4) | Either stay on the `Analyzer`-over-`BasicState`-list pattern (matches `exp.m`, gets auto ancilla-fill), or if using `StateVector`/`SVDistribution` directly, pad to `circuit_size` (includes herald modes) and call `min_detected_photons_filter(...)` first |
+| Extending `exact_qubit_iqp_distribution` (weight-1, `iqp_photonic_encoding.py`) to include a ZZ term for weight-2 validation | Ad-hoc bolting a `Z_i*Z_j` phase term onto the existing per-qubit-loop implementation without re-deriving the bit-index/Z-eigenvalue convention already documented for weight-1 | Reuse the exact same `(1 if bit_k==0 else -1)` Z-eigenvalue convention per qubit already established for weight-1, and add `thetas_zz[(i,j)] * (1 if bit_i==bit_j else -1)` (`Z_i⊗Z_j` eigenvalue is `+1` when bits agree, `-1` when they differ) as an additional phase term — keep it in the same closed-form numpy reference function so it stays independently checkable against Perceval's output the same way ENC-04 already validates weight-1 |
+| Reference-distribution semantics: qubit-side ZZ term vs. photonic-side conditional-on-herald output | Comparing the qubit-side *exact unitary* CZ/ZZ prediction directly against the photonic side's *unconditional* (raw, includes-failure) distribution | The qubit-side exact reference must be compared against the photonic side's **conditional-on-herald-success** distribution (`analyzer.distribution` / `probs()['results']`), since that's the distribution the herald's acceptance already selects for being the "ideal CZ" output; the success probability itself is a separate, additional number to report alongside the TVD, not folded into it |
+
+## "Looks Done But Isn't" Checklist (v2.1 addendum)
+
+- [ ] **Weight-2 measurement code**: often reports only a normalized output distribution — verify a distinct, explicitly-labeled success-probability number (`.performance` or `global_perf`) is also captured and printed/logged.
+- [ ] **Weight-2 circuit assembly**: often "runs without error" even when heralds were never attached — verify `processor.heralds` (or equivalent) is non-empty immediately after assembly, before running anything downstream.
+- [ ] **Weight-2 validation (TVD-style)**: often compares against the wrong side of the herald conditioning — verify the qubit-side exact reference is being compared against the *conditional* photonic distribution, and that the success probability is reported as a separate number, not baked into or confused with the TVD result.
+- [ ] **Success-probability claim**: often generalizes from one input case — verify it was checked (or explicitly flagged as un-checked) against the actual `|+>`-derived, potentially-entangling inputs this circuit produces, not only bare computational-basis states.
+- [ ] **Mode-index bookkeeping post-herald-embedding**: often silently assumes the old flat `2*k`/`2*k+1` convention still holds — verify with an explicit round-trip check (build → run known input → confirm output parses back to the expected bitstring) before trusting any output-parsing helper extended from weight-1.
+
+## Pitfall-to-Phase Mapping (v2.1 addendum)
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|---------------|
+| 9. Conflating success probability with conditional distribution | Implementation | Code explicitly returns/prints `.performance` (or `global_perf`) as its own labeled output, distinct from the distribution dict |
+| 10. `StateVector` input skipping ancilla auto-injection | Implementation (only if `StateVector`/`SVDistribution` input is used at all) | A superposition test input round-trips without `AssertionError`/`ValueError`; if hit once during dev, documented as the reason `Analyzer`-over-`BasicState` was preferred |
+| 11. Heralding vs. post-selection semantic drift (`logical_perf` bundling) | Validation | A recorded check that malformed/bunched-data-output probability mass is negligible for the inputs actually used, before citing `logical_perf`/`global_perf` as "the herald probability" |
+| 12. Input-dependence of the measured success probability | Validation | Success probability measured (not assumed) across at least: computational basis, and the actual `|+>`-derived inputs the full pipeline produces; result explicitly labeled with which inputs were tested |
+| 13. `build_circuit()` (no herald) used by mistake instead of `build_experiment()`/`build_processor()` | Implementation | `processor.heralds` non-empty check run and recorded before any downstream measurement |
+| 14. Mode-index renumbering breaking the weight-1 layout convention | Implementation | A throwaway calibration script (mirroring the weight-1 H/V check) round-trips a known input through the embedded weight-2 block before the full pipeline is built |
+
+## Sources (v2.1 addendum)
+
+- `venv/Lib/site-packages/perceval/components/core_catalog/heralded_cz.py` (installed `perceval-quandela` package, this repo's venv) — direct source read: confirms `build_circuit()` has no herald, `build_experiment()` adds `add_herald(4,1)`/`add_herald(5,1)`, article ref arXiv:quant-ph/0110144 (Knill 2002).
+- `venv/Lib/site-packages/perceval/components/experiment.py` — direct source read: `add_herald` sets both input AND output expected photon count by default (`location=IN_OUT`); `Experiment.m = self._m - len(self.heralds)`; the `with_input` multiple-dispatch table for `FockState`/`BasicState` (auto-fills herald ancillas + auto-sets `min_detected_photons_filter`) vs. `StateVector`/`SVDistribution` (requires full `circuit_size`, no auto-filter).
+- Direct empirical runs against `perceval.components.catalog['heralded cz']` in this repo's venv (2026-08-05): `global_perf`/`analyzer.performance` measured as ≈0.0740740740740741 (= 2/27, matching the literature figure for the *heralded* Knill CZ variant, independently reproduced rather than cited secondhand) across all 4 computational-basis dual-rail inputs and one spot-checked superposition input; `physical_perf == 1.0` in all cases (no photon loss in the unitary evolution itself — the entire cost is the herald/logical filter).
+- `docs/iqp-photonic-encoding.md` (this repo) — existing project derivation of the `PBS → heralded_cz → PBS` weight-2 construction and the CZ/ZZ operator identity (`exp(iθZ_iZ_j) = CZ · exp(iθZ_i) · exp(iθZ_j)` up to global phase at θ=π/4); already correctly distinguishes heralding from post-selection conceptually, cross-checked here at the code/API level.
+- `iqp_photonic_encoding.py` (this repo) — existing weight-1 implementation and its documented mode-layout/bit-ordering conventions, used as the baseline for identifying where weight-2 diverges structurally.
+
+---
+*Pitfalls research addendum for: heralded two-qubit photonic gate (Perceval `core_catalog.heralded_cz`), v2.1 weight-2 milestone*
+*Researched: 2026-08-05*
