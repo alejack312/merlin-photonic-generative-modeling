@@ -175,3 +175,62 @@ Per this repo's CLAUDE.md self-explanation checkpoints, the owner was asked to e
 - *"The CZ is a special instance of the ZZ gate when the ZZ-dial is set to pi/4 and there is a small correction applied to every qubit."* — correct, matches the operator identity derived above (`exp(iπ/4·Z_iZ_j) = CZ · exp(iπ/4·Z_i) · exp(iπ/4·Z_j)` up to global phase).
 - *"The operators on different qubits' modes automatically commute because the gates are 1-mode components that have no way to touch the other qubit's mode. If it is the same qubit, they commute because they are diagonal matrices in the same fixed basis."* — correct, and correctly distinguishes the two different reasons (disjoint tensor factors vs. diagonal-matrix multiplication) rather than conflating them.
 - *"The hadamard-conjugation makes the invisible phase convert into a visible difference, like `|+⟩` converting into `|0⟩` or `|1⟩`."* — the core mechanism (phase → visible population difference) is correct; the closing analogy overstates it into a deterministic collapse. The corrected version: the post-conjugation state is `α|H⟩+β|V⟩` with `|α|²=sin²θ`, `|β|²=cos²θ` — a superposition with unequal weights, not a collapse to a single definite state, except at the special angles `θ=0` or `θ=π`.
+
+## ENC-03: Basis Correspondence
+
+### Owner's Attempt
+
+The owner was asked to sketch, for polarization encoding: (1) the reverse map (measured `BasicState` → bitstring), (2) the failure/out-of-subspace case, (3) a falsifiability statement. First response: "I'm not sure how to answer these three questions" — each was then broken into a smaller, more concrete guided question rather than answered directly, per this repo's attempt-first gating.
+
+**1. Reverse direction.** Guided question: given the two valid readout pairs `(1,0)` and `(0,1)`, which is `H` and which is `V`? Owner's answer: *"(0, 1) is H and (1, 0) is V."* This was checked directly — not assumed — with a bare `PBS()` and no other gates, pure `|H⟩` and pure `|V⟩` input:
+
+```
+H -> {'|0,1>': 1.0, '|1,0>': 0.0}
+V -> {'|0,1>': ~0,  '|1,0>': 1.0}
+```
+
+**Confirmed correct, and it caught a real bug.** `iqp_photonic_encoding.py`'s Wave 1 `basic_state_to_bitstring` helper had this backwards (`(1,0)→"H"`, `(0,1)→"V"`) — self-consistent within its own labels (no Wave 1 test result was ever numerically wrong), but the labels didn't match true physical polarization. Fixed in this plan across the module, its tests, and ENC-01's derivation text (see the "Correction" note under Ingredient 1, and the commit history) — all 12 pre-existing tests still pass after the relabeling, since it's a consistent rename, not a physics change.
+
+**2. Failure case.** Guided question: what photon-count patterns in a qubit's 2-mode pair are possible besides the two valid single-photon ones? Owner's answer: *"Are you referring to (0,0) and (1,1)? Probably report 'X% of outcomes were invalid' as its own number."* Correct disqualifying criterion (total photon count ≠ 1) and correct choice of reporting policy, but incomplete enumeration — missing the bunched cases `(2,0)`/`(0,2)` (two photons in the *same* mode, distinct from `(1,1)`'s one-in-each). Full set of four invalid patterns and the reporting-policy choice are below.
+
+**3. Falsifiability.** Guided question: what should you get back if you forward-map a bitstring then immediately reverse-map it? Owner's answer: *"You should get the same bitstring. Quantum operations should be unitary, meaning they are reversible..."* — correct mechanism and correct expected behavior; this is exactly `tests/test_iqp_photonic_encoding.py`'s `test_enc03_round_trip`, and it's the same style of check that caught the H/V bug in point 1.
+
+**Feynman-technique explanation of the four invalid patterns** (owner requested this after being unable to enumerate them precisely): our bit-reading rule is "exactly one photon, in one of two spots" — the same as saying "the answer is heads or tails, read off which of two boxes has the one coin." That statement presumes exactly one coin. Four ways the premise breaks:
+- `(0,0)` — no coin in either box (photon lost — absorbed, or missed by an inefficient detector in a real device).
+- `(1,1)` — a coin in *each* box (an extra photon, one landing in each mode, not "the" photon choosing a side).
+- `(2,0)`/`(0,2)` — both coins bunched into the *same* box (the Hong-Ou-Mandel-style bunching phenomenon from `perceval_fluency_demo.py`'s Phase 8 demo, applied to two photons that should have gone to different modes).
+
+None of these are physics errors — they're outcomes our translation rule was never defined to answer. In this project's specific ideal, lossless circuits, none of the four ever actually occur (confirmed empirically in Plan 09-01: exactly zero leaked probability across every tested case, since photon number is conserved per-qubit through passive linear optics with no cross-qubit mixing) — but the rule must still be stated, since a noisier device model or a future weight-2 gate (which briefly mixes two qubits' modes) could produce them.
+
+### Forward Map
+
+`bitstring_to_fock(bitstring, n)`: bit `'0'` → photon in `{P:H}`, bit `'1'` → photon in `{P:V}`, one photon per qubit on its own polarization-carrying mode (port `2k`), vacuum on its partner mode (port `2k+1`) — directly reusing ENC-01's `|0⟩=|H⟩`, `|1⟩=|V⟩` convention and `2n`-mode layout. This is Perceval's own documented convention for building a polarized `BasicState` from a logical bit register (`09-RESEARCH.md`'s basis-correspondence table), not a new rule invented here.
+
+### Reverse Map and Out-of-Subspace Handling
+
+`fock_to_bitstring(basic_state, n)` reads a *post-readout* (`PBS`-converted) `BasicState`, checks each qubit's `(port_2k, port_2k+1)` pair against the two valid patterns confirmed above (`(0,1)='0'`, `(1,0)='1'`), and returns `None` — not a guessed bitstring — the moment any pair matches one of the four invalid patterns (`(0,0)`, `(1,1)`, `(2,0)`, `(0,2)`), even if every other qubit in the same register reads validly (`tests/test_iqp_photonic_encoding.py`'s `test_enc03_out_of_subspace_in_larger_register`).
+
+**Reporting policy** (owner's choice, adopted): when `fock_to_bitstring` returns `None` for a sampled outcome, that outcome's probability mass is reported as an explicit residual figure ("X% of outcomes were invalid"), not silently discarded and renormalized into the remaining valid outcomes. This matches `09-CONTEXT.md`'s standing instruction to report mismatches/caveats honestly rather than smooth them over (the same pattern already used for v1.0's GEN-07 and Phase 7's neighbor-locality result) — a silent renormalization would hide exactly the information (how often the scheme leaves the computational subspace) that a future implementation phase would need to know.
+
+### Falsifiability
+
+**Claim:** for every bitstring `b`, `fock_to_bitstring(run_readout(n, bitstring_to_fock(b, n)), n) == b`.
+
+**What would contradict it:** any bitstring for which that round trip returns a *different* bitstring, or `None`, when no diagonal-layer or conjugation gate has been applied (i.e. the identity case — pure forward-encode, pure `PBS` readout, pure decode). This is a live, checkable claim, not an analogy — `tests/test_iqp_photonic_encoding.py`'s `test_enc03_round_trip` runs it for `n=1,2,3` across multiple bitstrings, and it is exactly the kind of check that surfaced the H/V labeling bug in this plan (there, the "same bitstring back" property held for the *product-distribution* test only because both sides of that comparison shared the same — backwards — convention; a direct round-trip test against Perceval's raw physical behavior, as run here, is what actually pins the convention down).
+
+### Worked Example
+
+```python
+from iqp_photonic_encoding import bitstring_to_fock, run_readout, fock_to_bitstring
+
+fock_state = bitstring_to_fock("10", n=2)          # |{P:V},0,{P:H},0>
+readout_state = run_readout(n=2, input_state=fock_state)  # |1,0,0,1>
+decoded = fock_to_bitstring(readout_state, n=2)    # "10"  (round trip holds)
+
+# Out-of-subspace: a bunched outcome for qubit 1, valid for qubit 0
+import perceval as pcvl
+invalid_state = pcvl.BasicState([0, 1, 2, 0])
+fock_to_bitstring(invalid_state, n=2)  # None -- qubit 0 valid, qubit 1 bunched
+```
+
+Verified by `pytest tests/test_iqp_photonic_encoding.py -v` — 24/24 passed, including 7 round-trip cases (`n=1,2,3`) and 5 out-of-subspace cases (all four invalid patterns individually, plus one embedded in a larger valid register).

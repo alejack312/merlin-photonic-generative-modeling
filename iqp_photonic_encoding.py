@@ -190,3 +190,54 @@ def basic_state_to_bitstring(state, n):
         else:
             return None
     return "".join(bits)
+
+
+# ENC-03: basis correspondence (bitstring <-> Fock state), both directions.
+
+
+def bitstring_to_fock(bitstring, n):
+    """Forward map (ENC-03): '0' -> |H>, '1' -> |V>, one photon per qubit on
+    its own polarization-carrying mode, vacuum on its partner mode -- matches
+    ENC-01's |0>=|H>, |1>=|V> convention and this module's 2n-mode layout.
+    Returns a raw (pre-circuit) pcvl.BasicState, not yet converted through
+    build_readout_circuit's PBS."""
+    assert len(bitstring) == n
+    assert all(b in "01" for b in bitstring)
+    parts = []
+    for b in bitstring:
+        parts.append("{P:H}" if b == "0" else "{P:V}")
+        parts.append("0")
+    return pcvl.BasicState("|" + ",".join(parts) + ">")
+
+
+def run_readout(n, input_state):
+    """Runs input_state through build_readout_circuit(n) (PBS conversion
+    only, no diagonal/conjugation gates) and returns the single output
+    BasicState with probability ~1. For a pure computational-basis input
+    (exactly one polarization state per qubit, no superposition), the PBS
+    conversion is deterministic -- exactly one output state should have
+    probability 1. Returns None if no such state is found (would indicate an
+    input that wasn't a pure computational-basis state)."""
+    circuit = build_readout_circuit(n)
+    processor = pcvl.Processor("SLOS", circuit)
+    analyzer = pcvl.algorithm.Analyzer(processor, [input_state], "*")
+    analyzer.compute()
+    for state, prob in zip(analyzer.output_states_list, analyzer.distribution[0]):
+        if np.isclose(complex(prob).real, 1.0, atol=1e-9):
+            return state
+    return None
+
+
+def fock_to_bitstring(basic_state, n):
+    """Reverse map (ENC-03): a 2n-mode post-readout BasicState (each qubit
+    pair (0,1)='0'=H or (1,0)='1'=V) -> an n-character '0'/'1' bitstring.
+    Returns None for any qubit pair outside the single-photon computational
+    subspace -- (0,0) [photon lost], (1,1) [extra photon, one per mode],
+    (2,0)/(0,2) [bunched photons] -- the out-of-subspace case ENC-03 requires
+    an explicit answer for, even though this module's own ideal, lossless
+    circuits never actually produce these outcomes (confirmed empirically in
+    Plan 09-01: exactly zero leaked probability for every tested case)."""
+    hv = basic_state_to_bitstring(basic_state, n)
+    if hv is None:
+        return None
+    return hv.replace("H", "0").replace("V", "1")

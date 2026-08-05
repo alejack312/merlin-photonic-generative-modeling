@@ -14,10 +14,13 @@ from iqp_photonic_encoding import (
     build_readout_circuit,
     build_full_circuit,
     run_full_circuit,
+    run_readout,
     all_h_input,
     expected_single_qubit_probs,
     expected_joint_distribution,
     basic_state_to_bitstring,
+    bitstring_to_fock,
+    fock_to_bitstring,
 )
 
 TOLERANCE = 1e-9
@@ -122,3 +125,36 @@ def test_module_functions_independently_callable():
     assert build_conjugation_circuit(n).m == 2 * n
     assert build_readout_circuit(n).m == 2 * n
     assert build_full_circuit(n, [0.1, 0.2]).m == 2 * n
+
+
+@pytest.mark.parametrize("n,bitstring", [(1, "0"), (1, "1"), (2, "00"), (2, "01"), (2, "10"), (2, "11"), (3, "101")])
+def test_enc03_round_trip(n, bitstring):
+    """ENC-03's falsifiability claim: forward map -> physical PBS readout ->
+    reverse map must recover the original bitstring exactly. This is the same
+    check that caught Plan 09-02's H/V port-labeling bug -- a real example of
+    the correspondence being checkable, not just asserted."""
+    fock_state = bitstring_to_fock(bitstring, n)
+    readout_state = run_readout(n, fock_state)
+    assert readout_state is not None
+    decoded = fock_to_bitstring(readout_state, n)
+    assert decoded == bitstring
+
+
+@pytest.mark.parametrize(
+    "invalid_pair",
+    [(0, 0), (1, 1), (2, 0), (0, 2)],
+)
+def test_enc03_out_of_subspace_returns_none(invalid_pair):
+    """Every non-single-photon pair pattern for a qubit ((0,0)=lost,
+    (1,1)=extra photon split across both modes, (2,0)/(0,2)=bunched) must
+    decode to None, not a wrong-but-plausible-looking bitstring."""
+    state = pcvl.BasicState(list(invalid_pair))
+    assert fock_to_bitstring(state, 1) is None
+
+
+def test_enc03_out_of_subspace_in_larger_register():
+    """An invalid pair for one qubit must invalidate the whole reading, even
+    when the other qubits in the same register are perfectly valid."""
+    # qubit 0 valid ('0'=H=(0,1)), qubit 1 invalid (bunched, (2,0))
+    state = pcvl.BasicState([0, 1, 2, 0])
+    assert fock_to_bitstring(state, 2) is None
