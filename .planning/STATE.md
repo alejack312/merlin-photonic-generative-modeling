@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-30)
+See: .planning/PROJECT.md (updated 2026-08-05)
 
-**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v1.0 shipped 2026-07-29. Phase 7 (Mechanism Validation) closed 2026-07-30. v2.0 (IQP → Photonic Encoding) roadmap created 2026-07-30 — 2 phases (8: Literature Scoping & Prerequisites, 9: Encoding Design), 11 requirements, 100% coverage. **v2.0 milestone complete as of 2026-08-05** (Phases 8-9 both done).
+**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier. (v2.0's core value: determine whether IQP's structural properties survive translation into a photonic ansatz, defensibly and honestly.)
+**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05 — 2 phases (8: Literature Scoping & Prerequisites, 9: Encoding Design), 11/11 requirements, both milestones archived. No milestone currently in progress.
 
 ## Current Position
 
-Milestone: v2.0 IQP → Photonic Encoding — **complete** 2026-08-05 (started 2026-07-30; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30)
-Phase: 9 (Encoding Design) — complete, all 4 plans executed, final self-explanation checkpoint passed
-Plan: 4 of 4 complete (09-01 ENC-01, 09-02 ENC-03, 09-03 ENC-04, 09-04 ENC-02 + final assembly)
-Status: Phase 9 delivered `docs/iqp-photonic-encoding.md` — a complete, owner-attempted, equation-derived mapping from IQP's structure onto Perceval's polarization-encoding primitives. Owner chose polarization encoding (personal Sorbonne coursework). Weight-1 IQP generators: fully derived (`WP(θ,0) = exp(iθZ)` exactly), implemented (`iqp_photonic_encoding.py`), and empirically validated (TVD ~1e-16 against the exact qubit-side distribution at n=2,3 — ten orders of magnitude under the owner's chosen 1e-6 threshold). Weight-2 generators: derived on paper only (fixed angle π/4 via `heralded_cz`), explicitly flagged throughout as untested — the owner correctly resisted extrapolating the weight-1 result to weight-2 during the Wave 3 checkpoint. A real H/V port-labeling bug from Wave 1 (self-consistent but backwards relative to true physical polarization) was caught and fixed during Wave 2's attempt-first checkpoint. ENC-02 positions the mapping against Douce et al. (2017) with both a favorable contrast (native single-qubit conjugation) and an honest parallel (weight-2's probabilistic gate inherits the same measurement-based character as Douce's gadget). Full test suite: 85/85 passing, no regressions.
+Milestone: **None in progress.** v2.0 IQP → Photonic Encoding shipped 2026-08-05 (tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
+Phase: None active. Last completed: Phase 9 (Encoding Design), verified via UAT 2026-08-05 (8/8 tests passed).
+Plan: None active.
+Status: Both shipped milestones fully archived to `.planning/milestones/`. Fresh `.planning/REQUIREMENTS.md` will be created by `/gsd:new-milestone` when the next milestone starts. Full v2.0 detail: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-MILESTONE-AUDIT.md`.
 
-Progress: [██████████] 100% of v1.0 (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed. v2.0: [██████████] both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied.
+Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05.
 
 ## Performance Metrics
 
@@ -54,20 +54,21 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 - Phase 7 added 2026-07-29: Mechanism Validation — neighbor-locality test (Jacobian-based) + sigma re-sweep against the K=462 grid, scoped from the v1.0 self-audit's tracked backlog. Not yet assigned to a milestone; added via `/gsd:add-phase` continuing numbering from v1.0 rather than restarting.
 - v2.0 IQP → Photonic Encoding started 2026-07-30 via `/gsd:new-milestone`, continuing phase numbering from Phase 7 (new phases start at 8).
 - v2.0 roadmap created 2026-07-30: exactly 2 phases (8: Literature Scoping & Prerequisites; 9: Encoding Design), derived directly from this milestone's 11 v1 requirements — matching the source plan doc's own Phase 0/Phase 1 split, not the doc's full 5-phase scope. Phase 9 is sequentially dependent on Phase 8's LIT-04 go/no-go verdict. 100% requirement coverage validated (11/11 mapped, no orphans). v2 requirements (IMPL-01/02, STUDY-01/02, WRITE-01) explicitly deferred, not phased.
+- v2.0 shipped 2026-08-05 via `/gsd:complete-milestone`, tagged `v2.0`. `.planning/ROADMAP.md` and `REQUIREMENTS.md` archived to `.planning/milestones/v2.0-*`; fresh `REQUIREMENTS.md` will be created by the next `/gsd:new-milestone` run. Phase numbering continues from 9 for any future milestone (next phases start at 10).
 
 ### Pending Todos
 
-- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`, Phase 7 addendum already written in) — owner plans to send 2026-07-31 (still open)
+- Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`, Phase 7 addendum already written in) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: `/gsd:audit-milestone` or `/gsd:complete-milestone` to close out v2.0, or start planning a future milestone covering the deferred v2 requirements (IMPL-01/02, STUDY-01/02, WRITE-01) if the owner wants to continue implementing the weight-2 case and running a larger-scale study
-- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; v2.0's deferred Phases 2-4 (implementation, trainability/hardness study, write-up) — now well-scoped by Phase 9's stated limitations (weight-2 `heralded_cz` needs actual implementation and testing; general-n scaling untested)
+- Next: `/gsd:new-milestone` to start planning a future milestone, e.g. covering the deferred v2 requirements (IMPL-01/02, STUDY-01/02, WRITE-01) if the owner wants to continue implementing the weight-2 case and running a larger-scale study
+- Backlog (not blocking, candidates for a future milestone): BMK-03 apples-to-apples QGAN comparison; v2.0's deferred v2 requirements (implementation, trainability/hardness study, write-up) — well-scoped by Phase 9's stated limitations (weight-2 `heralded_cz` needs actual implementation and testing; general-n scaling untested)
 
 ### Blockers/Concerns
 
-None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings, the Phase 8 LIT-04 contingency) are resolved or honestly documented as closed — see `.planning/milestones/v1.0-ROADMAP.md` and `.planning/milestones/v1.0-MILESTONE-AUDIT.md`. v2.0 milestone (Phases 8-9) is now fully complete with no open blockers.
+None open. All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings, the Phase 8 LIT-04 contingency, Phase 9's missing formal verification) are resolved or honestly documented as closed — see `.planning/milestones/v1.0-ROADMAP.md`, `v1.0-MILESTONE-AUDIT.md`, `v2.0-ROADMAP.md`, and `v2.0-MILESTONE-AUDIT.md`. Both milestones are now fully complete, archived, and tagged, with no open blockers.
 
 ## Session Continuity
 
 Last session: 2026-08-05
-Stopped at: Phase 9 (Encoding Design) fully complete — all 4 plans executed, verified, and committed (`27925f7`, `396dd5a`, `b87b2a2`, `773756f`, `15a64ed`, `c341af0`, `541145d`, `0315ba8`). `docs/iqp-photonic-encoding.md` assembled as one coherent document (intro, ENC-01 through ENC-04, Conclusion and Open Questions). Owner chose polarization encoding; weight-1 generators fully derived/implemented/validated (TVD ~1e-16 at n=2,3); weight-2 derived on paper only, explicitly untested. A real H/V port-labeling bug from Wave 1 was caught during Wave 2 and fixed across the module, tests, and docs. Full test suite: 85/85 passing. Final whole-document self-explanation checkpoint passed after several correction rounds (documented in `09-04-SUMMARY.md` and within the doc's own checkpoint sections). `.planning/REQUIREMENTS.md` (ENC-01 through ENC-05) and `.planning/ROADMAP.md` (Phase 9, Progress table) updated to reflect completion. v2.0 milestone is complete.
-Resume by: run `/gsd:audit-milestone` to formally audit v2.0 before archiving, or `/gsd:complete-milestone` to archive directly, or start a new milestone/phase for the deferred v2 requirements (weight-2 implementation, trainability study, write-up) if the owner wants to continue. The two owner-only v1.0 todos (flip repo public, send technical note to Vincent) remain open and are independent of this milestone.
+Stopped at: v2.0 milestone (Phases 8-9) fully complete, audited (`v2.0-MILESTONE-AUDIT.md`, tech_debt closed via Phase 9 UAT), and archived. `/gsd:verify-work 9` independently re-verified all 8 Phase 9 deliverables live (code re-run, not just doc claims) — 8/8 passed, including a fresh self-explanation checkpoint that needed two follow-up rounds on the basis-correspondence sub-question. `/gsd:complete-milestone` archived `.planning/ROADMAP.md`/`REQUIREMENTS.md` to `milestones/v2.0-*`, updated `PROJECT.md` (full evolution review), reset `STATE.md`, and tagged `v2.0`.
+Resume by: run `/gsd:new-milestone` to start planning the next milestone — candidates are the deferred v2 requirements (weight-2 implementation, trainability study, write-up) per `PROJECT.md`'s "Next Milestone Goals". The two owner-only v1.0 todos (flip repo public, send technical note to Vincent) remain open and are independent of any future milestone.

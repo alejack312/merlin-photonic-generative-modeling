@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Photonic Generator** — Phases 1-6 (shipped 2026-07-29)
-- 🚧 **v2.0 IQP → Photonic Encoding** — Phases 8-9 (in progress, started 2026-07-30)
+- ✅ **v2.0 IQP → Photonic Encoding** — Phases 8-9 (shipped 2026-08-05)
 
 ## Phases
 
@@ -32,57 +32,22 @@ Plans:
 - [x] 07-01-PLAN.md — Neighbor-locality test (Method B, Jacobian-based): `generator/neighbor_locality.py` + `neighbor_locality_test.py`, 20 fresh random parameter draws + 1 trained-checkpoint supplementary draw
 - [x] 07-02-PLAN.md — Sigma re-sweep: `sigma_resweep.py`, same SIGMA_GRID as Phase 4 re-trained against the K=462 natural-order grid, compared side-by-side against Phase 4's K=400 numbers
 
-**Details:**
-Two experiments, in this order:
-1. **Neighbor-locality test** — does `NaturallyOrderedGenerator`'s output have the property the correspondence-fix mechanism assumes: that list-neighbors (under the radius/center-of-mass ordering) move together more than random pairs when the circuit's parameters are nudged? Method B (Jacobian-based): compute `J = ∂q/∂θ` via autograd at several random parameter draws, compare `cosine_similarity(J[i,:], J[j,:])` for adjacent vs. random index pairs.
-2. **Sigma re-sweep** — rerun Phase 4's `sweep.py` pattern (same `SIGMA_GRID`, same resumable-checkpoint structure) against the K=462 natural-order grid instead of the old K=400 grid, to check whether sigma=0.1 is still the best choice or whether the never-re-swept bandwidth was masking/inflating the correspondence fix's apparent benefit.
-
-Not yet assigned to a v1.1 or later milestone — added directly to the roadmap per owner's explicit `/gsd:add-phase` request, continuing phase numbering from v1.0 rather than restarting at 1.
-
 **Results (measured, not interpreted — owner's job per this repo's CLAUDE.md):**
 - Neighbor-locality: pooled test **fails** the locked two-condition bar (`mean_diff=0.0096` vs. `min_effect=0.10`; p=0.00835 clears significance alone but the effect size doesn't). 13/20 draws individually show the expected direction. Trained checkpoint also fails (`mean_diff=0.0402`).
 - Sigma re-sweep: K=462 argmax is still sigma=0.1 (`ring_mass=0.7145`) — no other tested sigma beats it. Same bandwidth already used for every reported K=462 result.
 - Owner interpretation pending in both `results/phase7_*_summary.md` files.
 
-### Phase 8: Literature Scoping & Prerequisites
+<details>
+<summary>✅ v2.0 IQP → Photonic Encoding (Phases 8-9) — SHIPPED 2026-08-05</summary>
 
-**Goal:** Determine whether a discrete-variable (DV, Fock-space) linear-optical construction of IQP is worth designing at all — and confirm the technical/reference prerequisites that any subsequent design work depends on.
-**Depends on:** None (new milestone; builds on v1.0's already-installed MerLin/Perceval environment, no code dependency on Phase 7)
-**Requirements:** LIT-01, LIT-02, LIT-03, LIT-04, PREQ-01, PREQ-02
-**Plans:** 4 plans (1 wave, fully parallel; 08-04 added as gap closure)
+- [x] Phase 8: Literature Scoping & Prerequisites (4/4 plans) — completed 2026-08-04, LIT-04 verdict: **Go**
+- [x] Phase 9: Encoding Design (4/4 plans) — completed 2026-08-05, polarization encoding, TVD ~1e-16 at n=2,3
 
-Plans:
-- [x] 08-01-PLAN.md — Literature scoping & go/no-go verdict: Douce et al. summary (LIT-02), extended literature search (LIT-01), owner-authored go/no-go verdict (LIT-04) -> `docs/iqp-lit-scoping.md` — **Go**
-- [x] 08-02-PLAN.md — PREQ-01 Perceval fluency demo: attempt-first checkpoint, then manual Circuit/PS/BS/BasicState/Analyzer demo verified against closed-form predictions -> `perceval_fluency_demo.py`
-- [x] 08-03-PLAN.md — PREQ-02 baseline doc: compile sibling-project IQP structure/hardness + barren-plateau trainability notes -> `docs/iqp-baseline.md`
-- [x] 08-04-PLAN.md — Gap closure: PS (phase shifter) was never exercised in the PREQ-01 demo; added a BS.H()->PS(theta)->BS.H() Mach-Zehnder example with a closed-form interference check -> `perceval_fluency_demo.py`, `tests/test_perceval_fluency_demo.py`
+Full detail: [`.planning/milestones/v2.0-ROADMAP.md`](milestones/v2.0-ROADMAP.md)
+Requirements: [`.planning/milestones/v2.0-REQUIREMENTS.md`](milestones/v2.0-REQUIREMENTS.md)
+Audit: [`.planning/milestones/v2.0-MILESTONE-AUDIT.md`](milestones/v2.0-MILESTONE-AUDIT.md)
 
-**Success Criteria:**
-1. A go/no-go verdict on Phase 9 (encoding design) is written down explicitly, citing both constructive and disconfirming search passes, with the stated time-box honored — "not ready" counted as a valid, reportable outcome if nothing viable is found (LIT-01, LIT-04)
-2. Douce et al. (PRL 118, 070503, 2017, arXiv:1607.07605) has been read in full text (not abstract-level), with its CV-analogue construction (commuting diagonal gates, Hadamard-basis conjugation) summarized well enough to correctly position a DV design against it (LIT-02)
-3. MerLin's reproduced-papers catalog is confirmed checked for IQP-adjacency — already complete, carried forward for coverage (LIT-03)
-4. A working manual Perceval circuit (`Circuit`, `PS`, `BS`, `BasicState`, `Analyzer`) is built and run without the `QuantumLayer.simple()` wrapper, demonstrating low-level API fluency (PREQ-01)
-5. Prior IQP + barren-plateau notes/results are compiled into a single reference doc (`docs/iqp-baseline.md`) as the qubit-side baseline for later comparison (PREQ-02)
-
-### Phase 9: Encoding Design
-
-**Goal:** Produce a defensible, on-paper mapping from IQP's structure onto Perceval's DV/Fock-space primitives — the milestone's actual novel-contribution deliverable.
-**Depends on:** Phase 8 — contingent entirely on LIT-04's verdict being "go"; does not start if Phase 8 concludes "not ready"
-**Requirements:** ENC-01, ENC-02, ENC-03, ENC-04, ENC-05
-**Plans:** 4 plans (4 waves, sequential — attempt-first cadence per `09-CONTEXT.md`: each of ENC-01/ENC-03/ENC-04 gates on an owner attempt + self-explanation checkpoint before the next piece starts)
-
-Plans:
-- [x] 09-01-PLAN.md — ENC-01 ingredient-level mapping: owner picked polarization encoding + attempted mapping, Claude wrote equation-level derivation + n=2-3 worked example -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
-- [x] 09-02-PLAN.md — ENC-03 basis correspondence: owner attempted bidirectional bitstring<->Fock mapping (caught a real H/V port-labeling bug from Wave 1 in the process), Claude wrote falsifiable correspondence incl. out-of-subspace handling -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
-- [x] 09-03-PLAN.md — ENC-04 validation plan + toy check: owner attempted validation design (TVD, threshold 1e-6), Claude implemented and actually ran the n=2,3 photonic-vs-qubit distribution comparison (TVD ~1e-16) -> `docs/iqp-photonic-encoding.md`, `iqp_photonic_encoding.py`
-- [x] 09-04-PLAN.md — ENC-02 positioning against Douce et al. (hedged tone) + final document assembly and phase paperwork -> `docs/iqp-photonic-encoding.md`
-
-**Success Criteria:**
-1. An on-paper mapping from IQP's commuting diagonal gates + Hadamard-basis conjugation to phase shifters, beamsplitters, and photon-number measurement is written in raw Perceval vocabulary, not MerLin's high-level builder DSL (ENC-01)
-2. The mapping explicitly states how it differs from and extends the Douce et al. CV precedent, positioned as a distinct DV contribution rather than a restatement (ENC-02)
-3. A concrete, falsifiable basis correspondence is stated between qubit computational-basis bitstrings and photonic Fock-state/photon-count outcomes — not a hand-wavy analogy (ENC-03)
-4. A stated, checkable-in-principle validation plan (e.g., a small-scale classical comparison) exists, even though it won't run until a future implementation phase (ENC-04)
-5. The mapping is documented in `docs/iqp-photonic-encoding.md`, and the owner can explain it unaided — same bar as the v1.0 self-explanation checkpoints (ENC-05)
+</details>
 
 ## Progress
 
@@ -96,6 +61,6 @@ Plans:
 | 6. Documentation & Publication | v1.0 | 2/2 | Complete | 2026-07-29 |
 | 7. Mechanism Validation | (unassigned) | 2/2 | Complete — verified 10/10, owner interpretation pending | 2026-07-30 |
 | 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
-| 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3 | 2026-08-05 |
+| 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3, UAT 8/8 | 2026-08-05 |
 
-v2.0 roadmap created 2026-07-30, continuing phase numbering from Phase 7 (starts at 8) per owner's explicit scoping decision. Phase 8 planned 2026-07-31: 3 plans, 1 wave (fully parallel — no cross-plan file overlap). Phase 8 completed 2026-08-04: all 4 plans executed (08-04 added as gap closure for PREQ-01's missed PS primitive), fully verified (10/10 must-haves). LIT-04 verdict: **Go** — Phase 9 (Encoding Design) is unblocked. Phase 9 planned 2026-08-05: 4 plans, 4 waves, sequential (attempt-first cadence — ENC-01 -> ENC-03 -> ENC-04 each gate on an owner attempt + self-explanation checkpoint, ENC-02+ENC-05 assembled in the final wave). Phase 9 completed 2026-08-05: polarization encoding chosen by the owner; weight-1 IQP generators fully derived, implemented, and empirically validated (TVD ~1e-16 against the exact qubit-side distribution at n=2,3, ten orders of magnitude under the 1e-6 threshold); weight-2 generators derived on paper only (fixed angle pi/4 via heralded_cz), explicitly flagged as untested — not assumed to extend from the weight-1 result. A real H/V port-labeling bug from Wave 1 was caught and fixed during Wave 2's attempt-first checkpoint. Full document assembled in `docs/iqp-photonic-encoding.md` (ENC-01 through ENC-04 plus Conclusion and Open Questions). v2.0 milestone (Phases 8-9) is now complete.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. Next milestone not yet started — run `/gsd:new-milestone` to begin.

@@ -1,5 +1,34 @@
 # Project Milestones: MerLin Photonic Generative Modeling
 
+## v2.0 IQP → Photonic Encoding (Shipped: 2026-08-05)
+
+**Delivered:** A defensible, on-paper, empirically-checked mapping from IQP's structure (commuting Z-diagonal gates, Hadamard-basis conjugation) onto Perceval's discrete-variable/Fock-space primitives — polarization encoding, weight-1 generators fully derived/implemented/validated (TVD ~1e-16 at n=2,3 against the exact qubit-side distribution), weight-2 derived on paper only and explicitly flagged as untested. Positioned honestly against Douce et al.'s (2017) CV precedent, including the multi-qubit case's honest parallel to their measurement-based gadget.
+
+**Phases completed:** 8-9 (8 plans total)
+
+**Key accomplishments:**
+
+- Literature scoping (two independent search passes) found no existing DV/Fock-space linear-optical IQP construction and no impossibility result, yielding a **Go** verdict for original design work
+- Demonstrated low-level Perceval API fluency (`Circuit`/`PS`/`BS`/`BasicState`/`Analyzer`) beyond the high-level wrapper, closed-form verified against single-photon split, HOM dip, and PS-driven MZI interference
+- Compiled the qubit-side IQP structure/hardness and barren-plateau trainability baseline as the comparison reference
+- Designed and implemented a polarization-encoded DV/Fock-space mapping — weight-1 generators exact and tested, falsifiable bidirectional bitstring↔Fock basis correspondence with explicit out-of-subspace handling
+- Empirically validated the mapping: TVD ~1e-16 at n=2,3, ten orders of magnitude under the chosen 1e-6 threshold
+- Honestly positioned against Douce et al. (2017), stating both the favorable contrast and the honest parallel; a real H/V port-labeling bug was caught and fixed mid-milestone via a direct calibration check
+
+**Stats:**
+
+- 1,282 lines added across code and tests (`iqp_photonic_encoding.py`, `perceval_fluency_demo.py`, plus test files); 3 new docs (`docs/iqp-lit-scoping.md`, `docs/iqp-baseline.md`, `docs/iqp-photonic-encoding.md`)
+- 2 phases, 8 plans, 33 commits
+- 6 days (2026-07-30 → 2026-08-05)
+- 11/11 requirements shipped, 0 dropped, 0 scope-adjusted
+- Phase 9 shipped without a standalone `gsd-verifier` VERIFICATION.md (tech debt flagged by the milestone audit); closed post-audit via an independent `/gsd:verify-work 9` UAT pass (8/8, live-verified)
+
+**Git range:** `1200e75` (start) → `20da49a` (Phase 9 UAT)
+
+**What's next:** No follow-on milestone scoped yet. The v2 requirements deferred this milestone (IMPL-01/02: minimal Perceval implementation + classical sanity check; STUDY-01/02: trainability/barren-plateau and hardness-under-loss study; WRITE-01: write-up) are the natural next candidates, contingent on the owner wanting to continue into implementation. Weight-2 (`heralded_cz`) implementation/testing is the most concrete first piece.
+
+---
+
 ## v1.0 Photonic Generator (Shipped: 2026-07-29)
 
 **Delivered:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model on MerLin's `QuantumLayer`, published in a public-ready repo with a portfolio case study and a technical note ready for Vincent Espitalier — GEN-07 (clean two-ring generative output) not fully met, and reported that way rather than glossed over.
