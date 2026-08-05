@@ -51,24 +51,24 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WT2-01 | TBD | Pending |
-| WT2-02 | TBD | Pending |
-| WT2-03 | TBD | Pending |
-| WT2-04 | TBD | Pending |
-| WT2-05 | TBD | Pending |
-| WT2-06 | TBD | Pending |
-| WT2-07 | TBD | Pending |
-| WT2-08 | TBD | Pending |
+| WT2-01 | Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) | Pending |
+| WT2-02 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
+| WT2-03 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
+| WT2-04 | Phase 10 (Heralded-CZ Primitive De-Risking) | Pending |
+| WT2-05 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
+| WT2-06 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
+| WT2-07 | Phase 13 (Weight-1 + Weight-2 Composability Validation) | Pending |
+| WT2-08 | Phase 10 (Heralded-CZ Primitive De-Risking) | Pending |
 
 **Coverage:**
 - v1 requirements: 8 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 8 ⚠️ (expected — roadmap not yet created)
+- Mapped to phases: 8/8 ✓
+- Unmapped: 0 — no orphans
 
 ---
 *Requirements defined: 2026-08-05*
-*Last updated: 2026-08-05 after requirements definition*
+*Last updated: 2026-08-06 after roadmap creation (Phases 10-13)*
