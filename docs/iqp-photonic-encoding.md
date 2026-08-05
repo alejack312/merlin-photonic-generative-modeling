@@ -8,13 +8,14 @@
 - [`docs/iqp-baseline.md`](iqp-baseline.md) — the qubit-side IQP recipe (`|+⟩` prep, `MultiRZ` diagonal layer, Hadamard-conjugated measurement) and the Van den Nest cosine-formula classical-training trick this document's ENC-04 section references.
 - [`docs/iqp-lit-scoping.md`](iqp-lit-scoping.md) — the full Douce et al. (2017) CV-IQP hardness summary this document's ENC-02 section positions against, plus the literature-search verdict that unblocked this phase.
 
-**How to read this document:** ENC-01 through ENC-04 build on each other in order — ENC-01 fixes the encoding scheme and derives the mapping, ENC-02 positions it against the one existing adjacent result in the literature, ENC-03 states how to translate between qubit bitstrings and photonic measurement outcomes, and ENC-04 actually runs a small-scale comparison to check the whole thing holds together. Each section's "Owner's Attempt" subsection records the actual attempt-first Q&A that shaped it, including wrong turns and corrections, per this project's standing practice of keeping negative/partial results visible rather than smoothing them over.
+**How to read this document:** ENC-01 through ENC-04 build on each other in order — ENC-01 fixes the encoding scheme and derives the mapping, ENC-02 positions it against the one existing adjacent result in the literature, ENC-03 states how to translate between qubit bitstrings and photonic measurement outcomes, and ENC-04 actually runs a small-scale comparison to check the whole thing holds together. ENC-05 records the final whole-document self-explanation checkpoint. Each section's "Owner's Attempt" (or, for ENC-05, full checkpoint) subsection records the actual attempt-first Q&A that shaped it, including wrong turns and corrections, per this project's standing practice of keeping negative/partial results visible rather than smoothing them over.
 
 **Contents:**
 - [ENC-01: Ingredient-Level Mapping](#enc-01-ingredient-level-mapping)
 - [ENC-02: Positioning Against Douce et al. (2017)](#enc-02-positioning-against-douce-et-al-2017)
 - [ENC-03: Basis Correspondence](#enc-03-basis-correspondence)
 - [ENC-04: Validation Plan and Toy-Scale Check](#enc-04-validation-plan-and-toy-scale-check)
+- [ENC-05: Final Self-Explanation Checkpoint](#enc-05-final-self-explanation-checkpoint)
 - [Conclusion and Open Questions](#conclusion-and-open-questions)
 
 ## ENC-01: Ingredient-Level Mapping
@@ -342,6 +343,33 @@ Final interpretation, in two parts:
 2. Initial second half — *"I believe this will extend to generators of higher weight, so we should be good"* — flagged as an unsupported extrapolation, corrected. Weight-1 (`WP(θ,0)`) and weight-2 (`heralded_cz`) aren't the same mechanism at different sizes: weight-1 is exact and deterministic for any angle; weight-2 is probabilistic (herald-conditioned) and, per ENC-01's own derivation, only realizes one fixed angle (`π/4`), not an arbitrary θ. A clean match on the deterministic, arbitrary-angle case provides no evidence about the probabilistic, fixed-angle case, because they don't share the property this test actually checked. Corrected final answer: *"Nothing, we'll have to see via heralding."* — the weight-2 mechanism remains genuinely untested; ENC-04's result is silent on it, not quietly reassuring about it.
 
 **Standing scope of what ENC-04 actually established:** the photonic mapping reproduces the exact qubit-side IQP distribution to floating-point precision, for weight-1-only generator sets, at `n=2` and `n=3`. It says nothing about weight-2 generators, `n>3`, or any property beyond what these two specific circuits and generator sets exercise.
+
+## ENC-05: Final Self-Explanation Checkpoint
+
+Per this repo's CLAUDE.md and ENC-05's explicit bar — same standard as v1.0's self-explanation checkpoints — the owner was asked to explain the *entire* document unaided, as if explaining it to Vincent Espitalier: the chosen scheme, why the mapping preserves IQP's structure, the basis correspondence, the n=2-3 toy-check result, and the Douce et al. positioning. This took six rounds to close out; the full sequence (including the wrong turns) is recorded below, per this project's standing practice of keeping negative/partial answers visible rather than only the polished final version.
+
+**Round 1 — first pass:**
+1. *Scheme:* "I picked polarization encoding because that's what I learned at Sorbonne." — correct.
+2. *Commutativity + conjugation:* "The mapping preservers IQP's structures because with different qubits, operators that operate on 1-mode cannot affect other qubit's 1-mode. We can check using hadamard conjugation that we get the same input." — only the disjoint-qubit half of commutativity (missing the same-qubit/diagonal-matrix half); also conflates Hadamard-conjugation (phase → visible population difference) with ENC-03's round-trip falsifiability check (forward-map → readout → reverse-map recovers the original bitstring) — two different, both-real mechanisms in this document.
+3. *Basis correspondence:* not addressed — skipped directly to the toy-check result.
+4. *n=2-3 result:* "The n=2-3 result establishes that we are doing well for a weight-1 circuit, but beyond that, we need to explore deeply." — directionally right, but vaguer than the precision already established in ENC-04's own checkpoint.
+5. *Douce et al. positioning:* "I'm not sure." — an honest gap, rebuilt via direct re-teaching rather than left as a guess.
+
+**Round 2 — after targeted corrections:**
+- *Commutativity, completed:* "Same qubit operators commute because they're diagonal matrices, order doesn't matter." — correct, completes the two-part argument (disjoint tensor factors for different qubits; diagonal-matrix multiplication for the same qubit).
+- *Basis correspondence, still incomplete:* "The forward rule and reverse rule is that for a bitstring, we get a photon state and if we reverse it, we get the same input. The four patterns that don't correspond to any valid bit are in the case of lost photons or bunching." — still describes the round-trip *property* rather than the actual encode/decode *rules*, and names only 2 of the 4 invalid patterns (missing `(1,1)`).
+- *n=2-3 result:* "We have little room for doubt. The photonic circuit reproduces the exact qubit-side IQP distribution." — correct confirmation, but dropped the weight-1-only scope qualifier already established in ENC-04's own checkpoint.
+- *Douce et al. positioning, correct:* "For our weight-1 experiments, we are able to have a hadamard conjugation component that always works. This will change once we get to weight-2. We will experience the same obstacles Douce's paper does." — correctly captures both the favorable contrast and the honest parallel from ENC-02.
+
+**Round 3 — basis correspondence, port mapping reversed:** "Bit 0 turns into H and 1 turns into V. (1, 0) means 0 or H and (0, 1) means 1 or V." — the bit↔polarization half is correct, but the port↔bit half is backwards (repeats, in miniature, the exact class of error caught and fixed in Plan 09-02 — the port mapping is `H=(0,1)`, `V=(1,0)`, not the reverse). Corrected by re-showing the original bare-`PBS` calibration data.
+
+**Round 4:** "H is (0, 1) and V is (1, 0)" — port mapping now correct.
+
+**Round 5:** "The one in between is (1, 1) where there is a photon in both 'boxes' as we talked about with the feynman technique. Reproduces the exact distribution for generator weight 1. Silent?" — completes the four-invalid-pattern enumeration and the weight-1 scope qualifier's first half; asked to complete "silent about what" rather than being told directly.
+
+**Round 6 — final, correct:** "Doesn't say anything, we have to directly test that to see." — completes the weight-1/weight-2 scope statement: ENC-04's result is silent on weight-2 generators; nothing about them can be inferred from the weight-1 validation, and they would need to be directly tested on their own terms.
+
+**Outcome:** all five points correctly and completely explained by round 6. This closes ENC-05.
 
 ## Conclusion and Open Questions
 
