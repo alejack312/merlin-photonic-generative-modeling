@@ -289,8 +289,16 @@ Both distributions, `n=2`:
 | `10` | 0.017969 | 0.017969 |
 | `11` | 0.069364 | 0.069364 |
 
-No mismatch or caveat to report: both TVD values are at floating-point noise level (`~1e-16`), four orders of magnitude below the `1e-6` threshold, and residual probability is exactly `0.0` in both cases — consistent with Plan 09-01's "zero leaked probability" result. No revision to ENC-01 or ENC-03 is warranted by this check.
+No mismatch or caveat to report: both TVD values are at floating-point noise level (`~1e-16`), **ten** orders of magnitude below the `1e-6` threshold (corrected from an earlier draft of this section, which mistakenly said "four" — `10⁻⁶/10⁻¹⁶ = 10¹⁰`), and residual probability is exactly `0.0` in both cases — consistent with Plan 09-01's "zero leaked probability" result. No revision to ENC-01 or ENC-03 is warranted by this check.
 
 ### Self-Explanation Checkpoint (Task 3) — Owner's Interpretation
 
-*[Owner's own interpretation of the TVD/residual numbers and what they mean for the mapping's central claim goes here, per this repo's CLAUDE.md rule that Claude computes/plots but the owner interprets first.]*
+Per this repo's CLAUDE.md rule that Claude computes/plots results but the owner interprets first, the owner was asked to write their own interpretation of the TVD/residual numbers. First read misread the exponent: *"This looks like the TVD wasn't under the threshold. The distributions weren't exact enough?"* — a smaller (more negative) exponent means a *smaller* number, not a larger one; `3.85×10⁻¹⁶` is far below, not above, the `1×10⁻⁶` threshold. Clarified with a concrete comparison (`10⁻⁶` = one in a million vs. `10⁻¹⁶` ≈ one in three quadrillion) before the owner re-attempted.
+
+Second attempt: *"This mean the two probability tables are extremely similar. This mean our experiment is going well so far"* — correct direction but too hedged ("going well so far") for what floating-point-level agreement actually establishes. Pushed for a sharper statement plus an explicit scope check (does this result say anything about the weight-2/`heralded_cz` case, which was never run in this validation).
+
+Final interpretation, in two parts:
+1. *"There is little room for doubt, the photonic circuit reproduces the exact qubit-side IQP distribution."* — correct, and appropriately confident given the numbers (TVD at floating-point noise level, zero residual, for both `n=2` and `n=3`).
+2. Initial second half — *"I believe this will extend to generators of higher weight, so we should be good"* — flagged as an unsupported extrapolation, corrected. Weight-1 (`WP(θ,0)`) and weight-2 (`heralded_cz`) aren't the same mechanism at different sizes: weight-1 is exact and deterministic for any angle; weight-2 is probabilistic (herald-conditioned) and, per ENC-01's own derivation, only realizes one fixed angle (`π/4`), not an arbitrary θ. A clean match on the deterministic, arbitrary-angle case provides no evidence about the probabilistic, fixed-angle case, because they don't share the property this test actually checked. Corrected final answer: *"Nothing, we'll have to see via heralding."* — the weight-2 mechanism remains genuinely untested; ENC-04's result is silent on it, not quietly reassuring about it.
+
+**Standing scope of what ENC-04 actually established:** the photonic mapping reproduces the exact qubit-side IQP distribution to floating-point precision, for weight-1-only generator sets, at `n=2` and `n=3`. It says nothing about weight-2 generators, `n>3`, or any property beyond what these two specific circuits and generator sets exercise.
