@@ -228,6 +228,79 @@ def run_readout(n, input_state):
     return None
 
 
+# ENC-04: validation -- exact qubit-side reference, photonic-side readout,
+# and a distance metric between them.
+
+
+def exact_qubit_iqp_distribution(n, thetas):
+    """Exact qubit-side IQP distribution via direct state-vector simulation
+    (plain numpy, no external dependency): |+>^{tensor n} -> diagonal
+    weight-1 phase layer (thetas[k] on qubit k, matching
+    build_diagonal_layer_circuit's generator set) -> H^{tensor n} -> |amplitude|^2.
+
+    Bit-ordering convention (stated explicitly, per the sibling
+    iqp-mmd-barren-plateau project's documented gotcha that this is easy to
+    get backwards): qubit 0 is the most-significant bit. Basis-state index i
+    (0 <= i < 2^n) has qubit k's bit = (i >> (n-1-k)) & 1. This matches
+    np.kron's natural tensor-product ordering when qubit 0's factor is
+    kron'd first, and matches this module's own bitstring convention
+    elsewhere (bitstring[k] = qubit k, left to right)."""
+    plus = np.array([1, 1], dtype=complex) / np.sqrt(2)
+    state = plus.copy()
+    for _ in range(n - 1):
+        state = np.kron(state, plus)
+
+    dim = 2 ** n
+    phases = np.zeros(dim, dtype=complex)
+    for i in range(dim):
+        total_phase = 0.0
+        for k in range(n):
+            bit_k = (i >> (n - 1 - k)) & 1
+            total_phase += thetas[k] * (1 if bit_k == 0 else -1)  # Z eigenvalue (-1)^bit_k
+        phases[i] = np.exp(1j * total_phase)
+    state = state * phases
+
+    had = np.array([[1, 1], [1, -1]], dtype=complex) / np.sqrt(2)
+    had_n = had.copy()
+    for _ in range(n - 1):
+        had_n = np.kron(had_n, had)
+    final_state = had_n @ state
+
+    probs = np.abs(final_state) ** 2
+    return {
+        "".join(str((i >> (n - 1 - k)) & 1) for k in range(n)): probs[i]
+        for i in range(dim)
+    }
+
+
+def photonic_iqp_distribution(n, thetas):
+    """Photonic-side IQP distribution: runs the ENC-01 circuit (prep +
+    diagonal + conjugation + readout, via run_full_circuit) for the given
+    weight-1 generator set, and translates outputs to bitstrings via ENC-03's
+    fock_to_bitstring. Returns (dist, residual) where dist = {bitstring:
+    probability} over valid outcomes only, and residual = total probability
+    on out-of-subspace outcomes -- ENC-03's reporting policy (explicit
+    residual, never silently discarded/renormalized)."""
+    _, raw_dist = run_full_circuit(n, thetas)
+    dist = {}
+    residual = 0.0
+    for state_str, prob in raw_dist.items():
+        state = pcvl.BasicState(state_str)
+        bits = fock_to_bitstring(state, n)
+        if bits is None:
+            residual += prob
+        else:
+            dist[bits] = dist.get(bits, 0.0) + prob
+    return dist, residual
+
+
+def total_variation_distance(dist_a, dist_b):
+    """Standard total variation distance: TVD = 0.5 * sum(|a(x)-b(x)|) over
+    the union of both distributions' keys."""
+    keys = set(dist_a) | set(dist_b)
+    return 0.5 * sum(abs(dist_a.get(k, 0.0) - dist_b.get(k, 0.0)) for k in keys)
+
+
 def fock_to_bitstring(basic_state, n):
     """Reverse map (ENC-03): a 2n-mode post-readout BasicState (each qubit
     pair (0,1)='0'=H or (1,0)='1'=V) -> an n-character '0'/'1' bitstring.

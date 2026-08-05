@@ -21,6 +21,9 @@ from iqp_photonic_encoding import (
     basic_state_to_bitstring,
     bitstring_to_fock,
     fock_to_bitstring,
+    exact_qubit_iqp_distribution,
+    photonic_iqp_distribution,
+    total_variation_distance,
 )
 
 TOLERANCE = 1e-9
@@ -158,3 +161,28 @@ def test_enc03_out_of_subspace_in_larger_register():
     # qubit 0 valid ('0'=H=(0,1)), qubit 1 invalid (bunched, (2,0))
     state = pcvl.BasicState([0, 1, 2, 0])
     assert fock_to_bitstring(state, 2) is None
+
+
+@pytest.mark.parametrize(
+    "n,thetas",
+    [
+        (2, [0.3, 1.1]),
+        (3, [0.3, 1.1, 0.75]),
+    ],
+)
+def test_enc04_toy_validation_runs_end_to_end(n, thetas):
+    """ENC-04's central claim, actually run: the photonic circuit's output
+    distribution (translated to bitstrings via ENC-03) must match the exact
+    qubit-side IQP distribution to within TVD < 1e-6 (owner's chosen
+    threshold) -- both sides are exact calculations (no sampling noise), so
+    near-exact agreement is the right bar, not a loose one."""
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas)
+    photonic_dist, residual = photonic_iqp_distribution(n, thetas)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()), 1.0, atol=1e-9)
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n={n} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"

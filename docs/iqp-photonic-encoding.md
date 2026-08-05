@@ -234,3 +234,63 @@ fock_to_bitstring(invalid_state, n=2)  # None -- qubit 0 valid, qubit 1 bunched
 ```
 
 Verified by `pytest tests/test_iqp_photonic_encoding.py -v` — 24/24 passed, including 7 round-trip cases (`n=1,2,3`) and 5 out-of-subspace cases (all four invalid patterns individually, plus one embedded in a larger valid register).
+
+## ENC-04: Validation Plan and Toy-Scale Check
+
+### Owner's Attempt
+
+The owner's first sketch described the photonic circuit again (HWP at 22.5°, diagonal phase, Hadamard, measure "with heralding") — corrected: that's the thing being validated, not an independent reference to validate it against, and heralding doesn't apply since this project's worked example uses weight-1 generators only (no `heralded_cz` anywhere in it). The owner then asked whether Van den Nest's cosine-formula trick applies — yes, technically (it works for any IQP circuit), but it produces Z-word *expectation values*, not a full probability table, so using it here would need an extra Fourier/Walsh-transform step to become comparable to the photonic side's full distribution — more machinery than needed at this scale.
+
+The owner also asked about using MMD loss (this project's own v1.0 metric) instead of total variation distance. Declined, with reasoning: MMD's kernel-bandwidth machinery exists to handle **sampling noise** (exactly the problem this project's own Phase 4/7 sigma-resweep work wrestled with) — but both distributions being compared here are **exact** (no sampling on either side), so there's no noise for a kernel to smooth over, and picking a bandwidth would just be an unmotivated extra parameter.
+
+Final attempt, adopted: (1) reference method — direct `numpy` state-vector construction (`|+⟩^⊗n` → diagonal phase → `H^⊗n` → `|amplitude|²`), matching `09-RESEARCH.md`'s recommended option; (2) metric — total variation distance, `TVD = ½Σ|q(x)−p(x)|`, the same formula used in the sibling `iqp-mmd-barren-plateau` project's own marginal-agreement checks (`iqp_mmd AC Investigation 2026-04-23.md`); (3) threshold — `TVD < 1e-6`, chosen after noting that the sibling project's own thresholds (`<0.05` good, `>0.4` drifting) apply to a *sampled-vs-learned* comparison with real statistical noise, which doesn't describe this situation — two exact distributions should agree to numerical precision, not a loose "good enough" bound.
+
+One implementation detail carried over from the sibling project on purpose: its vault flags a **bit-ordering convention** bug risk ("critical for correctness," caught by an adversarial Codex review) — which qubit is the most-significant bit when converting a bitstring to a state-vector index. `exact_qubit_iqp_distribution` states its convention explicitly (qubit 0 = MSB) rather than leaving it implicit, precisely because that sibling project's experience shows it's an easy place to introduce a silent, hard-to-notice bug.
+
+### Validation Plan
+
+**What it checks:** that the photonic circuit built from ENC-01's prep/diagonal/conjugation functions, read out through ENC-03's `fock_to_bitstring`, reproduces the exact qubit-side IQP output distribution for the same generator set — the mapping's central claim, checked directly rather than assumed.
+
+**Why checkable in principle at any n:** the same two computations (build a `2^n`-dim exact state vector; build and run the corresponding photonic circuit) are well-defined for any `n`, though a larger `n` would need `2^n`-mode photonic circuits (this toy check doesn't attempt to show that scales practically — that's explicitly deferred to a future implementation phase, per `09-CONTEXT.md`).
+
+**Reference:** `exact_qubit_iqp_distribution(n, thetas)` — direct `numpy` state-vector simulation, no external dependency, ~30 lines including the explicit bit-ordering convention.
+
+**Photonic side:** `photonic_iqp_distribution(n, thetas)` — runs `run_full_circuit` (ENC-01's prep+diagonal+conjugation+readout pipeline) and translates every output through `fock_to_bitstring`, returning `(dist, residual)` per ENC-03's explicit-residual policy.
+
+**Metric and threshold:** `total_variation_distance(dist_a, dist_b) < 1e-6`.
+
+### Results
+
+```python
+from iqp_photonic_encoding import (
+    exact_qubit_iqp_distribution, photonic_iqp_distribution, total_variation_distance,
+)
+
+for n, thetas in [(2, [0.3, 1.1]), (3, [0.3, 1.1, 0.75])]:
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas)
+    photonic_dist, residual = photonic_iqp_distribution(n, thetas)
+    print(n, total_variation_distance(qubit_dist, photonic_dist), residual)
+
+# 2 3.85e-16 0.0
+# 3 5.68e-16 0.0
+```
+
+| n | thetas | TVD | residual | verdict (`TVD < 1e-6`) |
+|---|---|---|---|---|
+| 2 | `[0.3, 1.1]` | `3.85×10⁻¹⁶` | `0.0` | checks out |
+| 3 | `[0.3, 1.1, 0.75]` | `5.68×10⁻¹⁶` | `0.0` | checks out |
+
+Both distributions, `n=2`:
+
+| bitstring | qubit-side | photonic |
+|---|---|---|
+| `00` | 0.187781 | 0.187781 |
+| `01` | 0.724887 | 0.724887 |
+| `10` | 0.017969 | 0.017969 |
+| `11` | 0.069364 | 0.069364 |
+
+No mismatch or caveat to report: both TVD values are at floating-point noise level (`~1e-16`), four orders of magnitude below the `1e-6` threshold, and residual probability is exactly `0.0` in both cases — consistent with Plan 09-01's "zero leaked probability" result. No revision to ENC-01 or ENC-03 is warranted by this check.
+
+### Self-Explanation Checkpoint (Task 3) — Owner's Interpretation
+
+*[Owner's own interpretation of the TVD/residual numbers and what they mean for the mapping's central claim goes here, per this repo's CLAUDE.md rule that Claude computes/plots but the owner interprets first.]*
