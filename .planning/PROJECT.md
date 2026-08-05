@@ -14,10 +14,22 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 **v2.0 IQP → Photonic Encoding shipped 2026-08-05**, 6 days after starting (2026-07-30 → 2026-08-05). Both phases (8: Literature Scoping & Prerequisites; 9: Encoding Design) complete, 11/11 requirements satisfied, full test suite green (85/85), Phase 9 independently re-verified via a live UAT pass after the milestone audit flagged its missing formal verification as tech debt. Full detail: [`.planning/milestones/v2.0-ROADMAP.md`](milestones/v2.0-ROADMAP.md), [`.planning/milestones/v2.0-REQUIREMENTS.md`](milestones/v2.0-REQUIREMENTS.md), [`.planning/milestones/v2.0-MILESTONE-AUDIT.md`](milestones/v2.0-MILESTONE-AUDIT.md).
 
-## Next Milestone Goals
+## Current Milestone: v2.1 Weight-2 Implementation
 
-No milestone started yet. Candidates, in rough priority order:
-- **v2 requirements deferred from v2.0** (contingent on continuing into implementation): IMPL-01 (minimal Perceval implementation of the mapped circuit), IMPL-02 (classical sanity check against small-scale qubit-IQP simulation), STUDY-01 (trainability/barren-plateau study vs. the qubit-side baseline), STUDY-02 (hardness assessment under realistic photonic loss/noise), WRITE-01 (write-up format TBD by what the study finds). Weight-2 (`heralded_cz`) implementation/testing is the most concrete first piece — currently derived on paper only.
+**Goal:** Implement and validate the weight-2 IQP generator (`heralded_cz`-based two-qubit diagonal phase gate, fixed at θ=π/4) that v2.0 designed on paper but never built or ran. Extend the classical-comparison validation pattern from weight-1 (TVD-based) to cover weight-2. Empirically measure `heralded_cz`'s actual success probability against Perceval's specific implementation, rather than relying on secondhand literature figures for the general gate family.
+
+**Target features:**
+- Implementation of the `PBS`→`heralded_cz`→`PBS` weight-2 construction in Perceval, building on `iqp_photonic_encoding.py`'s existing weight-1 module
+- Empirical measurement of `heralded_cz`'s herald-success frequency for this specific implementation
+- Classical sanity check: extend the exact-vs-exact TVD comparison pattern (weight-1's ENC-04) to a small-scale weight-2 IQP circuit
+- **Explicitly out of scope this milestone:** trainability/barren-plateau study (STUDY-01), hardness-under-loss assessment (STUDY-02), write-up (WRITE-01), and resolving the fixed-angle (π/4-only) limitation for arbitrary-θ weight-2 gates — all deferred to a future milestone once weight-2 is working
+
+**Source:** `docs/iqp-photonic-encoding.md`'s Ingredient 2 (weight-2 derivation) and Conclusion/Open Questions section; `.planning/milestones/v2.0-REQUIREMENTS.md`'s deferred v2 requirements (IMPL-01, IMPL-02)
+
+## Next Milestone Goals (beyond v2.1)
+
+- STUDY-01/STUDY-02/WRITE-01 (trainability/hardness study and write-up), contingent on v2.1's weight-2 implementation actually working
+- Arbitrary-θ weight-2 gates (resolving the fixed-π/4 limitation), if the study reveals it's load-bearing
 - BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
 - Sending the drafted v1.0 technical note to Vincent Espitalier and flipping the repo public (both still open, independent of any future milestone)
 
@@ -57,7 +69,9 @@ No milestone started yet. Candidates, in rough priority order:
 
 ### Active
 
-None. v2.0 shipped 2026-08-05 with all 11 v1 requirements met. Next milestone not yet started — candidates in "Next Milestone Goals" above.
+- [ ] Weight-2 (`heralded_cz`-based) IQP generator implemented in Perceval
+- [ ] `heralded_cz`'s herald-success probability empirically measured for this specific implementation
+- [ ] Classical sanity-check validation (TVD-style, per weight-1's ENC-04 pattern) extended to a small-scale weight-2 circuit
 
 ### Out of Scope
 

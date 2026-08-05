@@ -4,17 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-08-05)
 
-**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier. (v2.0's core value: determine whether IQP's structural properties survive translation into a photonic ansatz, defensibly and honestly.)
-**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05 — 2 phases (8: Literature Scoping & Prerequisites, 9: Encoding Design), 11/11 requirements, both milestones archived. No milestone currently in progress.
+**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier. (v2.1's core value: get weight-2 IQP generators actually working and validated, not just designed on paper.)
+**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) started 2026-08-05** — implement + validate the `heralded_cz`-based weight-2 generator v2.0 designed but never built; measure its herald-success probability empirically; STUDY/WRITE work explicitly deferred.
 
 ## Current Position
 
-Milestone: **None in progress.** v2.0 IQP → Photonic Encoding shipped 2026-08-05 (tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
-Phase: None active. Last completed: Phase 9 (Encoding Design), verified via UAT 2026-08-05 (8/8 tests passed).
-Plan: None active.
-Status: Both shipped milestones fully archived to `.planning/milestones/`. Fresh `.planning/REQUIREMENTS.md` will be created by `/gsd:new-milestone` when the next milestone starts. Full v2.0 detail: `.planning/milestones/v2.0-ROADMAP.md`, `v2.0-REQUIREMENTS.md`, `v2.0-MILESTONE-AUDIT.md`.
+Milestone: **v2.1 Weight-2 Implementation** — in progress, started 2026-08-05 (v2.0 shipped 2026-08-05, tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
+Phase: Not started — defining requirements (research running first).
+Plan: —
+Status: Milestone scope confirmed with owner: implementation + validation only (not trainability/hardness study), heralded_cz success probability measured empirically, fixed θ=π/4 limitation accepted as-is this milestone. Research phase running next.
 
-Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05.
+Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [░░░░░░░░░░] 0% — requirements not yet defined.
 
 ## Performance Metrics
 
