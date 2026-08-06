@@ -207,6 +207,92 @@ def build_cz_insertion(n, i, j):
     return circuit, herald_spec
 
 
+def build_weight2_processor(n, i, j, thetas):
+    """Full weight-2 IQP generator pipeline (Phase 11, ROADMAP Success
+    Criteria 2-4): state prep -> theta-folded diagonal layer -> CZ insertion
+    (qubits i, j) -> conjugation -> readout, assembled as a Processor(2n+2)
+    via Processor.add() -- every weight-1 builder (build_state_prep_circuit,
+    build_diagonal_layer_circuit, build_conjugation_circuit,
+    build_readout_circuit) reused completely unmodified, per 11-RESEARCH.md's
+    architecture section and this phase's CONTEXT.md-locked decisions.
+
+    Mode layout: 2n+2 total modes. Modes 0..2n-1 are this module's normal
+    per-qubit (polarization-port, vacuum-partner-port) pairs (unchanged from
+    every other build_* function in this module). Modes 2n, 2n+1 are the 2
+    extra herald ancilla modes build_cz_insertion's PBS-wrap ->
+    PERM-adapted-heralded_cz -> PBS-unwrap needs -- present in the outer
+    Processor from construction (11-RESEARCH.md Pitfall 2:
+    Processor.add()'s mode-mapping dict requires every target mode to
+    already exist in the processor it's added to).
+
+    Theta folding is additive, not a replacement (CONTEXT.md-locked rule,
+    load-bearing for Phase 13's later weight-1+weight-2 mixed-circuit test):
+    thetas_folded[k] = thetas[k] + pi/4 for k in {i, j} only, every other
+    qubit's theta passes through build_diagonal_layer_circuit unchanged.
+    This realizes the CZ/ZZ operator identity documented in
+    docs/iqp-photonic-encoding.md: exp(i*pi/4*Z_i*Z_j) = CZ .
+    exp(i*pi/4*Z_i) . exp(i*pi/4*Z_j) up to global phase -- the single-qubit
+    corrections fold into the SAME thetas argument any weight-1 generator on
+    qubits i/j would already be using, not a separate gate.
+
+    build_cz_insertion(n, i, j) (Plan 11-01) is wired in via an explicit,
+    straight (unswapped -- the ctrl/data swap fix already lives inside
+    build_cz_insertion itself) mode-mapping dict: qubit i's ports (2i,
+    2i+1) -> build_cz_insertion's local (0,1), qubit j's ports (2j, 2j+1)
+    -> local (2,3), and the outer processor's 2 tail ancilla modes (2n,
+    2n+1) -> build_cz_insertion's local herald ports (4,5).
+    Processor.add's ModeConnector auto-inserts a PERM before this component
+    and its exact inverse after, so the outer processor's mode numbering
+    (mode 2i is still "mode 2i") is transparently restored for every .add()
+    call that follows -- verified by direct execution in 11-RESEARCH.md,
+    not assumed.
+
+    Heralds are registered IMMEDIATELY after that .add() call, using
+    build_cz_insertion's own returned herald_spec (never hardcoded 4/5 --
+    those are build_cz_insertion's LOCAL indices; the mapping dict above
+    sends them to global 2n/2n+1). This is the exact guard ROADMAP Success
+    Criterion 3 exists for: composing a bare Circuit (as opposed to an
+    Experiment/Processor) never auto-propagates herald metadata
+    (Experiment._add_component's plain-component path has no herald logic,
+    unlike _compose_experiment) -- forgetting this call would silently
+    produce a processor that runs an un-heralded raw unitary with no error.
+
+    Returns a Processor(2n+2) (register size 2n after heralds are
+    registered) whose .heralds is non-empty immediately after assembly."""
+    assert len(thetas) == n
+    assert 0 <= i < n and 0 <= j < n and i != j
+
+    # Additive pi/4 folding -- never mutate the caller's list.
+    thetas_folded = list(thetas)
+    thetas_folded[i] += np.pi / 4
+    thetas_folded[j] += np.pi / 4
+
+    total_modes = 2 * n + 2  # 2n qubit modes + 2 tail herald ancilla modes (11-RESEARCH.md Pitfall 2)
+    proc = pcvl.Processor("SLOS", total_modes)
+
+    proc.add(0, build_state_prep_circuit(n))
+    proc.add(0, build_diagonal_layer_circuit(n, thetas_folded))
+
+    cz_circuit, herald_spec = build_cz_insertion(n, i, j)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,      # qubit i's ports -> build_cz_insertion's local (0,1)
+        2 * j: 2, 2 * j + 1: 3,      # qubit j's ports -> build_cz_insertion's local (2,3)
+        2 * n: 4, 2 * n + 1: 5,      # tail ancilla modes -> build_cz_insertion's local herald ports
+    }
+    proc.add(mapping, cz_circuit)
+
+    # Explicit, immediate herald registration -- Success Criterion 3's guard
+    # (see docstring above). herald_spec's keys are build_cz_insertion's own
+    # LOCAL indices (4, 5); the global indices they land on via the mapping
+    # dict are 2*n and 2*n+1.
+    proc.add_herald(2 * n, herald_spec[4])
+    proc.add_herald(2 * n + 1, herald_spec[5])
+
+    proc.add(0, build_conjugation_circuit(n))
+    proc.add(0, build_readout_circuit(n))
+    return proc
+
+
 def build_full_circuit(n, thetas):
     """Full ENC-01 pipeline for weight-1 generators: state prep -> diagonal
     layer -> conjugation -> readout, all on Circuit(2n)."""
