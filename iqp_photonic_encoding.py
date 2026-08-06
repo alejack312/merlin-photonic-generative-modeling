@@ -110,6 +110,45 @@ def build_readout_circuit(n):
     return circuit
 
 
+def _build_cz_insertion_core():
+    """The PERM-adapted heralded_cz sub-wiring only -- dual-rail in, dual-rail
+    out, local Circuit(6), no PBS -- factored out of build_cz_insertion so
+    the ctrl/data swap fix's phase behavior is directly testable via
+    Simulator/SLOSBackend (tests/test_iqp_photonic_encoding.py).
+
+    Perceval's SLOSBackend refuses circuits containing PBS
+    (`Circuit.requires_polarization` -- confirmed empirically: `assert not
+    circuit.requires_polarization` in perceval/backends/_slos.py), so
+    build_cz_insertion's full PBS-wrapped circuit cannot be handed to
+    Simulator directly. This core is the exact same PERM->heralded_cz->PERM
+    wiring build_cz_insertion embeds (identical `circuit.add` calls, just
+    without the surrounding PBS steps) -- not a re-derivation -- so testing
+    it here genuinely exercises build_cz_insertion's own logic. Combined
+    with the fact that a bare PBS deterministically maps a pure (non-
+    superposed) computational-basis polarization input to its dual-rail
+    counterpart with amplitude exactly 1 and no extra phase (confirmed
+    empirically against a standalone PBS circuit; also implicit in Plan
+    09-02's port-convention measurement and this suite's existing
+    `test_enc03_round_trip` checks), this core's dual-rail truth table IS
+    build_cz_insertion's polarization-basis truth table."""
+    circuit = pcvl.Circuit(6)
+    circuit.add(0, pcvl.PERM([1, 0]))  # Convention adapter (11-RESEARCH.md Pitfall 1), not a bug fix:
+                                        # heralded_cz uses Perceval's own Encoding.DUAL_RAIL standard
+                                        # (logical 1 -> Fock pattern (0,1), per port.py), which is the
+                                        # mirror image of this module's PBS-derived convention (H/bit "0"
+                                        # -> (0,1), Plan 09-02, from measured physical PBS behavior).
+                                        # Both conventions are independently correct; without this swap,
+                                        # the CZ's -1 phase lands on |0,0> instead of |1,1>. Verified by
+                                        # direct execution (11-RESEARCH.md "Pitfall 1").
+    circuit.add(2, pcvl.PERM([1, 0]))  # same adapter for qubit j's pair
+    item = HeraldedCzItem()
+    circuit.add(0, item.build_circuit())  # bare 6-mode heralded_cz: ctrl=local(0,1), data=local(2,3), herald=local(4,5)
+    circuit.add(0, pcvl.PERM([1, 0]))  # swap back: undo the ctrl-side relabeling so this function's own
+                                        # local port 0 is still "qubit i's polarization port" for the caller
+    circuit.add(2, pcvl.PERM([1, 0]))  # swap back for qubit j
+    return circuit
+
+
 def build_cz_insertion(n, i, j):
     """Weight-2 CZ insertion unit (Phase 11, ROADMAP Success Criterion 1):
     wraps qubit i's and qubit j's polarization ports into dual rail via PBS,
@@ -160,20 +199,7 @@ def build_cz_insertion(n, i, j):
     circuit = pcvl.Circuit(6)
     circuit.add(0, pcvl.PBS())        # wrap qubit i: polarization -> dual rail, local (0,1)
     circuit.add(2, pcvl.PBS())        # wrap qubit j: polarization -> dual rail, local (2,3)
-    circuit.add(0, pcvl.PERM([1, 0]))  # Convention adapter (11-RESEARCH.md Pitfall 1), not a bug fix:
-                                        # heralded_cz uses Perceval's own Encoding.DUAL_RAIL standard
-                                        # (logical 1 -> Fock pattern (0,1), per port.py), which is the
-                                        # mirror image of this module's PBS-derived convention (H/bit "0"
-                                        # -> (0,1), Plan 09-02, from measured physical PBS behavior).
-                                        # Both conventions are independently correct; without this swap,
-                                        # the CZ's -1 phase lands on |0,0> instead of |1,1>. Verified by
-                                        # direct execution (11-RESEARCH.md "Pitfall 1").
-    circuit.add(2, pcvl.PERM([1, 0]))  # same adapter for qubit j's pair
-    item = HeraldedCzItem()
-    circuit.add(0, item.build_circuit())  # bare 6-mode heralded_cz: ctrl=local(0,1), data=local(2,3), herald=local(4,5)
-    circuit.add(0, pcvl.PERM([1, 0]))  # swap back: undo the ctrl-side relabeling so this function's own
-                                        # local port 0 is still "qubit i's polarization port" for the caller
-    circuit.add(2, pcvl.PERM([1, 0]))  # swap back for qubit j
+    circuit.add(0, _build_cz_insertion_core())  # PERM-adapted heralded_cz, local (0..5)
     circuit.add(0, pcvl.PBS())        # unwrap qubit i: dual rail -> polarization, local (0,1)
     circuit.add(2, pcvl.PBS())        # unwrap qubit j: dual rail -> polarization, local (2,3)
 
