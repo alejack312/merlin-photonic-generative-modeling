@@ -101,8 +101,10 @@ Plans:
 **Plans:** 2 plans (2 waves, sequential — 12-02 depends on 12-01 for the actual measured numbers)
 
 Plans:
-- [ ] 12-01-PLAN.md — Extend exact_qubit_iqp_distribution with Z_i*Z_j pair terms; build the {P:V}-annotated, herald-unregistered measurement path for build_weight2_processor's output; TVD gate test at n=2, theta=pi/4
-- [ ] 12-02-PLAN.md — Write results/phase12_weight2_tvd_validation_summary.md and file the upstream Perceval add_herald+PBS crash as a GitHub issue
+- [x] 12-01-PLAN.md — Extend exact_qubit_iqp_distribution with Z_i*Z_j pair terms; build the {P:V}-annotated, herald-unregistered measurement path for build_weight2_processor's output; TVD gate test at n=2, theta=pi/4
+- [x] 12-02-PLAN.md — Write results/phase12_weight2_tvd_validation_summary.md and file the upstream Perceval add_herald+PBS crash as a GitHub issue
+
+**Results (measured 2026-08-06):** `exact_qubit_iqp_distribution` extended with `pair_thetas` for `Z_i·Z_j` terms, fully backward compatible (pair_thetas=None reproduces pre-Phase-12 output exactly). `photonic_weight2_iqp_distribution` computes the herald-conditioned distribution via the `{P:V}`-annotated, herald-unregistered measurement path (working around the confirmed `Processor.add_herald()`+`PBS` crash from Phase 11), reporting herald-failure probability and out-of-subspace residual as two separate, never-merged numbers. Locked TVD gate at n=2, i=0, j=1, θ=π/4: TVD=2.58e-15 (well under the 1e-6 bar), herald_failure_prob=0.9259259... (=1-2/27, matching Phase 10's measured heralded_cz success rate), residual=0.0. Supplementary n=3 robustness test also passes. Full suite: 115/115 tests green (107 pre-existing + 8 new), zero regressions. Results write-up filed at `results/phase12_weight2_tvd_validation_summary.md`; upstream Perceval `add_herald`+`PBS` crash filed as [Quandela/Perceval#783](https://github.com/Quandela/Perceval/issues/783). Verified by gsd-verifier: 4/4 must-haves, independently re-executed. All 4 of Phase 12's requirements (WT2-02, WT2-03, WT2-05, WT2-06) now Complete.
 
 #### Phase 13: Weight-1 + Weight-2 Composability Validation
 **Goal**: Weight-1 and weight-2 generator layers are confirmed to compose correctly within the same circuit, not just in isolation.
@@ -132,7 +134,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3, UAT 8/8 | 2026-08-05 |
 | 10. Heralded-CZ Primitive De-Risking | v2.1 | 1/1 | Complete — verified 4/4, 2/27 herald-success confirmed | 2026-08-06 |
 | 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 2/2 | Complete — verified 4/4, weight-2 pipeline built and truth-table verified | 2026-08-06 |
-| 12. Exact Reference Extension & TVD Validation | v2.1 | 0/TBD | Not started | - |
+| 12. Exact Reference Extension & TVD Validation | v2.1 | 2/2 | Complete — verified 4/4, TVD=2.6e-15 at locked gate | 2026-08-06 |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/TBD | Not started | - |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) completed and verified 2026-08-06 — WT2-01 satisfied, full weight-2 circuit built and truth-table verified, 107-test suite green. Next: `/gsd:discuss-phase 12`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) completed and verified 2026-08-06 — WT2-01 satisfied, full weight-2 circuit built and truth-table verified, 107-test suite green. Phase 12 (Exact Reference Extension & TVD Validation) completed and verified 2026-08-06 — WT2-02/03/05/06 satisfied, TVD=2.58e-15 at the locked n=2 θ=π/4 gate, 115-test suite green. Next: `/gsd:discuss-phase 13`.
