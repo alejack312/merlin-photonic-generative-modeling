@@ -417,10 +417,10 @@ def run_readout(n, input_state):
 # and a distance metric between them.
 
 
-def exact_qubit_iqp_distribution(n, thetas):
+def exact_qubit_iqp_distribution(n, thetas, pair_thetas=None):
     """Exact qubit-side IQP distribution via direct state-vector simulation
     (plain numpy, no external dependency): |+>^{tensor n} -> diagonal
-    weight-1 phase layer (thetas[k] on qubit k, matching
+    weight-1 (+ optional weight-2) phase layer (thetas[k] on qubit k, matching
     build_diagonal_layer_circuit's generator set) -> H^{tensor n} -> |amplitude|^2.
 
     Bit-ordering convention (stated explicitly, per the sibling
@@ -429,7 +429,18 @@ def exact_qubit_iqp_distribution(n, thetas):
     (0 <= i < 2^n) has qubit k's bit = (i >> (n-1-k)) & 1. This matches
     np.kron's natural tensor-product ordering when qubit 0's factor is
     kron'd first, and matches this module's own bitstring convention
-    elsewhere (bitstring[k] = qubit k, left to right)."""
+    elsewhere (bitstring[k] = qubit k, left to right).
+
+    pair_thetas (Phase 12, WT2-02): optional dict {(i, j): theta_ij} (i < j)
+    for Z_i*Z_j pair-generator terms, added on top of the existing weight-1
+    diagonal phase accumulation using the SAME bit-ordering convention and
+    the SAME Z-eigenvalue sign convention ((-1)^bit_k) already established
+    for weight-1 -- Z_i*Z_j's eigenvalue is the product of each qubit's own
+    Z eigenvalue. pair_thetas=None (the default) behaves identically to the
+    pre-Phase-12 function -- fully backward compatible, no existing call
+    site or test needs to change. Verified against the photonic ground
+    truth to ~1e-16 (12-RESEARCH.md Steps 2-5)."""
+    pair_thetas = pair_thetas or {}
     plus = np.array([1, 1], dtype=complex) / np.sqrt(2)
     state = plus.copy()
     for _ in range(n - 1):
@@ -442,6 +453,12 @@ def exact_qubit_iqp_distribution(n, thetas):
         for k in range(n):
             bit_k = (i >> (n - 1 - k)) & 1
             total_phase += thetas[k] * (1 if bit_k == 0 else -1)  # Z eigenvalue (-1)^bit_k
+        for (a, b), th in pair_thetas.items():
+            bit_a = (i >> (n - 1 - a)) & 1
+            bit_b = (i >> (n - 1 - b)) & 1
+            za = 1 if bit_a == 0 else -1
+            zb = 1 if bit_b == 0 else -1
+            total_phase += th * za * zb
         phases[i] = np.exp(1j * total_phase)
     state = state * phases
 

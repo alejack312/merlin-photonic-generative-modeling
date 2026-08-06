@@ -227,6 +227,43 @@ def test_enc04_toy_validation_runs_end_to_end(n, thetas):
     assert tvd < 1e-6, f"n={n} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"
 
 
+# Phase 12 Plan 01: exact_qubit_iqp_distribution's pair_thetas extension (WT2-02).
+
+
+@pytest.mark.parametrize(
+    "n,thetas",
+    [
+        (2, [0.3, 1.1]),
+        (3, [0.3, 1.1, 0.75]),
+    ],
+)
+def test_exact_qubit_distribution_weight2_backward_compatible(n, thetas):
+    """pair_thetas=None (or omitted entirely) must reproduce the pre-Phase-12
+    weight-1-only output exactly -- no existing call site or test may be
+    affected by this extension."""
+    baseline = exact_qubit_iqp_distribution(n, thetas)
+    explicit_none = exact_qubit_iqp_distribution(n, thetas, pair_thetas=None)
+    assert set(baseline.keys()) == set(explicit_none.keys())
+    for key in baseline:
+        assert explicit_none[key] == pytest.approx(baseline[key], abs=1e-12)
+
+
+@pytest.mark.parametrize(
+    "n,thetas,pair_thetas",
+    [
+        (2, [0.0, 0.0], {(0, 1): np.pi / 4}),
+        (2, [0.3, 1.1], {(0, 1): np.pi / 4}),
+        (3, [0.2, 0.0, 0.0], {(1, 2): np.pi / 4}),
+    ],
+)
+def test_exact_qubit_distribution_weight2_extension_sums_to_one(n, thetas, pair_thetas):
+    """Any Z_i*Z_j pair-generator addition must still yield a normalized
+    probability distribution (the phase layer is unitary, so this must hold
+    regardless of pair_thetas' specific values)."""
+    dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas=pair_thetas)
+    assert np.isclose(sum(dist.values()), 1.0, atol=1e-9)
+
+
 # Phase 11 Plan 01: build_cz_insertion -- CZ insertion unit truth table.
 #
 # build_cz_insertion(n, i, j) returns a Circuit(6) that starts and ends with
