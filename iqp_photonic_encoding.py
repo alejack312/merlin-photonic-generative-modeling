@@ -293,6 +293,130 @@ def build_weight2_processor(n, i, j, thetas):
     return proc
 
 
+def _build_weight2_processor_no_herald(n, i, j, thetas):
+    """Phase 12 (WT2-03): identical wiring to build_weight2_processor (state
+    prep -> theta-folded diagonal layer -> build_cz_insertion via the SAME
+    mode-mapping dict -> conjugation -> readout) but WITHOUT calling
+    proc.add_herald(...) -- confirmed crash (12-RESEARCH.md Pitfall 3):
+    add_herald + PBS -> Processor.probs() raises a ValueError (matmul shape
+    mismatch inside PolarizationSimulator._prepare_input), unconditionally,
+    independent of thetas, state_prep, or ancilla annotation.
+
+    Deliberately reuses build_cz_insertion's own wiring and mode-mapping
+    dict rather than re-deriving it, so this measurement path can never
+    silently drift from what build_weight2_processor actually ships
+    (12-RESEARCH.md's explicit "Don't Hand-Roll" guidance).
+
+    Returns (proc, herald_spec) -- proc exposes all 2n+2 modes (heralds not
+    registered); the caller must post-select on herald_spec by hand."""
+    assert len(thetas) == n
+    assert 0 <= i < n and 0 <= j < n and i != j
+
+    thetas_folded = list(thetas)
+    thetas_folded[i] += np.pi / 4
+    thetas_folded[j] += np.pi / 4
+
+    total_modes = 2 * n + 2
+    proc = pcvl.Processor("SLOS", total_modes)
+
+    proc.add(0, build_state_prep_circuit(n))
+    proc.add(0, build_diagonal_layer_circuit(n, thetas_folded))
+
+    cz_circuit, herald_spec = build_cz_insertion(n, i, j)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,
+        2 * j: 2, 2 * j + 1: 3,
+        2 * n: 4, 2 * n + 1: 5,
+    }
+    proc.add(mapping, cz_circuit)
+
+    proc.add(0, build_conjugation_circuit(n))
+    proc.add(0, build_readout_circuit(n))
+    return proc, herald_spec
+
+
+def _weight2_input_state(n, herald_spec):
+    """Phase 12 (WT2-03): builds the pcvl.BasicState input for
+    _build_weight2_processor_no_herald's processor -- all_h_input(n)'s
+    '{P:H},0' pattern for the n qubit ports, PLUS the two herald ancilla
+    ports EXPLICITLY annotated '{P:V}' (not bare integers, not '{P:H}').
+    Perceval's silent default for an unannotated/bare-integer photon is
+    '{P:H}', which is confirmed WRONG here (gives a silently-wrong, non-
+    crashing herald-conditioned distribution -- TVD~0.46 at the locked n=2,
+    theta=pi/4 gate); '{P:V}' is confirmed CORRECT, matching a trusted
+    PBS-free ground truth to TVD~1e-16 (12-RESEARCH.md Steps 3-4, Pitfall 2).
+
+    herald_spec's photon-count values are always 1 in this project (read
+    from heralded_cz's own in_heralds, per build_cz_insertion) -- the
+    annotation string is still built generically off the count rather than
+    hardcoding '1', in case that ever changes."""
+    parts = ["{P:H},0"] * n
+    parts.append("{P:V}" if herald_spec[4] else "0")
+    parts.append("{P:V}" if herald_spec[5] else "0")
+    return pcvl.BasicState("|" + ",".join(parts) + ">")
+
+
+def photonic_weight2_iqp_distribution(n, i, j, thetas):
+    """Phase 12 (WT2-03), the weight-2 analogue of photonic_iqp_distribution.
+
+    Builds _build_weight2_processor_no_herald(n, i, j, thetas) (which folds
+    +pi/4 onto thetas[i]/thetas[j] internally, exactly as
+    build_weight2_processor does -- pair_theta is NOT a caller-supplied
+    parameter here, since the CZ/ZZ operator identity this pipeline realizes
+    is only exact at pi/4; any other fold would produce numerically-valid
+    but physically-meaningless output, per 12-RESEARCH.md's explicit
+    recommendation), runs .probs() via Analyzer on the {P:V}-annotated
+    ancilla input from _weight2_input_state, and for each output state:
+      - if the two ancilla output modes do NOT match herald_spec's expected
+        photon pattern, that probability is counted into herald_failure_prob.
+      - if they DO match, the ancilla modes are stripped and the remaining
+        2n qubit modes are decoded via fock_to_bitstring: None (out-of-
+        subspace) goes to residual, otherwise into dist[bitstring].
+    dist and residual are then both renormalized by dividing by
+    (1 - herald_failure_prob), so dist is reported CONDITIONAL on herald
+    success (matching photonic_iqp_distribution's existing convention of
+    only reporting valid in-subspace outcomes, now also conditioned on
+    herald success), and sum(dist.values()) + residual == 1.0.
+
+    Returns (dist, residual, herald_failure_prob) -- a 3-tuple per
+    CONTEXT.md's locked reporting rule: herald_failure_prob is a separate
+    number from residual, NEVER merged into it and NEVER silently
+    renormalized away.
+
+    Expected herald_failure_prob at the pi/4 fold: ~1 - 2/27 ~ 0.9259,
+    matching Phase 10's established heralded_cz success rate (2/27).
+    {P:V} ancilla annotation fix sourced from 12-RESEARCH.md."""
+    proc, herald_spec = _build_weight2_processor_no_herald(n, i, j, thetas)
+    input_state = _weight2_input_state(n, herald_spec)
+
+    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], "*")
+    analyzer.compute()
+
+    ancilla_a, ancilla_b = 2 * n, 2 * n + 1
+    expected_a, expected_b = herald_spec[4], herald_spec[5]
+
+    dist = {}
+    residual = 0.0
+    herald_failure_prob = 0.0
+    for state, prob in zip(analyzer.output_states_list, analyzer.distribution[0]):
+        p = complex(prob).real
+        if state[ancilla_a] != expected_a or state[ancilla_b] != expected_b:
+            herald_failure_prob += p
+            continue
+        bits = fock_to_bitstring(state, n)
+        if bits is None:
+            residual += p
+        else:
+            dist[bits] = dist.get(bits, 0.0) + p
+
+    herald_success_prob = 1.0 - herald_failure_prob
+    if herald_success_prob > 0:
+        dist = {k: v / herald_success_prob for k, v in dist.items()}
+        residual = residual / herald_success_prob
+
+    return dist, residual, herald_failure_prob
+
+
 def build_full_circuit(n, thetas):
     """Full ENC-01 pipeline for weight-1 generators: state prep -> diagonal
     layer -> conjugation -> readout, all on Circuit(2n)."""
