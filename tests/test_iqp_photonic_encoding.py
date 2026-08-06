@@ -1,5 +1,6 @@
 import sys
 import os
+import hashlib
 
 import numpy as np
 import pytest
@@ -17,6 +18,7 @@ from iqp_photonic_encoding import (
     build_readout_circuit,
     build_full_circuit,
     build_cz_insertion,
+    build_weight2_processor,
     _build_cz_insertion_core,
     run_full_circuit,
     run_readout,
@@ -337,3 +339,123 @@ def test_cz_insertion_phase_sign_superposition():
         assert np.isclose(abs(out_amp) ** 2, amp_plus_zero ** 2 * EXPECTED_CZ_MAGNITUDE_SQ, atol=TOLERANCE)
         expected_value = amp_plus_zero * np.sqrt(EXPECTED_CZ_MAGNITUDE_SQ)  # always positive -- no |1,1> term
         assert np.isclose(out_amp.real, expected_value, atol=PHASE_TOLERANCE)
+
+
+# Phase 11 Plan 02: build_weight2_processor -- full pipeline composition.
+
+
+def test_weight2_processor_heralds_nonempty():
+    """Success Criterion 3, the calibration check: build_weight2_processor's
+    assembled Processor must have its heralds registered at the exact global
+    indices (2n, 2n+1) immediately after assembly -- not just 'non-empty',
+    since a wrong-but-nonzero registration would pass a looser check."""
+    n, i, j = 3, 0, 1
+    proc = build_weight2_processor(n, i, j, [0.0, 0.0, 0.0])
+    assert proc.heralds == {2 * n: 1, 2 * n + 1: 1}
+
+
+def _build_weight2_tail_no_state_prep(n, i, j, thetas_folded):
+    """Reproduces build_weight2_processor's diagonal-layer -> CZ-insertion ->
+    conjugation -> readout wiring (same mapping dict, same mode layout)
+    WITHOUT build_state_prep_circuit's leading Hadamard and WITHOUT
+    registering heralds via Processor.add_herald. Exists solely to support
+    test_weight2_herald_success_sanity -- see that test's docstring for why
+    state_prep and add_herald must both be excluded here (a confirmed
+    Perceval PolarizationSimulator limitation, not a design issue in this
+    module). Returns (proc, herald_spec) -- proc exposes all 2n+2 modes
+    (heralds not registered), so the caller must post-select on herald_spec
+    manually."""
+    total_modes = 2 * n + 2
+    proc = pcvl.Processor("SLOS", total_modes)
+    proc.add(0, build_diagonal_layer_circuit(n, thetas_folded))
+    cz_circuit, herald_spec = build_cz_insertion(n, i, j)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,
+        2 * j: 2, 2 * j + 1: 3,
+        2 * n: 4, 2 * n + 1: 5,
+    }
+    proc.add(mapping, cz_circuit)
+    proc.add(0, build_conjugation_circuit(n))
+    proc.add(0, build_readout_circuit(n))
+    return proc, herald_spec
+
+
+def test_weight2_herald_success_sanity():
+    """11-RESEARCH.md Open Question 2's recommended cheap sanity check:
+    confirms the lossless PBS wrap/unwrap doesn't change the bare
+    heralded_cz's herald-success probability (2/27), now checked through the
+    FULL mode-mapping-dict embedding build_weight2_processor uses (new
+    information beyond Plan 11-01's local-Circuit(6)-only truth table).
+
+    Deviation from the plan's literal recipe (Rule 3 -- blocking Perceval
+    limitation, discovered during this plan's execution): calling
+    build_weight2_processor(...) itself, then Processor.add_herald() +
+    Processor.with_input() + Processor.probs() on the result, crashes
+    unconditionally (`ValueError: matmul: ... size 12 is different from 16`
+    in perceval/simulators/polarization_simulator.py's `_prepare_input`) for
+    ANY circuit that combines a registered herald (`add_herald`) with a
+    polarization-tracking (`PBS`-containing) circuit -- confirmed by direct
+    execution, independent of thetas or state_prep. Separately, even without
+    add_herald, feeding this pipeline through build_state_prep_circuit's
+    Hadamard (creating a real polarization superposition before the CZ
+    insertion) gives silently WRONG (non-crashing) probabilities -- the same
+    unannotated-ancilla-photon-distinguishability artifact Plan 11-01's
+    summary already flagged as a carry-forward concern for polarization-plus-
+    heralded-ancilla simulation, now confirmed to also affect real Hadamard-
+    created superpositions, not just directly-constructed dual-rail
+    superposition states.
+
+    This test therefore checks the herald-success invariant the way that
+    stays inside Perceval's working envelope: no add_herald registration
+    (bare Processor, all 2n+2 modes exposed, herald condition applied by
+    hand via post-selection on the ancilla output modes), and no state_prep
+    (a definite computational-basis input, which WP(theta,0) leaves as a
+    definite state up to global phase -- no superposition reaches the CZ
+    insertion). Both limitations are carried forward as concerns for Plan
+    12's TVD validation strategy (must avoid Processor.probs() on the fully
+    composed, herald-registered, PBS+superposition circuit)."""
+    n, i, j = 3, 0, 1
+    thetas_folded = [0.0, 0.0, 0.0]
+    thetas_folded[i] += np.pi / 4
+    thetas_folded[j] += np.pi / 4
+
+    proc, herald_spec = _build_weight2_tail_no_state_prep(n, i, j, thetas_folded)
+    ancilla_a, ancilla_b = 2 * n, 2 * n + 1
+    expected_a, expected_b = herald_spec[4], herald_spec[5]
+
+    # No add_herald registered on this bare processor, so with_input has no
+    # auto-fill for the ancilla modes -- they need REAL input photons
+    # matching herald_spec's expected counts (Phase 10 Pitfall 1: heralds
+    # need a real photon on input, not vacuum), appended by hand to
+    # all_h_input(n)'s qubit-port pattern.
+    input_state = pcvl.BasicState(
+        "|" + ",".join(["{P:H},0"] * n) + f",{expected_a},{expected_b}>"
+    )
+    proc.with_input(input_state)
+    probs = proc.probs()
+    herald_matched_total = sum(
+        complex(p).real
+        for state, p in probs["results"].items()
+        if state[ancilla_a] == expected_a and state[ancilla_b] == expected_b
+    )
+    assert np.isclose(herald_matched_total, EXPECTED_CZ_MAGNITUDE_SQ, atol=TOLERANCE)
+
+
+# n=2, chosen because build_state_prep_circuit has no parameters besides n,
+# so its unitary is a pure function of the module's code. Captured live
+# during Plan 11-02's execution -- since build_state_prep_circuit was NOT
+# modified by this plan, this must match on first run. If it doesn't,
+# something else changed unexpectedly (a real finding, not a test bug).
+STATE_PREP_N2_SHA256 = "a61523a81534f6a30fad6b3bdecd777d29484c5009d3944c09aded0aaa228810"
+
+
+def test_weight1_builders_unitary_unchanged():
+    """CONTEXT.md's non-regression requirement: build_state_prep_circuit's
+    unitary must be bit-identical to its value captured before this phase's
+    changes -- guards against an accidental shared-helper edit, the same
+    risk category as Phase 9's silent H/V labeling bug (a module every prior
+    phase also depends on)."""
+    n = 2
+    matrix = np.array(build_state_prep_circuit(n).compute_unitary(), dtype=complex)
+    digest = hashlib.sha256(matrix.tobytes()).hexdigest()
+    assert digest == STATE_PREP_N2_SHA256
