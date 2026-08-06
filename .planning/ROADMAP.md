@@ -81,7 +81,11 @@ Plans:
   2. The full weight-2 pipeline is composed via `Processor.add()`, reusing `build_state_prep_circuit`, `build_conjugation_circuit`, and `build_readout_circuit` unmodified, with the `π/4` single-qubit corrections folded additively into `build_diagonal_layer_circuit`'s existing `thetas` argument.
   3. The assembled processor's `heralds` property is confirmed non-empty immediately after assembly (calibration check, guards against silently running an unheralded raw unitary).
   4. The existing 26-test weight-1 suite still passes unmodified (regression check) after this phase's changes.
-**Plans**: TBD
+**Plans**: 2 plans (2 waves, sequential)
+
+Plans:
+- [ ] 11-01-PLAN.md — build_cz_insertion(n, i, j): PBS-wrap -> heralded_cz -> PBS-unwrap, internal ctrl/data swap fix, truth-table + superposition verification
+- [ ] 11-02-PLAN.md — build_weight2_processor(n, i, j, thetas): full Processor-level pipeline composition, additive pi/4 theta folding, herald re-registration, non-regression snapshot check
 
 #### Phase 12: Exact Reference Extension & TVD Validation
 **Goal**: Weight-2 is validated to the same rigor bar weight-1 already cleared — exact reference, herald-conditioned TVD comparison, explicit honest failure/residual reporting, no silently-discarded probability mass.
@@ -121,8 +125,8 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
 | 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3, UAT 8/8 | 2026-08-05 |
 | 10. Heralded-CZ Primitive De-Risking | v2.1 | 1/1 | Complete — verified 4/4, 2/27 herald-success confirmed | 2026-08-06 |
-| 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 0/TBD | Not started | - |
+| 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 0/2 | Planned | - |
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 0/TBD | Not started | - |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/TBD | Not started | - |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Next: `/gsd:plan-phase 11`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) planned 2026-08-06 — 2 plans, 2 waves (sequential). Next: `/gsd:execute-phase 11`.
