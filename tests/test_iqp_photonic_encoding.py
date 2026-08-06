@@ -31,6 +31,7 @@ from iqp_photonic_encoding import (
     exact_qubit_iqp_distribution,
     photonic_iqp_distribution,
     total_variation_distance,
+    photonic_weight2_iqp_distribution,
 )
 
 TOLERANCE = 1e-9
@@ -496,3 +497,74 @@ def test_weight1_builders_unitary_unchanged():
     matrix = np.array(build_state_prep_circuit(n).compute_unitary(), dtype=complex)
     digest = hashlib.sha256(matrix.tobytes()).hexdigest()
     assert digest == STATE_PREP_N2_SHA256
+
+
+# Phase 12 Plan 01: TVD gate + herald-accounting tests (WT2-05, WT2-06).
+
+EXPECTED_HERALD_FAILURE_PROB = 1 - 2 / 27  # Phase 10's confirmed heralded_cz success rate, 2/27
+
+
+def test_wt2_tvd_gate_n2_theta_pi_4():
+    """ROADMAP Success Criterion 3, the literal locked pass/fail gate: at
+    n=2, i=0, j=1, a pure weight-2 pair term (theta=pi/4, no weight-1
+    thetas), the photonic weight-2 distribution must match the extended
+    exact reference to TVD < 1e-6 -- do not weaken this tolerance.
+    Research (12-RESEARCH.md Step 4) measured TVD~2.2e-16 at this exact
+    configuration with the {P:V} ancilla annotation fix applied."""
+    n, i, j = 2, 0, 1
+    thetas = [0.0, 0.0]
+
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(0, 1): np.pi / 4})
+    photonic_dist, residual, herald_failure_prob = photonic_weight2_iqp_distribution(n, i, j, thetas)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(herald_failure_prob, EXPECTED_HERALD_FAILURE_PROB, atol=1e-6)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n={n} i={i} j={j}: TVD={tvd} exceeds the 1e-6 threshold"
+
+
+def test_wt2_herald_failure_and_residual_are_separate_numbers():
+    """CONTEXT.md-locked accounting check: dist, residual, and
+    herald_failure_prob are three separate, never-merged numbers. dist sums
+    to 1.0 minus residual exactly (herald_failure_prob was already divided
+    out during renormalization, not folded in again), residual is near 0.0
+    (lossless circuit) while herald_failure_prob is near 0.9259 -- they must
+    be visibly different numbers, not the same value under two names."""
+    n, i, j = 2, 0, 1
+    thetas = [0.0, 0.0]
+
+    dist, residual, herald_failure_prob = photonic_weight2_iqp_distribution(n, i, j, thetas)
+
+    assert np.isclose(sum(dist.values()) + residual, 1.0, atol=1e-9)
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(herald_failure_prob, EXPECTED_HERALD_FAILURE_PROB, atol=1e-6)
+    assert abs(residual - herald_failure_prob) > 0.5, (
+        "residual and herald_failure_prob must be visibly distinct numbers, not the same "
+        "value silently reported under two names"
+    )
+
+
+def test_wt2_tvd_gate_n3_bystander_qubit():
+    """Opportunistic robustness check (12-RESEARCH.md Step 5, CONTEXT.md
+    'not a hard requirement'): n=3, pair (1,2), bystander qubit 0 at a
+    nonzero weight-1 theta -- same TVD gate assertions as the locked n=2
+    test, confirming the fix generalizes beyond the single locked
+    configuration."""
+    n, i, j = 3, 1, 2
+    thetas = [0.6, 0.0, 0.0]
+
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(1, 2): np.pi / 4})
+    photonic_dist, residual, herald_failure_prob = photonic_weight2_iqp_distribution(n, i, j, thetas)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(herald_failure_prob, EXPECTED_HERALD_FAILURE_PROB, atol=1e-6)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n={n} i={i} j={j} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"
