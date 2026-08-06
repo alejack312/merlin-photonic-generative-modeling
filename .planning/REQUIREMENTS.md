@@ -88,17 +88,51 @@ Explicitly excluded this milestone. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which phases cover which requirements. Populated during roadmap creation (2026-08-07).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmap creation) | | Pending |
+| VERIFY-01 | 14 - Julia Toolchain Spike | Pending |
+| ARB-01 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-02 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-03 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-04 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-05 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-06 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-07 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
+| ARB-08 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
+| ARB-09 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
+| TRAIN-01 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-02 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-03 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-04 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-05 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-06 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-07 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-08 | 17 - Trainability / Barren-Plateau Study | Pending |
+| HARD-01 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-02 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-03 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-04 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-05 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-06 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-07 | 18 - Hardness-Under-Loss Assessment | Pending |
+| VERIFY-02 | 19 - Independent Julia Cross-Checks | Pending |
+| VERIFY-03 | 19 - Independent Julia Cross-Checks | Pending |
+| VERIFY-04 | 19 - Independent Julia Cross-Checks | Pending |
+| WRITE-01 | 20 - Technical Write-Up | Pending |
+| WRITE-02 | 20 - Technical Write-Up | Pending |
+| WRITE-03 | 20 - Technical Write-Up | Pending |
+| WRITE-04 | 20 - Technical Write-Up | Pending |
+| WRITE-05 | 20 - Technical Write-Up | Pending |
+| WRITE-06 | 20 - Technical Write-Up | Pending |
+| WRITE-07 | 21 - External-Facing Framing Pass | Pending |
 
 **Coverage:**
-- v1 requirements: 34 total (TRAIN: 8, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7)
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 34 ⚠️ (pending roadmap)
+- v1 requirements: **35 total** (TRAIN: 8, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7). Note: this file's summary line previously stated "34 total" — 8+7+9+4+7=35, not 34; corrected here during roadmap creation as an arithmetic-error fix, not a scope change. All 35 IDs listed above were already present in the v1 Requirements section unchanged.
+- Mapped to phases: 35/35 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-07 after initial definition*
+*Last updated: 2026-08-07 after roadmap creation — traceability populated, 35/35 v1 requirements mapped to Phases 14-21, 100% coverage, no orphans*
