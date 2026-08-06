@@ -84,6 +84,10 @@ If any item is stalled at this checkpoint, say so plainly (per this project's es
 **Goal:** Confirm the Julia toolchain (`juliaup`, Yao.jl, BosonSampling.jl) installs and runs a hello-world circuit successfully. **This is deliberately this milestone's earliest, most decoupled phase — a stall-risk checkpoint, not an implementation detail.** The owner committed to a brand-new Julia toolchain as Must-have despite research explicitly flagging it as this milestone's single biggest risk of repeating the historical stall pattern: a prior self-directed track (PennyLane) stalled indefinitely from May 2026 after committing to an unfamiliar framework with no early go/no-go signal (documented in `CLAUDE.md` and `PROJECT.md`). Mirroring this project's own v1.0 Jul-25 stall-risk-checkpoint precedent: if the toolchain can't produce a hello-world result early, that's a visible, actionable signal — not something discovered only when VERIFY-02/03/04 are due.
 **Depends on:** None. Deliberately decoupled from every other phase's results.
 **Requirements:** VERIFY-01
+**Plans:** 1 plan (1 wave, single autonomous plan — install + both hello-worlds + go/no-go verdict, sequential by nature of a from-scratch toolchain install)
+
+Plans:
+- [ ] 14-01-PLAN.md — Install juliaup/Julia 1.10 LTS, scaffold `julia/` project, run Yao.jl + BosonSampling.jl hello-world circuits asserted against hand-derived analytical values, record go/no-go/partial-go verdict in `results/phase14_julia_toolchain_summary.md` + `STATE.md`
 
 **Success criteria:**
 1. `juliaup` installed; `julia --version` runs successfully from the project's shell.
