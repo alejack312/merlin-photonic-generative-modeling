@@ -9,7 +9,7 @@ Requirements for this milestone (v2.1). Each maps to roadmap phases (continuing 
 
 ### Weight-2 Circuit Implementation
 
-- [ ] **WT2-01**: Weight-2 generator circuit implemented — `PBS`→`heralded_cz`→`PBS` plus the two `WP(π/4,0)` single-qubit corrections, wired into the existing 2n-mode-per-register layout, reusing the existing weight-1 builders (`build_state_prep_circuit`, `build_conjugation_circuit`, `build_readout_circuit`) unmodified via `Processor`-level composition (not a `Circuit`-level modification, per the research finding that `heralded_cz` requires `Processor` composition)
+- [x] **WT2-01**: Weight-2 generator circuit implemented — `PBS`→`heralded_cz`→`PBS` plus the two `WP(π/4,0)` single-qubit corrections, wired into the existing 2n-mode-per-register layout, reusing the existing weight-1 builders (`build_state_prep_circuit`, `build_conjugation_circuit`, `build_readout_circuit`) unmodified via `Processor`-level composition (not a `Circuit`-level modification, per the research finding that `heralded_cz` requires `Processor` composition)
 - [ ] **WT2-02**: `exact_qubit_iqp_distribution` (or a sibling function) extended to accept weight-2 pair terms (`Z_iZ_j`), reusing the existing bit-ordering convention
 
 ### Validation
@@ -55,7 +55,7 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| WT2-01 | Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) | Pending |
+| WT2-01 | Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) | Complete |
 | WT2-02 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
 | WT2-03 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
 | WT2-04 | Phase 10 (Heralded-CZ Primitive De-Risking) | Complete |
