@@ -12,9 +12,21 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 ## Current State
 
-**v2.0 IQP → Photonic Encoding shipped 2026-08-05**, 6 days after starting (2026-07-30 → 2026-08-05). Both phases (8: Literature Scoping & Prerequisites; 9: Encoding Design) complete, 11/11 requirements satisfied, full test suite green (85/85), Phase 9 independently re-verified via a live UAT pass after the milestone audit flagged its missing formal verification as tech debt. Full detail: [`.planning/milestones/v2.0-ROADMAP.md`](milestones/v2.0-ROADMAP.md), [`.planning/milestones/v2.0-REQUIREMENTS.md`](milestones/v2.0-REQUIREMENTS.md), [`.planning/milestones/v2.0-MILESTONE-AUDIT.md`](milestones/v2.0-MILESTONE-AUDIT.md).
+**v2.1 Weight-2 Implementation shipped 2026-08-06**, same-day (all 4 phases in one sprint, 2026-08-06 09:04 → 21:42). All 4 phases (10: Heralded-CZ Primitive De-Risking; 11: CZ Insertion Unit & Weight-2 Circuit Composition; 12: Exact Reference Extension & TVD Validation; 13: Weight-1 + Weight-2 Composability Validation) complete, 8/8 requirements satisfied, full test suite green (118/118), every phase independently re-verified live by `gsd-verifier` (not trusted from SUMMARYs). Full detail: [`.planning/milestones/v2.1-ROADMAP.md`](milestones/v2.1-ROADMAP.md), [`.planning/milestones/v2.1-REQUIREMENTS.md`](milestones/v2.1-REQUIREMENTS.md), [`.planning/milestones/v2.1-MILESTONE-AUDIT.md`](milestones/v2.1-MILESTONE-AUDIT.md).
 
-## Current Milestone: v2.1 Weight-2 Implementation
+## Current Milestone
+
+No milestone in progress. Candidates for the next one are listed below in "Next Milestone Goals" — run `/gsd:new-milestone` to scope one.
+
+## Next Milestone Goals
+
+- STUDY-01/STUDY-02/WRITE-01 (trainability/barren-plateau study, hardness-under-loss assessment, write-up) — now unblocked, since weight-2 is confirmed working and validated as of v2.1
+- ARB-01 (arbitrary-θ weight-2, resolving the fixed-π/4 limitation) — genuinely open research, not a resolvable implementation task; worth scoping only if STUDY-01/02 reveal it's load-bearing
+- BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
+- Sending the drafted v1.0 technical note to Vincent Espitalier and flipping the repo public (both still open, independent of any future milestone)
+
+<details>
+<summary>Archived: v2.1 Weight-2 Implementation milestone scope (shipped 2026-08-06)</summary>
 
 **Goal:** Implement and validate the weight-2 IQP generator (`heralded_cz`-based two-qubit diagonal phase gate, fixed at θ=π/4) that v2.0 designed on paper but never built or ran. Extend the classical-comparison validation pattern from weight-1 (TVD-based) to cover weight-2. Empirically measure `heralded_cz`'s actual success probability against Perceval's specific implementation, rather than relying on secondhand literature figures for the general gate family.
 
@@ -22,16 +34,11 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 - Implementation of the `PBS`→`heralded_cz`→`PBS` weight-2 construction in Perceval, building on `iqp_photonic_encoding.py`'s existing weight-1 module
 - Empirical measurement of `heralded_cz`'s herald-success frequency for this specific implementation
 - Classical sanity check: extend the exact-vs-exact TVD comparison pattern (weight-1's ENC-04) to a small-scale weight-2 IQP circuit
-- **Explicitly out of scope this milestone:** trainability/barren-plateau study (STUDY-01), hardness-under-loss assessment (STUDY-02), write-up (WRITE-01), and resolving the fixed-angle (π/4-only) limitation for arbitrary-θ weight-2 gates — all deferred to a future milestone once weight-2 is working
+- Out of scope: trainability/barren-plateau study (STUDY-01), hardness-under-loss assessment (STUDY-02), write-up (WRITE-01), and resolving the fixed-angle (π/4-only) limitation for arbitrary-θ weight-2 gates — all deferred, all now candidates for the next milestone
 
 **Source:** `docs/iqp-photonic-encoding.md`'s Ingredient 2 (weight-2 derivation) and Conclusion/Open Questions section; `.planning/milestones/v2.0-REQUIREMENTS.md`'s deferred v2 requirements (IMPL-01, IMPL-02)
 
-## Next Milestone Goals (beyond v2.1)
-
-- STUDY-01/STUDY-02/WRITE-01 (trainability/hardness study and write-up), contingent on v2.1's weight-2 implementation actually working
-- Arbitrary-θ weight-2 gates (resolving the fixed-π/4 limitation), if the study reveals it's load-bearing
-- BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
-- Sending the drafted v1.0 technical note to Vincent Espitalier and flipping the repo public (both still open, independent of any future milestone)
+</details>
 
 <details>
 <summary>Archived: v2.0 IQP → Photonic Encoding milestone scope (shipped 2026-08-05)</summary>
@@ -66,16 +73,19 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 - ✓ Perceval low-level circuit API fluency confirmed (manual construction with phase shifters/beamsplitters, not just the high-level wrapper) — v2.0, 2026-08-04, `perceval_fluency_demo.py`
 - ✓ Prior IQP + barren-plateau notes/results compiled into one reference doc as the qubit-side baseline — v2.0, 2026-08-04, `docs/iqp-baseline.md`
 - ✓ On-paper IQP→photonic encoding mapping designed and documented, defensible unaided — v2.0, 2026-08-05, `docs/iqp-photonic-encoding.md`; polarization encoding, weight-1 generators exact/implemented/validated (TVD ~1e-16 at n=2,3), weight-2 derived on paper only and explicitly untested; owner's unaided explanation independently re-verified via UAT 2026-08-05
+- ✓ Weight-2 (`heralded_cz`-based) IQP generator implemented in Perceval — v2.1, 2026-08-06, `build_cz_insertion`/`build_weight2_processor` in `iqp_photonic_encoding.py`, reusing all weight-1 builders unmodified
+- ✓ `heralded_cz`'s herald-success probability empirically measured for this specific implementation — v2.1, 2026-08-06, exactly 2/27 (~0.074074), uniform across all computational-basis and superposition inputs, read from Perceval's exact backend (`heralded_cz_derisking.py`)
+- ✓ Classical sanity-check validation (TVD-style, per weight-1's ENC-04 pattern) extended to a small-scale weight-2 circuit — v2.1, 2026-08-06, TVD=2.58e-15 at the locked n=2, θ=π/4 gate, herald-failure probability and residual reported as two separate never-merged numbers
+- ✓ Weight-1/weight-2 composability confirmed in a mixed circuit — v2.1, 2026-08-06, n=3 test passing for 3 configs, TVD < 1e-6 against the extended exact reference, companion sanity check confirms the ZZ term is non-vacuous
 
 ### Active
 
-- [ ] Weight-2 (`heralded_cz`-based) IQP generator implemented in Perceval
-- [ ] `heralded_cz`'s herald-success probability empirically measured for this specific implementation
-- [ ] Classical sanity-check validation (TVD-style, per weight-1's ENC-04 pattern) extended to a small-scale weight-2 circuit
+(None — no milestone currently in progress. See PROJECT.md's "Next Milestone Goals" for candidates.)
 
 ### Out of Scope
 
-- **Reproducing the IQP gate-model circuits directly in MerLin (implementation)** — v2.0 completed the *design* side of this (an original, defensible DV/Fock-space encoding mapping, `docs/iqp-photonic-encoding.md`, weight-1 implemented and validated). Actually implementing/testing the full circuit including weight-2, and the trainability/hardness study, remain out of scope until a future milestone (deferred as IMPL-01/02, STUDY-01/02, WRITE-01 — see "Next Milestone Goals").
+- **Reproducing the IQP gate-model circuits directly in MerLin (implementation)** — v2.0 completed the *design* side (an original, defensible DV/Fock-space encoding mapping, `docs/iqp-photonic-encoding.md`), v2.1 completed weight-2 *implementation and validation* (weight-1 and weight-2 both implemented and validated, TVD ~1e-16/2.58e-15 respectively, confirmed composable). The trainability/hardness study and write-up remain out of scope until a future milestone (deferred as STUDY-01/02, WRITE-01 — see "Next Milestone Goals").
+- **Arbitrary-θ weight-2 generators (ARB-01)** — `heralded_cz` is a fixed, non-parameterized catalog gate; realizing a continuously-tunable `exp(iθ·Z_iZ_j)` for θ≠π/4 needs new paper-derivation work, not resolvable from the existing catalog alone. Deferred, contingent on whether STUDY-01/02 reveal it's actually load-bearing.
 - **PennyLane independent contributions** — parked, sequenced after the IQP-photonic project.
 - **ket.jl / SDP self-study** — informal free-time research only, no artifact expected.
 - **Weighted-average → single continuous point output mapping** — rejected: collapses multimodal targets (circles' two rings) into their midpoint, a region with zero real density.
@@ -85,8 +95,8 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 ## Context
 
-- **Shipped:** v1.0 complete 2026-07-29 (6 phases, 11 plans, 51 commits, 1,648 LOC Python, 10 days start-to-ship). v2.0 complete 2026-08-05 (2 phases, 8 plans, 33 commits, 1,282 lines added across code+tests, 6 days start-to-ship).
-- **Deadline pressure (resolved):** Hard deadline was September 1, 2026, driven by a warm contact (Vincent Espitalier) and the Quandela Spring 2027 placement pipeline. v1.0 shipped ~5 weeks early; v2.0 shipped as a bonus milestone well within the remaining runway.
+- **Shipped:** v1.0 complete 2026-07-29 (6 phases, 11 plans, 51 commits, 1,648 LOC Python, 10 days start-to-ship). v2.0 complete 2026-08-05 (2 phases, 8 plans, 33 commits, 1,282 lines added across code+tests, 6 days start-to-ship). v2.1 complete 2026-08-06 (4 phases, 6 plans, 38 commits, 1,144 lines of Python added, same-day sprint).
+- **Deadline pressure (resolved):** Hard deadline was September 1, 2026, driven by a warm contact (Vincent Espitalier) and the Quandela Spring 2027 placement pipeline. v1.0 shipped ~5 weeks early; v2.0 and v2.1 both shipped as bonus milestones well within the remaining runway.
 - **Historical stall pattern (did not recur):** A prior self-directed track (PennyLane) had been stalled since May 2026. The July 25, 2026 v1.0 stall-risk checkpoint (Phase 3, end-to-end training run) was met a day early — the pattern did not repeat in either milestone.
 - **Prior relevant expertise:** PyTorch; MMD-loss and generative-modeling experience from an IQP-MMD project; general quantum ML fluency; IQP circuits and barren-plateau research; polarization-optics coursework (Sorbonne) — directly informed v2.0's encoding choice.
 - **MerLin specifics (verified empirically, not just from docs):** `ML.QuantumLayer.simple(input_size, output_size)` returns a probability distribution over `output_size` measurement outcomes — non-negative, rows sum to exactly 1. MerLin also ships its own `PhotonicGenerator`/`NormalLatent`/`OutputAdapter` classes (`merlin.models.photonic_generator`) — v1.0 used `NormalLatent` directly but hand-rolled the training loop and output-correspondence logic, since the built-in `VectorAdapter` doesn't solve the correspondence problem the radius/center-of-mass fix addresses (confirmed via the v1.0 self-audit).
@@ -95,14 +105,16 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 - **Douce et al. (PRL 118, 070503, 2017)** proved CV-IQP sampling hardness in a continuous-quadrature formalism (squeezed light + homodyne) — a genuinely different formalism from v2.0's Fock-space/photon-number approach; positioned honestly in ENC-02 (favorable contrast on single-qubit conjugation, honest parallel on the multi-qubit measurement-conditioned case).
 - **Post-shipment self-audit (v1.0):** A directed Codex (gpt-5.5) deep audit against MerLin's local package source and the sibling IQP-MMD project's Obsidian vault found and the project fixed: a backwards tau/sigma direction claim, a misattributed statistic, stale batch-sweep numbers, a factually wrong claim about the sibling project's exact-MMD path, a silent-mismatch footgun in `NaturallyOrderedGenerator`, and an unsupported "reproducible" claim. Full record: `.planning/milestones/v1.0-MILESTONE-AUDIT.md`.
 - **Milestone audit + UAT gap-closure (v2.0):** `/gsd:audit-milestone` found Phase 9 shipped without a standalone `gsd-verifier` report (tech debt, not a functional gap — 11/11 requirements satisfied, integration checks clean). Closed via an independent `/gsd:verify-work 9` UAT pass: 6 of 8 tests verified by directly re-running code against the doc's claimed numbers (all matched exactly), and the self-explanation checkpoint (test 8) was independently re-tested rather than cited from the prior pass, surfacing a real (if minor) gap on the basis-correspondence sub-question that needed two follow-up rounds to resolve correctly. Full record: `.planning/milestones/v2.0-MILESTONE-AUDIT.md`, `.planning/phases/09-encoding-design/09-UAT.md`.
+- **Weight-2 implementation (v2.1, all 4 phases same-day 2026-08-06):** `heralded_cz` de-risked standalone first (Phase 10: herald-success 2/27 confirmed, CZ phase sign confirmed), then the full circuit built via `Processor`-level composition reusing weight-1 builders unmodified (Phase 11), then validated to weight-1's rigor bar (Phase 12: TVD=2.58e-15 at the locked n=2 gate, herald-failure/residual reported as two separate numbers), then confirmed to compose correctly alongside weight-1 in a shared circuit (Phase 13). A genuine Perceval library limitation was found and worked around (`Processor.add_herald()` + `PBS` crashes `Processor.probs()`), filed upstream as [Quandela/Perceval#783](https://github.com/Quandela/Perceval/issues/783).
+- **Milestone audit (v2.1):** `/gsd:audit-milestone` found all 8/8 requirements satisfied, cross-phase call chain genuinely wired end-to-end (no bypassed/mocked seams between Phase 11's circuit builder, Phase 12's TVD measurement, and Phase 13's composability test), and 118/118 tests independently re-run green. One gap found and fixed within the audit itself: `docs/iqp-photonic-encoding.md` had gone stale after Phase 11's own last edit, still describing weight-2 as unimplemented in three places — corrected before archiving. Full record: `.planning/milestones/v2.1-MILESTONE-AUDIT.md`.
 - **Known open items (owner's manual steps):** flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`); send the drafted technical note to Vincent Espitalier.
 
 ## Constraints
 
-- **Timeline**: Hard deadline Sept 1, 2026 — met with runway to spare on both milestones. Jul 25, 2026 stall-risk checkpoint (v1.0) — met one day early.
+- **Timeline**: Hard deadline Sept 1, 2026 — met with runway to spare across all three milestones. Jul 25, 2026 stall-risk checkpoint (v1.0) — met one day early.
 - **Tech stack**: Python 3.10–3.12 only (MerLin's `pyproject.toml` caps here). `torch<2.13`, `perceval-quandela>=1.2.1`.
-- **Collaboration process** (see [CLAUDE.md](../CLAUDE.md)): core conceptual/design decisions require the owner's own attempt or explanation before full implementation is written; self-explanation checkpoints occur at each SMART-spec milestone; no silent unilateral design decisions. Held throughout both milestones — including a corrected self-explanation attempt at v1.0's Phase 3 checkpoint, and v2.0's Phase 9 attempt-first checkpoints (each of ENC-01/ENC-03/ENC-04 gated on an owner attempt before implementation, with real corrections along the way — e.g. the H/V port-labeling bug caught during ENC-03's checkpoint).
-- **Scope discipline**: single project, sized to fit the window — held across both milestones. BMK-03, the full IQP→photonic implementation/study (v2 requirements), and PennyLane all stayed parked rather than scope-creeping into either shipped milestone.
+- **Collaboration process** (see [CLAUDE.md](../CLAUDE.md)): core conceptual/design decisions require the owner's own attempt or explanation before full implementation is written; self-explanation checkpoints occur at each SMART-spec milestone; no silent unilateral design decisions. Held throughout all three milestones — including a corrected self-explanation attempt at v1.0's Phase 3 checkpoint, v2.0's Phase 9 attempt-first checkpoints (each of ENC-01/ENC-03/ENC-04 gated on an owner attempt before implementation, with real corrections along the way — e.g. the H/V port-labeling bug caught during ENC-03's checkpoint), and v2.1's per-phase `gsd-verifier` gate.
+- **Scope discipline**: single project, sized to fit the window — held across all three milestones. BMK-03, the trainability/hardness study (STUDY-01/02), arbitrary-θ weight-2 (ARB-01), and PennyLane all stayed parked rather than scope-creeping into any shipped milestone.
 
 ## Key Decisions
 
@@ -123,7 +135,10 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 | Polarization encoding (H/V) chosen over dual rail or QUDIT | Owner's own choice, from personal Sorbonne coursework — corrected an inaccuracy in `09-RESEARCH.md`'s survey (Perceval does ship a polarization gate catalog: `HWP`/`QWP`/`PR`/`WP`/`PBS`) | ✓ Good — weight-1 generators map exactly (`WP(θ,0) = exp(iθZ)`), validated to floating-point precision |
 | Runnable code/tests scoped to weight-1 IQP generators only; weight-2 derived on paper via `heralded_cz` at a fixed angle (π/4) | `heralded_cz` is a fixed catalog gate, not a continuously-tunable one — resolving an arbitrary-θ two-qubit diagonal phase gate from Perceval's catalog alone is a real, unresolved gap, not glossed over | ⚠️ Revisit — a real, stated limitation; weight-2 implementation/testing is the natural first task of any follow-on milestone |
 | Validation metric: total variation distance (exact-vs-exact), not MMD | MMD's kernel-bandwidth machinery exists to handle sampling noise, which doesn't apply when both sides of the comparison are exact calculations | ✓ Good — TVD ~1e-16 at n=2,3, ten orders of magnitude under the chosen 1e-6 threshold |
-| Phase 9 shipped without a standalone `gsd-verifier` VERIFICATION.md (unlike Phase 8) | Not a deliberate choice — a process gap flagged by the milestone audit as tech debt | ⚠️ Revisit — closed post-audit via an independent `/gsd:verify-work 9` UAT pass (8/8, live-verified), but worth avoiding in future milestones: run `gsd-verifier` per-phase during execution, not just at milestone audit time |
+| Phase 9 shipped without a standalone `gsd-verifier` VERIFICATION.md (unlike Phase 8) | Not a deliberate choice — a process gap flagged by the milestone audit as tech debt | ✓ Good — closed post-audit via an independent `/gsd:verify-work 9` UAT pass (8/8, live-verified); v2.1 then ran `gsd-verifier` per-phase during execution as the fix, avoiding the same gap |
+| Weight-2 built via `Processor`-level composition, not `Circuit`-level | `heralded_cz`'s `build_circuit()` alone drops the herald — only `build_experiment()`/`build_processor()` attach it; confirmed by direct source read, not assumed | ✓ Good — full pipeline composed via `Processor.add()`, all four weight-1 builders reused with zero modification (sha256 snapshot-verified) |
+| Herald-free measurement variant (`_build_weight2_processor_no_herald`) built specifically to route around `Processor.add_herald()`+`PBS` crashing `Processor.probs()` | A genuine Perceval library limitation, independently reproduced (not assumed from a stack trace) before designing around it | ✓ Good — TVD validation still exercises the real production wiring (`build_cz_insertion`, same mode-mapping), just skips the herald registration step that crashes; upstream issue filed for the library bug itself |
+| Weight-1/weight-2 composability tested with a weight-1 theta stacked directly on a weight-2 pair member, not disjoint qubits | The stronger test — proves a qubit's independent Z term and its participation in the ZZ pair term compose correctly on the same qubit, not just that unrelated qubits don't interfere | ✓ Good — TVD < 1e-6 across all 3 configs, companion sanity check confirms the ZZ term has a real (0.46-0.50 TVD), non-vacuous effect |
 
 ---
-*Last updated: 2026-08-05 after v2.0 milestone completion*
+*Last updated: 2026-08-06 after v2.1 milestone completion*

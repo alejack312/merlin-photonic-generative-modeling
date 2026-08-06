@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-05)
+See: .planning/PROJECT.md (updated 2026-08-06)
 
-**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier. (v2.1's core value: get weight-2 IQP generators actually working and validated, not just designed on paper.)
-**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) roadmap created 2026-08-06** — 4 phases (10-13), 8/8 v1 requirements mapped. Phase 10 completed and verified 2026-08-06. Phase 11 completed and verified 2026-08-06. Phase 12 completed and verified 2026-08-06. Phase 13 completed and verified 2026-08-06 — all 4 v2.1 phases now complete, 8/8 requirements Complete. Ready for milestone audit/close.
+**Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
+**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) shipped 2026-08-06** — 4 phases, 8/8 requirements satisfied, milestone audit passed. No milestone currently in progress. Next candidates (STUDY-01/02, WRITE-01, ARB-01, BMK-03) are listed in PROJECT.md's "Next Milestone Goals" — run `/gsd:new-milestone` to scope one.
 
 ## Current Position
 
-Milestone: **v2.1 Weight-2 Implementation** — all phases complete, started 2026-08-05 (v2.0 shipped 2026-08-05, tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
-Phase: 13 of 13 (Weight-1 + Weight-2 Composability Validation) — complete and verified.
-Plan: — (all Phase 13 plans executed and verified; v2.1 milestone functionally done, not yet audited/archived)
-Status: Phase 13 completed and verified 2026-08-06 (gsd-verifier: 3/3 must-haves passed, no gaps, independently re-executed rather than trusted from the SUMMARY — `test_wt2_composability_mixed_generators_n3` at n=3, 3 parametrized configs each stacking a weight-1 theta on a weight-2 pair member plus one on the bystander qubit, TVD < 1e-6 vs. extended exact reference in all 3 cases, plus a companion sanity check confirming the ZZ term has a genuine non-vacuous effect (TVD 0.46-0.50 against the weight-1-only reference, well above the 0.1 bar). Full suite: 118/118 passing live re-run, cross-checked against a `git checkout`'d pre-Phase-13 baseline of 115 to confirm the +3 delta exactly matches the new test's parametrization. No production code changed — Phase 12's `exact_qubit_iqp_distribution`/`photonic_weight2_iqp_distribution` already supported this scenario. Manual staff-engineer review (gstack's `/review` skill couldn't run — same limitation as Phases 11-12: this repo works directly on `master` with no feature branch/PR): diff reviewed directly, pure test-only addition, reuses existing verified functions and conventions, no issues found. WT2-07 satisfied — marked Complete in REQUIREMENTS.md. All 8/8 v2.1 requirements now Complete.
+Milestone: **None in progress.** v2.1 shipped 2026-08-06, tag: v2.1 (v2.0 shipped 2026-08-05, tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
+Phase: — (ready to plan next milestone)
+Plan: Not started
+Status: v2.1 Weight-2 Implementation fully shipped and archived — all 4 phases (10-13) complete and independently verified, 8/8 requirements satisfied, milestone audit passed (`.planning/milestones/v2.1-MILESTONE-AUDIT.md`), 118/118 test suite green. Roadmap and requirements archived to `.planning/milestones/v2.1-*`. `.planning/REQUIREMENTS.md` deleted (fresh one needed for next milestone). PROJECT.md fully evolved: all 8 v2.1 requirements moved to Validated, Current State/Current Milestone/Next Milestone Goals sections updated.
 
-Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [██████████] 100% — all 4 phases complete and verified (Phase 10, 11, 12, 13), 8/8 requirements satisfied, not yet audited/archived as a shipped milestone.
+Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete, 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [██████████] 100% — all 4 phases complete and verified, 8/8 requirements satisfied, shipped and archived 2026-08-06.
 
 ## Performance Metrics
 
@@ -33,29 +33,26 @@ Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded 
 - Lines added: 1,282 (code + tests)
 - Timeline: 6 days (2026-07-30 → 2026-08-05)
 
+**v2.1 milestone:**
+- Phases: 4
+- Plans: 6
+- Commits: 38
+- Files touched: 33 (4,167 insertions, 45 deletions); 1,144 lines of Python
+- Timeline: 1 day (2026-08-06, same-day sprint)
+
 ## Accumulated Context
 
 ### Decisions
 
-Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `.planning/milestones/v1.0-ROADMAP.md`'s Milestone Summary. Highlights carried forward for any future work on this codebase:
+Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.planning/milestones/v1.0-ROADMAP.md`'s Milestone Summary, and `.planning/milestones/v2.1-ROADMAP.md`'s Milestone Summary. Reusable technical gotchas carried forward for any future work on this codebase:
 
-- Weight-2 requires `Processor`-level composition, not `Circuit`-level — `heralded_cz`'s `build_circuit()` alone has no herald attached; only `build_experiment()`/`build_processor()` do. Every existing weight-1 builder (`build_state_prep_circuit`, `build_diagonal_layer_circuit`, `build_conjugation_circuit`, `build_readout_circuit`) is a valid `Processor.add()` input and stays unmodified.
-- `heralded_cz` success probability independently re-measured in this repo's venv at exactly 2/27 ≈ 0.074074, uniform across all 4 computational-basis inputs — confirms rather than merely cites the literature figure. `physical_perf == 1.0` in all cases (no photon loss in the unitary itself; the entire cost is the herald/logical filter).
-- `global_perf`/`.performance` (herald success) must be captured as a first-class, separately-reported number from day one — weight-1's `run_full_circuit` pattern never needed to read it (its `performance` was always 1.0), so copy-pasting that helper verbatim would silently drop the milestone's actual deliverable number.
-- `logical_perf` bundles the true herald condition with a second, distinct filter (data-mode output falling outside the valid dual-rail subspace) — must be checked negligible for the inputs actually used before citing it as "the herald probability," not assumed.
-- The CZ/ZZ operator identity (`exp(iπ/4·Z_iZ_j) = CZ · exp(iπ/4·Z_i) · exp(iπ/4·Z_j)` up to global phase) means the single-qubit π/4 corrections fold additively into `build_diagonal_layer_circuit`'s existing `thetas` argument — no new phase-gate code needed.
-- Batch-averaged per-sample MMD² training objective is a provable upper bound on the marginal-distribution MMD² (Jensen's inequality on the convex kernel term), not identical to it — documented in `DESIGN_DECISIONS.md`, worth knowing before extending the training loop.
-- Natural-order correspondence's causal mechanism (why radius-sorting helps) is asserted, not demonstrated — a genuine open question, not a settled fact, if this generator is extended or reused.
+- `numpy.float64` amplitude coefficients silently break `perceval`'s `StateVector` arithmetic (misleading "inhomogeneous shape" `ValueError`, not a type error) — cast to plain Python `float` before multiplying/adding `StateVector` terms.
+- Perceval's `Simulator`+`SLOSBackend` cannot process any circuit containing `PBS` (`Circuit.requires_polarization` assertion). `Processor`/`Analyzer`/`PolarizationSimulator` can handle `PBS`, but `PolarizationSimulator` combined with unannotated ancilla photons produces spurious results — always explicitly annotate ancilla polarization (`{P:V}` or similar), never rely on the default.
+- `Processor.add_herald()` combined with any `PBS`-containing circuit crashes `Processor.probs()` unconditionally (Perceval library limitation, filed upstream as [Quandela/Perceval#783](https://github.com/Quandela/Perceval/issues/783)). Workaround: build a herald-free measurement variant with manual post-selection on the ancilla output modes instead of registering the herald on the measurement processor.
 - `torch.func.functional_call` + `jacrev` against MerLin's `QuantumLayer` silently produces an all-zero Jacobian unless `quantum_layer.thetas` is also monkey-patched inside the traced closure (see `generator/neighbor_locality.py`).
-- `docs/iqp-photonic-encoding.md` (Phase 9) is the milestone's core prior deliverable: polarization encoding, `WP(θ,0) = diag(e^{iθ},e^{-iθ})` for weight-1, `HWP(π/8)` for state prep/conjugation. Port convention `H=(0,1)`, `V=(1,0)` — a backwards version of this was caught and fixed silently mid-Phase-9 (no test failed, only the label was wrong) via a direct calibration check, the same pattern weight-2's mode-index round-trip check (Phase 11) must repeat.
-- Phase 10 confirmed `heralded_cz`'s herald-success probability at exactly 2/27 (~0.074074), uniform across all 4 computational-basis dual-rail inputs and 2 superposition spot-checks, and the CZ phase sign (negative only on `|1,1⟩`, via `Simulator.prob_amplitude` since `Processor.probs()`/`Analyzer` are phase-blind). `logical_perf` confirmed pure herald condition (empty `post_select_fn`, zero Analyzer-truth-table leakage) — no hidden second filter for this gate.
-- `numpy.float64` amplitude coefficients silently break `perceval`'s `StateVector` arithmetic (misleading "inhomogeneous shape" `ValueError`, not a type error) — cast to plain Python `float` before multiplying/adding `StateVector` terms. Hit while building Phase 10's superposition spot-checks; worth knowing for any future `StateVector`-construction code in this repo.
-- Perceval's `Simulator`+`SLOSBackend` cannot process any circuit containing `PBS` (`Circuit.requires_polarization` assertion) — confirmed by direct execution while building Phase 11 Plan 01's `build_cz_insertion` tests. `Processor`/`Analyzer`/`PolarizationSimulator` can handle `PBS`, but `PolarizationSimulator` combined with `heralded_cz`'s unannotated ancilla photons produces spurious (near-zero or wrong-magnitude) results due to default polarization labeling making ancilla photons wrongly (in)distinguishable from qubit photons during multi-photon interference. Resolved by testing the PBS boundary (phase-neutral, amplitude-1 for computational basis) and the dual-rail core (adapter + `heralded_cz`) separately, never combined in one simulator call. Worth knowing before Plan 12 attempts to phase-check the full composed weight-2 pipeline — use `Processor`/`Analyzer` (magnitude-only) for the full polarized circuit, not `PolarizationSimulator` phase checks.
-- `build_cz_insertion(n, i, j)` (Phase 11 Plan 01) realizes CZ = diag(1,1,1,-1) on this module's own polarization convention via PBS-wrap → PERM-adapted `heralded_cz` → PBS-unwrap, `Circuit(6)` local layout, `herald_spec` read from `in_heralds` not hardcoded. The PERM([1,0]) ctrl/data convention adapter (11-RESEARCH.md Pitfall 1) is fully internal to the function — callers use the module's normal port order, never see the adapter. `_build_cz_insertion_core()` exposes the PBS-free inner wiring for direct testability.
-- `build_weight2_processor(n, i, j, thetas)` (Phase 11 Plan 02) assembles the full weight-2 pipeline as `Processor(2n+2)`: `build_state_prep_circuit` → π/4-additively-folded `build_diagonal_layer_circuit` → `build_cz_insertion` wired via an explicit mode-mapping dict (`Processor.add(mapping_dict, circuit)`, ModeConnector auto-PERM/inverse-PERM) → `build_conjugation_circuit` → `build_readout_circuit`. Heralds registered immediately after the CZ insertion's `.add()` call via `add_herald`, reading Plan 11-01's own `herald_spec` (never hardcoded). All 4 weight-1 builders reused with zero modification — Phase 11 is complete.
-- **Resolved by Phase 12 (was flagged as a blocking concern for Plan 12; now fixed and tested):** `Processor.add_herald()` combined with any `PBS`-containing circuit crashes `Processor.probs()` unconditionally (`matmul` shape mismatch inside `PolarizationSimulator._prepare_input`). Fix: never call `add_herald` on the measurement processor — `_build_weight2_processor_no_herald` mirrors `build_weight2_processor`'s exact wiring/mode-mapping minus the two `add_herald` calls, with manual post-selection on the ancilla output modes. Separately, real Hadamard-created superposition feeding a heralded-ancilla sub-circuit gave silently wrong (non-crashing) probabilities via `PolarizationSimulator`'s default `{P:H}` ancilla annotation — fixed by explicitly annotating the ancilla input photons `{P:V}` in `_weight2_input_state` (12-RESEARCH.md Steps 3-4, confirmed against a trusted PBS-free ground truth to TVD~1e-16, robust across 5+ configurations). Both fixes implemented and tested in Phase 12 Plan 01 (`iqp_photonic_encoding.py`); no remaining blocker for weight-2 TVD validation.
-- Phase 12 Plan 02 filed the `add_herald`+`PBS` crash upstream as https://github.com/Quandela/Perceval/issues/783 (Perceval 1.2.4, repro confirmed independent of thetas/state_prep/the `{P:V}` annotation fix). Courtesy report only — not on the critical path for any WT2 requirement, since the workaround is already implemented and tested in this repo.
-- Phase 13 Plan 01 confirmed weight-1 (Z) and weight-2 (ZZ) generator layers compose correctly at n=3 when a weight-1 theta is stacked directly on a qubit that is also a weight-2 pair member (a stronger test than disjoint qubits) — TVD < 1e-6 against the extended exact reference across 3 configs, with a companion sanity check (TVD > 0.1 against the weight-1-only reference) confirming the ZZ term is not accidentally inert. No changes needed to `iqp_photonic_encoding.py`; Phase 12's functions already supported this scenario.
+- Batch-averaged per-sample MMD² training objective is a provable upper bound on the marginal-distribution MMD² (Jensen's inequality), not identical to it — documented in `DESIGN_DECISIONS.md`.
+- Natural-order correspondence's causal mechanism (why radius-sorting helps) is asserted, not demonstrated — a genuine open question if this generator is extended or reused.
+- `docs/iqp-photonic-encoding.md` is the canonical design reference for both weight-1 (implemented v2.0) and weight-2 (implemented v2.1) IQP generators — kept in sync with shipped code as of the v2.1 milestone audit.
 
 ### Roadmap Evolution
 
@@ -64,22 +61,20 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table and `
 - v2.0 roadmap created 2026-07-30: exactly 2 phases (8: Literature Scoping & Prerequisites; 9: Encoding Design), derived directly from this milestone's 11 v1 requirements. 100% requirement coverage validated (11/11 mapped, no orphans). v2 requirements (IMPL-01/02, STUDY-01/02, WRITE-01) explicitly deferred, not phased.
 - v2.0 shipped 2026-08-05 via `/gsd:complete-milestone`, tagged `v2.0`. `.planning/ROADMAP.md` and `REQUIREMENTS.md` archived to `.planning/milestones/v2.0-*`.
 - v2.1 Weight-2 Implementation roadmap created 2026-08-06: 4 phases (10: Heralded-CZ Primitive De-Risking; 11: CZ Insertion Unit & Weight-2 Circuit Composition; 12: Exact Reference Extension & TVD Validation; 13: Weight-1 + Weight-2 Composability Validation), derived directly from this milestone's 8 v1 requirements (WT2-01 through WT2-08) and sequenced per research's recommended de-risk-first build order. Phases 10→11→12→13 are sequentially dependent (each builds on the prior's confirmed output). 100% requirement coverage validated (8/8 mapped, no orphans).
+- v2.1 shipped 2026-08-06 via `/gsd:complete-milestone`, tagged `v2.1`. All 4 phases completed same-day. `.planning/ROADMAP.md`, `REQUIREMENTS.md`, and the milestone audit archived to `.planning/milestones/v2.1-*`.
 
 ### Pending Todos
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: Phase 13 verified, WT2-07 marked Complete — run `/gsd:audit-milestone` to close out the v2.1 milestone (8/8 requirements satisfied)
-- Backlog (not blocking, deferred to a future milestone): ARB-01 (arbitrary-θ weight-2), STUDY-01/02 (trainability/hardness study), WRITE-01 (write-up), BMK-03 (apples-to-apples QGAN comparison) — all contingent on v2.1's weight-2 implementation actually working
+- Next: no milestone in progress — run `/gsd:new-milestone` to scope the next one (candidates: STUDY-01/02, WRITE-01, ARB-01, BMK-03, all listed in PROJECT.md's "Next Milestone Goals")
 
 ### Blockers/Concerns
 
-None open. The Phase 11→12 handoff concern (Perceval `Processor.add_herald()` + `PBS` crash, plus a silent ancilla-distinguishability bug) is resolved — see Accumulated Context's Decisions above and `.planning/phases/12-exact-reference-extension-tvd-validation/12-01-SUMMARY.md`.
-
-All prior blockers (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings, the Phase 8 LIT-04 contingency, Phase 9's missing formal verification) are resolved or honestly documented as closed.
+None open. All prior blockers across all three milestones (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings, the Phase 8 LIT-04 contingency, Phase 9's missing formal verification, the Phase 11→12 Perceval `add_herald`+`PBS` crash) are resolved or honestly documented as closed.
 
 ## Session Continuity
 
 Last session: 2026-08-06
-Stopped at: Phase 13 executed (1 plan), verified (gsd-verifier: 3/3 must-haves, no gaps, independently re-executed), manually code-reviewed (no issues found — `/review` skill unavailable, same master-branch-only limitation as Phases 11-12) — `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md` (WT2-07 → Complete), `.planning/phases/13-weight-1-weight-2-composability-validation/13-VERIFICATION.md`, and `.planning/STATE.md` all updated. v2.1 milestone functionally complete: all 4 phases done, 8/8 requirements satisfied, not yet audited/archived.
-Resume by: run `/gsd:audit-milestone` to verify v2.1 requirements/integration/E2E flows and close out the milestone.
+Stopped at: v2.1 Weight-2 Implementation milestone completed and archived via `/gsd:complete-milestone 2.1` — `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, and `v2.1-MILESTONE-AUDIT.md` created; `.planning/ROADMAP.md` collapsed v2.1's phase detail into a `<details>` block; `.planning/REQUIREMENTS.md` deleted (fresh for next milestone); `.planning/PROJECT.md` fully evolved (all 8 v2.1 requirements moved to Validated, Current State/Next Milestone Goals updated); `.planning/MILESTONES.md` given a new v2.1 entry; git tagged `v2.1`.
+Resume by: run `/gsd:new-milestone` to scope the next milestone, or handle the two remaining owner-only manual steps (send technical note to Vincent Espitalier, flip repo public).
