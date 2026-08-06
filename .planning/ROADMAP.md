@@ -65,7 +65,10 @@ Audit: [`.planning/milestones/v2.0-MILESTONE-AUDIT.md`](milestones/v2.0-MILESTON
   2. The measured success probability is confirmed uniform (to floating-point precision) across all 4 computational-basis dual-rail inputs.
   3. `heralded_cz`'s CZ truth table/phase behavior is verified against computational-basis inputs.
   4. A literature-comparison note documents the measured value alongside the design doc's previously-flagged, unverified literature figures (1/9 post-selected, ~2/27 heralded) — descriptive only, no equality claimed.
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 10-01-PLAN.md — Herald-success probability + CZ phase-sign de-risking (heralded_cz_derisking.py + tests + docs update)
 
 #### Phase 11: CZ Insertion Unit & Weight-2 Circuit Composition
 **Goal**: The full weight-2 generator circuit is implemented — `PBS`→`heralded_cz`→`PBS` plus the two `WP(π/4,0)` single-qubit corrections — composed via `Processor`-level composition, reusing every existing weight-1 builder unmodified.
@@ -115,7 +118,7 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 7. Mechanism Validation | (unassigned) | 2/2 | Complete — verified 10/10, owner interpretation pending | 2026-07-30 |
 | 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
 | 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3, UAT 8/8 | 2026-08-05 |
-| 10. Heralded-CZ Primitive De-Risking | v2.1 | 0/TBD | Not started | - |
+| 10. Heralded-CZ Primitive De-Risking | v2.1 | 0/1 | Planned | - |
 | 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 0/TBD | Not started | - |
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 0/TBD | Not started | - |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/TBD | Not started | - |
