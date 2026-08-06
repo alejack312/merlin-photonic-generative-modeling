@@ -98,7 +98,11 @@ Plans:
   2. The herald-conditioned photonic distribution is computed with herald-failure probability and out-of-subspace decode residual reported as two separate, explicit numbers — never merged into one figure, never silently renormalized away.
   3. A TVD test at n=2, θ=π/4 passes, comparing the extended exact reference against the herald-conditioned photonic distribution, in the same style/tolerance convention as `test_enc04_toy_validation_runs_end_to_end` (TVD < 1e-6).
   4. New test coverage is added to `tests/test_iqp_photonic_encoding.py` for WT2-01 through WT2-05, matching existing test conventions, and the full suite (existing 26 + new tests) passes.
-**Plans**: TBD
+**Plans:** 2 plans (2 waves, sequential — 12-02 depends on 12-01 for the actual measured numbers)
+
+Plans:
+- [ ] 12-01-PLAN.md — Extend exact_qubit_iqp_distribution with Z_i*Z_j pair terms; build the {P:V}-annotated, herald-unregistered measurement path for build_weight2_processor's output; TVD gate test at n=2, theta=pi/4
+- [ ] 12-02-PLAN.md — Write results/phase12_weight2_tvd_validation_summary.md and file the upstream Perceval add_herald+PBS crash as a GitHub issue
 
 #### Phase 13: Weight-1 + Weight-2 Composability Validation
 **Goal**: Weight-1 and weight-2 generator layers are confirmed to compose correctly within the same circuit, not just in isolation.
