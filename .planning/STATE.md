@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-08-05)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier. (v2.1's core value: get weight-2 IQP generators actually working and validated, not just designed on paper.)
-**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) roadmap created 2026-08-06** — 4 phases (10-13), 8/8 v1 requirements mapped. Ready to plan Phase 10.
+**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) roadmap created 2026-08-06** — 4 phases (10-13), 8/8 v1 requirements mapped. Phase 10 completed and verified 2026-08-06. Ready to plan Phase 11.
 
 ## Current Position
 
 Milestone: **v2.1 Weight-2 Implementation** — in progress, started 2026-08-05 (v2.0 shipped 2026-08-05, tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
-Phase: 10 of 13 (Heralded-CZ Primitive De-Risking) — plan 01 complete.
-Plan: 01 of 1 — complete
-Status: Phase 10 Plan 01 executed 2026-08-06: `heralded_cz`'s herald-success probability (2/27, uniform across 4 computational-basis + 2 superposition inputs) and CZ phase sign confirmed programmatically via `Processor.probs()` and `Simulator.prob_amplitude`; `logical_perf` purity confirmed (empty `post_select_fn`, zero-leakage `Analyzer` truth table); `docs/iqp-photonic-encoding.md` updated to state the confirmed measurement. WT2-04 and WT2-08 satisfied. Build order: Phase 10 (done) → Phase 11 (insertion unit + full pipeline composition) → Phase 12 (exact reference extension + TVD validation) → Phase 13 (weight-1/weight-2 composability). Existing weight-1 suite (32 tests, incl. Phase 8's fluency demo) stayed green throughout; 12 new heralded_cz-de-risking tests added.
+Phase: 11 of 13 (CZ Insertion Unit & Weight-2 Circuit Composition) — ready to plan.
+Plan: — (not yet planned)
+Status: Phase 10 completed and verified 2026-08-06 (gsd-verifier: 4/4 must-haves passed, no gaps). `heralded_cz`'s herald-success probability (2/27, uniform across 4 computational-basis + 2 superposition inputs) and CZ phase sign confirmed programmatically via `Processor.probs()` and `Simulator.prob_amplitude`; `logical_perf` purity confirmed (empty `post_select_fn`, zero-leakage `Analyzer` truth table); `docs/iqp-photonic-encoding.md` updated to state the confirmed measurement. WT2-04 and WT2-08 satisfied — marked Complete in REQUIREMENTS.md. Pre-landing code review (`/review`): no issues found. Build order: Phase 10 (done) → Phase 11 (insertion unit + full pipeline composition) → Phase 12 (exact reference extension + TVD validation) → Phase 13 (weight-1/weight-2 composability). Existing weight-1 suite (32 tests, incl. Phase 8's fluency demo) stayed green throughout; 12 new heralded_cz-de-risking tests added.
 
-Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [██░░░░░░░░] ~13% — Phase 10 (1/4 phases) complete, 0/1 plans remaining in-phase pending Phase 11-13.
+Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete (Phase 8: 4/4 plans; Phase 9: 4/4 plans), 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [██░░░░░░░░] ~25% — Phase 10 complete and verified (1/4 phases), 0/3 remaining phases started.
 
 ## Performance Metrics
 

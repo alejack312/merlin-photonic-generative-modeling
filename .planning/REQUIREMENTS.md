@@ -15,11 +15,11 @@ Requirements for this milestone (v2.1). Each maps to roadmap phases (continuing 
 ### Validation
 
 - [ ] **WT2-03**: Herald-conditioned photonic distribution computed, with herald-failure probability and out-of-subspace decode residual reported as two separate, explicit numbers — never merged into one figure, never silently renormalized away, per this project's established ENC-03 honesty-ledger policy
-- [ ] **WT2-04**: Exact (analytic, not sampled) herald-success probability computed for this specific `heralded_cz` implementation, read directly off Perceval's exact backend (`Analyzer.performance` / `logical_perf`) — not estimated via shot-based sampling
+- [x] **WT2-04**: Exact (analytic, not sampled) herald-success probability computed for this specific `heralded_cz` implementation, read directly off Perceval's exact backend (`Analyzer.performance` / `logical_perf`) — not estimated via shot-based sampling
 - [ ] **WT2-05**: TVD validation test at n=2, θ=π/4, comparing the extended exact qubit-side reference (WT2-02) against the herald-conditioned photonic distribution (WT2-03), in the same style/tolerance conventions as the existing `test_enc04_toy_validation_runs_end_to_end`
 - [ ] **WT2-06**: Test coverage added to `tests/test_iqp_photonic_encoding.py` for WT2-01 through WT2-05, matching existing test conventions
 - [ ] **WT2-07**: n=3 mixed generator test — 2 weight-1 terms plus 1 weight-2 term in the same circuit, confirming weight-1 and weight-2 layers compose correctly
-- [ ] **WT2-08**: Literature comparison note documenting the measured herald-success probability alongside the design doc's previously-flagged, unverified literature figures (1/9 post-selected, ~2/27 heralded) — descriptive only, no equality claimed
+- [x] **WT2-08**: Literature comparison note documenting the measured herald-success probability alongside the design doc's previously-flagged, unverified literature figures (1/9 post-selected, ~2/27 heralded) — descriptive only, no equality claimed
 
 ## v2 Requirements
 
@@ -58,11 +58,11 @@ Which phases cover which requirements.
 | WT2-01 | Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) | Pending |
 | WT2-02 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
 | WT2-03 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
-| WT2-04 | Phase 10 (Heralded-CZ Primitive De-Risking) | Pending |
+| WT2-04 | Phase 10 (Heralded-CZ Primitive De-Risking) | Complete |
 | WT2-05 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
 | WT2-06 | Phase 12 (Exact Reference Extension & TVD Validation) | Pending |
 | WT2-07 | Phase 13 (Weight-1 + Weight-2 Composability Validation) | Pending |
-| WT2-08 | Phase 10 (Heralded-CZ Primitive De-Risking) | Pending |
+| WT2-08 | Phase 10 (Heralded-CZ Primitive De-Risking) | Complete |
 
 **Coverage:**
 - v1 requirements: 8 total

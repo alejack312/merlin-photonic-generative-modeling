@@ -68,7 +68,9 @@ Audit: [`.planning/milestones/v2.0-MILESTONE-AUDIT.md`](milestones/v2.0-MILESTON
 **Plans:** 1 plan
 
 Plans:
-- [ ] 10-01-PLAN.md — Herald-success probability + CZ phase-sign de-risking (heralded_cz_derisking.py + tests + docs update)
+- [x] 10-01-PLAN.md — Herald-success probability + CZ phase-sign de-risking (heralded_cz_derisking.py + tests + docs update)
+
+**Results (measured 2026-08-06):** `heralded_cz` herald-success probability confirmed at exactly 2/27 (~0.074074), uniform across 4 computational-basis inputs + 2 superposition spot-checks, read from `global_perf`/`physical_perf`/`logical_perf` (never shot-sampled). CZ phase sign confirmed via `Simulator.prob_amplitude`: negative only on `|1,1⟩`, matching `diag(1,1,1,-1)`. `logical_perf` confirmed pure herald condition (empty `post_select_fn`, zero-leakage `Analyzer` truth table). Literature-comparison note added to `docs/iqp-photonic-encoding.md` (descriptive, no equality claimed). Full 32-test suite (26 existing + 6 new pytest functions covering 12 parametrized cases) green, no regression. Verified 4/4 must-haves.
 
 #### Phase 11: CZ Insertion Unit & Weight-2 Circuit Composition
 **Goal**: The full weight-2 generator circuit is implemented — `PBS`→`heralded_cz`→`PBS` plus the two `WP(π/4,0)` single-qubit corrections — composed via `Processor`-level composition, reusing every existing weight-1 builder unmodified.
@@ -118,9 +120,9 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 7. Mechanism Validation | (unassigned) | 2/2 | Complete — verified 10/10, owner interpretation pending | 2026-07-30 |
 | 8. Literature Scoping & Prerequisites | v2.0 | 4/4 | Complete — verified 10/10, LIT-04: **Go** | 2026-08-04 |
 | 9. Encoding Design | v2.0 | 4/4 | Complete — polarization encoding, TVD ~1e-16 at n=2,3, UAT 8/8 | 2026-08-05 |
-| 10. Heralded-CZ Primitive De-Risking | v2.1 | 0/1 | Planned | - |
+| 10. Heralded-CZ Primitive De-Risking | v2.1 | 1/1 | Complete — verified 4/4, 2/27 herald-success confirmed | 2026-08-06 |
 | 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 0/TBD | Not started | - |
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 0/TBD | Not started | - |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/TBD | Not started | - |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Next: `/gsd:plan-phase 10`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Next: `/gsd:plan-phase 11`.
