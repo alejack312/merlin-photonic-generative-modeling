@@ -1,107 +1,327 @@
-# Architecture Research: Weight-2 IQP Generator Integration
+# Architecture Research
 
-**Domain:** Photonic QML (Perceval), extending an existing tested weight-1 module with a `heralded_cz`-based weight-2 generator
-**Researched:** 2026-08-05
-**Confidence:** HIGH — all claims below verified by direct inspection of the installed `perceval-quandela` source and by running the actual catalog primitive (`perceval.components.catalog['heralded cz']`) in this repo's `venv`, not assumed from docs or training data.
+**Domain:** v3.0 milestone — integrating a trainability study (STUDY-01), a loss-hardness study (STUDY-02), an arbitrary-θ two-qubit gate (ARB-01), and an independent Julia verifier into the existing, fully-validated weight-1/weight-2 IQP-photonic codebase
+**Researched:** 2026-08-07
+**Confidence:** HIGH — every claim below that concerns Perceval/MerLin behavior was verified by direct execution against this repo's own `./venv` (perceval-quandela==1.2.4, merlinquantum==0.4.0), not inferred from documentation or training-data memory. The one claim that could not be verified locally (Julia package behavior) is explicitly marked MEDIUM and sourced from the sibling Stack research thread's `.planning/research/STACK.md`.
 
-**Note on this file:** supersedes the previous (2026-07-30) version of this file, which was written before v2.0's implementation existed and proposed a `iqp_photonic/` package structure that was never adopted — the actual v2.0 deliverable is a single flat module, `iqp_photonic_encoding.py`, plus `tests/test_iqp_photonic_encoding.py` and `docs/iqp-photonic-encoding.md`. This file is scoped narrowly to the v2.1 weight-2 question and is grounded in that actual codebase, read directly.
+**Note on this file:** supersedes the previous (2026-08-05) version of this file, which was scoped narrowly to v2.1's weight-2 `heralded_cz` integration question. That content is preserved in git history; this version covers the four new v3.0 capabilities and is grounded in the actual v2.1-complete codebase (118/118 tests passing, weight-1 and weight-2 both validated).
 
-## Summary Answer
+## Critical Finding First (this changes STUDY-01/02's architecture)
 
-`heralded_cz` needs 2 extra internal modes beyond the 4 dual-rail modes it acts on, but Perceval's `Processor` abstraction manages those extra modes automatically — they never enter the module's existing 2n-mode logical port numbering. The existing 2n-mode-per-qubit layout is already dual-rail-shaped (`build_readout_circuit`'s `PBS()` on ports `(2k, 2k+1)` is exactly a polarization→dual-rail conversion), so no renumbering of qubit ports is needed. The real architectural fork is different: **weight-1's pipeline is `Circuit`-only (a single unitary matrix), but any circuit containing a heralded gate cannot be represented as a plain `pcvl.Circuit` — it must be composed as a `pcvl.Processor`.** That forces a second, parallel top-level pipeline function (`Processor`-composed) for weight-2, while every existing weight-1 *builder* function (`build_state_prep_circuit`, `build_diagonal_layer_circuit`, `build_conjugation_circuit`, `build_readout_circuit`) is reused unmodified — they're all valid inputs to `Processor.add()`.
+**The existing weight-1/weight-2 IQP-photonic circuits cannot be wrapped in a MerLin `QuantumLayer` at all — not a workaround-able input-format issue, a hard backend incompatibility.**
 
-## Verified Facts About `heralded_cz`
+Verified directly:
+```
+>>> c = build_full_circuit(n, thetas)
+>>> c.requires_polarization
+True
+>>> ML.QuantumLayer(circuit=c, input_state=all_h_input(n), trainable_parameters=['theta'])
+ValueError: BasicState with annotations is not supported
+```
+`iqp_photonic_encoding.py`'s entire encoding (`WP`, `HWP`, `PBS`, `{P:H}`/`{P:V}`-annotated `BasicState`) is built on Perceval's **polarization** formalism. MerLin's `QuantumLayer` — and by extension Phase 7's `torch.func.jacrev`/`functional_call` pattern in `generator/neighbor_locality.py`, which only works because it differentiates *through* a `QuantumLayer` — is built on plain Fock-space (no polarization degree of freedom) circuits via Perceval's `SLOSBackend`. This is the exact same restriction `_build_cz_insertion_core`'s own docstring already documents for the `Simulator`/`SLOSBackend` path (`assert not circuit.requires_polarization`) — it turns out to apply to `QuantumLayer`'s autodiff pipeline too, for the same underlying reason.
 
-Confirmed by running `perceval.components.catalog['heralded cz']` directly in this repo's venv:
+**Consequence:** STUDY-01 (gradients) and, separately, MerLin's `PhotonLossTransform` for STUDY-02 (loss) are both reachable only through a `QuantumLayer`, and a `QuantumLayer` cannot host this project's actual circuit. Both studies must be built on a **different mechanism** than "wrap the circuit in `QuantumLayer` and reuse Phase 7's code verbatim." Details and recommended alternatives are in the STUDY-01/STUDY-02 sections below. The `generator/` MerLin `QuantumLayer` pipeline (a separate, `QuantumLayer.simple()`-generated ansatz, per this milestone's context) is **not the substrate for either study** — it never was the IQP-photonic circuit, and this finding confirms it structurally can't become one.
 
-| Fact | Value | How verified |
-|---|---|---|
-| Logical (data) modes | 4 — two dual-rail qubits | `catalog['heralded cz'].build_experiment().m == 4` |
-| Internal circuit width | 6 | `catalog['heralded cz'].build_circuit().m == 6` |
-| Herald modes | 2, at internal circuit indices 4,5 | `Processor(...).heralds == {4: 1, 5: 1}` — success requires exactly 1 photon in each herald mode |
-| Gate realized | Knill CZ (arXiv:quant-ph/0110144) | `catalog['heralded cz'].article_ref` |
-| Success probability | ≈0.07407 = **2/27** exactly | measured directly via `Processor.probs()['global_perf']` on a `\|1,0,1,0>` dual-rail input — independently confirms the literature figure `docs/iqp-photonic-encoding.md` had flagged as unverified (lines 184, 216, 381) |
-| Success-probability retrieval | `Processor.probs()` returns `{'results': {...conditional dist...}, 'global_perf': <success prob>}` | run directly, output captured |
-| Herald-mode bookkeeping when composed into a larger `Processor` | Automatic — parent `Processor.m` (logical port count) is unchanged after `p.add(mode_mapping, heralded_cz_experiment)`; `p.circuit_size` grows by 2, `p.heralds` gains the new pair | verified: built a 4-mode weight-1-shaped `Processor`, added the heralded_cz experiment at modes `[0,1,2,3]`, confirmed `p.m` stayed 4 while `circuit_size` went from 4 to 6 |
+A second, independently-verified finding, relevant to STUDY-02: **`pcvl.algorithm.Analyzer` — the class every existing distribution function in `iqp_photonic_encoding.py` uses (`run_full_circuit`, `photonic_iqp_distribution`, `photonic_weight2_iqp_distribution`) — silently ignores `Processor`-level `NoiseModel`/loss.** Verified on both the polarization circuit and a trivial 2-mode control circuit: probabilities sum to exactly 1.0 with `transmittance=0.5` set, no loss outcomes appear. `Processor.probs()` (with `min_detected_photons_filter(0)` explicitly set to allow sub-normalized/vacuum outcomes) **does** apply the loss — verified: `transmittance=0.5` on a single photon into a beamsplitter correctly produces `|0,0⟩: 0.5` (photon lost) plus the two split outcomes at 0.25 each. STUDY-02 must call `.probs()`, not `Analyzer`, or loss will be silently absent from the results.
 
-**Practical consequence:** you never manually allocate ancilla/herald modes in the module's public API — `Processor.add()` does it. This directly answers "does heralded_cz require additional modes beyond the 2n-mode layout": yes, internally (2 per CZ application), but they're invisible to and don't renumber the existing per-qubit port convention, provided composition happens at the `Processor` level rather than by hand-concatenating a 6-mode unitary into a flat `Circuit`.
+## System Overview
 
-## Why the Existing 2n-Mode Layout Already Fits
+```
+┌───────────────────────────────────────────────────────────────────────────┐
+│  EXISTING (v2.1, validated, untouched)                                    │
+│  iqp_photonic_encoding.py                                                 │
+│  ┌──────────────┐ ┌───────────────┐ ┌──────────────┐ ┌─────────────────┐  │
+│  │ weight-1     │ │ weight-1      │ │ weight-2 CZ  │ │ weight-2        │  │
+│  │ builders     │ │ distribution  │ │ insertion    │ │ processor +     │  │
+│  │ (Circuit)    │ │ fns (Analyzer)│ │ (Processor)  │ │ distribution    │  │
+│  └──────┬───────┘ └───────┬───────┘ └──────┬───────┘ └────────┬────────┘  │
+│         │                 │                │                  │           │
+│         └─────────────────┴────────┬───────┴──────────────────┘           │
+│                          exact_qubit_iqp_distribution (trusted numpy ref) │
+└──────────────────────────────────┬────────────────────────────────────────┘
+                                    │  reused UNMODIFIED as forward-pass primitives
+        ┌───────────────────┬──────┴───────┬──────────────────────┐
+        ▼                   ▼               ▼                      ▼
+┌───────────────┐  ┌────────────────┐ ┌─────────────────┐  ┌────────────────┐
+│ STUDY-01       │  │ STUDY-02       │ │ ARB-01           │  │ generator/     │
+│ trainability   │  │ loss-hardness  │ │ arbitrary-θ gate │  │ (MerLin        │
+│                │  │                │ │                  │  │ QuantumLayer,  │
+│ NEW:           │  │ NEW:           │ │ NEW:             │  │ separate       │
+│ generator/     │  │ iqp_photonic_  │ │ iqp_photonic_    │  │ ansatz —       │
+│ trainability.py│  │ encoding.py:   │ │ encoding.py:     │  │ NOT touched by │
+│ (parameter-    │  │ *_lossy() fns  │ │ build_arb_gate_  │  │ this milestone)│
+│ shift grads,   │  │ via .probs()   │ │ insertion(),     │  │                │
+│ no QuantumLayer│  │ + NoiseModel   │ │ build_weight2_   │  │                │
+│ trainability_  │  │ loss_hardness_ │ │ arb_processor()  │  │                │
+│ study.py       │  │ study.py       │ │ arb01_derisking. │  │                │
+│ (driver)       │  │ (driver)       │ │ py (de-risk)     │  │                │
+└───────┬────────┘  └────────┬───────┘ └────────┬─────────┘  └────────────────┘
+        │                    │                   │
+        └────────────────────┴─────────┬─────────┘
+                                        ▼
+                        results/ (CSV + PNG + *.md, existing convention)
+                                        │
+                                        ▼
+                         ┌──────────────────────────────┐
+                         │ julia_verification/ (NEW)     │
+                         │ side-channel, subprocess+JSON, │
+                         │ never imported by Python at    │
+                         │ runtime, never a dependency of  │
+                         │ any pytest test unless Julia    │
+                         │ is present                      │
+                         └──────────────────────────────┘
+                                        │
+                                        ▼
+                            WRITE-01 (docs/, findings write-up)
+```
 
-`heralded_cz` acts on 4 dual-rail modes — 2 per qubit. The module's existing layout already reserves exactly 2 modes per qubit: port `2k` (polarization-carrying) and port `2k+1` (vacuum partner, currently unused until `build_readout_circuit`'s final `PBS()`). `PBS()` converts a polarization superposition on mode `2k` into a spread across the pair `(2k, 2k+1)` — that pair **is** the qubit's dual-rail representation. So converting qubit `i` and qubit `j` to dual rail for a CZ application uses their existing mode pairs `(2i, 2i+1)` and `(2j, 2j+1)` — no new modes needed for the conversion itself, only for the herald ancillas inside `heralded_cz`, which `Processor.add()` handles as shown above.
+### Component Responsibilities
 
-This means weight-2 does not require a layout change (e.g., 3n modes, or moving vacuum-partner modes) — it requires an *early* `PBS` conversion on the qubit pair (mid-circuit, not just at final readout), the `heralded_cz` insertion, then a `PBS` conversion back to polarization so the rest of the pipeline (conjugation, readout) is unaffected.
+| Component | Responsibility | Status |
+|-----------|----------------|--------|
+| `iqp_photonic_encoding.py` | Weight-1/weight-2 circuit builders, distribution functions, exact qubit-side reference | Existing — extended with new distribution/builder functions for STUDY-02 and ARB-01, existing functions untouched |
+| `generator/` (`naturally_ordered_generator.py`, `neighbor_locality.py`, etc.) | MerLin `QuantumLayer`-based generative pipeline, separate ansatz | Existing — **not touched**. Confirmed architecturally separate: it never wrapped the IQP-photonic circuit, and per the finding above, it structurally cannot. |
+| `generator/trainability.py` (NEW) | Parameter-shift gradient computation directly on `iqp_photonic_encoding.py`'s Analyzer-based distribution functions; gradient-variance-vs-`n` aggregation | New — analogous role to `generator/neighbor_locality.py`, different mechanism (no `QuantumLayer`, no `jacrev`) |
+| `trainability_study.py` (NEW, top-level) | STUDY-01 driver script: sweeps `n`, random `θ` draws, calls `generator/trainability.py`, writes `results/` artifacts | New — mirrors `neighbor_locality_test.py`'s role (driver/report script, not a pytest file) |
+| `iqp_photonic_encoding.py`: new `*_lossy` functions (NEW) | Loss-aware variants of `photonic_iqp_distribution`/`photonic_weight2_iqp_distribution`, built on `Processor.probs()` + `NoiseModel`, not `Analyzer` | New — additive, same module (matches how weight-2 was added alongside weight-1 in the same file rather than a new module) |
+| `loss_hardness_study.py` (NEW, top-level) | STUDY-02 driver script: sweeps transmittance, measures TVD/sampling-hardness proxy vs. loss level | New — mirrors `sigma_resweep.py`/`batch_sweep.py`'s role |
+| `iqp_photonic_encoding.py`: `build_arb_gate_insertion`, `build_weight2_arb_processor` (NEW) | `PostProcessedControlledRotationsItem`-based arbitrary-α weight-2 gate, composed the same way `build_cz_insertion`/`build_weight2_processor` are, plus the added `set_postselection` plumbing | New — additive, same module, mirrors the exact precedent set by weight-2's own addition alongside weight-1 |
+| `arb01_derisking.py` (NEW, top-level) | Standalone amplitude/phase/success-probability verification of `PostProcessedControlledRotationsItem` before wiring it into the full pipeline | New — mirrors `heralded_cz_derisking.py`'s exact precedent (de-risk the primitive in isolation first) |
+| `julia_verification/` (NEW, top-level directory) | Independent Julia-side recomputation of exact distributions (Yao.jl, qubit-side) and lossy photonic distributions (BosonSampling.jl), invoked as a subprocess, compared via JSON — never a runtime dependency of the Python pipeline | New — genuinely new toolchain, isolated per the pattern in "Julia Interop" below |
+| `docs/` (WRITE-01) | Findings write-up | Existing directory, new document(s) |
 
-## Why Weight-2 Cannot Reuse `build_full_circuit`'s Circuit-Concatenation Pattern
+## Recommended Project Structure
 
-`build_full_circuit` (`iqp_photonic_encoding.py:111-124`) builds one `pcvl.Circuit(2n)` by calling `circuit.add(port, component)` repeatedly, and `run_full_circuit` wraps that single `Circuit` in a `Processor` only at the very end, purely to run it. This works because every weight-1 component (`HWP`, `WP`, `PBS`) is a plain unitary — a `Circuit` is just a unitary matrix, with no concept of post-selection or heralding.
+```
+merlin-quantum-case-study/
+├── iqp_photonic_encoding.py       # EXTENDED: existing weight-1/weight-2 fns untouched;
+│                                   #   + photonic_iqp_distribution_lossy(n, thetas, noise)
+│                                   #   + photonic_weight2_iqp_distribution_lossy(n, i, j, thetas, noise)
+│                                   #   + build_arb_gate_insertion(n, i, j, alpha)
+│                                   #   + build_weight2_arb_processor(n, i, j, alpha, thetas)
+├── generator/
+│   ├── trainability.py            # NEW: parameter-shift gradient + variance-vs-n utilities
+│   │                               #   (no QuantumLayer dependency — operates on
+│   │                               #   iqp_photonic_encoding.py's Analyzer-based fns directly)
+│   └── ...                        # (unchanged: neighbor_locality.py, mmd.py, etc.)
+├── trainability_study.py          # NEW top-level driver (STUDY-01), mirrors neighbor_locality_test.py
+├── loss_hardness_study.py         # NEW top-level driver (STUDY-02), mirrors sigma_resweep.py
+├── arb01_derisking.py             # NEW top-level de-risking script (ARB-01), mirrors heralded_cz_derisking.py
+├── julia_verification/            # NEW top-level directory — isolated Julia toolchain
+│   ├── Project.toml               # Julia's own lockfile (pins Yao.jl, BosonSampling.jl versions)
+│   ├── Manifest.toml
+│   ├── verify_weight1_qubit_side.jl    # Yao.jl: rebuild the H-diag-H IQP circuit, exact distribution
+│   ├── verify_weight2_loss.jl          # BosonSampling.jl: permanent-based lossy linear-optical distribution
+│   ├── run_verification.py             # thin Python wrapper: writes JSON input, subprocess.run(["julia", ...]),
+│   │                                   #   reads JSON output, compares via existing total_variation_distance()
+│   └── fixtures/                       # checked-in JSON snapshots of Python-side reference distributions,
+│                                       #   so Julia-side scripts can run standalone without a live Python call
+├── tests/
+│   ├── test_iqp_photonic_encoding.py   # EXTENDED: new tests for *_lossy fns and ARB-01 builders,
+│   │                                   #   appended in the same file — matches existing weight-1/weight-2 precedent
+│   ├── test_trainability.py            # NEW: unit tests for generator/trainability.py's parameter-shift math
+│   └── test_julia_verification.py      # NEW: `pytest.mark.skipif(shutil.which("julia") is None, ...)` —
+│                                       #   never fails CI/local runs when Julia isn't installed
+├── results/                         # unchanged convention: *.csv, *.png, *_summary.md per study
+└── docs/
+    └── iqp-trainability-loss-study.md  # WRITE-01 (name illustrative — final naming is a roadmap/planning call)
+```
 
-`heralded_cz`'s catalog item is not exposed as a plain unitary in the way the module needs it: `build_circuit()` gives the raw 6-mode unitary but leaves herald-mode bookkeeping (which modes are heralds, what pattern counts as success, how to compute `global_perf`) entirely on the caller. `build_experiment()`/`build_processor()` give that bookkeeping for free, but return `Experiment`/`Processor` objects, not `Circuit`. `Processor.add()`'s own docstring confirms it accepts "a unitary circuit... a non-unitary component... a processor" — i.e. it is the composition primitive spanning both worlds. A flat `Circuit` cannot hold a non-unitary/heralded component at all.
+### Structure Rationale
 
-**Conclusion:** weight-2's top-level pipeline builder must construct a `pcvl.Processor` from the start (composed via `Processor.add()` calls), not a `pcvl.Circuit`. This is a second, parallel pipeline function alongside `build_full_circuit`/`run_full_circuit` — not a modification of them.
+- **New distribution/builder functions live inside `iqp_photonic_encoding.py`, not new modules.** This matches the file's own established precedent — weight-2 (`build_cz_insertion`, `build_weight2_processor`) was added directly alongside weight-1 in the same file rather than split into a second module, specifically so every builder shares one set of conventions (mode-mapping dicts, herald-spec extraction, bit-ordering) and one 118-test suite that already proves them composable. STUDY-02's loss variants and ARB-01's gate variants are the same kind of extension.
+- **STUDY-01's gradient logic lives in `generator/`, not `iqp_photonic_encoding.py`.** It's a numerical/statistical utility (parameter-shift evaluation, variance aggregation) operating *on* the encoding module's outputs, not a circuit builder — matching where `generator/neighbor_locality.py`'s Jacobian/statistics code already lives, even though the underlying differentiation mechanism can't be the same (see Critical Finding).
+- **Top-level driver scripts (`*_study.py`, `arb01_derisking.py`) mirror the existing convention exactly** (`batch_sweep.py`, `sigma_resweep.py`, `neighbor_locality_test.py`, `heralded_cz_derisking.py`): a sweep/report script at the repo root that imports from `iqp_photonic_encoding.py`/`generator/`, writes to `results/`, and is not itself part of the pytest suite (the pytest suite tests the underlying functions in `tests/`, not the driver scripts).
+- **`julia_verification/` is a dedicated, isolated top-level directory**, not scattered files or a package importable from Python — see "Julia Interop" pattern below for the full rationale.
 
-## Integration Points With Existing Code (Verified Against Actual `iqp_photonic_encoding.py`)
+## Architectural Patterns
 
-| Existing function | Reused as-is for weight-2? | How |
-|---|---|---|
-| `build_state_prep_circuit(n)` | Yes, unmodified | Returns `Circuit(2n)`; add via `processor.add(0, build_state_prep_circuit(n))` — `Processor.add` explicitly accepts a unitary `Circuit` |
-| `build_diagonal_layer_circuit(n, thetas)` | Yes, unmodified — and it's also where the CZ single-qubit corrections live | Ingredient 2's operator identity (`exp(iπ/4·Z_iZ_j) = CZ · exp(iπ/4·Z_i) · exp(iπ/4·Z_j)` up to global phase, `docs/iqp-photonic-encoding.md` lines 117-121) needs `WP(π/4, 0)` on each qubit in a CZ pair. Since `WP(θ,0)` gates are diagonal and additive (`exp(iaZ)·exp(ibZ) = exp(i(a+b)Z)`), the correction is just `thetas[i] += π/4`, `thetas[j] += π/4` *before* calling the existing function — no new phase-gate code needed |
-| `build_conjugation_circuit(n)` | Yes, unmodified | Same composition pattern as state prep |
-| `build_readout_circuit(n)` | Yes, unmodified | Final `PBS` per qubit — unaffected because weight-2's own PBS conversions happen mid-circuit and convert back to polarization before this stage runs |
-| `all_h_input(n)` | Yes, unmodified | Input-state convention doesn't change |
-| `basic_state_to_bitstring` / `fock_to_bitstring` | Yes, unmodified, conditional on correctness of the mid-circuit PBS round-trip | Decode logic never needs to know a CZ happened, provided weight-2's own PBS-back-conversion restores the same per-qubit `(2k,2k+1)` polarization convention before the final readout stage — worth its own explicit round-trip check (see Build Order step 2), not assumed |
-| `exact_qubit_iqp_distribution(n, thetas)` | No — needs a new sibling function for weight-2 validation | Current implementation only sums weight-1 `Z_k` phase terms (lines 235-273); a weight-2 reference needs to also add `Z_i*Z_j` eigenvalue terms for CZ pairs before the Hadamard/probability step |
-| `build_full_circuit` / `run_full_circuit` | No — parallel functions, not modifications | Weight-1's `Circuit`-only representation structurally cannot carry a heralded component (see above) |
+### Pattern 1: Parameter-shift gradients directly on the Analyzer-based pipeline (STUDY-01)
 
-## New Components Needed
+**What:** Because the circuit can't enter `QuantumLayer`, compute `∂L/∂θₖ` using the exact parameter-shift rule instead of autograd. Every weight-1 diagonal-layer gate is `WP(θₖ, 0) = diag(e^{iθₖ}, e^{-iθₖ})` — an `exp(iθZ)`-type rotation generator, for which parameter-shift is *exact*, not an approximation: `∂f/∂θₖ = [f(θₖ+π/2) − f(θₖ−π/2)] / 2` for any observable/probability built from this gate family. This is arguably a **stronger** guarantee than autograd-through-SLOS would have given, since it's a closed-form identity rather than a numerically-differentiated computational graph.
 
-1. **`build_cz_insertion(n, i, j)`** (naming illustrative) — a `Processor`-composable unit implementing Ingredient 2's mechanism: `PBS` on qubit `i`'s pair, `PBS` on qubit `j`'s pair (convert both to dual rail), the catalog's `heralded_cz` experiment across those 4 modes, then `PBS` back on both pairs (return to polarization). Likely itself assembled as a small `Processor`/`Experiment`, since it mixes plain `PBS` circuits with the non-unitary `heralded_cz` catalog item.
+**When to use:** STUDY-01's entire gradient-variance-vs-`n` sweep. Also the natural choice for STUDY-02's "does the gradient landscape survive loss" question if that's added to the study, since it reuses the same forward-pass call, just against the lossy distribution function instead of the exact one.
 
-2. **`build_full_circuit_weight2(n, thetas, cz_pairs)`** — the new top-level `Processor`-composed pipeline: state prep → adjusted diagonal layer (weight-1 `thetas` plus `π/4` corrections folded in per CZ pair) → for each pair in `cz_pairs`, insert `build_cz_insertion` at that pair's ports → conjugation → readout. Returns a `Processor`, not a `Circuit`.
+**Trade-offs:** Two forward-pass evaluations per parameter per draw (like any parameter-shift/finite-difference method) — more `Analyzer`/`.probs()` calls than a single autograd backward pass would need, but at this project's system sizes (`n` small enough for exact photonic simulation) this is not a performance concern, and it entirely sidesteps the polarization/`QuantumLayer` incompatibility. The `exact_qubit_iqp_distribution` numpy reference (already trusted to ~1e-16 TVD against the photonic pipeline) can also be parameter-shifted or differentiated in closed form directly (Van den Nest's cosine formula in `docs/iqp-baseline.md` is already an analytic expectation-value formula in `θ`) — a natural cross-check that costs nothing extra.
 
-3. **`run_full_circuit_weight2(n, thetas, cz_pairs)`** — runs the above via `Processor.probs()` (not `Analyzer`, which was built around the module's existing single-`Circuit`+`Processor`-wrap pattern; `Processor.probs()` already returns both the herald-conditional distribution and `global_perf` directly, as verified above). Should return three things, not two: the conditional distribution (analogous to `run_full_circuit`'s `dist`), the herald `global_perf` (success probability — new, no weight-1 analogue), and the module's existing out-of-subspace `residual` concept (still worth checking empirically for weight-2 rather than assuming zero, since weight-2 mixes photons across qubit pairs in a way weight-1 never does).
+**Example (illustrative shape, not final code):**
+```python
+def parameter_shift_gradient(dist_fn, n, thetas, k, target_bitstring, shift=np.pi/2):
+    thetas_plus = list(thetas); thetas_plus[k] += shift
+    thetas_minus = list(thetas); thetas_minus[k] -= shift
+    dist_plus, _ = dist_fn(n, thetas_plus)
+    dist_minus, _ = dist_fn(n, thetas_minus)
+    return (dist_plus.get(target_bitstring, 0.0) - dist_minus.get(target_bitstring, 0.0)) / 2
+```
+`dist_fn` is `photonic_iqp_distribution` (weight-1) or a fixed-`(i,j)` closure over `photonic_weight2_iqp_distribution` (weight-2) — **unmodified**, called as a black box.
 
-4. **`exact_qubit_iqp_distribution_weight2(n, thetas, cz_pairs)`** (or an additive optional parameter on the existing function) — qubit-side reference distribution including `Z_i*Z_j` phase terms, needed as the ENC-04-style ground truth for weight-2 validation. Decide up front: model only CZ (θ fixed at π/4, matching what `heralded_cz` actually realizes) rather than an arbitrary-angle two-qubit term — per `docs/iqp-photonic-encoding.md` line 121, the catalog gate is fixed, so the reference should match exactly, or the validation comparison is apples-to-oranges.
+### Pattern 2: `Processor.probs()` + `NoiseModel`, never `Analyzer`, for loss (STUDY-02)
 
-## Data Flow Changes
+**What:** Loss integrates via `pcvl.Processor("SLOS", circuit, noise=pcvl.NoiseModel(transmittance=...))`, exactly as `iqp_photonic_encoding.py`'s existing builders already construct their `Processor`/`Circuit` objects — no change to `build_full_circuit`, `build_weight2_processor`, or any weight-1/weight-2 builder. The only required change is **which Perceval API reads the result**: new `*_lossy` distribution functions must call `proc.min_detected_photons_filter(0); proc.with_input(input_state); proc.probs()` instead of `pcvl.algorithm.Analyzer(proc, [input_state], "*")`. `min_detected_photons_filter(0)` is required so loss-truncated (fewer-photon) outcomes are returned rather than filtered out by Perceval's default photon-count floor.
 
-- **Mode count:** the logical port count stays `2n` for the pipeline's public interface (matches weight-1) — heralds are internal-only, hidden by `Processor`. No change to any function's `n`-based mode arithmetic.
-- **Readout/decode logic:** unchanged in principle, but the weight-2 pipeline's PBS-back-conversion after each CZ pair must be verified (not assumed) to restore the exact same 2-mode-per-qubit polarization convention weight-1 relies on — analogous to ENC-03's existing round-trip test.
-- **New data surfaced:** `global_perf` (herald success probability) is genuinely new, with no weight-1 equivalent. It is not the same thing as the existing out-of-subspace `residual` (a post-hoc property of decoded Fock outcomes) — per the module's established convention (explicit residual reporting, never silently renormalized — `docs/iqp-photonic-encoding.md` lines 254, 299), `global_perf` must be surfaced explicitly alongside the conditional distribution, not folded into or confused with `residual`. Keep them as two clearly separate return fields.
-- **Validation metric implication:** TVD between the weight-2 photonic distribution and the qubit-side reference should be computed on the herald-conditional distribution (`Processor.probs()['results']`, already renormalized by Perceval) against the exact-CZ qubit-side reference, with `global_perf` reported alongside as a separate honest datum — not folded into the TVD comparison itself. Mirrors the existing pattern of reporting `residual` alongside, not folded into, TVD in `photonic_iqp_distribution`/ENC-04.
+**When to use:** Any STUDY-02 measurement (TVD-vs-transmittance sweeps, hardness-under-loss proxies).
+
+**Trade-offs:** `.probs()`'s output shape/dict keys differ slightly from `Analyzer`'s (`output_states_list`/`distribution` pair) — the new `*_lossy` functions need their own small adapter to convert `.probs()`'s result into the same `{bitstring: probability}` + `residual` shape the existing (lossless) functions already return, so downstream code (TVD comparisons, plotting) doesn't need to know which path produced a distribution. Raw Perceval's `LossSimulator`/`LC` component (the "second, independently-implemented" loss model per `STACK.md`) is available as an **in-Python cross-check that both loss models agree**, cheaper to run than reaching for the Julia verifier for this specific question.
+
+### Pattern 3: `PostProcessedControlledRotationsItem` composes like `build_cz_insertion`, but needs new postselection plumbing (ARB-01)
+
+**What:** Verified directly against the installed catalog item's `build_experiment()`:
+```python
+e.set_postselection(PostSelect("[0,1]==1 & [2,3]==1"))   # data/ctrl dual-rail validity (LOCAL indices, n=2)
+for i in range(4, 8):  # 2n..4n-1
+    e.add_herald(i, 0)                                    # ALL 2n ancilla modes heralded to vacuum
+```
+Two composition-relevant differences from `build_cz_insertion`'s `heralded_cz`-based pattern:
+1. **Twice the ancilla modes.** `heralded_cz` uses 2 herald ancilla modes (6-mode local circuit total); `PostProcessedControlledRotationsItem` uses `2n` ancilla modes for an `n`-qubit gate — **4 ancilla modes** for the `n=2` case this project uses (8-mode local circuit total: 4 data + 4 ancilla). `build_weight2_arb_processor`'s outer mode-count constant must become `2*n_qubits + 4` (mirroring how `build_weight2_processor` uses `2*n_qubits + 2` for `heralded_cz`'s 2 ancilla modes), and the mode-mapping dict passed to `Processor.add()` needs 4 ancilla-mode entries instead of 2.
+2. **A `set_postselection` call is required in addition to heralds — new plumbing `build_cz_insertion`/`build_weight2_processor` never needed.** `heralded_cz`'s data-rail validity is currently handled *after* simulation, in plain Python (`fock_to_bitstring` returning `None` for out-of-subspace states, bucketed into `residual`). `PostProcessedControlledRotationsItem` instead expects validity enforced *at the Perceval level* via `Experiment.set_postselection`/`Processor.set_postselection`, using **global** mode indices once composed into the full `2n_qubits+4`-mode outer processor — exactly the same local→global translation problem `build_cz_insertion` already solved for `herald_spec` (Plan 11-02's mode-mapping dict), but for a `PostSelect` condition string instead of a herald dict. This is genuinely new code (a small helper to rewrite `PostSelect`'s local mode indices into the outer processor's global ones), not a reuse of existing plumbing — flag this explicitly as new work, not "the same pattern, just call it."
+
+**When to use:** ARB-01's entire gate — ancilla-wrap/unwrap via `PBS` (same convention-adapter `PERM` pattern `build_cz_insertion` already established, since `PostProcessedControlledRotationsItem`'s ports are also `Encoding.DUAL_RAIL`) still applies unchanged; only the herald/postselection registration step differs.
+
+**Trade-offs:** Success probability is `α`-dependent and non-monotonic (0.42 near `α→0` down to ~0.09 near `α=π/2`, per `STACK.md`'s empirical table) — any sweep over `α` must budget for this, unlike the fixed 2/27 rate `heralded_cz` always has.
+
+### Pattern 4: Julia as an out-of-process, JSON-mediated side channel, never an in-process interop bridge
+
+**What:** `julia_verification/run_verification.py` is the *only* Python file that knows Julia exists. It shells out via `subprocess.run(["julia", "verify_weight1_qubit_side.jl", "--input", "fixtures/case1.json", "--out", "/tmp/out.json"])`, then loads the JSON and diffs it against Python's own `exact_qubit_iqp_distribution`/`photonic_iqp_distribution` output using the **already-existing** `total_variation_distance()` function — the same cross-check shape this project has used since Phase 12 (exact-qubit-vs-photonic TVD validation), just with a third, independently-implemented source added to the comparison.
+
+**When to use:** Standalone verification runs, not wired into any code path the rest of the project depends on at runtime.
+
+**Trade-offs (why not PyJulia/juliacall):**
+- **Availability blast radius.** Julia is confirmed **not installed** in this environment (per `STACK.md`, `julia --version` → not found). An in-process bridge (PyJulia/`juliacall`) would make importing `run_verification.py` — and transitively, any test module that imports it — fail on any machine without a correctly version-matched Julia install. A subprocess CLI call fails only when that one script is actually invoked, and can be `pytest.mark.skipif`-guarded cleanly (`shutil.which("julia") is None`).
+- **Version-pinning independence.** Julia's `Project.toml`/`Manifest.toml` lock Yao.jl/BosonSampling.jl versions entirely on the Julia side; nothing about the Python `venv`, `requirements.txt`, or CI needs to know Julia exists at all.
+- **Matches the milestone's own stated intent.** `PROJECT.md` explicitly frames this as "not a central architectural component — a verification tool alongside the existing pipeline." A subprocess+JSON side channel is the only shape that can't accidentally become load-bearing; an in-process bridge, once adopted, has a strong pull toward becoming one (any convenience win from calling Julia functions inline from Python creates exactly the coupling this milestone's own scoping note says to avoid).
+- **Windows-specific risk reduction.** PyJulia's Python↔Julia shared-library bridge has known extra friction on Windows (locating `libjulia`, matching Python's own ABI); a plain subprocess call sidesteps all of it — `julia script.jl` behaves identically to any other CLI tool from PowerShell/Bash.
+
+## Data Flow
+
+### STUDY-01 (trainability)
+
+```
+random θ draws (numpy, seeded) × system sizes n=2..N
+        ↓
+photonic_iqp_distribution(n, θ) / photonic_weight2_iqp_distribution(n, i, j, θ)   [UNCHANGED]
+        ↓ (called twice per θₖ, at θₖ±π/2 — Pattern 1)
+generator/trainability.py: parameter_shift_gradient(...)  → ∂L/∂θₖ per draw
+        ↓
+aggregate Var[∂L/∂θₖ] across draws, per n  → fit exponential decay vs n
+        ↓ (same statistical spine as generator/train.py's decreasing_trend_check
+        ↓  and generator/neighbor_locality.py's neighbor_locality_check —
+        ↓  direction + effect-size threshold, not a bare p-value)
+results/phaseNN_trainability_metrics.csv, .png, _summary.md
+        ↓
+docs/ WRITE-01, cross-checked (optionally) by julia_verification/verify_weight1_qubit_side.jl
+```
+
+### STUDY-02 (loss-hardness)
+
+```
+weight-1/weight-2 Circuit/Processor  [UNCHANGED builders]
+        ↓ wrapped with pcvl.Processor(..., noise=pcvl.NoiseModel(transmittance=t))
+        ↓ (Pattern 2: .probs() with min_detected_photons_filter(0), NOT Analyzer)
+new photonic_iqp_distribution_lossy() / photonic_weight2_iqp_distribution_lossy()
+        ↓
+TVD(lossless dist, lossy dist) vs t sweep   [reuses existing total_variation_distance()]
+        ↓
+results/phaseNN_loss_hardness_metrics.csv, .png, _summary.md
+        ↓
+docs/ WRITE-01, cross-checked (optionally) by julia_verification/verify_weight2_loss.jl (BosonSampling.jl)
+```
+
+### ARB-01 (arbitrary-θ gate)
+
+```
+arb01_derisking.py (standalone, mirrors heralded_cz_derisking.py):
+  PostProcessedControlledRotationsItem amplitude/phase/success-probability checks
+        ↓ (if it de-risks cleanly)
+iqp_photonic_encoding.py: build_arb_gate_insertion(n, i, j, alpha)   [mirrors build_cz_insertion]
+        ↓
+build_weight2_arb_processor(n, i, j, alpha, thetas)   [mirrors build_weight2_processor,
+        ↓                                              +4 ancilla modes, + set_postselection]
+TVD validation against exact_qubit_iqp_distribution(..., pair_thetas={(i,j): alpha/2})
+        ↓ (same CZ/ZZ operator-identity pattern already used for the fixed-π/4 case,
+        ↓  generalized to arbitrary alpha — CP(α) = exp(iα/4·(I−Zᵢ−Zⱼ+ZᵢZⱼ)))
+tests/test_iqp_photonic_encoding.py (appended)
+```
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Wrapping the polarization circuit in `QuantumLayer` "because Phase 7 already has the pattern"
+
+**What people would do:** Try to reuse `generator/neighbor_locality.py`'s `compute_jacobian` verbatim by passing `build_full_circuit`/`build_weight2_processor`'s output into `QuantumLayer(circuit=...)`.
+**Why it's wrong:** Confirmed by direct execution — this raises `ValueError: BasicState with annotations is not supported`, because the circuit's `requires_polarization` is `True`. This isn't a bug to work around with a kwarg; it's a genuine backend mismatch between Perceval's polarization formalism and MerLin's Fock-space-only autodiff pipeline.
+**Do this instead:** Parameter-shift gradients directly on the existing `Analyzer`-based distribution functions (Pattern 1). If literal `QuantumLayer`/`jacrev` reuse is later judged worth the cost, it would require designing and re-validating a **second, non-polarization (plain dual-rail) IQP-photonic encoding** from scratch — a substantial new-encoding effort, not a wrapper, and should be treated as clearly out of scope for this milestone's timeline unless explicitly chosen.
+
+### Anti-Pattern 2: Configuring `NoiseModel` on a `Processor` and reading results via `Analyzer`
+
+**What people would do:** Add `noise=pcvl.NoiseModel(transmittance=t)` to `Processor("SLOS", circuit, noise=...)` and assume the existing `Analyzer`-based distribution functions now report lossy results.
+**Why it's wrong:** Confirmed by direct execution on both the project's own circuit and a trivial control circuit — `Analyzer` output sums to exactly 1.0 regardless of `transmittance`; the noise model is silently not applied.
+**Do this instead:** Use `Processor.probs()` with `min_detected_photons_filter(0)` explicitly set (Pattern 2). Write new `*_lossy` functions rather than adding a `noise=` parameter to the existing `photonic_iqp_distribution`/`photonic_weight2_iqp_distribution` — those functions' current `Analyzer`-based contract (exact, lossless, already TVD-validated) should stay untouched.
+
+### Anti-Pattern 3: Treating `PostProcessedControlledRotationsItem` as a drop-in replacement for `heralded_cz`
+
+**What people would do:** Assume `build_arb_gate_insertion` can reuse `build_cz_insertion`'s exact mode-mapping dict and herald-registration code with only the catalog item swapped.
+**Why it's wrong:** The ancilla mode count doubles (2 → 4 for `n=2`) and the composition requires an additional `set_postselection` call with mode indices translated from local to global — a mechanism `build_cz_insertion` never needed. Copying `build_cz_insertion`'s structure without accounting for both differences will silently under- or over-constrain the circuit.
+**Do this instead:** Treat it as a new builder following the same *shape* of precedent (local circuit + explicit spec returned to the caller, global-index translation at the outer-processor call site) rather than a literal code reuse — see Pattern 3.
+
+### Anti-Pattern 4: PyJulia/`juliacall` in-process interop for "convenience"
+
+**What people would do:** Use `juliacall` to call Julia functions directly from a Python script for a tighter feedback loop.
+**Why it's wrong:** Makes every Python module that imports the interop layer implicitly depend on a correctly-versioned Julia install being present — a severe availability regression for a project whose test suite currently has zero non-Python dependencies and 118/118 passing tests, especially risky this close to the Sept 1 deadline on a toolchain confirmed not-yet-installed.
+**Do this instead:** Subprocess + JSON (Pattern 4). The convenience cost (one extra serialization boundary) is worth the isolation guarantee.
+
+## Integration Points
+
+### Existing files/functions — extended (new functions added, existing ones untouched)
+
+| File | New additions | Existing code touched? |
+|------|---------------|------------------------|
+| `iqp_photonic_encoding.py` | `photonic_iqp_distribution_lossy`, `photonic_weight2_iqp_distribution_lossy` (STUDY-02); `build_arb_gate_insertion`, `build_weight2_arb_processor` (ARB-01) | No — all 118 existing tests should pass unmodified; additive only |
+| `tests/test_iqp_photonic_encoding.py` | New test functions for the above | No — appended, matching existing precedent |
+
+### Existing files/functions — left alone
+
+| File | Why untouched |
+|------|----------------|
+| `generator/naturally_ordered_generator.py`, `generator/data.py`, `generator/mmd.py`, `generator/train.py` | The `generator/` MerLin `QuantumLayer` pipeline is a separate ansatz from the IQP-photonic encoding; confirmed structurally incapable of hosting the polarization circuit, so there is no integration point here to modify — STUDY-01/02 do not run through this pipeline at all |
+| `generator/neighbor_locality.py` | Phase 7's `jacrev`/`functional_call` pattern is `QuantumLayer`-specific; not reusable as code for STUDY-01 (see Critical Finding), only reusable as a *conceptual* precedent (statistical rigor pattern — see `generator/train.py`'s `decreasing_trend_check` two-condition shape, reused by `neighbor_locality_check`, and now by STUDY-01's gradient-variance check) |
+| `docs/iqp-photonic-encoding.md` | Canonical design doc for weight-1/weight-2 — extend only if ARB-01 changes the encoding's on-paper design (likely: a new section documenting `CP(α)`'s operator identity, alongside the existing `π/4` `heralded_cz` one), not a rewrite |
+
+### New components needed
+
+| Component | Depends on |
+|-----------|------------|
+| `generator/trainability.py` | `iqp_photonic_encoding.py`'s existing distribution functions (unmodified) |
+| `trainability_study.py` | `generator/trainability.py` |
+| `iqp_photonic_encoding.py`'s new `*_lossy` functions | `perceval.utils.noise_model.NoiseModel`, existing `Processor`/`Circuit` builders (unmodified) |
+| `loss_hardness_study.py` | The new `*_lossy` functions |
+| `iqp_photonic_encoding.py`'s `build_arb_gate_insertion`/`build_weight2_arb_processor` | `perceval.components.core_catalog.controlled_rotation_gates.PostProcessedControlledRotationsItem`, the existing PBS-wrap/`PERM`-adapter pattern from `build_cz_insertion` |
+| `arb01_derisking.py` | `PostProcessedControlledRotationsItem` directly (no dependency on the new builders — de-risks the primitive first, same order `heralded_cz_derisking.py` established) |
+| `julia_verification/` | Julia 1.10 LTS + Yao.jl + BosonSampling.jl (new toolchain, `juliaup`-installed); Python side depends only on `subprocess`/`json`, stdlib |
 
 ## Suggested Build Order
 
-1. **De-risk the primitive standalone, no integration.** Reproduce this research's own verification (n=2 bare dual-rail `Processor` around `catalog['heralded cz']`, confirm `global_perf ≈ 2/27`, confirm the CZ truth table on `|1,0,1,0>`-style dual-rail inputs) as an actual test, independent of the rest of the module. Cheap, isolates the highest-uncertainty piece (does the catalog gate really behave as ENC-01 assumed) before touching any existing code, and directly resolves the "success-probability unverified" flag currently open in `docs/iqp-photonic-encoding.md`.
-2. **Build `build_cz_insertion`** (PBS-wrap + `heralded_cz` + PBS-unwrap) as an isolated `Processor`-composable unit at the module's existing `(2i,2i+1)`/`(2j,2j+1)` port convention. Test its polarization-basis truth table directly (not yet embedded in a full IQP pipeline) — confirms the mid-circuit PBS round-trip claim above.
-3. **Compose `build_full_circuit_weight2`/`run_full_circuit_weight2`** from existing weight-1 builders + step 2's insertion, via `Processor.add()`. No changes to any existing weight-1 function.
-4. **Extend the qubit-side reference** (`exact_qubit_iqp_distribution_weight2` or an additive parameter) to include CZ terms, matching the fixed-π/4 realization only.
-5. **Weight-2 TVD validation**, ENC-04-style, at small `n` (2-3 qubits, one CZ pair) — report TVD on the conditional distribution plus `global_perf` and `residual` as separate honest fields, following the existing module's reporting convention exactly.
-6. **Full regression run** of the existing 26-test suite (`pytest tests/test_iqp_photonic_encoding.py -v`) after each of steps 2-4, to catch any accidental signature change to a reused weight-1 function early. Since every new function is additive, this should stay green throughout — if it doesn't, that's a signal a "reuse" step accidentally mutated a shared function instead of composing around it.
-
-## Anti-Patterns to Avoid
-
-### Anti-Pattern: Manually managing herald ancilla modes by hand-extending a flat `Circuit`
-**What people might do:** keep `build_full_circuit`'s single-`Circuit`-concatenation style by manually widening the circuit to `2n+2` modes per CZ pair and adding `catalog['heralded cz'].build_circuit()`'s raw 6-mode unitary directly.
-**Why it's wrong:** `build_circuit()` gives the *unconditional* unitary including the herald modes as ordinary output modes — heralding (post-select on the herald outcome, compute success probability, renormalize) would have to be reimplemented entirely by hand, duplicating what `Processor`/`Experiment` already do correctly, and entangling herald-mode indices into the module's clean `2n`-port qubit convention.
-**Do this instead:** compose at the `Processor` level using `build_experiment()`/`build_processor()` and `Processor.add()`, exactly as verified above — let Perceval track heralds and `global_perf`.
-
-### Anti-Pattern: Silently renormalizing away herald failure
-**What people might do:** report only the herald-conditional distribution (`Processor.probs()['results']`) and drop `global_perf`, since it's "just" a success probability.
-**Why it's wrong:** contradicts this module's own established, explicitly-stated policy (`docs/iqp-photonic-encoding.md` line 254) of never silently discarding/renormalizing probability mass without reporting it — `global_perf` is exactly the kind of number that policy exists to surface, and is also the number needed to finally resolve the "success probability unverified for this exact gate" flag currently open in that document.
-
-### Anti-Pattern: Extrapolating weight-1's exactness threshold blindly, in either direction
-**What people might do:** either assume weight-2 can't be validated to the same `TVD < 1e-6` bar as weight-1 (since it's "probabilistic"), or ignore `global_perf`'s own precision when claiming validation success.
-**Why it's wrong:** `docs/iqp-photonic-encoding.md`'s own ENC-04 self-explanation checkpoint (lines 341-343) already flags the naive "weight-1 matched exactly, so weight-2 will too" extrapolation as unsupported reasoning, precisely because it treats a deterministic and a probabilistic mechanism as interchangeable. But conditioning on herald success is just Bayes' rule over Perceval's exact `SLOS` simulation — so the *conditional* distribution should still match the exact-CZ qubit-side reference to floating-point precision, and `TVD < 1e-6` remains the right bar for that comparison. What must not be silently assumed is that `global_perf` itself reproduces 2/27 to the same precision once composed inside the full n-qubit pipeline (as opposed to the standalone-primitive check in Build Order step 1) — that should be asserted explicitly in the weight-2 validation, not taken on faith from the isolated test.
+1. **ARB-01 de-risking (`arb01_derisking.py`) first, standalone.** Genuinely open research (per `PROJECT.md`'s own framing) with no known blocker but also no prior validation in this project — same "de-risk the primitive before wiring it in" order weight-2 already used successfully (`heralded_cz_derisking.py` → `build_cz_insertion`). Front-loading it leaves the most runway if it needs a pivot, and it has zero dependency on STUDY-01/02.
+2. **STUDY-02 (loss) and STUDY-01 (trainability) in parallel — both depend only on the existing, already-validated weight-1/weight-2 builders**, not on each other or on ARB-01. STUDY-02 is the lower-risk of the two (Pattern 2 is now fully verified end-to-end; "just" a sweep + plotting task). STUDY-01 carries more open methodological risk (choosing the observable/loss `L` for the barren-plateau protocol, deciding weight-1-only vs. weight-1+weight-2 scope) and benefits from starting in parallel rather than after STUDY-02.
+3. **ARB-01 full integration (`build_arb_gate_insertion`/`build_weight2_arb_processor` + TVD validation)** once de-risked — can run concurrently with STUDY-01/02 since it touches only new functions in `iqp_photonic_encoding.py`.
+4. **Julia toolchain spike, early and small, decoupled from when the real cross-check scripts get written.** Given the "new toolchain this close to a deadline" risk `PROJECT.md` itself already flags, do a minimal `juliaup add lts; Pkg.add(["Yao","BosonSampling"])` + one hello-world circuit in each package as its own tiny early step — not gated behind STUDY-01/02 numeric results existing yet — specifically to surface install/version friction (the CLAUDE.md-documented Jul-25 stall pattern) before it can block anything load-bearing. The full `julia_verification/` cross-check scripts (which need real Python-side numbers to diff against) come after STUDY-01/02/ARB-01 produce results.
+5. **WRITE-01 last**, synthesizing STUDY-01/02's measured results (reported honestly either direction, per `PROJECT.md`), ARB-01's outcome (resolved or plainly documented as unresolved), and the Julia cross-check's outcome (or an honest note if descoped/incomplete) — matching this project's established norm (`docs/iqp-photonic-encoding.md`, `iqp-baseline.md`) of citing what was actually verified, not what was hoped for.
 
 ## Sources
 
-- `perceval-quandela` installed package (version pinned in `requirements.txt`), inspected directly via this repo's `venv` — `Processor`, `Circuit`, `catalog['heralded cz']` behavior all confirmed by running code, not read from docs.
-- `C:\Users\cuqui\merlin-quantum-case-study\iqp_photonic_encoding.py` — full existing module, read directly.
-- `C:\Users\cuqui\merlin-quantum-case-study\docs\iqp-photonic-encoding.md` — design document, Ingredient 2 (weight-2 derivation) and its ENC-02/Conclusion open-questions sections.
-- `C:\Users\cuqui\merlin-quantum-case-study\tests\test_iqp_photonic_encoding.py` — existing 26-test suite structure (test names enumerated directly, not re-derived).
-- Catalog gate provenance: arXiv:quant-ph/0110144 (Knill, 2002), per `catalog['heralded cz'].article_ref`.
+- Direct execution against this repo's `./venv` (perceval-quandela==1.2.4, merlinquantum==0.4.0) — HIGH confidence:
+  - `c.requires_polarization` on `build_full_circuit`'s output → `True`.
+  - `ML.QuantumLayer(circuit=..., input_state=all_h_input(n), ...)` on the polarization circuit → `ValueError: BasicState with annotations is not supported`, traced to `venv/Lib/site-packages/merlin/algorithms/layer_utils.py:549`.
+  - `pcvl.Parameter` objects pass through `build_full_circuit`/`build_diagonal_layer_circuit` unmodified and register correctly as circuit parameters (`c.get_parameters()`), confirming the builders are parameter-duck-typed even though they can't currently reach `QuantumLayer`.
+  - `pcvl.algorithm.Analyzer` on a `Processor` constructed with `noise=pcvl.NoiseModel(transmittance=0.5)` (both the project's own circuit and a trivial 2-mode control circuit) → output sums to 1.0, no loss applied.
+  - `Processor.probs()` with `min_detected_photons_filter(0)` on the same trivial circuit → correctly loss-truncated distribution (`|0,0⟩: 0.5` for `transmittance=0.5` on a single input photon).
+  - `Processor.experiment` → confirmed a `perceval.components.experiment.Experiment` instance, the exact type `QuantumLayer(experiment=...)` expects — relevant if a future non-polarization dual-rail re-encoding is ever pursued.
+  - `Processor.set_postselection`/`.post_select_fn` confirmed present as an outer-`Processor`-level API.
+- `venv/Lib/site-packages/perceval/components/core_catalog/controlled_rotation_gates.py` — HIGH confidence, read directly (`PostProcessedControlledRotationsItem.build_circuit`/`build_experiment`: `4*n`-mode local circuit, `set_postselection` on data/ctrl dual-rail pairs, `add_herald(i, 0)` on all `2n` ancilla modes).
+- `venv/Lib/site-packages/merlin/algorithms/layer.py`, `layer_utils.py` — HIGH confidence, read directly (`QuantumLayer.__init__`'s `circuit`/`experiment`/`builder` mutual exclusivity, `prepare_input_state`'s annotation rejection).
+- `iqp_photonic_encoding.py`, `generator/neighbor_locality.py`, `generator/naturally_ordered_generator.py`, `generator/data.py`, `generator/train.py`, `generator/noise.py`, `benchmark.py`, `batch_sweep.py` (this repo) — HIGH confidence, read directly, established existing conventions (mode-mapping dicts, herald-spec local→global translation, top-level driver script pattern, `results/` output convention, two-condition statistical-check pattern).
+- `docs/iqp-baseline.md` (this repo) — HIGH confidence, read directly (Van den Nest cosine-formula analytic gradient precedent, barren-plateau formal definition, average-case framing).
+- `.planning/research/STACK.md` (sibling research thread, this milestone) — MEDIUM confidence for the Julia-specific claims (Julia not installed locally, so those claims could not be independently re-verified here); HIGH confidence for the parts also independently re-verified above (`PostProcessedControlledRotationsItem`'s success-probability table, `PhotonLossTransform`'s `QuantumLayer`-only reachability — now additionally explained by this research's `requires_polarization` finding, which `STACK.md` did not test).
+- `.planning/PROJECT.md` (this repo) — HIGH confidence, read directly (v3.0 milestone scope, Must-have status of all four items, historical Jul-25 stall-risk framing).
 
 ---
-*Architecture research for: weight-2 IQP generator implementation (v2.1 milestone)*
-*Researched: 2026-08-05*
+*Architecture research for: MerLin v3.0 milestone — IQP circuit study & write-up*
+*Researched: 2026-08-07*
