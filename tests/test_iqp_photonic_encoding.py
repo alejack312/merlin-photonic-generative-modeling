@@ -568,3 +568,58 @@ def test_wt2_tvd_gate_n3_bystander_qubit():
     tvd = total_variation_distance(qubit_dist, photonic_dist)
     assert 0.0 <= tvd <= 1.0
     assert tvd < 1e-6, f"n={n} i={i} j={j} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"
+
+
+# Phase 13: weight-1 + weight-2 composability (WT2-07).
+
+
+@pytest.mark.parametrize(
+    "n, i, j, thetas",
+    [
+        (3, 0, 1, [0.5, 0.0, 1.3]),
+        (3, 1, 2, [0.9, 0.4, 0.0]),
+        (3, 0, 2, [0.2, 1.7, 0.65]),
+    ],
+)
+def test_wt2_composability_mixed_generators_n3(n, i, j, thetas):
+    """ROADMAP Success Criterion 1 / WT2-07: n=3, 2 weight-1 terms (one
+    stacked on a weight-2 pair member i or j, one on the bystander qubit
+    outside the pair) plus 1 weight-2 term in the same circuit. Confirms
+    weight-1 and weight-2 layers compose correctly, not just in isolation
+    (Phases 10-12). Stacking a nonzero weight-1 theta directly on a pair
+    qubit is a stronger test than using fully disjoint qubits (CONTEXT.md):
+    it proves a qubit's independent Z term and its participation in the ZZ
+    pair term compose correctly on the same qubit. Pair theta is locked at
+    pi/4 internally by photonic_weight2_iqp_distribution (not
+    caller-adjustable, per Phase 12's convention).
+
+    Primary check: TVD < 1e-6 against the extended exact reference (both
+    thetas and pair_thetas set) -- same style/tolerance as
+    test_wt2_tvd_gate_n3_bystander_qubit. Companion sanity check: TVD
+    against the weight-1-only exact reference (pair_thetas=None) must be
+    clearly non-negligible, proving the ZZ term isn't vacuously doing
+    nothing -- 13-RESEARCH.md measured 0.46-0.50 for these three configs;
+    0.1 is used as a safe, non-flaky lower bound with headroom."""
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(i, j): np.pi / 4})
+    photonic_dist, residual, herald_failure_prob = photonic_weight2_iqp_distribution(n, i, j, thetas)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(herald_failure_prob, EXPECTED_HERALD_FAILURE_PROB, atol=1e-6)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n={n} i={i} j={j} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"
+
+    # Companion sanity check: confirm the ZZ term is doing real, non-vacuous
+    # work -- TVD against the weight-1-only reference must be clearly
+    # non-negligible (observed 0.46-0.50 in 13-RESEARCH.md; 0.1 threshold
+    # gives large headroom while still ruling out an accidentally-inert
+    # weight-2 term).
+    qubit_dist_w1only = exact_qubit_iqp_distribution(n, thetas, pair_thetas=None)
+    tvd_sanity = total_variation_distance(qubit_dist_w1only, photonic_dist)
+    assert tvd_sanity > 0.1, (
+        f"n={n} i={i} j={j} thetas={thetas}: sanity TVD={tvd_sanity} is too small -- "
+        "the weight-2 (ZZ) term does not appear to have a non-negligible effect"
+    )
