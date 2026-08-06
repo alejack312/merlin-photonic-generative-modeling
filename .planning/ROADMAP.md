@@ -114,7 +114,10 @@ Plans:
   1. An n=3 mixed generator test (2 weight-1 terms + 1 weight-2 term in the same circuit) passes, confirming weight-1 and weight-2 layers compose correctly.
   2. The test is added to `tests/test_iqp_photonic_encoding.py`, matching existing test conventions.
   3. The full test suite (weight-1's original 26 tests + all weight-2 tests added across Phases 10-13) is green after this addition.
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 13-01-PLAN.md — n=3 mixed weight-1 + weight-2 composability test (WT2-07)
 
 ## Progress
 
@@ -135,6 +138,6 @@ Phases execute in numeric order: 10 → 11 → 12 → 13
 | 10. Heralded-CZ Primitive De-Risking | v2.1 | 1/1 | Complete — verified 4/4, 2/27 herald-success confirmed | 2026-08-06 |
 | 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 2/2 | Complete — verified 4/4, weight-2 pipeline built and truth-table verified | 2026-08-06 |
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 2/2 | Complete — verified 4/4, TVD=2.6e-15 at locked gate | 2026-08-06 |
-| 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/TBD | Not started | - |
+| 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 0/1 | Planned | - |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) completed and verified 2026-08-06 — WT2-01 satisfied, full weight-2 circuit built and truth-table verified, 107-test suite green. Phase 12 (Exact Reference Extension & TVD Validation) completed and verified 2026-08-06 — WT2-02/03/05/06 satisfied, TVD=2.58e-15 at the locked n=2 θ=π/4 gate, 115-test suite green. Next: `/gsd:discuss-phase 13`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. Full phase and requirement detail archived to `.planning/milestones/v2.0-ROADMAP.md` and `.planning/milestones/v2.0-REQUIREMENTS.md`. v2.1 (Weight-2 Implementation, Phases 10-13) roadmap created 2026-08-06 — 8/8 v1 requirements mapped, no orphans. Phase 10 (Heralded-CZ Primitive De-Risking) completed 2026-08-06 — WT2-04, WT2-08 satisfied. Phase 11 (CZ Insertion Unit & Weight-2 Circuit Composition) completed and verified 2026-08-06 — WT2-01 satisfied, full weight-2 circuit built and truth-table verified, 107-test suite green. Phase 12 (Exact Reference Extension & TVD Validation) completed and verified 2026-08-06 — WT2-02/03/05/06 satisfied, TVD=2.58e-15 at the locked n=2 θ=π/4 gate, 115-test suite green. Phase 13 (Weight-1 + Weight-2 Composability Validation) planned 2026-08-06 — 1 plan, 1 wave, ready for execution.
