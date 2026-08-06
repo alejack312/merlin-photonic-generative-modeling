@@ -5,16 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. **v2.1 (Weight-2 Implementation) shipped 2026-08-06** — 4 phases, 8/8 requirements satisfied, milestone audit passed. No milestone currently in progress. Next candidates (STUDY-01/02, WRITE-01, ARB-01, BMK-03) are listed in PROJECT.md's "Next Milestone Goals" — run `/gsd:new-milestone` to scope one.
+**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. v2.1 (Weight-2 Implementation) shipped 2026-08-06. **v3.0 (IQP Circuit Study & Write-Up) scoping started 2026-08-06** — STUDY-01 (trainability/barren-plateau), STUDY-02 (hardness-under-loss), ARB-01 (arbitrary-θ weight-2), WRITE-01 (write-up), plus a ket.jl/SDP independent verifier. All four Must-have, no fallback ordering (owner's explicit call).
 
 ## Current Position
 
-Milestone: **None in progress.** v2.1 shipped 2026-08-06, tag: v2.1 (v2.0 shipped 2026-08-05, tag: v2.0; v1.0 shipped 2026-07-29, tag: v1.0; Phase 7 mechanism-validation add-on closed 2026-07-30, unassigned to a milestone).
-Phase: — (ready to plan next milestone)
-Plan: Not started
-Status: v2.1 Weight-2 Implementation fully shipped and archived — all 4 phases (10-13) complete and independently verified, 8/8 requirements satisfied, milestone audit passed (`.planning/milestones/v2.1-MILESTONE-AUDIT.md`), 118/118 test suite green. Roadmap and requirements archived to `.planning/milestones/v2.1-*`. `.planning/REQUIREMENTS.md` deleted (fresh one needed for next milestone). PROJECT.md fully evolved: all 8 v2.1 requirements moved to Validated, Current State/Current Milestone/Next Milestone Goals sections updated.
-
-Progress: v1.0 [██████████] 100% (GEN-07 honestly concluded not-met within that 100% — not a partial-completion asterisk, the requirement was fully addressed, the outcome was negative). Phase 7 mechanism-validation work is fully closed, owner interpretation pending. v2.0 [██████████] 100% — both phases complete, 11/11 requirements satisfied, shipped 2026-08-05. v2.1 [██████████] 100% — all 4 phases complete and verified, 8/8 requirements satisfied, shipped and archived 2026-08-06.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for milestone v3.0.
 
 ## Performance Metrics
 
@@ -67,14 +64,14 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: no milestone in progress — run `/gsd:new-milestone` to scope the next one (candidates: STUDY-01/02, WRITE-01, ARB-01, BMK-03, all listed in PROJECT.md's "Next Milestone Goals")
+- Next: continue `/gsd:new-milestone` — requirements not yet defined for v3.0
 
 ### Blockers/Concerns
 
-None open. All prior blockers across all three milestones (the July 25 stall-risk checkpoint, Phase 4's GEN-07 shortfall, the self-audit findings, the Phase 8 LIT-04 contingency, Phase 9's missing formal verification, the Phase 11→12 Perceval `add_herald`+`PBS` crash) are resolved or honestly documented as closed.
+None open yet for v3.0. Watch item: v3.0 was scoped with STUDY-01, STUDY-02, ARB-01, and WRITE-01 all as Must-have with no fallback ordering — owner's explicit call after being shown the risk that ARB-01 is genuinely open research and ket.jl/SDP is a new toolchain. This is the first milestone since the PennyLane stall (May 2026) to combine open research with a hard deadline; worth watching for the same stall pattern.
 
 ## Session Continuity
 
 Last session: 2026-08-06
-Stopped at: v2.1 Weight-2 Implementation milestone completed and archived via `/gsd:complete-milestone 2.1` — `.planning/milestones/v2.1-ROADMAP.md`, `v2.1-REQUIREMENTS.md`, and `v2.1-MILESTONE-AUDIT.md` created; `.planning/ROADMAP.md` collapsed v2.1's phase detail into a `<details>` block; `.planning/REQUIREMENTS.md` deleted (fresh for next milestone); `.planning/PROJECT.md` fully evolved (all 8 v2.1 requirements moved to Validated, Current State/Next Milestone Goals updated); `.planning/MILESTONES.md` given a new v2.1 entry; git tagged `v2.1`.
-Resume by: run `/gsd:new-milestone` to scope the next milestone, or handle the two remaining owner-only manual steps (send technical note to Vincent Espitalier, flip repo public).
+Stopped at: v3.0 (IQP Circuit Study & Write-Up) milestone scoping in progress via `/gsd:new-milestone` — PROJECT.md and STATE.md updated with milestone goals (STUDY-01, STUDY-02, ARB-01, WRITE-01, ket.jl/SDP verifier); requirements not yet defined.
+Resume by: continue `/gsd:new-milestone` from the requirements-definition step, or handle the two remaining owner-only manual steps (send technical note to Vincent Espitalier, flip repo public).

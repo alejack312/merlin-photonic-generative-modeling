@@ -14,14 +14,22 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 **v2.1 Weight-2 Implementation shipped 2026-08-06**, same-day (all 4 phases in one sprint, 2026-08-06 09:04 → 21:42). All 4 phases (10: Heralded-CZ Primitive De-Risking; 11: CZ Insertion Unit & Weight-2 Circuit Composition; 12: Exact Reference Extension & TVD Validation; 13: Weight-1 + Weight-2 Composability Validation) complete, 8/8 requirements satisfied, full test suite green (118/118), every phase independently re-verified live by `gsd-verifier` (not trusted from SUMMARYs). Full detail: [`.planning/milestones/v2.1-ROADMAP.md`](milestones/v2.1-ROADMAP.md), [`.planning/milestones/v2.1-REQUIREMENTS.md`](milestones/v2.1-REQUIREMENTS.md), [`.planning/milestones/v2.1-MILESTONE-AUDIT.md`](milestones/v2.1-MILESTONE-AUDIT.md).
 
-## Current Milestone
+## Current Milestone: v3.0 IQP Circuit Study & Write-Up
 
-No milestone in progress. Candidates for the next one are listed below in "Next Milestone Goals" — run `/gsd:new-milestone` to scope one.
+**Goal:** Turn the validated weight-1/weight-2 IQP-photonic encoding into the project's actual research payoff — measure whether the circuit shows barren-plateau behavior and whether sampling stays hard once photon loss is accounted for, attempt to resolve the fixed-π/4 weight-2 limitation, and write up the findings. Add an independent Julia/ket.jl + SDP verification path alongside the existing Python/Perceval pipeline, rather than trusting a single toolchain for the study's core claims.
+
+**Target features:**
+- STUDY-01: Trainability/barren-plateau measurement on the weight-1+weight-2 circuit — a specific measured claim, reported honestly either direction (plateau or not), same bar as GEN-07/LIT-04 in prior milestones.
+- STUDY-02: Hardness-under-loss assessment — does the sampling-hardness argument survive realistic photon loss, measured and reported either direction.
+- ARB-01: Attempt to resolve the fixed-π/4 weight-2 limitation (arbitrary-θ two-qubit diagonal phase gate) — genuinely open research; if unresolved, document why plainly rather than dropping it silently.
+- WRITE-01: Write up STUDY-01/02 (and ARB-01's outcome) as the project's technical findings document.
+- ket.jl/SDP independent verifier: a second, Julia-based implementation used to (1) cross-check the Python/Perceval exact-distribution calculations and (2) bound/verify quantities for the STUDY-02 hardness-under-loss methodology via SDP relaxations. Not a central architectural component — a verification tool alongside the existing pipeline.
+- All four (STUDY-01, STUDY-02, ARB-01, WRITE-01) are Must-have for this milestone — owner's explicit call, no fallback/deferral ordering, accepting the added timeline risk from the open-research item (ARB-01) and the new toolchain (Julia/ket.jl).
+
+**Note:** ket.jl/SDP was previously parked in "Out of Scope" as informal, no-artifact research. This milestone changes that — it is now scoped in, specifically as a verifier, not a central component.
 
 ## Next Milestone Goals
 
-- STUDY-01/STUDY-02/WRITE-01 (trainability/barren-plateau study, hardness-under-loss assessment, write-up) — now unblocked, since weight-2 is confirmed working and validated as of v2.1
-- ARB-01 (arbitrary-θ weight-2, resolving the fixed-π/4 limitation) — genuinely open research, not a resolvable implementation task; worth scoping only if STUDY-01/02 reveal it's load-bearing
 - BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
 - Sending the drafted v1.0 technical note to Vincent Espitalier and flipping the repo public (both still open, independent of any future milestone)
 
@@ -87,7 +95,6 @@ No milestone in progress. Candidates for the next one are listed below in "Next 
 - **Reproducing the IQP gate-model circuits directly in MerLin (implementation)** — v2.0 completed the *design* side (an original, defensible DV/Fock-space encoding mapping, `docs/iqp-photonic-encoding.md`), v2.1 completed weight-2 *implementation and validation* (weight-1 and weight-2 both implemented and validated, TVD ~1e-16/2.58e-15 respectively, confirmed composable). The trainability/hardness study and write-up remain out of scope until a future milestone (deferred as STUDY-01/02, WRITE-01 — see "Next Milestone Goals").
 - **Arbitrary-θ weight-2 generators (ARB-01)** — `heralded_cz` is a fixed, non-parameterized catalog gate; realizing a continuously-tunable `exp(iθ·Z_iZ_j)` for θ≠π/4 needs new paper-derivation work, not resolvable from the existing catalog alone. Deferred, contingent on whether STUDY-01/02 reveal it's actually load-bearing.
 - **PennyLane independent contributions** — parked, sequenced after the IQP-photonic project.
-- **ket.jl / SDP self-study** — informal free-time research only, no artifact expected.
 - **Weighted-average → single continuous point output mapping** — rejected: collapses multimodal targets (circles' two rings) into their midpoint, a region with zero real density.
 - **Discrete `shots`-based sampling for the generator** — rejected: not differentiable through standard autograd without an additional estimator.
 - **Exact replication of MerLin's photonic QGAN paper's full MNIST-patch dataset/architecture (BMK-03)** — not pursued in v1.0 or v2.0; shipped without it. Candidate for a future milestone if the apples-to-apples comparison becomes worth the added scope.
@@ -139,6 +146,8 @@ No milestone in progress. Candidates for the next one are listed below in "Next 
 | Weight-2 built via `Processor`-level composition, not `Circuit`-level | `heralded_cz`'s `build_circuit()` alone drops the herald — only `build_experiment()`/`build_processor()` attach it; confirmed by direct source read, not assumed | ✓ Good — full pipeline composed via `Processor.add()`, all four weight-1 builders reused with zero modification (sha256 snapshot-verified) |
 | Herald-free measurement variant (`_build_weight2_processor_no_herald`) built specifically to route around `Processor.add_herald()`+`PBS` crashing `Processor.probs()` | A genuine Perceval library limitation, independently reproduced (not assumed from a stack trace) before designing around it | ✓ Good — TVD validation still exercises the real production wiring (`build_cz_insertion`, same mode-mapping), just skips the herald registration step that crashes; upstream issue filed for the library bug itself |
 | Weight-1/weight-2 composability tested with a weight-1 theta stacked directly on a weight-2 pair member, not disjoint qubits | The stronger test — proves a qubit's independent Z term and its participation in the ZZ pair term compose correctly on the same qubit, not just that unrelated qubits don't interfere | ✓ Good — TVD < 1e-6 across all 3 configs, companion sanity check confirms the ZZ term has a real (0.46-0.50 TVD), non-vacuous effect |
+| v3.0 scoped with STUDY-01, STUDY-02, ARB-01, and WRITE-01 all as Must-have, no fallback ordering | Owner's explicit call during milestone scoping, after being shown the risk (ARB-01 is genuinely open research with no known decomposition; ket.jl/SDP is a new toolchain) — chose to accept the timeline risk rather than defer either | — Pending — first milestone where the historical stall-risk pattern (PennyLane, May 2026) meets a genuinely open research item; watch closely |
+| ket.jl/SDP moved from Out of Scope ("informal, no artifact expected") into v3.0 scope, specifically as an independent verifier (cross-checks Python/Perceval's exact distributions; bounds STUDY-02's hardness-under-loss quantities via SDP) | Owner's proposal during milestone scoping — not a central architectural component, a second toolchain used to catch the kind of silent-but-wrong bug a single pipeline can't self-detect (same rationale as this project's existing TVD cross-checks) | — Pending |
 
 ---
-*Last updated: 2026-08-06 after v2.1 milestone completion*
+*Last updated: 2026-08-06 after v3.0 milestone scoping*
