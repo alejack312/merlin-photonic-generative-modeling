@@ -15,8 +15,8 @@ combined with any `PBS`-containing circuit crashes `Processor.probs()`
 unconditionally, and (2) unannotated ancilla photons are silently
 mis-distinguished from qubit photons during multi-photon interference, giving
 wrong (non-crashing) numbers unless the ancilla input photons are explicitly
-annotated `{P:V}` (see 12-RESEARCH.md). Upstream bug report for issue (1):
-pending (filed separately -- see Plan 12-02 Task 2).
+annotated `{P:V}` (see 12-RESEARCH.md). Upstream bug report for issue (1) filed
+against Quandela's Perceval repo: https://github.com/Quandela/Perceval/issues/783
 
 Both configurations below were re-run live against the committed
 `iqp_photonic_encoding.py` (perceval-quandela 1.2.4) immediately before writing
