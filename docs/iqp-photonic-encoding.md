@@ -16,6 +16,7 @@
 - [ENC-03: Basis Correspondence](#enc-03-basis-correspondence)
 - [ENC-04: Validation Plan and Toy-Scale Check](#enc-04-validation-plan-and-toy-scale-check)
 - [ENC-05: Final Self-Explanation Checkpoint](#enc-05-final-self-explanation-checkpoint)
+- [ARB-01/ARB-02: General-α Operator Identity and Success Probability](#arb-01arb-02-general-α-operator-identity-and-success-probability)
 - [Conclusion and Open Questions](#conclusion-and-open-questions)
 
 ## ENC-01: Ingredient-Level Mapping
@@ -371,13 +372,87 @@ Per this repo's CLAUDE.md and ENC-05's explicit bar — same standard as v1.0's 
 
 **Outcome:** all five points correctly and completely explained by round 6. This closes ENC-05.
 
+## ARB-01/ARB-02: General-α Operator Identity and Success Probability
+
+**What this extends:** Ingredient 2's `heralded_cz`-based derivation above realizes `exp(iθZ_iZ_j)` only at the fixed angle `θ=π/4`, since `heralded_cz` is a fixed catalog gate. `PostProcessedControlledRotationsItem` (a **different** gate family — post-selection on ancilla vacuum + per-qubit data validity, not `heralded_cz`'s ancilla heralding) implements a continuously-tunable `CP(α) = diag(1,1,1,e^{iα})`, de-risked standalone in Phase 15 (`cp_gate_derisking.py`, `tests/test_cp_gate_derisking.py`, 8/8 passing) and confirmed to match `heralded_cz`'s boundary exactly at `α=π` (not `α=π/4` — see the correction below). This section derives the general-`α` operator identity connecting it to `exp(iθZ_iZ_j)` for arbitrary `θ`, and the gate's success probability as a closed-form function of `α`.
+
+### Owner's Attempt
+
+The owner was walked through both derivations via the Socratic method, per this repo's attempt-first gating, rather than being handed the results directly.
+
+**Part (a) — the general operator identity.** Working from `CP(α)=diag(1,1,1,e^{iα})` and the single-qubit correction `exp(iφZ)=diag(e^{iφ},e^{-iφ})` as given facts, the owner worked through the diagonal-matrix matching by hand. One real error surfaced and was caught: an early answer wrote `exp(iθZ_iZ_j)` as the eigenvalue matrix `diag(1,-1,-1,1)` itself rather than its exponential (`diag(e^{iθ},e^{-iθ},e^{-iθ},e^{iθ})`) — corrected on request, then the owner independently derived the correct form. A second, more useful catch: the owner initially assumed the `|01⟩`/`|10⟩` diagonal entries would depend on the single-qubit correction angle `φ`; direct computation (`e^{iφ}·e^{-iφ}=e^{0}=1`, independent of `φ`) showed they never do, for any `φ` — this pinned down that the free "global phase" degree of freedom, not `φ`, is what forces those two entries to `1`. A late arithmetic slip claimed `α=1` in terms of `θ`; corrected by re-tracing the exponent arithmetic (`e^{2iθ}·e^{2iθ}=e^{4iθ}`, matched against `e^{iα}`) rather than accepted at face value.
+
+Final statement, in the owner's own words: *"α is equal to 4θ as we computed this using eigenvalues and matrix multiplication. We also found that theta and phi need to be opposite sign, but equal in magnitude."* — correct. `φ=−θ` is the correction angle when multiplied directly onto `exp(iθZ_iZ_j)` to reach `CP(4θ)` (opposite sign, equal magnitude, exactly as stated); the algebraically-equivalent statement with `φ=+θ` on the other side of the identity (used below) is the same physics rearranged, not a second independent fact.
+
+**Part (b) — success probability.** Asked what the "missing" probability represents physically when a non-unitary sub-block is embedded in a larger unitary and the ancilla is post-selected back onto vacuum, the owner's answer: *"This has to do with dilations and basically representing quantum operations as part of a larger system entangled system. This means that the 'missing' probability comes from correlations with the environment."* — correct, and the right general principle (Stinespring dilation: post-selecting the environment/ancilla onto vacuum recovers a sub-unitary contraction; the norm lost is exactly what leaked into non-vacuum ancilla branches).
+
+Deriving the *exact* closed form for this specific gate went differently from part (a): a first hand-derivation attempt (assuming the gate's internal coupling matrix was block-diagonal by *qubit pair*, i.e. one block per qubit) was checked numerically against the gate's actual measured amplitudes and was **wrong** — all four computational-basis inputs showed identical, non-monotonic dependence on `α`, contradicting the "some inputs are lossless" prediction that wrong assumption implied. Rather than keep re-deriving from a mis-mapped structure, the primary source the gate itself cites (arXiv:2405.01395, Section V-B) was consulted directly and the resulting formula verified against `cp_gate_derisking.py`'s own measured sweep before being accepted — see Verification below.
+
+### General-α Operator Identity
+
+Writing `exp(iθZ_iZ_j)` explicitly using `Z_iZ_j`'s eigenvalues (`+1,-1,-1,+1` on `{|00⟩,|01⟩,|10⟩,|11⟩}`) gives `diag(e^{iθ},e^{-iθ},e^{-iθ},e^{iθ})`. Multiplying by the single-qubit correction `exp(iφZ_i)·exp(iφZ_j) = diag(e^{2iφ},1,1,e^{-2iφ})` (the `|01⟩`/`|10⟩` entries are always exactly `1`, independent of `φ`, since the two single-qubit phases cancel there) and choosing the free global phase `g=e^{iθ}` to force those two entries to `1`, then solving the remaining `|00⟩` and `|11⟩` entries for `φ` and the resulting `CP`-dial value:
+
+```
+φ = θ    (single-qubit correction angle, same sign as θ on this side of the identity)
+α = 4θ   (CP's own dial value)
+
+⟹ exp(iθ·Z_i·Z_j) = e^{−iθ} · CP(4θ) · exp(iθ·Z_i) · exp(iθ·Z_j)   (up to the stated global phase)
+```
+
+**Sanity check against the confirmed boundary:** at `θ=π/4` (the existing fixed-angle case, Ingredient 2 above), `α=4·(π/4)=π` — matching Plan 15-01/15-02's independently-confirmed result that `CP(α=π)` reproduces `heralded_cz`'s `CZ=diag(1,1,1,-1)` exactly, sign-for-sign. This **corrects `15-CONTEXT.md`'s originally-stated boundary** (`α=π/4`) to the verified value (`α=π`) — `θ=π/4` is this codebase's existing `Z_iZ_j`-generator-angle convention (`pair_thetas`), and `α=π` is `CP`'s own separate dial value at that same physical point; the two were conflated in the original context note and are stated unambiguously here.
+
+### Closed-Form Success Probability
+
+`PostProcessedControlledRotationsItem`'s success probability (post-selection on ancilla vacuum + per-qubit data validity), for the `n`-qubit gate, per arXiv:2405.01395 Section V-B:
+
+```
+p_success(α) = (1/σ_max)^(2n)
+
+where  a = (e^{iα} − 1)^(1/n)
+       w = e^(i·2π/n)                       (n-th roots of unity)
+       σ_max = max_k |1 + a·w^k|,  k=0,...,n-1
+```
+
+For **n=2** (this project's case): `σ_max = max(|1+a|, |1−a|)`, so `p_success(α) = 1/σ_max⁴`.
+
+**Physical reading, tying back to the owner's dilation answer:** `σ_max` is the largest singular value of the coupling matrix (`I_n + aJ_n`) `PostProcessedControlledRotationsItem`'s internal construction uses — matching, up to the mode-ordering permutation Perceval applies internally, the `A0=I+aJ` block found in `perceval/components/core_catalog/controlled_rotation_gates.py`'s `build_control_gate_unitary`. `σ_max` deviating from `1` is exactly the "excess gain" the target operation needs that a unitary process can't provide on its own — precisely the probability that leaks into the non-vacuum-ancilla branches the owner's answer identified. Each of the `n` qubits' photons independently "pays" a per-particle factor `1/σ_max²` (amplitude scales as `1/σ_max`, probability as its square) to be embedded into the larger unitary; with `n` photons, the factors multiply: `(1/σ_max²)ⁿ = 1/σ_max^(2n)`.
+
+**Verification** — `p_success(α)` computed from the closed form above vs. `cp_gate_derisking.py`'s independently-measured `|amplitude|²` table (all 4 computational-basis inputs give the same value at each `α`, matching Success Criterion 2's confirmed uniformity):
+
+| α | closed-form `p_success(α)` | measured (`cp_gate_derisking.py`) | diff |
+|---|---|---|---|
+| 0.3 | 0.24704744 | 0.247047 | 4.4e-7 |
+| π/6 (0.5236) | 0.17453928 | 0.174539 | 2.8e-7 |
+| π/3 (1.0472) | 0.11111111 | 0.111111 | 1.1e-7 |
+| π/2 (1.5708) | 0.09048471 | 0.090485 | 2.9e-7 |
+| 2π/5 (1.2566) | 0.10014184 | 0.100142 | 1.6e-7 |
+| 2.0 | 0.08582660 | 0.085827 | 4.0e-7 |
+| π (3.1416) | 0.11111111 | 0.111111 | 1.1e-7 |
+
+All 7 tested points (the original 4-point de-risking sweep plus 3 additional exploratory points) agree to the measured table's printed precision — the differences above are rounding in the printed 6-decimal measured values, not a real discrepancy. Notably, `α=π/3` and `α=π` give the *exact same* success probability (`1/9`) for different reasons: at `π/3` only one of the two singular values dominates (`σ_max=√3`, the other `=1`); at `π` both singular values happen to coincide (`σ_max=√3` for both) — a coincidence in the numbers, not a hidden relationship between those two angles.
+
+Success probability is genuinely **non-monotonic** in `α` (confirmed above, matching `.planning/research/STACK.md`'s prior flag) — it decreases from `α→0` toward a minimum somewhere past `α=π/2`, then rises back up by `α=π`. This is a real, `α`-dependent quantity, never a fixed constant like `heralded_cz`'s uniform `2/27` — reported here as the full table/formula per this milestone's Success Criterion 4, not collapsed to a single number.
+
+### Comparison Against `heralded_cz`
+
+Two genuinely different gate families realize the same `exp(iθZ_iZ_j)` operator at the shared boundary point (`θ=π/4`, `α=π`):
+
+| | `heralded_cz` (Ingredient 2) | `PostProcessedControlledRotationsItem` (this section) |
+|---|---|---|
+| Mechanism | Ancilla **heralding** — succeeds conditioned on a specific detector click pattern on dedicated herald modes | **Post-selection** — succeeds conditioned on ancilla modes returning to vacuum plus valid per-qubit dual-rail data |
+| Tunability | Fixed at `θ=π/4` only (not a parameterized family) | Continuously tunable, any `α` (equivalently any `θ=α/4`) |
+| Success probability at the shared boundary | `2/27` (~0.074074), measured Phase 10 | `1/9` (~0.111111), measured Phase 15, matches the closed form above |
+| Success probability, general | Fixed (only one angle exists) | `1/σ_max^{2n}`, non-monotonic in `α` (derived above) |
+
+The two success-probability figures at the shared boundary (`2/27` vs `1/9`) are genuinely different numbers for genuinely different constructions — never to be conflated, consistent with this document's existing note (Ingredient 2, above) that literature figures for "the general gate family" are not automatically this exact implementation's number.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
 
 **What it does not establish** — the full honesty ledger, collected in one place from across ENC-01 through ENC-04:
 
-- **Generator-weight scope.** Weight-1 generators: fully derived, implemented, and validated. Weight-2 generators (`exp(iθZ_iZ_j)`): now also implemented and validated (v2.1, Phases 11-13) via a `PBS`-mediated conversion to dual rail's `heralded_cz`, realizing a single fixed angle (`π/4`) rather than an arbitrary θ. TVD=2.58e-15 against the extended exact reference at the locked n=2, θ=π/4 gate (Phase 12); confirmed to compose correctly with weight-1 terms in the same n=3 circuit (Phase 13). Remaining limitation: still fixed-angle only, not arbitrary θ — see ARB-01, deferred.
+- **Generator-weight scope.** Weight-1 generators: fully derived, implemented, and validated. Weight-2 generators (`exp(iθZ_iZ_j)`): implemented and validated at fixed `θ=π/4` (v2.1, Phases 11-13) via a `PBS`-mediated conversion to dual rail's `heralded_cz`. TVD=2.58e-15 against the extended exact reference at the locked n=2, θ=π/4 gate (Phase 12); confirmed to compose correctly with weight-1 terms in the same n=3 circuit (Phase 13). The fixed-angle limitation is now also resolved for **arbitrary** θ (v3.0, Phase 15) via a second, genuinely different gate family (`PostProcessedControlledRotationsItem`, post-selection-based) — general operator identity, closed-form success probability, and comparison against `heralded_cz` are in the ARB-01/ARB-02 section above. TVD validation of the *full pipeline* at arbitrary α (not just the bare gate) is Plan 15-04's job, not yet done as of this section's writing.
 - **`heralded_cz`'s success probability is now confirmed for this exact gate (Phase 10).** The Knill CZ construction it implements (arXiv:quant-ph/0110144) was confirmed real by reading Perceval's source directly in Phase 9; Phase 10's `heralded_cz_derisking.py` then independently measured its herald-success probability at exactly 2/27 (~0.074074), uniform across all 4 computational-basis inputs and 2 superposition spot-checks, confirmed the CZ phase sign (negative only on `|1,1⟩`, via `Simulator.prob_amplitude`), and confirmed `logical_perf` is pure herald condition — no hidden second filter — via an empty `post_select_fn` and a zero-leakage `Analyzer` truth table. This de-risked the primitive standalone; the weight-2 circuit built on top of it (Ingredient 2's `PBS`-mediated conversion plus the `π/4` phase corrections) was then implemented, run, and validated end-to-end in Phases 11-13.
 - **Toy-check scope.** ENC-04 validated `n=2` and `n=3` for weight-1 generators, and the same `n=2-3` range for weight-2 (Phase 12) and mixed weight-1+weight-2 circuits (Phase 13), all under an idealized, lossless `SLOS`/`Processor` simulation. It says nothing about larger `n` or behavior under realistic loss/noise.
 - **General-`n` scaling is stated, not demonstrated.** The mapping's ingredients are defined for general `n`, but only concretely instantiated and checked at `n=2-3`. Nothing here shows the construction scales practically to circuit sizes that would matter for an actual hardness claim.
