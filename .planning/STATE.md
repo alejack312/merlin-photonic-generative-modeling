@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 15 (ARB-01 Core Gate De-Risking & Validation) — Wave 2 complete, Wave 3 next
-Plan: 03 of 4 — complete
-Status: Wave 2 (15-02, 15-03) both shipped. 15-02: `_build_cp_insertion_core(alpha)` and `build_cp_insertion(n, i, j, alpha)` added to `iqp_photonic_encoding.py`, reusing `_build_cz_insertion_core`'s exact `PERM([1,0])` convention-adapter fix for CP(α) — confirmed via `Simulator.prob_amplitude` to reproduce `diag(1,1,1,e^{iα})` on `MODULE_DUAL_RAIL`, including exact sign-for-sign boundary agreement with `heralded_cz`'s `diag(1,1,1,-1)` at α=π. 15-03: general-α operator identity (`exp(iθZ_iZ_j) = e^{-iθ}·CP(4θ)·exp(iθZ_i)·exp(iθZ_j)`, α=4θ, correcting 15-CONTEXT.md's original α=π/4 boundary note to the verified α=π) and closed-form success probability (`p_success(α)=1/σ_max^(2n)`, sourced from arXiv:2405.01395 Section V-B, verified against `cp_gate_derisking.py`'s measured sweep at 7 points to ~1e-7) written into `docs/iqp-photonic-encoding.md` — both derived via attempt-first Socratic dialogue with the owner. 53/53 module tests and 132/132 full repo suite pass, zero regressions. Also this session: corrected an overstated Perceval `add_herald()`+`PBS` crash claim (filed as Quandela/Perceval#783) after live re-verification showed the crash only triggers on auto-fill omission, not unconditionally — v2.1-ROADMAP.md and this file's gotcha list corrected, plus an additive cross-validation test confirming the direct `add_herald()` production path agrees with Phase 12's herald-free measurement path. Plan 15-04 (full-pipeline wiring + TVD validation at arbitrary α) is next.
+Phase: 15 (ARB-01 Core Gate De-Risking & Validation) — complete, Phase 16 next
+Plan: 04 of 4 — complete (Phase 15 done)
+Status: Phase 15 fully shipped (Plans 15-01 through 15-04). 15-04: `photonic_cp_iqp_distribution(n, i, j, thetas, alpha)` wires `build_cp_insertion` into the full weight-2 pipeline (state prep → α/4-folded diagonal → CP-insertion via a corrected 4-entry ancilla mode-mapping dict → conjugation → readout), mirroring `photonic_weight2_iqp_distribution`'s manual-filtering pattern (Pitfall 3: CP's registered postselection can't compose with later pipeline components). TVD validated at floating-point-noise level against the extended exact reference at n=2,3 across all 3 non-trivial α values, plus a direct α=π full-pipeline boundary-agreement confirmation against `heralded_cz` (TVD~3e-15) — the missing third confirmation level after Plans 15-01/15-02's bare-gate/bare-core checks. **Load-bearing fix found during this plan's own smoke-test step, not in the plan's literal recipe**: `postselect_failure_prob` must include qubit i's/j's own pair-validity failure (CP's own internal post-selection condition, not just ancilla-nonzero) — the literal recipe reproduced `15-RESEARCH.md`'s previously-unresolved TVD~0.3-0.4 finding exactly; the corrected accounting matches the closed-form `p_success(α)=1/σ_max^4` to ~1e-15. `docs/iqp-photonic-encoding.md`'s `heralded_cz`-vs-CP comparison table extended with ancilla/resource-cost and measured circuit-depth rows (CP: 4 ancilla/vacuum, 9 components, depth 5; `heralded_cz`: 2 ancilla/heralded photon, 21 components, depth 12), purely descriptive per locked scope. 61/61 module tests and 142/142 full repo suite pass, zero regressions. Phase 16 (Extended Validation & Postselection Bookkeeping) is next.
 
 ```
-Progress: [██------------------] 1/8 phases (v3.0)
+Progress: [███-----------------] 1.4/8 phases (v3.0, Phase 15 of 8 complete)
 ```
 
 ## Performance Metrics
@@ -57,6 +57,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 - Batch-averaged per-sample MMD² training objective is a provable upper bound on the marginal-distribution MMD² (Jensen's inequality), not identical to it — documented in `DESIGN_DECISIONS.md`.
 - Natural-order correspondence's causal mechanism (why radius-sorting helps) is asserted, not demonstrated — a genuine open question if this generator is extended or reused.
 - `docs/iqp-photonic-encoding.md` is the canonical design reference for both weight-1 (implemented v2.0) and weight-2 (implemented v2.1) IQP generators — kept in sync with shipped code as of the v2.1 milestone audit.
+- For any manually-filtered (herald-free/postselect-free) Perceval measurement pipeline: a gate's OWN post-selection condition may cover more than one physical check (e.g. `PostProcessedControlledRotationsItem`'s ancilla-vacuum AND per-qubit-pair data-validity, registered together by `build_experiment()`). Every check that's part of the gate's own condition must be folded into that gate's `*_failure_prob`, never into a generic `residual` bucket — `residual` is reserved for genuinely unrelated leakage (e.g. a bystander qubit untouched by the gate). Misclassifying this reproduces large, hard-to-diagnose TVD mismatches (~0.3-0.4) that look like a wiring/convention bug but aren't — confirmed live during Phase 15 Plan 04 (`iqp_photonic_encoding.py`'s `photonic_cp_iqp_distribution`).
 
 ### Roadmap Evolution
 
@@ -72,7 +73,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: continue Phase 15 with Plan 15-04 (full-pipeline wiring: PBS + CP + PBS composed with state-prep/diagonal/conjugation/readout, plus TVD validation against the exact reference — the bare-core convention adapter is now confirmed solid per Plan 15-02, so any remaining gap is isolated to the composition/mode-mapping layer)
+- Next: start Phase 16 (Extended Validation & Postselection Bookkeeping) — denser α sweeps (8-16 points), mixed weight-1+arbitrary-θ weight-2 composability, Forge-based postselection verification, per `docs/iqp-photonic-encoding.md`'s updated scope statement.
 
 ### Blockers/Concerns
 
@@ -92,5 +93,5 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: Plan 15-02 executed and shipped — `_build_cp_insertion_core(alpha)`/`build_cp_insertion(n, i, j, alpha)` added to `iqp_photonic_encoding.py` with truth-table tests in `tests/test_iqp_photonic_encoding.py`. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-02-SUMMARY.md` documents the run.
-Resume by: continue Phase 15 with Plan 15-04 (full-pipeline wiring + TVD validation).
+Stopped at: Plan 15-04 executed and shipped — `photonic_cp_iqp_distribution` and its supporting builders added to `iqp_photonic_encoding.py`, full-pipeline TVD validation (n=2,3, 3 non-trivial α) plus α=π boundary-agreement and success-probability-table tests added to `tests/test_iqp_photonic_encoding.py`, `docs/iqp-photonic-encoding.md`'s comparison table and scope statements updated. Phase 15 (ARB-01 Core Gate De-Risking & Validation) is fully complete. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-04-SUMMARY.md` documents the run.
+Resume by: start Phase 16 (Extended Validation & Postselection Bookkeeping).
