@@ -34,6 +34,7 @@ from iqp_photonic_encoding import (
     photonic_iqp_distribution,
     total_variation_distance,
     photonic_weight2_iqp_distribution,
+    photonic_cp_iqp_distribution,
 )
 
 TOLERANCE = 1e-9
@@ -723,3 +724,124 @@ def test_cp_insertion_returns_circuit_and_ancilla_spec():
     circuit, ancilla_spec = build_cp_insertion(2, 0, 1, np.pi / 3)
     assert circuit.m == 8
     assert ancilla_spec == {4: 0, 5: 0, 6: 0, 7: 0}
+
+
+# Phase 15 Plan 04: photonic_cp_iqp_distribution -- full-pipeline TVD
+# validation, alpha=pi boundary-agreement vs heralded_cz, and the
+# success-probability-vs-alpha table (ARB-03/ARB-04/ARB-05/ARB-06).
+
+NON_TRIVIAL_ALPHAS = [np.pi / 6, np.pi / 3, 2 * np.pi / 5]  # same 3 values as
+# NON_TRIVIAL_CP_ALPHAS above (15-CONTEXT.md's locked non-trivial set),
+# repeated here as its own name since this section validates the FULL
+# pipeline, not the bare core.
+
+
+@pytest.mark.parametrize("alpha", NON_TRIVIAL_ALPHAS)
+def test_cp_pipeline_tvd_gate_n2(alpha):
+    """ARB-03, the full-pipeline-level TVD gate for n=2, pair (0,1), across
+    all 3 non-trivial alpha values -- same TVD<1e-6 bar WT2-05 already
+    cleared for heralded_cz at its own fixed angle (15-CONTEXT.md's locked
+    decision: do not relax the tolerance for this different gate mechanism).
+    theta=alpha/4 per the ARB-01/ARB-02 identity (docs/iqp-photonic-encoding.md),
+    reused directly as exact_qubit_iqp_distribution's pair_thetas argument."""
+    n, i, j = 2, 0, 1
+    thetas = [0.3, 1.1]
+    theta = alpha / 4
+
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(i, j): theta})
+    photonic_dist, residual, postselect_failure_prob = photonic_cp_iqp_distribution(n, i, j, thetas, alpha)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+    assert 0.0 < postselect_failure_prob < 1.0
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"alpha={alpha}: TVD={tvd} exceeds the 1e-6 threshold"
+
+
+@pytest.mark.parametrize("alpha", NON_TRIVIAL_ALPHAS)
+def test_cp_pipeline_tvd_gate_n3_bystander_qubit(alpha):
+    """ARB-03's n=3 instance, mirroring test_wt2_tvd_gate_n3_bystander_qubit's
+    style: pair (1,2), bystander qubit 0 at a nonzero weight-1 theta. Confirms
+    the fix generalizes beyond n=2 and beyond the single locked pair, across
+    all 3 non-trivial alpha values (not just one, since ARB-03 requires
+    coverage at n=2 AND n=3 for the tested angles)."""
+    n, i, j = 3, 1, 2
+    thetas = [0.6, 0.0, 0.0]
+    theta = alpha / 4
+
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(i, j): theta})
+    photonic_dist, residual, postselect_failure_prob = photonic_cp_iqp_distribution(n, i, j, thetas, alpha)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+    assert 0.0 < postselect_failure_prob < 1.0
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n=3 alpha={alpha}: TVD={tvd} exceeds the 1e-6 threshold"
+
+
+def test_cp_pipeline_boundary_agreement_matches_heralded_cz():
+    """ARB-05/ARB-06's direct full-pipeline boundary-agreement test (the
+    missing third level -- Plans 15-01/15-02 already confirmed the bare-gate
+    and bare-core levels): at alpha=pi (the corrected literal value per
+    15-CONTEXT.md, NOT pi/4), photonic_cp_iqp_distribution's output must
+    match the ALREADY-VALIDATED photonic_weight2_iqp_distribution
+    (heralded_cz-based) output at the same (n, i, j, thetas) configuration --
+    confirming CP(alpha=pi) genuinely reproduces heralded_cz's construction
+    end-to-end, not just at the bare-gate/bare-core level."""
+    n, i, j = 2, 0, 1
+    thetas = [0.3, 1.1]
+
+    cp_dist, cp_residual, cp_failure_prob = photonic_cp_iqp_distribution(n, i, j, thetas, np.pi)
+    cz_dist, cz_residual, cz_herald_failure_prob = photonic_weight2_iqp_distribution(n, i, j, thetas)
+
+    assert np.isclose(cp_residual, 0.0, atol=1e-9)
+    assert np.isclose(cz_residual, 0.0, atol=1e-9)
+
+    tvd = total_variation_distance(cp_dist, cz_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"CP(alpha=pi) vs heralded_cz boundary-agreement TVD={tvd} exceeds the 1e-6 threshold"
+
+    # The two gate families' success-probability MECHANISMS are genuinely
+    # different (ARB-05: post-selection + ancilla vacuum vs. ancilla
+    # heralding) -- their failure-probability NUMBERS need not, and do not,
+    # match, even though their conditional output DISTRIBUTIONS do. Stated
+    # explicitly here so the boundary agreement isn't misread as "the two
+    # gates are identical in every respect."
+    assert not np.isclose(cp_failure_prob, cz_herald_failure_prob, atol=1e-3)
+
+
+def test_cp_pipeline_success_probability_vs_alpha_table():
+    """ARB-04, closing the loop at the full-pipeline level (Plan 15-01
+    already satisfied it at the bare-gate level): reports
+    1 - postselect_failure_prob across all 3 non-trivial alpha values plus
+    alpha=pi, as an explicit table -- never a single collapsed number.
+    Matches the closed-form p_success(alpha)=1/sigma_max^4 derived in
+    docs/iqp-photonic-encoding.md's ARB-02 section (n=2) to within 1e-6."""
+    n, i, j = 2, 0, 1
+    thetas = [0.0, 0.0]
+
+    def sigma_max(alpha):
+        a = np.sqrt(complex(np.exp(1j * alpha) - 1))
+        return max(abs(1 + a), abs(1 - a))
+
+    table = {}
+    for alpha in NON_TRIVIAL_ALPHAS + [np.pi]:
+        _, _, postselect_failure_prob = photonic_cp_iqp_distribution(n, i, j, thetas, alpha)
+        success_prob = 1.0 - postselect_failure_prob
+        table[alpha] = success_prob
+
+        expected_success = 1.0 / sigma_max(alpha) ** 4
+        assert np.isclose(success_prob, expected_success, atol=1e-6), (
+            f"alpha={alpha}: measured success {success_prob} vs closed-form {expected_success}"
+        )
+
+    # Explicit table check (ARB-04's literal requirement): success
+    # probability must be a genuine function of alpha, not a constant --
+    # at least 2 distinct values across the 4 tested alpha points.
+    assert len(set(round(v, 6) for v in table.values())) >= 2
