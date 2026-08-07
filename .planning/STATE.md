@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 14 (Julia Toolchain Spike) — next phase to plan/execute
-Plan: —
-Status: Roadmap created for v3.0. Ready for `/gsd:plan-phase 14` (or parallel planning of Phases 14/15/17/18, since they're independent per the roadmap's Wave 1 grouping).
+Phase: 14 (Julia Toolchain Spike) — complete
+Plan: 01 of 1 — complete
+Status: Phase 14 shipped full go (juliaup + Julia 1.10 LTS + Yao.jl + BosonSampling.jl all installed and hello-world-verified). Ready to plan next phase (15, 17, or 18 per the roadmap's Wave 1 grouping).
 
 ```
-Progress: [--------------------] 0/8 phases (v3.0)
+Progress: [██------------------] 1/8 phases (v3.0)
 ```
 
 ## Performance Metrics
@@ -76,7 +76,15 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 ### Blockers/Concerns
 
-None open yet for v3.0 execution. Watch items carried into execution:
+**Phase 14 verdict: FULL GO** (2026-08-07) — juliaup + Julia 1.10.11 LTS +
+Yao.jl (v0.9.1, resolved) + BosonSampling.jl (v1.0.2) all installed and both
+hello-world scripts pass their analytical `@assert` checks. No alternate
+paths needed; ITensors.jl (the biggest flagged risk) was never pulled into
+the resolved dependency tree. See `results/phase14_julia_toolchain_summary.md`
+for full detail. Phase 19's VERIFY-02/03/04 can proceed as originally scoped
+— no scope conversation with the owner needed.
+
+None open yet for v3.0 execution otherwise. Watch items carried into execution:
 - v3.0 was scoped with STUDY-01 (TRAIN), STUDY-02 (HARD), ARB-01, and WRITE-01 all as Must-have with no fallback ordering — owner's explicit call after being shown the risk that ARB-01 is genuinely open research and the Julia toolchain is brand-new. This is the first milestone since the PennyLane stall (May 2026) to combine open research with a hard deadline.
 - Mitigation now built into the roadmap: Phase 14 (Julia spike) is sequenced earliest and fully decoupled as an explicit stall-risk checkpoint; Phases 17 (TRAIN) and 18 (HARD) are structurally independent of Phases 15-16 (ARB-01) so ARB-01 slippage cannot block them; a named mid-milestone checkpoint (~2026-08-20) with four per-item progress questions is recorded in `ROADMAP.md`.
 - HARD-03 (full read of arXiv:2510.24137) is a near-zero-code but load-bearing, non-deferrable first step inside Phase 18 — flagged explicitly in the roadmap so it isn't left implicit or done last.
@@ -84,5 +92,5 @@ None open yet for v3.0 execution. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: v3.0 (IQP Circuit Study & Write-Up) roadmap created — `ROADMAP.md`, `STATE.md`, and `REQUIREMENTS.md`'s traceability section all written. 8 phases (14-21), 35/35 v1 requirements mapped, 100% coverage validated, no orphans.
-Resume by: `/gsd:plan-phase 14` (or plan 14/15/17/18 in parallel, per the roadmap's Wave 1 grouping) to begin execution.
+Stopped at: Phase 14 (Julia Toolchain Spike) executed and shipped — full go. `julia/` project scaffolded with Yao.jl + BosonSampling.jl, both hello-world scripts pass analytical assertions. `results/phase14_julia_toolchain_summary.md` and `.planning/phases/14-julia-toolchain-spike/14-01-SUMMARY.md` document the run.
+Resume by: `/gsd:plan-phase 15` (or plan 15/17/18 in parallel, per the roadmap's Wave 1 grouping) to continue v3.0 execution.
