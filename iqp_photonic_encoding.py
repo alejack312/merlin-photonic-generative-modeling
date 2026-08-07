@@ -552,6 +552,243 @@ def photonic_weight2_iqp_distribution(n, i, j, thetas):
     return dist, residual, herald_failure_prob
 
 
+def _build_weight2_cp_processor_no_postselect(n, i, j, thetas, alpha):
+    """Phase 15 Plan 04 (ARB-03/ARB-04): the CP(alpha)-specific analogue of
+    _build_weight2_processor_no_herald -- identical wiring shape (state prep
+    -> theta-folded diagonal layer -> weight-2 insertion via a mode-mapping
+    dict -> conjugation -> readout), but built around build_cp_insertion
+    (Plan 15-02) instead of build_cz_insertion, and with NEITHER
+    Processor.add_herald() NOR Processor.set_postselection() called anywhere
+    (15-RESEARCH.md Pitfall 3, confirmed by direct execution: CP's
+    set_postselection condition raises `AssertionError: Post-selection
+    conditions cannot compose with modes [...]` the moment a later component
+    -- here, build_conjugation_circuit/build_readout_circuit -- touches the
+    same mode indices again). Filtering is deferred entirely to
+    photonic_cp_iqp_distribution's manual pass, mirroring the established
+    workaround _build_weight2_processor_no_herald already uses for the
+    analogous heralded_cz+PBS limitation (12-RESEARCH.md Pitfall 3).
+
+    Mode-count arithmetic (this task's structural warning, verified before
+    anything else): build_cp_insertion returns a local Circuit(2n+4) for its
+    OWN fixed n=2 (4 data modes + 4 ancilla modes) -- 4 ancilla modes, NOT
+    build_cz_insertion's 2. The OUTER processor (sized to this function's own
+    n, the outer qubit count, which may be 2 or 3) must therefore be
+    total_modes = 2*n + 4 (2n qubit modes + 4 tail ancilla modes), and the
+    mode-mapping dict must map all 4 tail ancilla modes (2n, 2n+1, 2n+2,
+    2n+3) to build_cp_insertion's local ancilla ports (4, 5, 6, 7) -- a
+    4-entry dict, not build_weight2_processor's 2-entry one.
+
+    Theta folding uses the ARB-01/ARB-02 identity derived in
+    docs/iqp-photonic-encoding.md (Plan 15-03): exp(i*theta*Z_i*Z_j) =
+    e^{-i*theta} * CP(4*theta) * exp(i*theta*Z_i) * exp(i*theta*Z_j), i.e.
+    theta = alpha/4 is the single-qubit correction angle added to BOTH
+    qubit i's and qubit j's own theta -- additive, never mutating the
+    caller's list, matching build_weight2_processor's exact convention.
+
+    Returns (proc, ancilla_spec) -- proc exposes all 2n+4 modes (no
+    herald/postselect registered); ancilla_spec's keys are
+    build_cp_insertion's own LOCAL indices (4..7), read from
+    build_cp_insertion's own returned value (never hardcoded), for the
+    caller to filter by hand."""
+    assert len(thetas) == n
+    assert 0 <= i < n and 0 <= j < n and i != j
+
+    alpha = float(alpha)  # Pitfall 1 (15-RESEARCH.md) -- cast at every call site
+    theta = alpha / 4.0
+
+    thetas_folded = list(thetas)
+    thetas_folded[i] += theta
+    thetas_folded[j] += theta
+
+    total_modes = 2 * n + 4  # 2n qubit modes + 4 tail ancilla modes (build_cp_insertion
+                              # has 4 ancilla modes, not build_cz_insertion's 2)
+    proc = pcvl.Processor("SLOS", total_modes)
+
+    proc.add(0, build_state_prep_circuit(n))
+    proc.add(0, build_diagonal_layer_circuit(n, thetas_folded))
+
+    cp_circuit, ancilla_spec = build_cp_insertion(n, i, j, alpha)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,          # qubit i's ports -> build_cp_insertion's local (0,1)
+        2 * j: 2, 2 * j + 1: 3,          # qubit j's ports -> build_cp_insertion's local (2,3)
+        2 * n: 4, 2 * n + 1: 5,          # tail ancilla modes -> build_cp_insertion's
+        2 * n + 2: 6, 2 * n + 3: 7,      # local ancilla ports (ALL 4, not 2)
+    }
+    proc.add(mapping, cp_circuit)
+
+    # NO add_herald, NO set_postselection here -- see docstring above
+    # (15-RESEARCH.md Pitfall 3). photonic_cp_iqp_distribution filters the
+    # ancilla-vacuum condition by hand after .compute().
+
+    proc.add(0, build_conjugation_circuit(n))
+    proc.add(0, build_readout_circuit(n))
+    return proc, ancilla_spec
+
+
+def _weight2_cp_input_state(n, ancilla_spec):
+    """Phase 15 Plan 04: builds the pcvl.BasicState input for
+    _build_weight2_cp_processor_no_postselect's processor -- all_h_input(n)'s
+    '{P:H},0' pattern for the n qubit ports, PLUS ALL 4 ancilla ports.
+
+    Unlike heralded_cz's herald ancilla (_weight2_input_state, which needs a
+    REAL '{P:V}'-annotated input photon on each herald mode -- Phase 10
+    Pitfall 1), CP's ancilla_spec expects photon count 0 at every ancilla
+    mode -- vacuum, both ends (post-selection on ancilla vacuum, not
+    heralding on a photon click). Confirmed empirically before running the
+    full TVD sweep (this task's own verification step, per the plan's
+    instruction not to assume the {P:V} fix transfers unchanged): plain bare
+    '0' entries (the SAME pattern all_h_input(n) already uses for each
+    qubit's own vacuum-partner mode, e.g. the second entry in '{P:H},0') is
+    the correct choice here -- a genuinely-vacuum mode needs no polarization
+    annotation at all, unlike a mode that must carry a real heralded photon.
+    Built as ONE single annotated-BasicState-string pass (15-RESEARCH.md
+    Pitfall 5: concatenating a bare-integer list onto an existing BasicState
+    via list(existing_state) + [0,0,0,0] silently strips annotations and
+    crashes PolarizationSimulator dispatch -- avoided here by building the
+    whole '|...>' string in one go, exactly as all_h_input/_weight2_input_state
+    already do)."""
+    parts = ["{P:H},0"] * n
+    parts.extend(["0"] * len(ancilla_spec))  # ancilla_spec always has 4 entries (build_cp_insertion's
+                                              # local 4-7), each expecting photon count 0 (vacuum)
+    return pcvl.BasicState("|" + ",".join(parts) + ">")
+
+
+def _decode_single_qubit_pair(state, k):
+    """Decodes ONE qubit's (port_2k, port_2k+1) pair only -- '0' for (0,1),
+    '1' for (1,0), None for any of the four invalid patterns (same rule
+    fock_to_bitstring applies to every qubit at once). Factored out for
+    photonic_cp_iqp_distribution's per-pair accounting (see that function's
+    docstring for why the (i,j) pair's own validity must be checked
+    separately from any bystander qubit's)."""
+    a, b = state[2 * k], state[2 * k + 1]
+    if (a, b) == (0, 1):
+        return "0"
+    if (a, b) == (1, 0):
+        return "1"
+    return None
+
+
+def photonic_cp_iqp_distribution(n, i, j, thetas, alpha):
+    """Phase 15 Plan 04 (ARB-03/ARB-04), the CP(alpha) analogue of
+    photonic_weight2_iqp_distribution.
+
+    Builds _build_weight2_cp_processor_no_postselect(n, i, j, thetas, alpha)
+    (which folds +alpha/4 onto thetas[i]/thetas[j] internally, per the
+    ARB-01/ARB-02 identity -- alpha is a genuine caller-supplied parameter
+    here, unlike photonic_weight2_iqp_distribution's fixed +pi/4 fold),
+    runs .probs() via Analyzer on the plain-'0'-ancilla input from
+    _weight2_cp_input_state, and for each output state applies THREE checks
+    in order:
+      1. If ANY of the 4 ancilla output modes (2n, 2n+1, 2n+2, 2n+3) is
+         non-zero, that probability is counted into postselect_failure_prob.
+      2. Otherwise, if qubit i's OR qubit j's own (port_2k, port_2k+1) pair
+         is itself outside the single-photon computational subspace
+         (bunched/lost -- via _decode_single_qubit_pair), that probability
+         is ALSO counted into postselect_failure_prob, not residual.
+      3. Otherwise (ancilla vacuum AND both pair-i and pair-j valid), any
+         REMAINING bystander qubit (k != i, j) that is itself out-of-
+         subspace contributes to residual; if every qubit decodes validly,
+         the bitstring goes into dist.
+
+    Why step 2 is folded into postselect_failure_prob, not residual (a
+    deliberate correction from this plan's original literal recipe, found
+    necessary during this task's own verification pass -- see
+    15-04-SUMMARY.md's deviations section): CP's own registered
+    post-selection condition inside PostProcessedControlledRotationsItem
+    (15-RESEARCH.md's architecture notes) is TWO conditions checked
+    together -- ancilla vacuum AND `[0,1]==1 & [2,3]==1` (exactly one
+    photon on EACH of CP's own local dual-rail pairs, i.e. qubit i's and
+    qubit j's own pair specifically). Since every component between CP and
+    the final readout (this module's own PBS-unwrap, HWP conjugation, PBS
+    readout) is a passive, per-pair-photon-number-preserving transform --
+    confirmed by inspection: HWP is a 1-mode component with zero cross-mode
+    coupling, and PBS only ever couples a single qubit's OWN 2-mode pair,
+    never a different qubit's -- whether pair i (or pair j) ends up with
+    exactly 1 photon at the FINAL readout is mathematically identical to
+    whether it had exactly 1 photon immediately after CP's own action.
+    Treating that as a bystander-style "residual" (as photonic_weight2_iqp_
+    distribution's structurally-similar but physically-different herald
+    mechanism does, where residual is always ~0) silently divides dist by
+    the wrong denominator: verified empirically that reporting pair-i/pair-j
+    invalidity as residual (matching this function's original draft, before
+    this fix) produces TVD~0.3-0.4 against the exact reference -- exactly
+    the unresolved number 15-RESEARCH.md's own end-to-end attempt hit --
+    while folding it into postselect_failure_prob instead reproduces the
+    theoretical closed-form success probability p_success(alpha)=1/sigma_max^4
+    (docs/iqp-photonic-encoding.md's ARB-02 section) to ~1e-15 and drives
+    TVD to floating-point noise level. A genuine bystander qubit (n=3,
+    k != i, j) remains unaffected by CP entirely -- its own pair validity
+    is independent of pair i/j's, and residual for it is expected to stay
+    at ~0, matching this module's established lossless-pipeline convention.
+
+    dist and residual are both renormalized by (1 - postselect_failure_prob),
+    matching the existing 3-tuple convention (dist, residual,
+    postselect_failure_prob -- three separate, never-merged numbers).
+
+    Returns (dist, residual, postselect_failure_prob) -- postselect_failure_prob
+    is named distinctly from herald_failure_prob elsewhere in this module
+    (ARB-05's requirement to state the mechanism difference plainly: CP
+    succeeds on ancilla VACUUM plus per-pair data validity -- a
+    post-selection condition -- not heralded_cz's ancilla photon click).
+
+    Success probability (1 - postselect_failure_prob) VARIES with alpha
+    (unlike heralded_cz's fixed 2/27) -- callers needing the
+    success-probability-vs-alpha table (ARB-04) should compute this across
+    multiple alpha values, never report a single collapsed number."""
+    alpha = float(alpha)  # Pitfall 1 -- cast before any downstream numpy.float64 leak
+    proc, ancilla_spec = _build_weight2_cp_processor_no_postselect(n, i, j, thetas, alpha)
+    input_state = _weight2_cp_input_state(n, ancilla_spec)
+
+    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], "*")
+    analyzer.compute()
+
+    ancilla_modes = [2 * n, 2 * n + 1, 2 * n + 2, 2 * n + 3]
+
+    dist = {}
+    residual = 0.0
+    postselect_failure_prob = 0.0
+    for state, prob in zip(analyzer.output_states_list, analyzer.distribution[0]):
+        p = complex(prob).real
+        if any(state[m] != 0 for m in ancilla_modes):
+            postselect_failure_prob += p
+            continue
+
+        bit_i = _decode_single_qubit_pair(state, i)
+        bit_j = _decode_single_qubit_pair(state, j)
+        if bit_i is None or bit_j is None:
+            # CP's own post-selection condition on its own pair -- see
+            # docstring above for why this is failure, not residual.
+            postselect_failure_prob += p
+            continue
+
+        bits = []
+        bystander_invalid = False
+        for k in range(n):
+            if k == i:
+                bits.append(bit_i)
+            elif k == j:
+                bits.append(bit_j)
+            else:
+                b = _decode_single_qubit_pair(state, k)
+                if b is None:
+                    bystander_invalid = True
+                    break
+                bits.append(b)
+
+        if bystander_invalid:
+            residual += p
+        else:
+            key = "".join(bits)
+            dist[key] = dist.get(key, 0.0) + p
+
+    postselect_success_prob = 1.0 - postselect_failure_prob
+    if postselect_success_prob > 0:
+        dist = {k: v / postselect_success_prob for k, v in dist.items()}
+        residual = residual / postselect_success_prob
+
+    return dist, residual, postselect_failure_prob
+
+
 def build_full_circuit(n, thetas):
     """Full ENC-01 pipeline for weight-1 generators: state prep -> diagonal
     layer -> conjugation -> readout, all on Circuit(2n)."""
