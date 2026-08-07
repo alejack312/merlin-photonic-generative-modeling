@@ -15,7 +15,7 @@ Validate `PostProcessedControlledRotationsItem` (the continuously-tunable two-qu
 
 ### α value selection
 - ≥3 non-trivial α values, chosen as round fractions of π spread across (0, π/2) with varied denominators (e.g., π/6, π/3, 2π/5 — not a fixed-denominator series like eighths).
-- α=π/4 is additionally included as an explicit boundary sanity-check, on top of (not counted among) the 3 non-trivial values — confirms the general identity correctly reduces to the already-validated fixed-π/4 `heralded_cz` case.
+- θ=π/4 (the Z_iZ_j generator angle, this codebase's existing convention — matching `pair_thetas={(0,1): np.pi/4}` in existing tests) is additionally included as an explicit boundary sanity-check, on top of (not counted among) the 3 non-trivial values — confirms the general identity correctly reduces to the already-validated fixed-π/4 `heralded_cz` case. **Correction (post-research, owner-confirmed 2026-08-07):** the literal value passed to `PostProcessedControlledRotationsItem`'s own `alpha` kwarg for this boundary check is `alpha=π` (=4θ), NOT `alpha=π/4` — CP's own dial and the Z_iZ_j generator angle θ are related by `α=4θ`, not equal. Research verified `CP(alpha=π)` reproduces `heralded_cz`'s `CZ=diag(1,1,1,-1)` exactly; `CP(alpha=π/4)` does not. Keep this α (CP dial) vs. θ (generator angle) distinction explicit in the plan and in the eventual `docs/iqp-photonic-encoding.md` writeup.
 - Exactly 3 non-trivial values for the gate-structure confirmation (criterion 1) — the roadmap's stated minimum, no extra margin. Total test points for that criterion: 3 non-trivial + 1 boundary (π/4) = 4.
 
 ### Derivation ownership
