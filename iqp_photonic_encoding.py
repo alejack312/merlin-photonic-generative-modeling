@@ -2,6 +2,9 @@ import perceval as pcvl
 import numpy as np
 
 from perceval.components.core_catalog.heralded_cz import HeraldedCzItem
+from perceval.components.core_catalog.controlled_rotation_gates import (
+    PostProcessedControlledRotationsItem,
+)
 
 # ENC-01: IQP -> photonic (DV/Fock-space) encoding, polarization scheme.
 #
@@ -205,6 +208,74 @@ def build_cz_insertion(n, i, j):
 
     herald_spec = HeraldedCzItem().build_experiment().in_heralds  # not hardcoded -- fails loudly if heralded_cz's layout ever changes
     return circuit, herald_spec
+
+
+def _build_cp_insertion_core(alpha):
+    """The PERM-adapted PostProcessedControlledRotationsItem (CP(alpha))
+    sub-wiring only -- dual-rail in, dual-rail out, local Circuit(8), no
+    PBS -- mirroring _build_cz_insertion_core's exact structure (Phase 11)
+    for the CP(alpha) gate family instead of the fixed heralded_cz.
+
+    alpha (CP's own raw dial, a plain Python float per
+    PostProcessedControlledRotationsItem.build_circuit's isinstance check --
+    cast at every call site, matching this repo's established
+    numpy.float64-breaks-Perceval discipline, STATE.md) is DIFFERENT from
+    theta (this codebase's Z_iZ_j generator-angle convention, matching
+    pair_thetas={(i,j): theta} in exact_qubit_iqp_distribution): related by
+    alpha = 4*theta (15-RESEARCH.md's confirmed general operator identity,
+    CP(4*phi).WP(phi,0)_i.WP(phi,0)_j = e^{i*phi}*exp(i*phi*Z_i*Z_j)).
+    alpha=pi corresponds to theta=pi/4, the existing Z_iZ_j-generator
+    boundary this codebase's pair_thetas already uses for the fixed
+    heralded_cz construction -- NOT alpha=pi/4, per 15-CONTEXT.md's
+    owner-confirmed correction (15-01-SUMMARY.md/cp_gate_derisking.py
+    independently confirmed alpha=pi, not alpha=pi/4, reproduces
+    heralded_cz's diag(1,1,1,-1) sign-for-sign).
+
+    Convention adapter, not a bug fix (same class of fix as
+    _build_cz_insertion_core's, 11-RESEARCH.md Pitfall 1, confirmed by
+    direct execution in this plan's own de-risking pass, 15-RESEARCH.md
+    Open Question 2): PostProcessedControlledRotationsItem also registers
+    ports via Perceval's own Encoding.DUAL_RAIL standard (confirmed from
+    source, 15-RESEARCH.md), the mirror image of this module's own
+    PBS-derived convention. Step 1 of this plan (the direct analog of
+    _build_cz_insertion_core's fix -- PERM([1,0]) on each qubit's own
+    dual-rail pair, local (0,1) and local (2,3), immediately before and
+    after the bare CP circuit, swap-back after) reproduces the target
+    truth table exactly on this module's own MODULE_DUAL_RAIL convention,
+    confirmed via Simulator.prob_amplitude at alpha=pi (matches
+    _build_cz_insertion_core's diag(1,1,1,-1) sign-for-sign) and at
+    alpha=pi/3 (matches diag(1,1,1,e^{i*pi/3})'s magnitude/phase pattern)
+    -- no Step 2/3 fallback search was needed, unlike 15-RESEARCH.md's
+    full-pipeline attempt (which had PBS/state-prep/conjugation/readout
+    confounds this isolated bare-core context removes).
+
+    n=2 for a 2-qubit CP gate (PostProcessedControlledRotationsItem's own
+    "number of qubits of the gate" parameter, confirmed in
+    15-RESEARCH.md/cp_gate_derisking.py -- NOT "number of controls"),
+    giving a bare Circuit(8): local (0,1) = qubit i's dual-rail pair
+    ("ctrl0" port), local (2,3) = qubit j's dual-rail pair ("data" port),
+    local (4..7) = ancilla, ALL held at vacuum on both ends (a
+    post-selected, not heralded, construction -- structurally different
+    from heralded_cz's 6-mode/2-heralded-photon-ancilla construction, per
+    15-CONTEXT.md/15-RESEARCH.md's explicit "post-selection + ancilla
+    vacuum" vs. "ancilla heralding" mechanism distinction)."""
+    circuit = pcvl.Circuit(8)
+    circuit.add(0, pcvl.PERM([1, 0]))  # Convention adapter (15-RESEARCH.md Open Question 2 /
+                                        # Pitfall 2), not a bug fix -- same class of fix as
+                                        # _build_cz_insertion_core's (11-RESEARCH.md Pitfall 1):
+                                        # PostProcessedControlledRotationsItem uses Perceval's own
+                                        # Encoding.DUAL_RAIL standard (mirror image of this module's
+                                        # PBS-derived convention). Verified by direct execution during
+                                        # this plan's isolated bare-core de-risking pass.
+    circuit.add(2, pcvl.PERM([1, 0]))  # same adapter for qubit j's pair
+    item = PostProcessedControlledRotationsItem()
+    circuit.add(0, item.build_circuit(n=2, alpha=float(alpha)))  # bare 8-mode CP(alpha):
+                                        # ctrl=local(0,1), data=local(2,3), ancilla=local(4..7)
+    circuit.add(0, pcvl.PERM([1, 0]))  # swap back: undo the ctrl-side relabeling so this
+                                        # function's own local port 0 is still "qubit i's
+                                        # polarization port" for the caller
+    circuit.add(2, pcvl.PERM([1, 0]))  # swap back for qubit j
+    return circuit
 
 
 def build_weight2_processor(n, i, j, thetas):
