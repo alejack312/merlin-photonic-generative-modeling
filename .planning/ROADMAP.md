@@ -87,7 +87,9 @@ If any item is stalled at this checkpoint, say so plainly (per this project's es
 **Plans:** 1 plan (1 wave, single autonomous plan — install + both hello-worlds + go/no-go verdict, sequential by nature of a from-scratch toolchain install)
 
 Plans:
-- [ ] 14-01-PLAN.md — Install juliaup/Julia 1.10 LTS, scaffold `julia/` project, run Yao.jl + BosonSampling.jl hello-world circuits asserted against hand-derived analytical values, record go/no-go/partial-go verdict in `results/phase14_julia_toolchain_summary.md` + `STATE.md`
+- [x] 14-01-PLAN.md — Install juliaup/Julia 1.10 LTS, scaffold `julia/` project, run Yao.jl + BosonSampling.jl hello-world circuits asserted against hand-derived analytical values, record go/no-go/partial-go verdict in `results/phase14_julia_toolchain_summary.md` + `STATE.md`
+
+**Result: FULL GO.** Julia 1.10.11 LTS + Yao.jl 0.9.1 + BosonSampling.jl 1.0.2 all installed and hello-world-verified against hand-derived analytical values (Bell state 0.5/0/0/0.5; 50/50 beamsplitter 0.5/0.5). No alternate paths needed for either component. Verified 4/4 must-haves — see `.planning/phases/14-julia-toolchain-spike/14-VERIFICATION.md`.
 
 **Success criteria:**
 1. `juliaup` installed; `julia --version` runs successfully from the project's shell.
@@ -219,7 +221,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 11. CZ Insertion Unit & Weight-2 Circuit Composition | v2.1 | 2/2 | Complete — verified 4/4, weight-2 pipeline built and truth-table verified | 2026-08-06 |
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 2/2 | Complete — verified 4/4, TVD=2.6e-15 at locked gate | 2026-08-06 |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 1/1 | Complete — verified 3/3, 118/118 suite green | 2026-08-06 |
-| 14. Julia Toolchain Spike | v3.0 | 0/? | Not started | — |
+| 14. Julia Toolchain Spike | v3.0 | 1/1 | Complete — verified 4/4, FULL GO | 2026-08-07 |
 | 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 0/? | Not started | — |
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 0/? | Not started | — |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 0/? | Not started | — |
