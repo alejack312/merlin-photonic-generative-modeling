@@ -34,7 +34,7 @@ Validate `PostProcessedControlledRotationsItem` (the continuously-tunable two-qu
 - Written comparison is a side-by-side table: success probability, ancilla/resource cost, circuit depth, post-selection (CP(α)) vs. ancilla-heralding (heralded_cz) mechanism — concrete dimensions, reusable directly in Phase 20's write-up.
 - Lives in `docs/iqp-photonic-encoding.md`, alongside the new general-α derivation (not a separate standalone doc).
 - Purely descriptive — states tradeoffs plainly, does not recommend when to use which gate family. That judgment call is left for later (write-up or actual usage decisions).
-- New test coverage includes a direct boundary-agreement test: `CP(α=π/4)` output checked against the existing `heralded_cz` result at that same angle, in addition to standalone `CP(α)` tests — added to `tests/test_iqp_photonic_encoding.py` matching existing conventions.
+- New test coverage includes a direct boundary-agreement test: `CP(α=π)` output (the θ=π/4 boundary, per the α=4θ correction above) checked against the existing `heralded_cz` result at that same angle, in addition to standalone `CP(α)` tests — added to `tests/test_iqp_photonic_encoding.py` matching existing conventions.
 
 ### Claude's Discretion
 - Exact test file structure/naming for the new CP(α) and boundary-agreement tests, as long as they match existing `tests/test_iqp_photonic_encoding.py` conventions.
