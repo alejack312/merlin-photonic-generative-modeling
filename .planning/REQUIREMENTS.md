@@ -30,12 +30,12 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 
 ### Arbitrary-θ Weight-2 Gate Validation (ARB)
 
-- [ ] **ARB-01**: Gate phase/structure confirmed at ≥3 non-trivial α values via `Simulator.prob_amplitude`, extending the single spot-check already done in research
-- [ ] **ARB-02**: General-α operator identity written down connecting `CP(α)` to `exp(iθZ_iZ_j)`, extending `docs/iqp-photonic-encoding.md`'s existing fixed-π/4 derivation
-- [ ] **ARB-03**: TVD validation against the extended exact qubit-side reference at ≥1 representative non-special α (ideally 2-3 values spanning the tested range)
-- [ ] **ARB-04**: Success probability reported as an explicit function of α (table or curve), never collapsed to a single number
-- [ ] **ARB-05**: Explicit written comparison to the existing fixed-π/4 `heralded_cz` construction — different gate family (post-selection + ancilla vacuum vs. ancilla heralding), stated plainly, not conflated
-- [ ] **ARB-06**: Test coverage added to `tests/test_iqp_photonic_encoding.py` matching existing tolerance/parametrization conventions
+- [x] **ARB-01**: Gate phase/structure confirmed at ≥3 non-trivial α values via `Simulator.prob_amplitude`, extending the single spot-check already done in research
+- [x] **ARB-02**: General-α operator identity written down connecting `CP(α)` to `exp(iθZ_iZ_j)`, extending `docs/iqp-photonic-encoding.md`'s existing fixed-π/4 derivation
+- [x] **ARB-03**: TVD validation against the extended exact qubit-side reference at ≥1 representative non-special α (ideally 2-3 values spanning the tested range)
+- [x] **ARB-04**: Success probability reported as an explicit function of α (table or curve), never collapsed to a single number
+- [x] **ARB-05**: Explicit written comparison to the existing fixed-π/4 `heralded_cz` construction — different gate family (post-selection + ancilla vacuum vs. ancilla heralding), stated plainly, not conflated
+- [x] **ARB-06**: Test coverage added to `tests/test_iqp_photonic_encoding.py` matching existing tolerance/parametrization conventions
 - [ ] **ARB-07**: n=3 mixed weight-1 + arbitrary-θ weight-2 composability test, direct parallel to Phase 13's existing test
 - [ ] **ARB-08**: Denser α sweep (8-16 points across [0, 2π)) with success probability plotted as a continuous curve
 - [ ] **ARB-09**: Forge model verifying the gate's `set_postselection` local→global ancilla mode-index translation is a valid, non-aliasing mapping — a narrow, bounded discrete-correctness check, not a numeric verifier
@@ -93,12 +93,12 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | VERIFY-01 | 14 - Julia Toolchain Spike | Complete |
-| ARB-01 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
-| ARB-02 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
-| ARB-03 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
-| ARB-04 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
-| ARB-05 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
-| ARB-06 | 15 - ARB-01 Core Gate De-Risking & Validation | Pending |
+| ARB-01 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
+| ARB-02 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
+| ARB-03 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
+| ARB-04 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
+| ARB-05 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
+| ARB-06 | 15 - ARB-01 Core Gate De-Risking & Validation | Complete |
 | ARB-07 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
 | ARB-08 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
 | ARB-09 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Pending |
