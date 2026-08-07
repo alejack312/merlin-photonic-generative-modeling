@@ -10,8 +10,8 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 ## Current Position
 
 Phase: 15 (ARB-01 Core Gate De-Risking & Validation) — in progress
-Plan: 01 of ? — complete
-Status: Plan 15-01 shipped: `cp_gate_derisking.py` confirms `PostProcessedControlledRotationsItem` implements `CP(α)=diag(1,1,1,e^{iα})` via bare-circuit `Simulator.prob_amplitude`, at 3 non-trivial α (π/6, π/3, 2π/5) plus the α=π boundary (independently confirming |amplitude|²=1/9 and the sign match to `heralded_cz`'s `diag(1,1,1,-1)`). Plan 15-02 (circuit-wiring integration into the full pipeline — flagged as a real open risk in 15-RESEARCH.md, TVD did not converge in the research spike) is next.
+Plan: 02 of ? — complete
+Status: Plan 15-02 shipped: `_build_cp_insertion_core(alpha)` and `build_cp_insertion(n, i, j, alpha)` added to `iqp_photonic_encoding.py`, reusing `_build_cz_insertion_core`'s exact `PERM([1,0])` convention-adapter fix for CP(α) — confirmed via `Simulator.prob_amplitude` to reproduce `diag(1,1,1,e^{iα})` on `MODULE_DUAL_RAIL`, including exact sign-for-sign boundary agreement with `heralded_cz`'s `diag(1,1,1,-1)` at α=π. The direct analog fix worked immediately in this isolated bare-core context — no fallback debugging steps needed, confirming 15-RESEARCH.md's diagnosis that the full-pipeline TVD~0.30 failure was a composition/mode-mapping confound, not the ctrl/data convention itself. 53/53 module tests and 132/132 full repo suite pass, zero regressions. Plan 15-04 (full-pipeline wiring + TVD validation) is next.
 
 ```
 Progress: [██------------------] 1/8 phases (v3.0)
@@ -72,7 +72,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: continue Phase 15 with Plan 15-02 (circuit-wiring integration — the flagged open risk from 15-RESEARCH.md's Open Question 2, TVD did not converge in the research spike)
+- Next: continue Phase 15 with Plan 15-04 (full-pipeline wiring: PBS + CP + PBS composed with state-prep/diagonal/conjugation/readout, plus TVD validation against the exact reference — the bare-core convention adapter is now confirmed solid per Plan 15-02, so any remaining gap is isolated to the composition/mode-mapping layer)
 
 ### Blockers/Concerns
 
@@ -92,5 +92,5 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: Plan 15-01 executed and shipped — `cp_gate_derisking.py` + `tests/test_cp_gate_derisking.py` confirm `CP(α)`'s bare-gate phase/structure at 3 non-trivial α plus the α=π boundary. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-01-SUMMARY.md` documents the run.
-Resume by: continue Phase 15 with Plan 15-02 (circuit-wiring integration — the flagged TVD-convergence risk from 15-RESEARCH.md).
+Stopped at: Plan 15-02 executed and shipped — `_build_cp_insertion_core(alpha)`/`build_cp_insertion(n, i, j, alpha)` added to `iqp_photonic_encoding.py` with truth-table tests in `tests/test_iqp_photonic_encoding.py`. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-02-SUMMARY.md` documents the run.
+Resume by: continue Phase 15 with Plan 15-04 (full-pipeline wiring + TVD validation).
