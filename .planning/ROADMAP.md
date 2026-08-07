@@ -104,6 +104,13 @@ Plans:
 **Goal:** Validate `PostProcessedControlledRotationsItem` (the continuously-tunable two-qubit diagonal phase gate) to the same rigor bar `heralded_cz` cleared in v2.1 — de-risk it standalone, derive the general-α operator identity, and confirm it via TVD against the extended exact qubit-side reference. ARB-01's "does a tunable gate exist" question is already closed by research (confirmed to exist and work); this phase is validation work, not open research.
 **Depends on:** None beyond already-shipped weight-1/weight-2 modules (Phases 9, 11-13). Independent of TRAIN, HARD, and VERIFY — no phase in this milestone blocks on ARB-01, and ARB-01 blocks on nothing else.
 **Requirements:** ARB-01, ARB-02, ARB-03, ARB-04, ARB-05, ARB-06
+**Plans:** 4 plans (3 waves — 15-02/15-03 parallel in wave 2, both depend only on 15-01; 15-04 depends on both)
+
+Plans:
+- [ ] 15-01-PLAN.md — CP(alpha) standalone gate de-risking: phase/structure confirmed at 3 non-trivial alpha + the alpha=pi boundary (ARB-01)
+- [ ] 15-02-PLAN.md — CP circuit wiring de-risking: mode-convention adapter for the bare dual-rail core, isolated from the full pipeline (real, budgeted debugging risk per research)
+- [ ] 15-03-PLAN.md — ARB-02 general-alpha operator identity: attempt-first owner checkpoint + written derivation in docs/iqp-photonic-encoding.md
+- [ ] 15-04-PLAN.md — Full CP-insertion pipeline, TVD validation (n=2,3), boundary-agreement test, and heralded_cz comparison table (ARB-03, ARB-04, ARB-05, ARB-06)
 
 **Success criteria:**
 1. Gate phase/structure confirmed at ≥3 non-trivial α values via `Simulator.prob_amplitude`, matching the operator identity's prediction (extends the single spot-check already done in research).
@@ -222,7 +229,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 12. Exact Reference Extension & TVD Validation | v2.1 | 2/2 | Complete — verified 4/4, TVD=2.6e-15 at locked gate | 2026-08-06 |
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 1/1 | Complete — verified 3/3, 118/118 suite green | 2026-08-06 |
 | 14. Julia Toolchain Spike | v3.0 | 1/1 | Complete — verified 4/4, FULL GO | 2026-08-07 |
-| 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 0/? | Not started | — |
+| 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 0/4 | Not started | — |
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 0/? | Not started | — |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 0/? | Not started | — |
 | 18. Hardness-Under-Loss Assessment | v3.0 | 0/? | Not started | — |
