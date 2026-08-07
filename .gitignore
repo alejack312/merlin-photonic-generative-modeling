@@ -4,3 +4,5 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 .ipynb_checkpoints/
+julia/Manifest.toml
+julia/.install_log_*.txt
