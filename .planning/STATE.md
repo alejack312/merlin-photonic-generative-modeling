@@ -9,9 +9,9 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 14 (Julia Toolchain Spike) — complete
-Plan: 01 of 1 — complete
-Status: Phase 14 shipped full go (juliaup + Julia 1.10 LTS + Yao.jl + BosonSampling.jl all installed and hello-world-verified). Ready to plan next phase (15, 17, or 18 per the roadmap's Wave 1 grouping).
+Phase: 15 (ARB-01 Core Gate De-Risking & Validation) — in progress
+Plan: 01 of ? — complete
+Status: Plan 15-01 shipped: `cp_gate_derisking.py` confirms `PostProcessedControlledRotationsItem` implements `CP(α)=diag(1,1,1,e^{iα})` via bare-circuit `Simulator.prob_amplitude`, at 3 non-trivial α (π/6, π/3, 2π/5) plus the α=π boundary (independently confirming |amplitude|²=1/9 and the sign match to `heralded_cz`'s `diag(1,1,1,-1)`). Plan 15-02 (circuit-wiring integration into the full pipeline — flagged as a real open risk in 15-RESEARCH.md, TVD did not converge in the research spike) is next.
 
 ```
 Progress: [██------------------] 1/8 phases (v3.0)
@@ -72,7 +72,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: `/gsd:plan-phase 14` (Julia Toolchain Spike — earliest, most decoupled, this milestone's stall-risk checkpoint) — or plan Phases 14/15/17/18 in parallel, since the roadmap places them in the same dependency wave
+- Next: continue Phase 15 with Plan 15-02 (circuit-wiring integration — the flagged open risk from 15-RESEARCH.md's Open Question 2, TVD did not converge in the research spike)
 
 ### Blockers/Concerns
 
@@ -92,5 +92,5 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: Phase 14 (Julia Toolchain Spike) executed and shipped — full go. `julia/` project scaffolded with Yao.jl + BosonSampling.jl, both hello-world scripts pass analytical assertions. `results/phase14_julia_toolchain_summary.md` and `.planning/phases/14-julia-toolchain-spike/14-01-SUMMARY.md` document the run.
-Resume by: `/gsd:plan-phase 15` (or plan 15/17/18 in parallel, per the roadmap's Wave 1 grouping) to continue v3.0 execution.
+Stopped at: Plan 15-01 executed and shipped — `cp_gate_derisking.py` + `tests/test_cp_gate_derisking.py` confirm `CP(α)`'s bare-gate phase/structure at 3 non-trivial α plus the α=π boundary. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-01-SUMMARY.md` documents the run.
+Resume by: continue Phase 15 with Plan 15-02 (circuit-wiring integration — the flagged TVD-convergence risk from 15-RESEARCH.md).
