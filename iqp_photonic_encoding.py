@@ -338,7 +338,18 @@ def build_cp_insertion(n, i, j, alpha):
     circuit.add(2, pcvl.PBS())        # unwrap qubit j: dual rail -> polarization, local (2,3)
 
     ancilla_spec = PostProcessedControlledRotationsItem().build_experiment(n=2, alpha=float(alpha)).in_heralds
-    # not hardcoded -- fails loudly if the catalog item's layout ever changes
+    # Read from the catalog item, not hardcoded -- but every caller (the
+    # mode-mapping dict in _build_weight2_cp_processor_no_postselect and the
+    # ancilla_modes list in photonic_cp_iqp_distribution) hardcodes local
+    # ports 4-7 directly rather than deriving them from this dict, so the
+    # "fails loudly" guarantee needs an explicit assertion here -- without
+    # it, a future catalog layout change would silently mask the wrong
+    # Fock modes as "ancilla vacuum" instead of raising (caught in review,
+    # Phase 15 completion).
+    assert ancilla_spec == {4: 0, 5: 0, 6: 0, 7: 0}, (
+        f"PostProcessedControlledRotationsItem's ancilla layout changed: {ancilla_spec} "
+        "-- every downstream caller hardcodes local ports 4-7, all expecting count 0"
+    )
     return circuit, ancilla_spec
 
 
