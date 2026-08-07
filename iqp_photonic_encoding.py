@@ -278,6 +278,70 @@ def _build_cp_insertion_core(alpha):
     return circuit
 
 
+def build_cp_insertion(n, i, j, alpha):
+    """Weight-2 CP(alpha) insertion unit (Phase 15, ARB-01): wraps qubit i's
+    and qubit j's polarization ports into dual rail via PBS, routes them
+    through the catalog's PostProcessedControlledRotationsItem gate (via
+    _build_cp_insertion_core), then unwraps back to polarization --
+    realizing CP(alpha) = diag(1,1,1,e^{i*alpha}) on this module's own
+    port/bit convention, mirroring build_cz_insertion's exact external-
+    contract pattern (Phase 11) for the tunable CP(alpha) gate family
+    instead of the fixed heralded_cz.
+
+    Builds a LOCAL, self-contained Circuit(2n+4) for n=2 -- 4 data modes
+    (local 0-3, matching build_cz_insertion's local 0-3 layout) + 4
+    ancilla modes (local 4-7). NOT 2 like build_cz_insertion/heralded_cz --
+    a structural difference from build_cz_insertion, since
+    PostProcessedControlledRotationsItem's n=2 construction uses 4n=8 total
+    modes (4 data + 4 ancilla), not heralded_cz's 6 (4 data + 2 herald
+    ancilla). Local layout:
+      local 0 = qubit i's polarization-carrying port (this module's normal
+                convention)
+      local 1 = qubit i's vacuum-partner port
+      local 2 = qubit j's polarization-carrying port
+      local 3 = qubit j's vacuum-partner port
+      local 4-7 = ancilla, owned entirely by
+                  PostProcessedControlledRotationsItem, ALL vacuum on both
+                  ends (post-selection + ancilla vacuum, not heralding --
+                  see ancilla_spec below)
+
+    alpha (CP's own raw dial) vs. theta (this codebase's Z_iZ_j
+    generator-angle convention): see _build_cp_insertion_core's docstring
+    for the full alpha=4*theta disambiguation.
+
+    ancilla_spec is read from PostProcessedControlledRotationsItem().
+    build_experiment().in_heralds (NOT hardcoded, matching
+    build_cz_insertion's pattern of reading herald_spec from the item's
+    own build_experiment() rather than assuming) -- expected {4: 0, 5: 0,
+    6: 0, 7: 0}, local indices into this function's own Circuit(2n+4),
+    since the bare CP circuit is added at local offset 0. Named
+    ancilla_spec, NOT herald_spec, because its meaning is fundamentally
+    different from heralded_cz's herald_spec: every value here is an
+    EXPECTED PHOTON COUNT OF 0 (vacuum both ends -- a post-selection
+    condition on the ancilla modes staying empty), not a 1-photon herald
+    count (per 15-CONTEXT.md/15-RESEARCH.md's explicit "post-selection +
+    ancilla vacuum" [CP] vs. "ancilla heralding" [heralded_cz] mechanism
+    distinction, which ARB-05 requires stating plainly).
+
+    n, i, j are accepted for interface symmetry with the other build_*
+    functions and to validate 0 <= i, j < n, i != j; the circuit body
+    itself is always a fixed local Circuit(8).
+
+    Returns (Circuit(8), ancilla_spec)."""
+    assert 0 <= i < n and 0 <= j < n and i != j
+
+    circuit = pcvl.Circuit(8)
+    circuit.add(0, pcvl.PBS())        # wrap qubit i: polarization -> dual rail, local (0,1)
+    circuit.add(2, pcvl.PBS())        # wrap qubit j: polarization -> dual rail, local (2,3)
+    circuit.add(0, _build_cp_insertion_core(alpha))  # PERM-adapted CP(alpha), local (0..7)
+    circuit.add(0, pcvl.PBS())        # unwrap qubit i: dual rail -> polarization, local (0,1)
+    circuit.add(2, pcvl.PBS())        # unwrap qubit j: dual rail -> polarization, local (2,3)
+
+    ancilla_spec = PostProcessedControlledRotationsItem().build_experiment(n=2, alpha=float(alpha)).in_heralds
+    # not hardcoded -- fails loudly if the catalog item's layout ever changes
+    return circuit, ancilla_spec
+
+
 def build_weight2_processor(n, i, j, thetas):
     """Full weight-2 IQP generator pipeline (Phase 11, ROADMAP Success
     Criteria 2-4): state prep -> theta-folded diagonal layer -> CZ insertion

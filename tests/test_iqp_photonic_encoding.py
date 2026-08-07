@@ -20,6 +20,8 @@ from iqp_photonic_encoding import (
     build_cz_insertion,
     build_weight2_processor,
     _build_cz_insertion_core,
+    build_cp_insertion,
+    _build_cp_insertion_core,
     run_full_circuit,
     run_readout,
     all_h_input,
@@ -623,3 +625,101 @@ def test_wt2_composability_mixed_generators_n3(n, i, j, thetas):
         f"n={n} i={i} j={j} thetas={thetas}: sanity TVD={tvd_sanity} is too small -- "
         "the weight-2 (ZZ) term does not appear to have a non-negligible effect"
     )
+
+
+# Phase 15 Plan 02: build_cp_insertion / _build_cp_insertion_core -- CP(alpha)
+# insertion unit truth table (ARB-01 criterion 1, bare-core level).
+#
+# Mirrors the Phase 11 Plan 01 CZ-insertion truth-table tests above:
+# build_cp_insertion's PBS-wrapped Circuit(8) cannot be simulated directly
+# via Simulator/SLOSBackend (Circuit.requires_polarization), so these tests
+# target _build_cp_insertion_core(alpha) -- the exact same PERM-adapted
+# CP(alpha) wiring build_cp_insertion embeds internally, not a re-derivation
+# -- using this module's own dual-rail convention (MODULE_DUAL_RAIL).
+
+NON_TRIVIAL_CP_ALPHAS = [np.pi / 6, np.pi / 3, 2 * np.pi / 5]
+BOUNDARY_CP_ALPHA = np.pi  # NOT np.pi / 4 -- 15-CONTEXT.md's owner-confirmed
+# correction: alpha=pi (CP's own dial) reproduces heralded_cz's
+# diag(1,1,1,-1) exactly, not alpha=pi/4 (see _build_cp_insertion_core's
+# docstring for the full alpha-vs-theta disambiguation).
+
+
+def _cp_core_amplitudes(alpha):
+    """Simulator over _build_cp_insertion_core(alpha)'s own dual-rail core
+    (PERM -> CP(alpha) -> PERM, no PBS), read via Simulator.prob_amplitude
+    at all 4 computational-basis combos on MODULE_DUAL_RAIL, ancilla (local
+    4-7) held at vacuum both ends -- the post-selected construction's own
+    condition, mirrored directly (not registered via add_herald/
+    set_postselection, matching 15-RESEARCH.md Pitfall 3's manual-filtering
+    guidance)."""
+    circuit = _build_cp_insertion_core(alpha)
+    sim = Simulator(SLOSBackend())
+    sim.set_circuit(circuit)
+    ancilla = [0, 0, 0, 0]
+    amplitudes = {}
+    for i_bit in "01":
+        for j_bit in "01":
+            im, jm = MODULE_DUAL_RAIL[i_bit], MODULE_DUAL_RAIL[j_bit]
+            state = pcvl.BasicState(list(im) + list(jm) + ancilla)
+            amplitudes[(i_bit, j_bit)] = sim.prob_amplitude(state, state)
+    return amplitudes
+
+
+@pytest.mark.parametrize("alpha", NON_TRIVIAL_CP_ALPHAS + [BOUNDARY_CP_ALPHA])
+def test_cp_insertion_core_matches_diag_1_1_1_ealpha(alpha):
+    """_build_cp_insertion_core(alpha)'s dual-rail truth table (on
+    MODULE_DUAL_RAIL) must match diag(1,1,1,e^{i*alpha}) exactly: uniform
+    |amplitude|^2 across all 4 computational-basis combos, and
+    amp(1,1)/amp(0,0) == e^{i*alpha} to floating-point precision -- the
+    concrete pass/fail check for this plan's Step 1 convention-adapter fix."""
+    amplitudes = _cp_core_amplitudes(alpha)
+
+    magnitudes_sq = [abs(amp) ** 2 for amp in amplitudes.values()]
+    reference = magnitudes_sq[0]
+    for m in magnitudes_sq:
+        assert np.isclose(m, reference, atol=1e-9), (
+            f"alpha={alpha}: |amplitude|^2 not uniform across computational-basis combos"
+        )
+
+    amp_00 = amplitudes[("0", "0")]
+    amp_11 = amplitudes[("1", "1")]
+    ratio = amp_11 / amp_00
+    expected = complex(np.cos(alpha), np.sin(alpha))
+    assert np.isclose(ratio.real, expected.real, atol=PHASE_TOLERANCE)
+    assert np.isclose(ratio.imag, expected.imag, atol=PHASE_TOLERANCE)
+
+
+def test_cp_insertion_core_boundary_matches_cz_insertion_core_sign_for_sign():
+    """ARB-06's direct boundary-agreement test, bare-core-level instance
+    (the full-pipeline-level instance is Plan 15-04's job): at alpha=pi,
+    _build_cp_insertion_core's sign pattern must be IDENTICAL to
+    _build_cz_insertion_core's ALREADY-CONFIRMED diag(1,1,1,-1) truth
+    table, sign-for-sign -- negative real amplitude on (1,1), positive on
+    the other three, for BOTH gate families."""
+    cp_amplitudes = _cp_core_amplitudes(BOUNDARY_CP_ALPHA)
+    cz_sim, cz_herald_counts = _cz_core_simulator_and_herald_counts()
+
+    for i_bit in "01":
+        for j_bit in "01":
+            cp_amp = cp_amplitudes[(i_bit, j_bit)]
+            cz_state = _dual_rail_state(i_bit, j_bit, cz_herald_counts)
+            cz_amp = cz_sim.prob_amplitude(cz_state, cz_state)
+
+            expected_sign_negative = (i_bit, j_bit) == ("1", "1")
+            assert (cp_amp.real < 0) == expected_sign_negative, (
+                f"CP core sign mismatch at ({i_bit},{j_bit})"
+            )
+            assert (cz_amp.real < 0) == expected_sign_negative, (
+                f"CZ core sign mismatch at ({i_bit},{j_bit})"
+            )
+
+
+def test_cp_insertion_returns_circuit_and_ancilla_spec():
+    """build_cp_insertion's external contract: a local Circuit(8) and an
+    ancilla_spec read from PostProcessedControlledRotationsItem's own
+    in_heralds (not hardcoded) -- all 4 ancilla modes expected at vacuum
+    (photon count 0), distinct in meaning from build_cz_insertion's
+    herald_spec (1-photon herald counts)."""
+    circuit, ancilla_spec = build_cp_insertion(2, 0, 1, np.pi / 3)
+    assert circuit.m == 8
+    assert ancilla_spec == {4: 0, 5: 0, 6: 0, 7: 0}
