@@ -464,6 +464,21 @@ The general-`α` identity and closed-form success probability above were derived
 
 The `α=π` boundary-agreement test is the missing **third** level of confirmation ARB-05/ARB-06 require: Plans 15-01/15-02 already confirmed CP(π) matches `heralded_cz`'s `diag(1,1,1,-1)` sign-for-sign at the bare-gate and bare-core levels; this test confirms the two full pipelines' *output distributions* agree end-to-end, while their failure-probability numbers (`postselect_failure_prob` vs. `herald_failure_prob`) remain genuinely different — as expected, since they measure different underlying mechanisms (post-selection vs. heralding), not the same event under two names.
 
+### Denser α Sweep (Phase 16)
+
+Phase 15's `test_cp_pipeline_success_probability_vs_alpha_table` validated 4 `α` points (`π/6`, `π/3`, `2π/5`, `π`). Phase 16 extends this to a **16-point sweep** spanning `[0, 2π)`, at the exact same locked configuration (`n=2`, pair `(i,j)=(0,1)`, `thetas=[0.0, 0.0]`) — a direct extension of the existing table, not a new configuration. The 16 points are the 4 already-validated values above plus 12 additional points uniformly spaced across `[0, 2π)`, offset by half a step so none collide with the 4 existing values.
+
+Every one of the 16 measured points (`1 - postselect_failure_prob`, read from `photonic_cp_iqp_distribution`) is **asserted** — not just plotted — against the closed-form `p_success(α) = 1/σ_max(α)⁴` derived in the Closed-Form Success Probability section above, to within `1e-6`. This turns the sweep into a validated dataset, matching every measured point to the theoretical prediction, rather than a decorative plot.
+
+`cp_alpha_sweep.py` (repo root) runs the sweep and produces:
+
+- `results/phase16_alpha_sweep.csv` — raw data: `alpha, measured_success_prob, closed_form_success_prob` for all 16 points.
+- `results/phase16_alpha_sweep.png` — the closed-form curve plotted continuously (200 densely-sampled points), with the 16 measured points overlaid as scatter markers:
+
+![CP(alpha) success probability sweep](../results/phase16_alpha_sweep.png)
+
+The non-monotonic behavior already established in the Closed-Form Success Probability section (success probability dipping to a minimum past `α=π/2` before rising back by `α=π`) is now visually confirmed at much finer resolution — the 16 measured points trace the closed-form curve's dip and recovery exactly, with no point deviating from the theoretical prediction beyond floating-point-level noise.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
