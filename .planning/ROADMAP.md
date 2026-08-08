@@ -131,9 +131,11 @@ Plans:
 **Plans:** 3 plans (2 waves — 16-01/16-02 parallel in wave 1, both independent; 16-03 depends on 16-02 for a shared docs/iqp-photonic-encoding.md edit, not a logical dependency)
 
 Plans:
-- [ ] 16-01-PLAN.md — ARB-07: n=3 mixed weight-1 + arbitrary-θ weight-2 composability test
-- [ ] 16-02-PLAN.md — ARB-08: 16-point α sweep, plotted success-probability curve
-- [ ] 16-03-PLAN.md — ARB-09: Forge model of the ancilla mode-mapping dict's injectivity (owner attempt-first checkpoint)
+- [x] 16-01-PLAN.md — ARB-07: n=3 mixed weight-1 + arbitrary-θ weight-2 composability test
+- [x] 16-02-PLAN.md — ARB-08: 16-point α sweep, plotted success-probability curve
+- [x] 16-03-PLAN.md — ARB-09: Forge model of the ancilla mode-mapping dict's injectivity (owner attempt-first checkpoint)
+
+**Result: Complete — verified 3/3 must-haves.** ARB-07's n=3 mixed-generator composability test passes (3/3 parametrized cases, TVD < 1e-6). ARB-08's 16-point α sweep matches the closed-form success probability to ~1e-9 at every point. ARB-09's Forge model (`forge/ancilla_mapping.frg`) confirms the ancilla mode-mapping dict is injective/non-aliasing for all valid `(n,i,j)` up to n=8 — no bug found. 145/145 full suite green throughout. See `16-VERIFICATION.md` for the independently-reproduced evidence.
 
 **Success criteria:**
 1. n=3 mixed weight-1 + arbitrary-θ weight-2 composability test passes (TVD under the same threshold), direct parallel to Phase 13's existing test.
@@ -238,11 +240,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 13. Weight-1 + Weight-2 Composability Validation | v2.1 | 1/1 | Complete — verified 3/3, 118/118 suite green | 2026-08-06 |
 | 14. Julia Toolchain Spike | v3.0 | 1/1 | Complete — verified 4/4, FULL GO | 2026-08-07 |
 | 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 4/4 | Complete — verified 5/5, TVD at floating-point-noise level | 2026-08-07 |
-| 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 0/? | Not started | — |
+| 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 3/3 | Complete — verified 3/3, no bugs found | 2026-08-09 |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 0/? | Not started | — |
 | 18. Hardness-Under-Loss Assessment | v3.0 | 0/? | Not started | — |
 | 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
 | 21. External-Facing Framing Pass | v3.0 | 0/? | Not started | — |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. v2.1 milestone (Phases 10-13, Weight-2 Implementation) shipped 2026-08-06. v3.0 milestone (Phases 14-21, IQP Circuit Study & Write-Up) roadmap created 2026-08-07 — 35 v1 requirements mapped across 8 phases (see `REQUIREMENTS.md` note on the corrected 34→35 count), 100% coverage validated, no orphans. Full phase and requirement detail for shipped milestones archived to `.planning/milestones/v2.0-ROADMAP.md`/`v2.0-REQUIREMENTS.md` and `.planning/milestones/v2.1-ROADMAP.md`/`v2.1-REQUIREMENTS.md`/`v2.1-MILESTONE-AUDIT.md`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. v2.1 milestone (Phases 10-13, Weight-2 Implementation) shipped 2026-08-06. v3.0 milestone (Phases 14-21, IQP Circuit Study & Write-Up) roadmap created 2026-08-07 — 35 v1 requirements mapped across 8 phases (see `REQUIREMENTS.md` note on the corrected 34→35 count), 100% coverage validated, no orphans. Phase 16 (ARB-01 Extended Validation & Postselection Bookkeeping) completed 2026-08-09 — verified 3/3 must-haves, ARB-07/08/09 all satisfied, no bugs found. Full phase and requirement detail for shipped milestones archived to `.planning/milestones/v2.0-ROADMAP.md`/`v2.0-REQUIREMENTS.md` and `.planning/milestones/v2.1-ROADMAP.md`/`v2.1-REQUIREMENTS.md`/`v2.1-MILESTONE-AUDIT.md`.
