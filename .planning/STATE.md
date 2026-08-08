@@ -10,8 +10,8 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 ## Current Position
 
 Phase: 16 (ARB-01 Extended Validation & Postselection Bookkeeping) — in progress
-Plan: 01 of 3 — complete
-Status: Plan 16-01 shipped. `test_cp_composability_mixed_generators_n3` added to `tests/test_iqp_photonic_encoding.py`: n=3, 2 weight-1 terms + 1 arbitrary-alpha weight-2 (CP) term in the same circuit, direct CP(alpha) analogue of Phase 13's `test_wt2_composability_mixed_generators_n3`, parametrized over Phase 13's 3 `(i,j,thetas)` configs each paired with a distinct `NON_TRIVIAL_ALPHAS` value (π/6, π/3, 2π/5) instead of the fixed π/4 heralded_cz gate. Satisfies ARB-07 — confirms the arbitrary-θ weight-2 gate validated standalone in Phase 15 also composes correctly with weight-1 terms in a shared circuit. Non-vacuity sanity threshold recalculated (not reused from Phase 13's 0.1): measured TVD range 0.017-0.088 at these smaller effective rotations (theta=alpha/4 ≈ 0.13-0.31 rad vs pi/4's 0.785 rad), threshold set to 0.005 for >3x headroom. 145/145 full repo suite passes (142 baseline + 3 new parametrized cases), zero regressions. Plans 16-02 (16-point α sweep + closed-form validation + plot) and 16-03 (Forge-based mode-mapping structural verification) remain.
+Plan: 02 of 3 — complete
+Status: Plan 16-01 shipped `test_cp_composability_mixed_generators_n3` (ARB-07), 145/145 suite passing. Plan 16-02 shipped next: `cp_alpha_sweep.py` (repo root) sweeps `photonic_cp_iqp_distribution`'s measured success probability at 16 α values across `[0, 2π)`, at Phase 15's same locked configuration (n=2, (i,j)=(0,1), thetas=[0,0]). The 16-point grid is Phase 15's 4 already-validated points (π/6, π/3, 2π/5, π) plus 12 additional points uniformly spaced and offset by π/12 to avoid collision. Every point asserted (not just plotted) against the closed-form `p_success(α)=1/σ_max(α)⁴` to within 1e-6 — all 16 matched with max observed deviation ~1e-9. `results/phase16_alpha_sweep.csv`/`.png` saved (closed-form curve at 200 dense points with the 16 measured points overlaid as scatter markers); `docs/iqp-photonic-encoding.md` gained a new "Denser α Sweep (Phase 16)" subsection after "Full-Pipeline Validation (Plan 15-04)", cross-referencing both output files, deliberately leaving the Conclusion/Open-Questions section untouched for Plan 16-03 to update alongside its own Forge result. 145/145 full repo suite still passes, zero regressions. Plan 16-03 (Forge-based postselection/mode-mapping structural verification) remains.
 
 ```
 Progress: [███-----------------] 2/8 phases (v3.0, Phases 14-15 of 8 complete; Phase 16 in progress)
@@ -74,7 +74,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: continue Phase 16 (Extended Validation & Postselection Bookkeeping) with Plan 02 — denser 16-point α sweep with closed-form validation and plot, per `docs/iqp-photonic-encoding.md`'s updated scope statement. Plan 03 (Forge-based postselection/mode-mapping verification) follows.
+- Next: continue Phase 16 (Extended Validation & Postselection Bookkeeping) with Plan 03 — Forge-based postselection/mode-mapping structural verification, plus the final Conclusion/Open-Questions doc update referencing both this sweep and the Forge result.
 
 ### Blockers/Concerns
 
@@ -94,7 +94,7 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-08
-Stopped at: Plan 16-01 executed and shipped — `test_cp_composability_mixed_generators_n3` added to `tests/test_iqp_photonic_encoding.py` (ARB-07), 145/145 full suite passing. `.planning/phases/16-arb-01-extended-validation-postselection-bookkeeping/16-01-SUMMARY.md` documents the run.
-Resume by: continue Phase 16 with Plan 02 (16-point α sweep + closed-form validation + plot).
+Stopped at: Plan 16-02 executed and shipped — `cp_alpha_sweep.py` created (16-point α sweep, all points asserted against the closed form to 1e-6), `results/phase16_alpha_sweep.csv`/`.png` saved, `docs/iqp-photonic-encoding.md`'s "Denser α Sweep (Phase 16)" subsection added. `.planning/phases/16-arb-01-extended-validation-postselection-bookkeeping/16-02-SUMMARY.md` documents the run.
+Resume by: continue Phase 16 with Plan 03 (Forge-based postselection/mode-mapping structural verification).
 
 **Repo note:** run `pytest`/Python commands in this repo via `./venv/Scripts/python.exe` (or activate `venv`) — system Python lacks `perceval`/`merlin`, causing spurious collection errors.
