@@ -128,6 +128,12 @@ Plans:
 **Goal:** Extend the core ARB-01 gate to a mixed-generator composability test and a denser α characterization, and formally verify its `set_postselection` local→global ancilla mode-index translation via Forge — a narrow, bounded discrete-correctness check, not a numeric verifier.
 **Depends on:** Phase 15 (needs the actual gate wiring and `set_postselection` plumbing to exist before it can be modeled or extended).
 **Requirements:** ARB-07, ARB-08, ARB-09
+**Plans:** 3 plans (2 waves — 16-01/16-02 parallel in wave 1, both independent; 16-03 depends on 16-02 for a shared docs/iqp-photonic-encoding.md edit, not a logical dependency)
+
+Plans:
+- [ ] 16-01-PLAN.md — ARB-07: n=3 mixed weight-1 + arbitrary-θ weight-2 composability test
+- [ ] 16-02-PLAN.md — ARB-08: 16-point α sweep, plotted success-probability curve
+- [ ] 16-03-PLAN.md — ARB-09: Forge model of the ancilla mode-mapping dict's injectivity (owner attempt-first checkpoint)
 
 **Success criteria:**
 1. n=3 mixed weight-1 + arbitrary-θ weight-2 composability test passes (TVD under the same threshold), direct parallel to Phase 13's existing test.
