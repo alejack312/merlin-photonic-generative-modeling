@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 15 (ARB-01 Core Gate De-Risking & Validation) — complete, Phase 16 next
-Plan: 04 of 4 — complete (Phase 15 done)
-Status: Phase 15 fully shipped (Plans 15-01 through 15-04), independently verified 5/5 must-haves (`15-VERIFICATION.md`), and staff-engineer-reviewed (`/review`, Claude adversarial pass after Codex hit its usage limit) — one real finding fixed (`ancilla_spec`'s "fails loudly if the catalog layout changes" claim was unenforced; added the missing assertion), two lower-priority findings noted as informational (no near-zero-success-probability guard; circuit-depth figures in docs are prose-only, untested). 15-04: `photonic_cp_iqp_distribution(n, i, j, thetas, alpha)` wires `build_cp_insertion` into the full weight-2 pipeline (state prep → α/4-folded diagonal → CP-insertion via a corrected 4-entry ancilla mode-mapping dict → conjugation → readout), mirroring `photonic_weight2_iqp_distribution`'s manual-filtering pattern (Pitfall 3: CP's registered postselection can't compose with later pipeline components). TVD validated at floating-point-noise level against the extended exact reference at n=2,3 across all 3 non-trivial α values, plus a direct α=π full-pipeline boundary-agreement confirmation against `heralded_cz` (TVD~3e-15) — the missing third confirmation level after Plans 15-01/15-02's bare-gate/bare-core checks. **Load-bearing fix found during this plan's own smoke-test step, not in the plan's literal recipe**: `postselect_failure_prob` must include qubit i's/j's own pair-validity failure (CP's own internal post-selection condition, not just ancilla-nonzero) — the literal recipe reproduced `15-RESEARCH.md`'s previously-unresolved TVD~0.3-0.4 finding exactly; the corrected accounting matches the closed-form `p_success(α)=1/σ_max^4` to ~1e-15. `docs/iqp-photonic-encoding.md`'s `heralded_cz`-vs-CP comparison table extended with ancilla/resource-cost and measured circuit-depth rows (CP: 4 ancilla/vacuum, 9 components, depth 5; `heralded_cz`: 2 ancilla/heralded photon, 21 components, depth 12), purely descriptive per locked scope. 142/142 full repo suite pass (post-review-fix), zero regressions. Phase 16 (Extended Validation & Postselection Bookkeeping) is next.
+Phase: 16 (ARB-01 Extended Validation & Postselection Bookkeeping) — in progress
+Plan: 01 of 3 — complete
+Status: Plan 16-01 shipped. `test_cp_composability_mixed_generators_n3` added to `tests/test_iqp_photonic_encoding.py`: n=3, 2 weight-1 terms + 1 arbitrary-alpha weight-2 (CP) term in the same circuit, direct CP(alpha) analogue of Phase 13's `test_wt2_composability_mixed_generators_n3`, parametrized over Phase 13's 3 `(i,j,thetas)` configs each paired with a distinct `NON_TRIVIAL_ALPHAS` value (π/6, π/3, 2π/5) instead of the fixed π/4 heralded_cz gate. Satisfies ARB-07 — confirms the arbitrary-θ weight-2 gate validated standalone in Phase 15 also composes correctly with weight-1 terms in a shared circuit. Non-vacuity sanity threshold recalculated (not reused from Phase 13's 0.1): measured TVD range 0.017-0.088 at these smaller effective rotations (theta=alpha/4 ≈ 0.13-0.31 rad vs pi/4's 0.785 rad), threshold set to 0.005 for >3x headroom. 145/145 full repo suite passes (142 baseline + 3 new parametrized cases), zero regressions. Plans 16-02 (16-point α sweep + closed-form validation + plot) and 16-03 (Forge-based mode-mapping structural verification) remain.
 
 ```
-Progress: [███-----------------] 2/8 phases (v3.0, Phases 14-15 of 8 complete)
+Progress: [███-----------------] 2/8 phases (v3.0, Phases 14-15 of 8 complete; Phase 16 in progress)
 ```
 
 ## Performance Metrics
@@ -74,7 +74,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: start Phase 16 (Extended Validation & Postselection Bookkeeping) — denser α sweeps (8-16 points), mixed weight-1+arbitrary-θ weight-2 composability, Forge-based postselection verification, per `docs/iqp-photonic-encoding.md`'s updated scope statement.
+- Next: continue Phase 16 (Extended Validation & Postselection Bookkeeping) with Plan 02 — denser 16-point α sweep with closed-form validation and plot, per `docs/iqp-photonic-encoding.md`'s updated scope statement. Plan 03 (Forge-based postselection/mode-mapping verification) follows.
 
 ### Blockers/Concerns
 
@@ -93,6 +93,8 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 
 ## Session Continuity
 
-Last session: 2026-08-07
-Stopped at: Plan 15-04 executed and shipped — `photonic_cp_iqp_distribution` and its supporting builders added to `iqp_photonic_encoding.py`, full-pipeline TVD validation (n=2,3, 3 non-trivial α) plus α=π boundary-agreement and success-probability-table tests added to `tests/test_iqp_photonic_encoding.py`, `docs/iqp-photonic-encoding.md`'s comparison table and scope statements updated. Phase 15 (ARB-01 Core Gate De-Risking & Validation) is fully complete. `.planning/phases/15-arb-01-core-gate-de-risking-validation/15-04-SUMMARY.md` documents the run.
-Resume by: start Phase 16 (Extended Validation & Postselection Bookkeeping).
+Last session: 2026-08-08
+Stopped at: Plan 16-01 executed and shipped — `test_cp_composability_mixed_generators_n3` added to `tests/test_iqp_photonic_encoding.py` (ARB-07), 145/145 full suite passing. `.planning/phases/16-arb-01-extended-validation-postselection-bookkeeping/16-01-SUMMARY.md` documents the run.
+Resume by: continue Phase 16 with Plan 02 (16-point α sweep + closed-form validation + plot).
+
+**Repo note:** run `pytest`/Python commands in this repo via `./venv/Scripts/python.exe` (or activate `venv`) — system Python lacks `perceval`/`merlin`, causing spurious collection errors.
