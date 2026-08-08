@@ -31,7 +31,8 @@ _OFFSET = np.pi / 12
 _UNIFORM_12 = [_OFFSET + k * (2 * np.pi / 12) for k in range(12)]
 
 ALPHAS = sorted(NON_TRIVIAL_ALPHAS_VALIDATED + _UNIFORM_12)
-assert len(ALPHAS) == 16, f"expected 16 distinct alpha points, got {len(ALPHAS)}"
+assert len(ALPHAS) == 16, f"expected 16 alpha points, got {len(ALPHAS)}"
+assert len({round(a, 9) for a in ALPHAS}) == 16, "duplicate alpha values in sweep grid"
 
 
 def sigma_max(alpha):
