@@ -845,3 +845,63 @@ def test_cp_pipeline_success_probability_vs_alpha_table():
     # probability must be a genuine function of alpha, not a constant --
     # at least 2 distinct values across the 4 tested alpha points.
     assert len(set(round(v, 6) for v in table.values())) >= 2
+
+
+# Phase 16 Plan 01: mixed weight-1 + arbitrary-theta weight-2 (CP)
+# composability at n=3 (ARB-07).
+
+
+@pytest.mark.parametrize(
+    "n, i, j, thetas, alpha",
+    [
+        (3, 0, 1, [0.5, 0.0, 1.3], np.pi / 6),
+        (3, 1, 2, [0.9, 0.4, 0.0], np.pi / 3),
+        (3, 0, 2, [0.2, 1.7, 0.65], 2 * np.pi / 5),
+    ],
+)
+def test_cp_composability_mixed_generators_n3(n, i, j, thetas, alpha):
+    """ARB-07: n=3, 2 weight-1 terms plus 1 arbitrary-alpha weight-2 (CP)
+    term in the same circuit -- the CP(alpha) analogue of
+    test_wt2_composability_mixed_generators_n3 (Phase 13), using
+    photonic_cp_iqp_distribution instead of photonic_weight2_iqp_distribution
+    and a per-config alpha from NON_TRIVIAL_ALPHAS instead of the fixed
+    pi/4 heralded_cz gate. Same 3 (n,i,j,thetas) tuples as Phase 13's test,
+    each paired with a different non-trivial alpha to spread coverage
+    across the validated range.
+
+    Primary check: TVD < 1e-6 against the extended exact reference
+    (pair_thetas={(i,j): alpha/4}), matching Phase 13/15's tolerance bar.
+    Companion sanity check: TVD against the weight-1-only exact reference
+    must be clearly non-negligible, proving the CP/ZZ term isn't vacuously
+    inert. Unlike Phase 13 (which measured 0.46-0.50 at the FIXED pi/4
+    angle), this test's alpha values fold in a much smaller effective
+    theta=alpha/4 (~0.13-0.31 rad vs pi/4's ~0.785 rad), so the sanity TVD
+    is genuinely smaller too -- measured directly for these 3 configs:
+    0.017037 (alpha=pi/6), 0.066987 (alpha=pi/3), 0.087953 (alpha=2*pi/5).
+    0.005 is used as a safe, non-flaky lower bound (>3x headroom below the
+    smallest observed value), following Phase 13's own reasoning pattern
+    of measuring first, then setting a threshold with headroom -- NOT
+    reusing Phase 13's 0.1 literal value, since these alpha values produce
+    a genuinely smaller (but still clearly non-zero) effect."""
+    theta = alpha / 4
+    qubit_dist = exact_qubit_iqp_distribution(n, thetas, pair_thetas={(i, j): theta})
+    photonic_dist, residual, postselect_failure_prob = photonic_cp_iqp_distribution(n, i, j, thetas, alpha)
+
+    assert np.isclose(residual, 0.0, atol=1e-9)
+    assert np.isclose(sum(qubit_dist.values()), 1.0, atol=1e-9)
+    assert np.isclose(sum(photonic_dist.values()) + residual, 1.0, atol=1e-9)
+    assert 0.0 < postselect_failure_prob < 1.0
+
+    tvd = total_variation_distance(qubit_dist, photonic_dist)
+    assert 0.0 <= tvd <= 1.0
+    assert tvd < 1e-6, f"n={n} i={i} j={j} alpha={alpha} thetas={thetas}: TVD={tvd} exceeds the 1e-6 threshold"
+
+    # Companion sanity check: confirm the CP/ZZ term is doing real,
+    # non-vacuous work -- see docstring above for the measured range and
+    # threshold reasoning.
+    qubit_dist_w1only = exact_qubit_iqp_distribution(n, thetas, pair_thetas=None)
+    tvd_sanity = total_variation_distance(qubit_dist_w1only, photonic_dist)
+    assert tvd_sanity > 0.005, (
+        f"n={n} i={i} j={j} alpha={alpha} thetas={thetas}: sanity TVD={tvd_sanity} is too small -- "
+        "the CP (weight-2) term does not appear to have a non-negligible effect"
+    )
