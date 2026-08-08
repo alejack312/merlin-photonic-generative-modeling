@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 16 (ARB-01 Extended Validation & Postselection Bookkeeping) — in progress
-Plan: 02 of 3 — complete
-Status: Plan 16-01 shipped `test_cp_composability_mixed_generators_n3` (ARB-07), 145/145 suite passing. Plan 16-02 shipped next: `cp_alpha_sweep.py` (repo root) sweeps `photonic_cp_iqp_distribution`'s measured success probability at 16 α values across `[0, 2π)`, at Phase 15's same locked configuration (n=2, (i,j)=(0,1), thetas=[0,0]). The 16-point grid is Phase 15's 4 already-validated points (π/6, π/3, 2π/5, π) plus 12 additional points uniformly spaced and offset by π/12 to avoid collision. Every point asserted (not just plotted) against the closed-form `p_success(α)=1/σ_max(α)⁴` to within 1e-6 — all 16 matched with max observed deviation ~1e-9. `results/phase16_alpha_sweep.csv`/`.png` saved (closed-form curve at 200 dense points with the 16 measured points overlaid as scatter markers); `docs/iqp-photonic-encoding.md` gained a new "Denser α Sweep (Phase 16)" subsection after "Full-Pipeline Validation (Plan 15-04)", cross-referencing both output files, deliberately leaving the Conclusion/Open-Questions section untouched for Plan 16-03 to update alongside its own Forge result. 145/145 full repo suite still passes, zero regressions. Plan 16-03 (Forge-based postselection/mode-mapping structural verification) remains.
+Phase: 16 (ARB-01 Extended Validation & Postselection Bookkeeping) — complete
+Plan: 03 of 3 — complete
+Status: Plan 16-01 shipped `test_cp_composability_mixed_generators_n3` (ARB-07). Plan 16-02 shipped `cp_alpha_sweep.py` (16-point α sweep, ARB-08, all points matched the closed form to 1e-6). Plan 16-03 shipped last: `forge/ancilla_mapping.frg` (ARB-09) — a relational Forge model confirming the CP(alpha) insertion's local→global ancilla mode-mapping dict (`iqp_photonic_encoding.py:622-627`) is injective/non-aliasing for every valid `(n,i,j)`, `n<=8`, checked against ALL n qubits' data ports (the fully general property, not just i/j's). Both required checks passed: `nonVacuous` (sat, non-vacuity) and `noCounterexample` (unsat, no injectivity violation found) — `racket forge/ancilla_mapping.frg` exits 0. Bitwidth `for 6 Int` chosen and verified sufficient (largest computed value `2n+3=19` at n=8, vs. Forge's default 4-bit range `[-8,7]` which the owner's initial recollection had conflated with a universal language limit). `results/phase16_forge_summary.md` records the pass/fail result; `docs/iqp-photonic-encoding.md` gained a new "Forge Verification of the Ancilla Mode-Mapping (Phase 16)" subsection and its Conclusion section now marks all of Phase 16 (ARB-07/08/09) complete. 145/145 full repo suite still passes, zero regressions. **Phase 16 is now fully complete.**
 
 ```
-Progress: [███-----------------] 2/8 phases (v3.0, Phases 14-15 of 8 complete; Phase 16 in progress)
+Progress: [████----------------] 3/8 phases (v3.0, Phases 14-16 of 8 complete)
 ```
 
 ## Performance Metrics
@@ -59,6 +59,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 - `docs/iqp-photonic-encoding.md` is the canonical design reference for both weight-1 (implemented v2.0) and weight-2 (implemented v2.1) IQP generators — kept in sync with shipped code as of the v2.1 milestone audit.
 - For any manually-filtered (herald-free/postselect-free) Perceval measurement pipeline: a gate's OWN post-selection condition may cover more than one physical check (e.g. `PostProcessedControlledRotationsItem`'s ancilla-vacuum AND per-qubit-pair data-validity, registered together by `build_experiment()`). Every check that's part of the gate's own condition must be folded into that gate's `*_failure_prob`, never into a generic `residual` bucket — `residual` is reserved for genuinely unrelated leakage (e.g. a bystander qubit untouched by the gate). Misclassifying this reproduces large, hard-to-diagnose TVD mismatches (~0.3-0.4) that look like a wiring/convention bug but aren't — confirmed live during Phase 15 Plan 04 (`iqp_photonic_encoding.py`'s `photonic_cp_iqp_distribution`).
 - **Forge v5.2 (Racket 8.15) confirmed installed** for Phase 16's planned `set_postselection`-adjacent mode-mapping verification — linked package at `C:\Users\cuqui\cs1710\forge\forge` (the owner's CS1710 checkout), already on the latest tagged release (checked live against upstream `tnelson/forge`'s tags 2026-08-08; ahead-of-tag `dev` branch exists but was deliberately left alone). No toolchain-spike risk for Phase 16, unlike Julia in Phase 14 — installation was already done before phase planning began.
+- **Forge's `Int` bitwidth is a per-run `for N Int` setting, not a universal ceiling** — the *default* bitwidth is 4 bits (signed range `[-8,7]`), easily mistaken for a hard "0-7" limit (confirmed this exact misconception surfaced live during Phase 16-03's attempt-first checkpoint). Always size `for N Int` to the model's actual largest computed value with headroom (e.g. `for 6 Int`, range `[-32,31]`, used for a model whose max value was 19) — an undersized bitwidth silently wraps instead of erroring, producing a false "no counterexample found" pass. Run via `racket file.frg` (never `raco forge` — no such subcommand exists in v5.2), with `option run_sterling off` as the file's second line to avoid a Windows Sterling-visualizer hang.
 
 ### Roadmap Evolution
 
@@ -74,7 +75,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 - Owner: send the drafted technical note to Vincent Espitalier (`.planning/phases/06-documentation-publication/06-technical-note.md`) — still open
 - Owner: flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`) — still open
-- Next: continue Phase 16 (Extended Validation & Postselection Bookkeeping) with Plan 03 — Forge-based postselection/mode-mapping structural verification, plus the final Conclusion/Open-Questions doc update referencing both this sweep and the Forge result.
+- Next: begin Phase 17 (Trainability/Barren-Plateau Study) or Phase 18 (Hardness-Under-Loss Assessment) — both structurally independent of Phase 16, now fully complete.
 
 ### Blockers/Concerns
 
@@ -94,7 +95,7 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-08
-Stopped at: Plan 16-02 executed and shipped — `cp_alpha_sweep.py` created (16-point α sweep, all points asserted against the closed form to 1e-6), `results/phase16_alpha_sweep.csv`/`.png` saved, `docs/iqp-photonic-encoding.md`'s "Denser α Sweep (Phase 16)" subsection added. `.planning/phases/16-arb-01-extended-validation-postselection-bookkeeping/16-02-SUMMARY.md` documents the run.
-Resume by: continue Phase 16 with Plan 03 (Forge-based postselection/mode-mapping structural verification).
+Stopped at: Plan 16-03 executed and shipped — `forge/ancilla_mapping.frg` created (Forge model of the ancilla mode-mapping dict's injectivity, both sat/unsat checks passed), `results/phase16_forge_summary.md` saved, `docs/iqp-photonic-encoding.md`'s Forge verification subsection added and Conclusion section updated to mark all of Phase 16 complete. `.planning/phases/16-arb-01-extended-validation-postselection-bookkeeping/16-03-SUMMARY.md` documents the run, including the owner's attempt-first Forge predicate design exchange. **Phase 16 is fully complete.**
+Resume by: begin Phase 17 (Trainability/Barren-Plateau Study) or Phase 18 (Hardness-Under-Loss Assessment).
 
 **Repo note:** run `pytest`/Python commands in this repo via `./venv/Scripts/python.exe` (or activate `venv`) — system Python lacks `perceval`/`merlin`, causing spurious collection errors.
