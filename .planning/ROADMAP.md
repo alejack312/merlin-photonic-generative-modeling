@@ -149,6 +149,16 @@ Plans:
 **Goal:** Measure whether the weight-1(+weight-2) IQP-photonic circuit shows barren-plateau behavior, via exact parameter-shift gradients (not MerLin `QuantumLayer` autograd, which architecture research confirmed cannot accept this circuit's polarization-annotated states) — a specific measured claim, reported honestly either direction.
 **Depends on:** None beyond already-shipped weight-1/weight-2 modules. Independent of ARB, HARD, and VERIFY — this phase does not wait on ARB-01's outcome.
 **Requirements:** TRAIN-01, TRAIN-02, TRAIN-03, TRAIN-04, TRAIN-05, TRAIN-06, TRAIN-07, TRAIN-08
+**Plans:** 7 plans (4 waves — 17-01/02/03/04 parallel in wave 1, all independent; 17-05 depends on 17-01/02/03; 17-06 depends on 17-05; 17-07 depends on 17-06 and 17-04)
+
+Plans:
+- [ ] 17-01-PLAN.md — Exact parameter-shift gradient (weight-1 + weight-2) of the WP(theta,0) gate, TDD against closed-form/finite-difference
+- [ ] 17-02-PLAN.md — Exact numpy MMD² loss + quadratic-form gradient, TDD against the existing torch reference
+- [ ] 17-03-PLAN.md — Per-n (K=2^n) target distribution & bin-index mapping, generalizing v1.0's fixed K=462 grid
+- [ ] 17-04-PLAN.md — Poly-vs-exponential curve fit with R²/AIC model comparison, TDD against synthetic ground-truth data
+- [ ] 17-05-PLAN.md — RNG substreams, summary statistics, and the gradient-variance sweep runner (integrates 17-01/02/03)
+- [ ] 17-06-PLAN.md — Run the real weight-1-only (n=2..6) and mixed (n=2..5) gradient-variance sweeps, plus best-effort n=7/n=6 stretch attempts
+- [ ] 17-07-PLAN.md — Curve-fit analysis, cross-reference against docs/iqp-baseline.md, and docs/trainability-study.md write-up
 
 **Success criteria:**
 1. Gradient-variance sweep computed via exact parameter-shift across ≥3 system sizes, ≥100 independent random parameter draws each, with an explicit poly-vs-exponential model comparison (curve fit + goodness-of-fit, not eyeballed).
@@ -241,7 +251,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 14. Julia Toolchain Spike | v3.0 | 1/1 | Complete — verified 4/4, FULL GO | 2026-08-07 |
 | 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 4/4 | Complete — verified 5/5, TVD at floating-point-noise level | 2026-08-07 |
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 3/3 | Complete — verified 3/3, no bugs found | 2026-08-09 |
-| 17. Trainability / Barren-Plateau Study | v3.0 | 0/? | Not started | — |
+| 17. Trainability / Barren-Plateau Study | v3.0 | 0/7 | Not started | — |
 | 18. Hardness-Under-Loss Assessment | v3.0 | 0/? | Not started | — |
 | 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
