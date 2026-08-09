@@ -40,12 +40,36 @@ def _nearest_bin_p_real(data_xy: np.ndarray, centers: np.ndarray) -> np.ndarray:
     generator/data.py::compute_p_real's algorithm (pairwise distance -> argmin
     -> bincount -> normalize), but without torch.
 
+    Distances are computed via the squared-expansion form
+    (||a||^2 - 2*a.b + ||b||^2, the same decomposition torch.cdist uses
+    internally) rather than a direct elementwise-difference sum-of-squares.
+    Both forms are mathematically equivalent, but for data points that are
+    genuinely equidistant (to floating-point precision) from two bin centers
+    -- confirmed to occur at v1.0's own 21x22 grid, where one training point
+    lands exactly on the y-midpoint between two adjacent rows -- the two
+    formulas round differently and can break the tie in opposite directions.
+    Matching torch.cdist's formula (not just its output) makes this a
+    bit-faithful port rather than a merely-equivalent one; verified in
+    tests/test_target_grid.py to reproduce compute_p_real's bin assignment
+    exactly, including at that tied point.
+
     data_xy: (N,2) numpy array, already in the bin-centers' coordinate space.
     centers: (K,2) numpy array.
     Returns (K,) numpy array: non-negative, sums to 1.
+
+    Deliberately does NOT force a specific dtype -- ordinary numpy type
+    promotion applies (e.g. float32 data_xy against float64 centers upcasts
+    to float64, matching this module's own float64-centers default and
+    preserving precision for the gradient-variance work downstream). Callers
+    that need to reproduce compute_p_real's float32 default exactly (e.g. the
+    v1.0 cross-validation test) must cast BOTH inputs to float32 themselves
+    before calling.
     """
-    diffs = data_xy[:, None, :] - centers[None, :, :]  # (N, K, 2)
-    dists = np.sqrt(np.sum(diffs**2, axis=2))  # (N, K)
+    a_sq = np.sum(data_xy**2, axis=1, keepdims=True)  # (N,1)
+    b_sq = np.sum(centers**2, axis=1, keepdims=True).T  # (1,K)
+    cross = data_xy @ centers.T  # (N,K)
+    sq_dists = np.clip(a_sq - 2 * cross + b_sq, a_min=0, a_max=None)
+    dists = np.sqrt(sq_dists)  # (N, K)
     nearest = np.argmin(dists, axis=1)  # (N,)
     counts = np.bincount(nearest, minlength=centers.shape[0]).astype(np.float64)
     return counts / counts.sum()
