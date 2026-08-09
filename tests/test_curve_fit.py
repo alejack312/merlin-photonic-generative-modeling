@@ -17,7 +17,7 @@ SEED = 1710
 # Ground-truth parameters shared by both synthetic cases.
 A_TRUE, B_TRUE, C_TRUE = 2.0, 0.8, 0.001
 
-NS = np.array([2, 3, 4, 5, 6], dtype=float)
+NS = np.array([2, 3, 4, 5, 6, 7, 8], dtype=float)
 
 
 def _make_exp_data():
@@ -85,3 +85,22 @@ def test_verdict_key_is_one_of_expected_values():
     ns, ys = _make_exp_data()
     result = fit_and_compare(ns, ys)
     assert result["verdict"] in ("exp", "poly", "inconclusive")
+
+
+def test_convergence_failure_is_surfaced_not_swallowed():
+    """Degenerate input (fewer points than free params) must not crash the
+    whole analysis -- fit_and_compare should surface converged=False and
+    NaN metrics for the failing model(s), per this plan's success criteria.
+    """
+    ns = np.array([2.0, 3.0])
+    ys = np.array([1e10, -1e10])
+
+    result = fit_and_compare(ns, ys)
+
+    assert result["exp"]["converged"] is False
+    assert result["poly"]["converged"] is False
+    assert result["exp"]["params"] is None
+    assert result["poly"]["params"] is None
+    assert np.isnan(result["exp"]["r2"])
+    assert np.isnan(result["exp"]["aic"])
+    assert result["verdict"] == "inconclusive"
