@@ -130,18 +130,24 @@ what fits inside this phase's timeline without becoming the open-ended
 compute struggle this project's `CLAUDE.md` explicitly warns against
 (the PennyLane-stall pattern).
 
-**Stretch attempt status, reported as of this writing:** a background job
-targeting n=7 (weight-1) and n=6 (mixed) was launched during Plan 17-06
-with no time-box, per this phase's locked no-time-box decision.
-`results/phase17_weight1_gradient_variance_stretch.csv` and
-`results/phase17_mixed_gradient_variance_stretch.csv` do not exist yet at
-the time this analysis and document were produced — `trainability_analysis.py`
-checks for both files and would have merged any completed rows in
-automatically had they been present. The n=2..6 (weight1) / n=2..5 (mixed)
-CORE range above is therefore the actual measured range this document's
-verdict is based on. This gap between the reached range (n<=6) and the
-literature's N=20-24 fit-flip threshold is real and is reported here
-plainly, not reframed as "future work."
+**Stretch attempt status, final outcome:** a background job targeting n=7
+(weight-1) and n=6 (mixed) was launched during Plan 17-06 with no
+time-box, per this phase's locked no-time-box decision. Weight-1 n=7
+failed 4/4 consecutive chunked attempts with an identical `MemoryError` on
+the very first circuit evaluation of each attempt — including when
+isolated in a completely fresh process with ~14GB free RAM immediately
+beforehand — indicating a genuine single-call memory ceiling on this
+hardware at n=7 weight-1, not a fixable cross-call leak (contrast the
+mixed n=5 CORE cell earlier in this phase, where chunking *did* resolve a
+real cross-call leak). The owner manually stopped the job rather than let
+it continue failing. No stretch CSVs were produced; the n=2..6 (weight1) /
+n=2..5 (mixed) CORE range above is the actual measured range this
+document's verdict is based on. This gap between the reached range (n<=6)
+and the literature's N=20-24 fit-flip threshold is real and is reported
+here plainly, not reframed as "future work." (A subsequent, independent
+dual-rail/MerLin cross-check *did* reach n=7-8 without hitting this same
+ceiling — see the new section below — but that used a different physical
+circuit and computational method, not a fix to this pipeline.)
 
 ## Cross-reference verdict (TRAIN-07)
 
@@ -166,6 +172,115 @@ or plateau if init_scheme == uniform and max(n) >= 6
 | mixed | uniform | no_plateau (n_max=5 < 6) | plateau (exp wins, R²=0.910, decaying) | **disagree** |
 
 > Owner interpretation: [pending]
+
+## Independent cross-check: dual-rail encoding + MerLin native autograd
+
+**Scope note, stated up front:** everything in this section is supplementary
+work done *after* Phase 17 was already complete and verified (8/8
+must-haves, `.planning/phases/17-trainability-barren-plateau-study/17-VERIFICATION.md`).
+It is not tracked as a phase requirement in `ROADMAP.md`/`REQUIREMENTS.md`
+and does not change Phase 17's own verdict above — it is an independent
+second measurement of the same underlying question, using a different
+circuit and a different computational method, kept here because it bears
+directly on TRAIN-05/TRAIN-08's max-n question.
+
+### Why this is possible at all
+
+The Methodology section above states plainly that MerLin `QuantumLayer`
+autograd is unavailable for this project's polarization-annotated circuits.
+That remains true. What changed: `dual_rail_merlin_encoding.py` (added
+after Phase 17 closed) re-implements the same abstract weight-1/weight-2
+IQP generator family in a **polarization-free spatial dual-rail basis** —
+`BS()` in place of `HWP(pi/8)`, `PS(theta)` in place of `WP(theta,0)`, no
+`PBS()` needed since the circuit is already dual rail throughout. MerLin's
+restriction is specifically on polarization annotations, not on dual rail
+itself, so `QuantumLayer` accepts this circuit with no issue. This is a
+**different physical encoding of the same abstract circuit**, not a fix or
+optimization of the polarization pipeline above — the two are independent
+measurements, not before/after versions of one pipeline.
+
+`trainability/dual_rail_autograd_sweep.py` computes the same MMD² loss
+against the same per-n target grid (`trainability/target_grid.py`, reused
+unmodified), but keeps the entire computation — MerLin's raw output, the
+bin-mapping to the target grid, the MMD² quadratic form — in torch tensors
+throughout, so `.backward()` yields exact gradients for **all** n circuit
+parameters from one forward+backward pass. This is structurally different
+from parameter-shift's 2-evaluations-per-tracked-parameter cost, and this
+sweep tracks all n parameters (no `max_tracked_params` cap), since
+autograd's cost doesn't scale with how many parameters are tracked.
+
+### Reached n range and why it's larger
+
+| generator_scope | this phase's CORE range (parameter-shift) | dual-rail/autograd range |
+|---|---|---|
+| weight1 | n = 2..6 | n = 2..8 |
+| mixed | n = 2..5 | n = 2..7 |
+
+Two sizes further in each case, reached without hitting the `MemoryError`
+ceiling described above. Two compounding, distinct reasons, not one:
+
+1. **Fewer circuit evaluations per draw** (inherent to the method, not an
+   implementation detail): parameter-shift needs 2 Perceval evaluations
+   *per tracked parameter* — at n=8 tracking all 8 params, 16 evaluations
+   per draw. Reverse-mode autograd gets every parameter's gradient from one
+   forward + one backward pass, regardless of parameter count.
+2. **Cheaper per-evaluation cost, via reuse** (partly a fixable gap in how
+   the polarization pipeline above is written, partly inherent to
+   supporting autograd at all): `run_full_circuit`/`photonic_iqp_distribution`
+   bake theta in as a concrete float and rebuild a fresh `pcvl.Processor` +
+   `Analyzer` from scratch on every single call. MerLin's `QuantumLayer`
+   builds its differentiable computation graph once per circuit topology
+   and reuses it across draws — only parameter *values* change between
+   calls. Measured directly: at n=8, `QuantumLayer` construction takes
+   ~40s (one-time), then each subsequent forward+backward pass on that
+   same layer takes ~0.2s — cheaper than a *single* `Analyzer` call was at
+   the smaller n=6 in this phase's own CORE sweep (~1.57s, backed out from
+   that sweep's logged per-cell timings: ~950s / 600 calls).
+
+Net effect on wall-clock time: the full dual-rail sweep (weight1 n=2..8 +
+mixed n=2..7, both init schemes, 100 draws/cell, all n parameters tracked)
+completed in **~10.5 minutes** of actual compute, run overnight locally to
+avoid competing with the owner's other active work for RAM.
+
+### Results
+
+| generator_scope | init_scheme | n range | winning model | exp R² | exp AIC | poly R² | poly AIC |
+|---|---|---|---|---|---|---|---|
+| weight1 | small_angle | 2–8 (7 pts) | **exp** | 0.838 | -110.17 | 0.714 | -106.20 |
+| weight1 | uniform | 2–8 (7 pts) | **exp** | 0.983 | -74.59 | 0.973 | -71.33 |
+| mixed | small_angle | 2–7 (6 pts) | inconclusive | 0.570 | -70.64 | 0.570 | -70.64 |
+| mixed | uniform | 2–7 (6 pts) | inconclusive | 0.840 | -69.16 | 0.814 | -68.26 |
+
+Full numbers: `results/phase17_dual_rail_curve_fit_summary.csv`.
+
+**Comparison against this phase's own CORE verdict, stated plainly —
+agreements and disagreements both:**
+
+| generator_scope | init_scheme | CORE verdict (n<=6, polarization) | dual-rail verdict (n<=7/8) | agreement |
+|---|---|---|---|---|
+| weight1 | small_angle | inconclusive | **exp** (R²=0.838) | extends — more data points (7 vs 5) resolve what was inconclusive at n<=6 |
+| weight1 | uniform | exp (R²=0.999) | exp (R²=0.983) | **agree** |
+| mixed | small_angle | inconclusive | inconclusive | **agree** |
+| mixed | uniform | exp (R²=0.910) | **inconclusive** (R²=0.840, AIC margin < 2) | **disagree** |
+
+The `mixed/uniform` disagreement is reported exactly as found, not
+resolved or explained away here — it could reflect the extra 2 data points
+changing the fit, a real difference between the two physical encodings, or
+both. Distinguishing between those requires the owner's own analysis, not
+an assertion in this document.
+
+> Owner interpretation: [pending]
+
+**What this cross-check does/doesn't establish, beyond the section below's
+general caveats:** agreement between two *different physical circuits*
+answering the same abstract question is stronger evidence than either
+alone, but the two encodings are not guaranteed to have identical
+trainability behavior even if they realize "the same" IQP generator
+family — dual rail and polarization differ in gate composition, ancilla
+structure (weight-2), and every other implementation detail below the
+abstract operator level. A disagreement (as seen in `mixed/uniform`) is
+therefore genuinely ambiguous between "thin-data artifact" and "encoding
+matters," and this document does not resolve which.
 
 ## What this does/doesn't establish
 
