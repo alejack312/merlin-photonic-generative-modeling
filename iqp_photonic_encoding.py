@@ -1,6 +1,7 @@
 import perceval as pcvl
 import numpy as np
 
+from perceval.utils import allstate_iterator
 from perceval.components.core_catalog.heralded_cz import HeraldedCzItem
 from perceval.components.core_catalog.controlled_rotation_gates import (
     PostProcessedControlledRotationsItem,
@@ -535,7 +536,16 @@ def photonic_weight2_iqp_distribution(n, i, j, thetas):
     proc, herald_spec = _build_weight2_processor_no_herald(n, i, j, thetas)
     input_state = _weight2_input_state(n, herald_spec)
 
-    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], "*")
+    # Explicit output_states (not the "*" string) is deliberate, not cosmetic: Analyzer's
+    # "*" path sets processor.min_detected_photons_filter(1) internally, forcing Perceval's
+    # SLOS backend to enumerate every partial-photon-count branch down to 1 detected photon.
+    # list(allstate_iterator(input_state)) is the exact same output-state set "*" builds
+    # (same total-photon-count-conserving enumeration -- verified bit-for-bit identical
+    # results at n=3), but taking the explicit-list code path sets the filter to n instead
+    # of 1, pruning all those partial-photon branches before the backend even starts. That
+    # filter, not output-state-list size, is what was causing MemoryError at n>=5/6 on
+    # commodity hardware (confirmed live during Phase 17 gradient-variance sweep execution).
+    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], list(allstate_iterator(input_state)))
     analyzer.compute()
 
     ancilla_a, ancilla_b = 2 * n, 2 * n + 1
@@ -750,7 +760,7 @@ def photonic_cp_iqp_distribution(n, i, j, thetas, alpha):
     proc, ancilla_spec = _build_weight2_cp_processor_no_postselect(n, i, j, thetas, alpha)
     input_state = _weight2_cp_input_state(n, ancilla_spec)
 
-    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], "*")
+    analyzer = pcvl.algorithm.Analyzer(proc, [input_state], list(allstate_iterator(input_state)))
     analyzer.compute()
 
     ancilla_modes = [2 * n, 2 * n + 1, 2 * n + 2, 2 * n + 3]
@@ -830,7 +840,7 @@ def run_full_circuit(n, thetas):
     processor = pcvl.Processor("SLOS", circuit)
     input_state = all_h_input(n)
 
-    analyzer = pcvl.algorithm.Analyzer(processor, [input_state], "*")
+    analyzer = pcvl.algorithm.Analyzer(processor, [input_state], list(allstate_iterator(input_state)))
     analyzer.compute()
 
     dist = {
@@ -912,7 +922,7 @@ def run_readout(n, input_state):
     input that wasn't a pure computational-basis state)."""
     circuit = build_readout_circuit(n)
     processor = pcvl.Processor("SLOS", circuit)
-    analyzer = pcvl.algorithm.Analyzer(processor, [input_state], "*")
+    analyzer = pcvl.algorithm.Analyzer(processor, [input_state], list(allstate_iterator(input_state)))
     analyzer.compute()
     for state, prob in zip(analyzer.output_states_list, analyzer.distribution[0]):
         if np.isclose(complex(prob).real, 1.0, atol=1e-9):
