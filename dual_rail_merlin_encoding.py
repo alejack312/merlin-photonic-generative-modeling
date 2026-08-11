@@ -1,9 +1,10 @@
 """Alternate, additive implementation of this project's v2.0 (weight-1
-IQP-photonic encoding) and v2.1 (weight-2 CZ-insertion) pipelines, built in a
-polarization-FREE spatial dual-rail basis and wrapped by MerLin's QuantumLayer
-for native torch autograd -- instead of iqp_photonic_encoding.py's existing
-polarization encoding, which MerLin's QuantumLayer categorically cannot wrap
-(rejects polarization-annotated BasicStates outright).
+IQP-photonic encoding), v2.1 (weight-2 CZ-insertion), and v3.0 ARB-01
+(tunable weight-2 CP(alpha)) pipelines, built in a polarization-FREE spatial
+dual-rail basis and wrapped by MerLin's QuantumLayer for native torch
+autograd -- instead of iqp_photonic_encoding.py's existing polarization
+encoding, which MerLin's QuantumLayer categorically cannot wrap (rejects
+polarization-annotated BasicStates outright).
 
 Does NOT modify iqp_photonic_encoding.py or any other existing v2.0/v2.1 code.
 Purely additive: a second, parallel encoding of the same abstract IQP circuit
@@ -68,6 +69,7 @@ import torch
 import merlin as ML
 
 from iqp_photonic_encoding import (
+    _build_cp_insertion_core,
     _build_cz_insertion_core,
     _decode_single_qubit_pair,
     fock_to_bitstring,
@@ -382,3 +384,170 @@ def dual_rail_photonic_weight2_iqp_distribution(n, i, j, thetas):
         residual = residual / herald_success_prob
 
     return dist, residual, herald_failure_prob
+
+
+# ---------------------------------------------------------------------------
+# ARB-01 tunable weight-2 CP(alpha) (v3.0 Phases 15-16 analogue)
+# ---------------------------------------------------------------------------
+
+
+def dual_rail_weight2_cp_input_state(n):
+    """All-'0' data qubits ([0,1] per pair) PLUS [0,0,0,0] ancilla -- CP's
+    post-selection-on-vacuum convention (NOT heralded_cz's [1,1] photon
+    input), matching _weight2_cp_input_state's polarization-side logic but
+    without any polarization annotation (a genuinely-vacuum mode needs
+    none)."""
+    return pcvl.BasicState([0, 1] * n + [0, 0, 0, 0])
+
+
+def make_weight2_cp_circuit_and_input(n, i, j, alpha):
+    """Symbolic (unbound in theta, fixed in alpha) weight-2 CP(alpha)
+    dual-rail circuit for qubits i, j, flattened from a Processor via
+    linear_circuit(). alpha is baked in as a plain float at construction
+    time (matching _build_cp_insertion_core's own isinstance(float) contract
+    -- it cannot be a late-bound pcvl.Parameter), exactly mirroring
+    iqp_photonic_encoding.py's own convention of rebuilding the circuit per
+    alpha value for a sweep, never optimizing alpha via gradient descent
+    (ARB-04's success-probability-vs-alpha table is a sweep over discrete
+    alpha values, not a differentiable alpha).
+
+    Theta folding: +alpha/4 on thetas[i]/thetas[j] via a SEPARATE, fixed,
+    non-parameterized PS(alpha/4) gate (not Perceval parameter arithmetic --
+    see build_dual_rail_weight2_processor's docstring for why arithmetic on
+    a pcvl.Parameter breaks MerLin's trainable-tensor name-mapping), per the
+    ARB-01/ARB-02 identity exp(i*theta*Z_i*Z_j) = e^{-i*theta} * CP(4*theta)
+    * exp(i*theta*Z_i) * exp(i*theta*Z_j), theta=alpha/4.
+
+    Returns (flat_circuit, input_state, ancilla_spec)."""
+    alpha = float(alpha)  # cast at every call site, matching this repo's established discipline
+    theta_fold = alpha / 4.0
+
+    assert 0 <= i < n and 0 <= j < n and i != j
+    params = [pcvl.Parameter(f"theta{k}") for k in range(n)]
+
+    total_modes = 2 * n + 4
+    proc = pcvl.Processor("SLOS", total_modes)
+    proc.add(0, build_dual_rail_state_prep_circuit(n))
+
+    diag = pcvl.Circuit(2 * n)
+    for k in range(n):
+        diag.add(2 * k, pcvl.PS(params[k]))
+        if k in (i, j):
+            diag.add(2 * k, pcvl.PS(theta_fold))
+    proc.add(0, diag)
+
+    cp_core = _build_cp_insertion_core(alpha)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,
+        2 * j: 2, 2 * j + 1: 3,
+        2 * n: 4, 2 * n + 1: 5,
+        2 * n + 2: 6, 2 * n + 3: 7,
+    }
+    proc.add(mapping, cp_core)
+    proc.add(0, build_dual_rail_conjugation_circuit(n))
+
+    flat = proc.linear_circuit()
+
+    from perceval.components.core_catalog.controlled_rotation_gates import (
+        PostProcessedControlledRotationsItem,
+    )
+    ancilla_spec = PostProcessedControlledRotationsItem().build_experiment(
+        n=2, alpha=alpha
+    ).in_heralds
+    assert ancilla_spec == {4: 0, 5: 0, 6: 0, 7: 0}, (
+        f"PostProcessedControlledRotationsItem's ancilla layout changed: {ancilla_spec} "
+        "-- this function hardcodes local ports 4-7, all expecting count 0"
+    )
+
+    return flat, dual_rail_weight2_cp_input_state(n), ancilla_spec
+
+
+def make_weight2_cp_quantum_layer(n, i, j, alpha):
+    """Factory for a MerLin QuantumLayer wrapping the full weight-2 CP(alpha)
+    dual-rail circuit (qubits i, j) for n qubits, at a fixed alpha. Returns
+    (layer, ancilla_spec).
+
+    ComputationSpace.FOCK (not UNBUNCHED) for the same reason as
+    make_weight2_quantum_layer: CP's post-selection mechanism, like
+    heralded_cz's heralding, relies on genuine multi-photon interference
+    that can populate bunched configurations -- confirmed necessary here too
+    (see test_weight2_cp_requires_fock_not_unbunched)."""
+    circuit, input_state, ancilla_spec = make_weight2_cp_circuit_and_input(n, i, j, alpha)
+    layer = ML.QuantumLayer(
+        circuit=circuit,
+        input_state=input_state,
+        trainable_parameters=["theta"],
+        measurement_strategy=ML.MeasurementStrategy.probs(
+            computation_space=ML.ComputationSpace.FOCK
+        ),
+    )
+    return layer, ancilla_spec
+
+
+def dual_rail_photonic_cp_iqp_distribution(n, i, j, thetas, alpha):
+    """Weight-2 CP(alpha) dual-rail analogue of photonic_cp_iqp_distribution:
+    builds the dual-rail CP(alpha) circuit for the given theta values, runs
+    it through MerLin's QuantumLayer, and applies the SAME three-step manual
+    filter as the polarization version (reused logic, not re-derived):
+      1. any nonzero ancilla mode (2n..2n+3) -> postselect_failure_prob
+      2. otherwise, qubit i's or j's own pair out-of-subspace ->
+         ALSO postselect_failure_prob (CP's own post-selection condition
+         covers both ancilla vacuum AND pair-i/pair-j validity together --
+         folding this into residual instead reproduces the exact TVD~0.3-0.4
+         bug iqp_photonic_encoding.py's own history already hit and fixed;
+         see photonic_cp_iqp_distribution's docstring for the full account)
+      3. otherwise, any other bystander qubit out-of-subspace -> residual;
+         everything else -> dist
+
+    Returns (dist, residual, postselect_failure_prob) -- identical 3-tuple
+    shape to photonic_cp_iqp_distribution."""
+    assert len(thetas) == n
+    layer, ancilla_spec = make_weight2_cp_quantum_layer(n, i, j, alpha)
+    with torch.no_grad():
+        theta_tensor = dict(layer.named_parameters())["theta"]
+        theta_tensor.copy_(torch.tensor(thetas, dtype=theta_tensor.dtype))
+        out_flat = layer().flatten()
+
+    ancilla_modes = [2 * n, 2 * n + 1, 2 * n + 2, 2 * n + 3]
+
+    dist = {}
+    residual = 0.0
+    postselect_failure_prob = 0.0
+    for key, val in zip(layer.output_keys, out_flat.tolist()):
+        if any(key[m] != 0 for m in ancilla_modes):
+            postselect_failure_prob += val
+            continue
+
+        state = pcvl.BasicState(list(key))
+        bit_i = _decode_single_qubit_pair(state, i)
+        bit_j = _decode_single_qubit_pair(state, j)
+        if bit_i is None or bit_j is None:
+            postselect_failure_prob += val
+            continue
+
+        bits = []
+        bystander_invalid = False
+        for k in range(n):
+            if k == i:
+                bits.append(bit_i)
+            elif k == j:
+                bits.append(bit_j)
+            else:
+                b = _decode_single_qubit_pair(state, k)
+                if b is None:
+                    bystander_invalid = True
+                    break
+                bits.append(b)
+
+        if bystander_invalid:
+            residual += val
+        else:
+            key_str = "".join(bits)
+            dist[key_str] = dist.get(key_str, 0.0) + val
+
+    postselect_success_prob = 1.0 - postselect_failure_prob
+    if postselect_success_prob > 0:
+        dist = {k: v / postselect_success_prob for k, v in dist.items()}
+        residual = residual / postselect_success_prob
+
+    return dist, residual, postselect_failure_prob
