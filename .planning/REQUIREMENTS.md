@@ -9,14 +9,14 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 
 ### Trainability / Barren-Plateau Study (TRAIN)
 
-- [ ] **TRAIN-01**: Gradient-variance sweep computed via exact parameter-shift on the existing distribution functions (`photonic_iqp_distribution`/`photonic_weight2_iqp_distribution`) — NOT via MerLin `QuantumLayer` autograd, which architecture research confirmed cannot accept this circuit's polarization-annotated `BasicState`s — across ≥3 system sizes, ≥100 independent random parameter draws each
-- [ ] **TRAIN-02**: Explicit poly-vs-exponential model comparison (curve fit + goodness-of-fit, e.g. R²/AIC) — not an eyeballed plot
-- [ ] **TRAIN-03**: Parameter-initialization distribution and per-circuit energy/photon-number normalization stated explicitly and controlled/reported across the sweep
-- [ ] **TRAIN-04**: Generator scope of the sweep (weight-1-only vs. mixed) stated explicitly, with reasoning
-- [ ] **TRAIN-05**: Honest statement of the max reachable system size `n`, and whether that range sits inside or outside the historically-misleading small-N regime this project's own pitfalls research documented (arXiv:2605.11879's N=2-10-vs-N=24 fit flip)
-- [ ] **TRAIN-06**: Mixed weight-1+weight-2 generator sweep, reusing Phase 13's validated composability
-- [ ] **TRAIN-07**: Cross-reference against `docs/iqp-baseline.md`'s qubit-side empirical plateau rule (97.9% accuracy, 283 rows) — does it transfer to the photonic realization?
-- [ ] **TRAIN-08**: Sweep extended toward N≈20-24 if compute allows — the range where the cited precedent's poly-vs-exp fit is known to flip; honestly report if this range isn't reached
+- [x] **TRAIN-01**: Gradient-variance sweep computed via exact parameter-shift on the existing distribution functions (`photonic_iqp_distribution`/`photonic_weight2_iqp_distribution`) — NOT via MerLin `QuantumLayer` autograd, which architecture research confirmed cannot accept this circuit's polarization-annotated `BasicState`s — across ≥3 system sizes, ≥100 independent random parameter draws each
+- [x] **TRAIN-02**: Explicit poly-vs-exponential model comparison (curve fit + goodness-of-fit, e.g. R²/AIC) — not an eyeballed plot
+- [x] **TRAIN-03**: Parameter-initialization distribution and per-circuit energy/photon-number normalization stated explicitly and controlled/reported across the sweep
+- [x] **TRAIN-04**: Generator scope of the sweep (weight-1-only vs. mixed) stated explicitly, with reasoning
+- [x] **TRAIN-05**: Honest statement of the max reachable system size `n`, and whether that range sits inside or outside the historically-misleading small-N regime this project's own pitfalls research documented (arXiv:2605.11879's N=2-10-vs-N=24 fit flip)
+- [x] **TRAIN-06**: Mixed weight-1+weight-2 generator sweep, reusing Phase 13's validated composability
+- [x] **TRAIN-07**: Cross-reference against `docs/iqp-baseline.md`'s qubit-side empirical plateau rule (97.9% accuracy, 283 rows) — does it transfer to the photonic realization?
+- [x] **TRAIN-08**: Sweep extended toward N≈20-24 if compute allows — the range where the cited precedent's poly-vs-exp fit is known to flip; honestly report if this range isn't reached
 
 ### Hardness-Under-Loss Assessment (HARD)
 
