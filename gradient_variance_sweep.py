@@ -10,6 +10,10 @@ Usage:
         --init-schemes small_angle uniform \\
         --out results/phase17_weight1_gradient_variance.csv
 
+    python gradient_variance_sweep.py --scope weight1 --n-values 2 3 4 5 6 \\
+        --init-schemes uniform --sigma 0.3 \\
+        --out results/phase17_1_weight1_sigma0.3_gradient_variance.csv
+
 This same script serves both the CORE sweeps (synchronous, must complete)
 and the STRETCH attempts (n=7 weight-1 / n=6 mixed, run in the background
 with no time-box per CONTEXT.md's locked decision) -- only the CLI
@@ -47,9 +51,12 @@ import time
 
 import numpy as np
 
-from trainability import stats
+from trainability import stats, target_grid
 from trainability.sweep import pooled_gradients_for_cell, run_gradient_variance_sweep
 
+# "sigma" and "bin_spacing" are per-row reporting columns (TRAIN-09/ROADMAP.md Phase
+# 17.1 success criterion 1) -- they record what bandwidth/grid-geometry produced this
+# row, but are NOT inputs to summarize_gradient_samples's summary statistics themselves.
 FIELDNAMES = [
     "n",
     "generator_scope",
@@ -62,6 +69,8 @@ FIELDNAMES = [
     "median",
     "abs_mean",
     "rms",
+    "sigma",
+    "bin_spacing",
 ]
 
 
@@ -105,6 +114,15 @@ def parse_args():
         type=int,
         default=3,
         help="Cap on tracked parameter indices per n (default: 3).",
+    )
+    parser.add_argument(
+        "--sigma",
+        type=float,
+        default=0.1,
+        help=(
+            "MMD kernel bandwidth, held fixed across the whole n-range for this "
+            "invocation (default: 0.1, Phase 17's original value)."
+        ),
     )
     parser.add_argument(
         "--append",
@@ -162,10 +180,10 @@ def _chunk_dir(out_path):
     return d
 
 
-def _chunk_path(out_path, scope, n, init_scheme, draw_start, draw_count):
+def _chunk_path(out_path, scope, n, init_scheme, sigma, draw_start, draw_count):
     return os.path.join(
         _chunk_dir(out_path),
-        f"{scope}_n{n}_{init_scheme}_{draw_start}-{draw_start + draw_count}.npy",
+        f"{scope}_n{n}_{init_scheme}_sigma{sigma:g}_{draw_start}-{draw_start + draw_count}.npy",
     )
 
 
@@ -184,9 +202,12 @@ def run_chunk(args):
         max_tracked_params=args.max_tracked_params,
         weight2_pair=(0, 1),
         seed_base=170917,
+        sigma=args.sigma,
     )
     elapsed = time.time() - start
-    path = _chunk_path(args.out, args.scope, n, init_scheme, args.draw_start, args.draw_count)
+    path = _chunk_path(
+        args.out, args.scope, n, init_scheme, args.sigma, args.draw_start, args.draw_count
+    )
     np.save(path, pooled_grads)
     print(
         f"n={n} init={init_scheme} draws=[{args.draw_start},{args.draw_start + args.draw_count}): "
@@ -201,7 +222,9 @@ def combine_chunks(args, writer, f):
     draw range), and write the final CSV row."""
     n = args.n_values[0]
     init_scheme = args.init_schemes[0]
-    pattern = os.path.join(_chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_*.npy")
+    pattern = os.path.join(
+        _chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_*.npy"
+    )
     chunk_files = sorted(glob.glob(pattern))
     if not chunk_files:
         raise FileNotFoundError(f"no chunk files found matching {pattern}")
@@ -212,6 +235,7 @@ def combine_chunks(args, writer, f):
     _, n_tracked = pooled_gradients_for_cell(
         n, args.scope, init_scheme, draw_start=0, draw_count=0,
         max_tracked_params=args.max_tracked_params, weight2_pair=(0, 1), seed_base=170917,
+        sigma=args.sigma,
     )
     result = {
         "n": n,
@@ -219,6 +243,8 @@ def combine_chunks(args, writer, f):
         "init_scheme": init_scheme,
         "n_tracked_params": n_tracked,
         **stats.summarize_gradient_samples(pooled_grads),
+        "sigma": args.sigma,
+        "bin_spacing": target_grid.bin_spacing(n),
     }
     writer.writerow(result)
     f.flush()
@@ -251,9 +277,12 @@ def run(args, writer, f):
                 max_tracked_params=args.max_tracked_params,
                 weight2_pair=(0, 1),
                 seed_base=170917,
+                sigma=args.sigma,
             )
             elapsed = time.time() - start
             result = cell_results[0]
+            result["sigma"] = args.sigma
+            result["bin_spacing"] = target_grid.bin_spacing(n)
             rows.append(result)
             writer.writerow(result)
             f.flush()
