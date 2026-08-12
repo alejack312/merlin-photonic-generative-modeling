@@ -102,14 +102,14 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | ARB-07 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Complete |
 | ARB-08 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Complete |
 | ARB-09 | 16 - ARB-01 Extended Validation & Postselection Bookkeeping | Complete |
-| TRAIN-01 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-02 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-03 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-04 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-05 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-06 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-07 | 17 - Trainability / Barren-Plateau Study | Pending |
-| TRAIN-08 | 17 - Trainability / Barren-Plateau Study | Pending |
+| TRAIN-01 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-02 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-03 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-04 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-05 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-06 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-07 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-08 | 17 - Trainability / Barren-Plateau Study | Complete |
 | HARD-01 | 18 - Hardness-Under-Loss Assessment | Pending |
 | HARD-02 | 18 - Hardness-Under-Loss Assessment | Pending |
 | HARD-03 | 18 - Hardness-Under-Loss Assessment | Pending |
@@ -135,4 +135,4 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-07 after roadmap creation — traceability populated, 35/35 v1 requirements mapped to Phases 14-21, 100% coverage, no orphans*
+*Last updated: 2026-08-12 — traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; the checkboxes in the v1 Requirements section above were already updated at that time, but this traceability table was missed — flagged by gsd-verifier during Phase 17's own verification pass, fixed here). No scope change; dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) is explicitly supplementary and out of this milestone's formal requirement set, not added here.*
