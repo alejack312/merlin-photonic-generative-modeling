@@ -113,6 +113,21 @@ def make_target_grid(n: int, lo: float = -0.1, hi: float = 1.1):
     return centers, p_real, bin_index_fn
 
 
+def bin_spacing(n: int, lo: float = -0.1, hi: float = 1.1) -> float:
+    """Nearest-neighbor spacing between adjacent target-grid bin centers at this n --
+    the min(dx, dy) of make_target_grid's axis-aligned rows x cols layout. Purely a
+    reporting/context value (17.1-RESEARCH.md: TRAIN-09's final design uses a FIXED
+    sigma per sweep run, not a per-n-derived schedule, so this is NOT used to compute
+    sigma -- only to record explicitly, in the sweep's own CSV output, how sharp/blunt
+    a given fixed sigma is relative to the grid at each n, per ROADMAP.md Phase 17.1
+    success criterion 1)."""
+    rows = 2 ** ((n + 1) // 2)
+    cols = 2 ** (n // 2)
+    dx = (hi - lo) / (rows - 1) if rows > 1 else float("inf")
+    dy = (hi - lo) / (cols - 1) if cols > 1 else float("inf")
+    return min(dx, dy)
+
+
 def bitstring_dict_to_vector(d: dict, n: int, bin_index_fn) -> np.ndarray:
     """Generic {bitstring: value} -> length-2^n numpy array utility.
 

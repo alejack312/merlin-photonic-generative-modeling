@@ -1,7 +1,12 @@
 import numpy as np
 import pytest
 
-from trainability.sweep import pick_tracked_indices, run_gradient_variance_sweep
+from trainability import target_grid
+from trainability.sweep import (
+    pick_tracked_indices,
+    pooled_gradients_for_cell,
+    run_gradient_variance_sweep,
+)
 
 EXPECTED_STATS_KEYS = {
     "n",
@@ -61,3 +66,34 @@ def test_sweep_empty_n_values_raises():
 def test_sweep_unknown_generator_scope_raises():
     with pytest.raises(ValueError):
         run_gradient_variance_sweep([2], "bogus", "uniform", n_draws=1)
+
+
+def test_pooled_gradients_sigma_default_matches_explicit_old_value():
+    """sigma=SIGMA (0.1) explicitly passed must reproduce the same result as
+    omitting sigma entirely -- proves the default really equals the old
+    hardcoded behavior, not just "close enough" (Pitfall 1)."""
+    grads_default, n_tracked_default = pooled_gradients_for_cell(
+        2, "weight1", "uniform", draw_start=0, draw_count=3
+    )
+    grads_explicit, n_tracked_explicit = pooled_gradients_for_cell(
+        2, "weight1", "uniform", draw_start=0, draw_count=3, sigma=0.1
+    )
+    assert n_tracked_default == n_tracked_explicit
+    np.testing.assert_array_equal(grads_default, grads_explicit)
+
+
+def test_pooled_gradients_different_sigma_changes_output():
+    """A materially different sigma must actually change the pooled gradients --
+    proves sigma is wired into the kernel matrix, not a no-op parameter."""
+    grads_low, _ = pooled_gradients_for_cell(
+        2, "weight1", "uniform", draw_start=0, draw_count=3, sigma=0.1
+    )
+    grads_high, _ = pooled_gradients_for_cell(
+        2, "weight1", "uniform", draw_start=0, draw_count=3, sigma=5.0
+    )
+    assert not np.array_equal(grads_low, grads_high)
+
+
+def test_bin_spacing_matches_hand_verified_table():
+    assert target_grid.bin_spacing(2) == pytest.approx(1.2)
+    assert target_grid.bin_spacing(6) == pytest.approx(0.1714, abs=1e-3)

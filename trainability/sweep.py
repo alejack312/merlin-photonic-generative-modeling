@@ -70,6 +70,7 @@ def pooled_gradients_for_cell(
     max_tracked_params=3,
     weight2_pair=(0, 1),
     seed_base=170917,
+    sigma=SIGMA,
 ):
     """Raw (not summarized) pooled gradient samples for ONE (n, generator_scope,
     init_scheme) cell, over draw indices [draw_start, draw_start + draw_count).
@@ -84,12 +85,18 @@ def pooled_gradients_for_cell(
     as part of a single draws-[0,100) run -- concatenating chunks and summarizing
     once is exactly equivalent to running all draws in one process.
 
+    sigma: MMD kernel bandwidth (default: SIGMA, Phase 17's original fixed value).
+    Explicit, caller-controllable parameter added in Plan 17.1-02 (TRAIN-09) so a
+    sweep can hold sigma fixed at a value other than 0.1, or scale it with n --
+    every existing zero-argument-changed caller keeps getting SIGMA=0.1, bit-
+    identical to Phase 17's shipped results (17.1-RESEARCH.md Pitfall 1).
+
     Returns (pooled_grads: np.ndarray, n_tracked_params: int).
     """
     _validate_cell_args(n, generator_scope)
 
     centers, p_real, bin_index_fn = target_grid.make_target_grid(n)
-    K = mmd_exact.gaussian_kernel_matrix_np(centers, SIGMA)
+    K = mmd_exact.gaussian_kernel_matrix_np(centers, sigma)
     tracked = pick_tracked_indices(n, max_tracked_params)
 
     accumulator = []
@@ -129,6 +136,7 @@ def run_gradient_variance_sweep(
     max_tracked_params=3,
     weight2_pair=(0, 1),
     seed_base=170917,
+    sigma=SIGMA,
 ):
     """Pooled exact-gradient-variance sweep across a set of system sizes.
 
@@ -141,6 +149,11 @@ def run_gradient_variance_sweep(
     generator_scope: "weight1" (photonic_iqp_distribution only) or "mixed"
       (photonic_weight2_iqp_distribution over weight2_pair=(i, j), which
       requires n >= 2).
+
+    sigma: MMD kernel bandwidth, passed straight through to
+    pooled_gradients_for_cell (default: SIGMA, Phase 17's original fixed
+    value -- see pooled_gradients_for_cell's docstring for the backward-
+    compatibility guarantee).
 
     Returns a list of per-n result dicts:
       {"n": n, "generator_scope": ..., "init_scheme": ...,
@@ -164,6 +177,7 @@ def run_gradient_variance_sweep(
             max_tracked_params=max_tracked_params,
             weight2_pair=weight2_pair,
             seed_base=seed_base,
+            sigma=sigma,
         )
         result = {
             "n": n,
