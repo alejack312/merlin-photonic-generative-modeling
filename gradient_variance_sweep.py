@@ -14,6 +14,13 @@ Usage:
         --init-schemes uniform --sigma 0.3 \\
         --out results/phase17_1_weight1_sigma0.3_gradient_variance.csv
 
+    python gradient_variance_sweep.py --scope weight1 --n-values 2 3 4 5 6 \\
+        --init-schemes data_dependent --n-draws 1 --out results/foo.csv
+
+(note --n-draws 1 in the example above -- TRAIN-10's own owner-decided setting,
+since data_dependent's thetas are identical on every draw; Plan 17.1-05 will
+use this explicitly when it actually runs TRAIN-10.)
+
 This same script serves both the CORE sweeps (synchronous, must complete)
 and the STRETCH attempts (n=7 weight-1 / n=6 mixed, run in the background
 with no time-box per CONTEXT.md's locked decision) -- only the CLI
@@ -95,8 +102,8 @@ def parse_args():
         "--init-schemes",
         required=True,
         nargs="+",
-        choices=["small_angle", "uniform"],
-        help="Initialization regime(s) to run, e.g. small_angle uniform.",
+        choices=["small_angle", "uniform", "data_dependent"],
+        help="Initialization regime(s) to run, e.g. small_angle uniform data_dependent.",
     )
     parser.add_argument(
         "--out",
@@ -122,6 +129,16 @@ def parse_args():
         help=(
             "MMD kernel bandwidth, held fixed across the whole n-range for this "
             "invocation (default: 0.1, Phase 17's original value)."
+        ),
+    )
+    parser.add_argument(
+        "--scale-factor",
+        type=float,
+        default=1.0,
+        help=(
+            "Weight-2 pair covariance-scaling hyperparameter for "
+            "init_scheme='data_dependent' (default: 1.0, owner-decided per "
+            "17.1-RESEARCH.md -- unused for small_angle/uniform)."
         ),
     )
     parser.add_argument(
@@ -203,6 +220,7 @@ def run_chunk(args):
         weight2_pair=(0, 1),
         seed_base=170917,
         sigma=args.sigma,
+        scale_factor=args.scale_factor,
     )
     elapsed = time.time() - start
     path = _chunk_path(
@@ -235,7 +253,7 @@ def combine_chunks(args, writer, f):
     _, n_tracked = pooled_gradients_for_cell(
         n, args.scope, init_scheme, draw_start=0, draw_count=0,
         max_tracked_params=args.max_tracked_params, weight2_pair=(0, 1), seed_base=170917,
-        sigma=args.sigma,
+        sigma=args.sigma, scale_factor=args.scale_factor,
     )
     result = {
         "n": n,
@@ -278,6 +296,7 @@ def run(args, writer, f):
                 weight2_pair=(0, 1),
                 seed_base=170917,
                 sigma=args.sigma,
+                scale_factor=args.scale_factor,
             )
             elapsed = time.time() - start
             result = cell_results[0]
