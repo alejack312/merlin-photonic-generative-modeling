@@ -269,7 +269,38 @@ changing the fit, a real difference between the two physical encodings, or
 both. Distinguishing between those requires the owner's own analysis, not
 an assertion in this document.
 
-> Owner interpretation: [pending]
+> **Owner interpretation:** Three candidate interpretations for the
+> `mixed/uniform` disagreement, none currently ruled in or out:
+>
+> 1. **No real effect.** The original 4-point "exp" verdict was decided
+>    between two near-identical degenerate fits (both `b≈0`, both with
+>    large near-cancelling `a`/`c`) — essentially a noise-level AIC
+>    difference, not a real signal. The dual-rail fit's `exp` model became
+>    well-conditioned (`b=0.103`), but still did not clear the
+>    delta-AIC>2 threshold against `poly`, and the bootstrap CI's lower
+>    bound (0.0002) sits arbitrarily close to zero. Under this reading,
+>    six data points still isn't enough to distinguish real weak decay
+>    from no decay.
+> 2. **A real, weak effect.** If the true decay rate were exactly zero,
+>    roughly half of 500 independent bootstrap resamples should land on a
+>    negative `b` from noise alone. 0/500 did. Under this reading, both
+>    datasets are picking up the same real, if weak, decay — something
+>    specific to the weight-2/mixed circuit, since `weight1/small_angle`
+>    did *not* resolve into a non-degenerate fit with more data while
+>    `mixed/uniform` did.
+> 3. **The comparison may be under-specified.** The two datasets don't
+>    fully overlap in n range (2-5 vs 2-7), use different computational
+>    methods (parameter-shift vs. autograd) and different gate mechanics
+>    for the surrounding weight-1 layer (symmetric `WP` vs. single-sided
+>    `PS` — argued equivalent up to global phase, never independently
+>    verified at the gradient-variance statistical level across the
+>    actual swept draws), and different floating-point precision paths
+>    (MerLin defaults to float32). Treating the two datasets as
+>    replications of one experiment may itself be premature.
+>
+> **Further experimentation is required to conclude whether the true
+> explanation is one of these three, some combination, or something else
+> not yet identified.** None of the three is asserted as the answer here.
 
 **What this cross-check does/doesn't establish, beyond the section below's
 general caveats:** agreement between two *different physical circuits*
