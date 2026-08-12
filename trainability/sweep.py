@@ -22,7 +22,7 @@ from iqp_photonic_encoding import (
     photonic_iqp_distribution,
     photonic_weight2_iqp_distribution,
 )
-from trainability import mmd_exact, param_shift, target_grid
+from trainability import data_dependent_init, mmd_exact, param_shift, target_grid
 from trainability import rng as rng_mod
 from trainability import stats
 
@@ -71,6 +71,7 @@ def pooled_gradients_for_cell(
     weight2_pair=(0, 1),
     seed_base=170917,
     sigma=SIGMA,
+    scale_factor=1.0,
 ):
     """Raw (not summarized) pooled gradient samples for ONE (n, generator_scope,
     init_scheme) cell, over draw indices [draw_start, draw_start + draw_count).
@@ -91,6 +92,12 @@ def pooled_gradients_for_cell(
     every existing zero-argument-changed caller keeps getting SIGMA=0.1, bit-
     identical to Phase 17's shipped results (17.1-RESEARCH.md Pitfall 1).
 
+    scale_factor: weight-2 pair covariance-scaling hyperparameter (TRAIN-10,
+    Recio-Armengol et al.'s own free hyperparameter), only used when
+    init_scheme == "data_dependent" and generator_scope == "mixed" -- unused
+    (and harmless) for every other (init_scheme, generator_scope) combination.
+    Default 1.0 is the owner's decision per 17.1-RESEARCH.md.
+
     Returns (pooled_grads: np.ndarray, n_tracked_params: int).
     """
     _validate_cell_args(n, generator_scope)
@@ -99,10 +106,29 @@ def pooled_gradients_for_cell(
     K = mmd_exact.gaussian_kernel_matrix_np(centers, sigma)
     tracked = pick_tracked_indices(n, max_tracked_params)
 
+    # data_dependent's thetas are deterministic given (n, generator_scope) --
+    # computed once per cell here, not re-derived on every draw, per
+    # 17.1-RESEARCH.md's explicit recommendation.
+    fixed_thetas = None
+    if init_scheme == "data_dependent":
+        fixed_thetas = data_dependent_init.weight1_data_dependent_theta(p_real, n)
+        if generator_scope == "mixed":
+            i, j = weight2_pair
+            pair_theta = data_dependent_init.weight2_data_dependent_theta(
+                p_real, i, j, n, scale_factor
+            )
+            fixed_thetas[i] = pair_theta
+            fixed_thetas[j] = pair_theta
+
     accumulator = []
     for draw in range(draw_start, draw_start + draw_count):
+        # draw_rng is derived unconditionally (even though data_dependent doesn't
+        # use it) to keep the loop/chunking structure uniform across init schemes.
         draw_rng = rng_mod.get_rng(seed_base, generator_scope, init_scheme, n, draw)
-        thetas = sample_thetas(draw_rng, n, init_scheme)
+        if init_scheme == "data_dependent":
+            thetas = fixed_thetas  # deterministic -- identical every draw, per Plan 17.1-01
+        else:
+            thetas = sample_thetas(draw_rng, n, init_scheme)
 
         if generator_scope == "weight1":
             q_dist, _q_residual = photonic_iqp_distribution(n, thetas)
@@ -137,6 +163,7 @@ def run_gradient_variance_sweep(
     weight2_pair=(0, 1),
     seed_base=170917,
     sigma=SIGMA,
+    scale_factor=1.0,
 ):
     """Pooled exact-gradient-variance sweep across a set of system sizes.
 
@@ -154,6 +181,10 @@ def run_gradient_variance_sweep(
     pooled_gradients_for_cell (default: SIGMA, Phase 17's original fixed
     value -- see pooled_gradients_for_cell's docstring for the backward-
     compatibility guarantee).
+
+    scale_factor: weight-2 pair covariance-scaling hyperparameter, passed
+    straight through to pooled_gradients_for_cell (default: 1.0, unused
+    unless init_scheme == "data_dependent" and generator_scope == "mixed").
 
     Returns a list of per-n result dicts:
       {"n": n, "generator_scope": ..., "init_scheme": ...,
@@ -178,6 +209,7 @@ def run_gradient_variance_sweep(
             weight2_pair=weight2_pair,
             seed_base=seed_base,
             sigma=sigma,
+            scale_factor=scale_factor,
         )
         result = {
             "n": n,
