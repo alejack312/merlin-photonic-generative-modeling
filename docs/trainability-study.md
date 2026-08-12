@@ -282,6 +282,48 @@ abstract operator level. A disagreement (as seen in `mixed/uniform`) is
 therefore genuinely ambiguous between "thin-data artifact" and "encoding
 matters," and this document does not resolve which.
 
+### Follow-up experiments (post-cross-check)
+
+Three follow-up experiments were run after the cross-check above, in
+response to the `mixed/uniform` disagreement.
+
+**1. Fitted parameters for `weight1/small_angle`.** This cell's verdict
+changed from "inconclusive" (original, n=2..6) to "exp" (dual-rail,
+n=2..8) in the tables above. The fitted `exp_model(n) = a*exp(-b*n) + c`
+parameters for both:
+
+| | a | b | c |
+|---|---|---|---|
+| Original (n=2..6) | 54.556 | 6.972e-05 | -54.490 |
+| Dual-rail (n=2..8) | 4.372 | 6.477e-05 | -4.368 |
+
+For comparison, `mixed/uniform`'s fitted parameters (already given above):
+original `a=153.555, b=7.998e-05, c=-153.478`; dual-rail
+`a=0.0390, b=0.1026, c=-0.0180`.
+
+**2. Attempted extension of the dual-rail mixed sweep to n=8/9.**
+`pooled_native_gradients_for_cell(8, "mixed", "uniform", draw_start=0, draw_count=100)`
+was run. It took 2929.4s (~48.8 min) and raised `MemoryError` inside
+MerLin's `SLOSComputeGraph._build_graph_structure`
+(`merlin/pcvl_pytorch/slos_torchscript.py`), during `QuantumLayer`
+construction, before any forward/backward pass executed. n=9 was not
+attempted — the process exited on the n=8 failure. For reference: mixed
+n=8 has `2n+2=18` modes and `n+2=10` total photons
+(`C(27,10) ≈ 8.4 million` Fock states); mixed n=7 (the largest completed
+cell) has 16 modes and 9 photons (`C(24,9) ≈ 1.3 million` Fock states).
+
+**3. Bootstrap confidence interval on `mixed/uniform`'s dual-rail decay
+rate `b`.** Method: for each of 500 iterations, the pooled gradient
+samples at each n=2..7 were independently resampled with replacement
+(same sample count per n), `var` was recomputed per n from the resampled
+values, and `exp_model` was refit via `scipy.optimize.curve_fit`.
+Results:
+
+- 500/500 bootstrap iterations produced a converged fit.
+- `b` across the 500 fits: mean = 0.1022, median = 0.1009, std = 0.0604.
+- 95% CI (2.5th–97.5th percentile of the 500 `b` values): [0.0002, 0.2285].
+- Fraction of the 500 resampled `b` values that were <= 0: 0.000.
+
 ## What this does/doesn't establish
 
 This is an empirical measurement at this project's own small, compute-bound
