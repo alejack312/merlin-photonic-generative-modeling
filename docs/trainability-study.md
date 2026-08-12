@@ -258,7 +258,7 @@ agreements and disagreements both:**
 
 | generator_scope | init_scheme | CORE verdict (n<=6, polarization) | dual-rail verdict (n<=7/8) | agreement |
 |---|---|---|---|---|
-| weight1 | small_angle | inconclusive | **exp** (R²=0.838) | extends — more data points (7 vs 5) resolve what was inconclusive at n<=6 |
+| weight1 | small_angle | inconclusive | **exp** (R²=0.838) | verdict label changed, but see Follow-up Experiments below: the exp fit's own `b` parameter is still degenerate (6.48e-05 dual-rail vs 6.97e-05 original, near-unchanged) |
 | weight1 | uniform | exp (R²=0.999) | exp (R²=0.983) | **agree** |
 | mixed | small_angle | inconclusive | inconclusive | **agree** |
 | mixed | uniform | exp (R²=0.910) | **inconclusive** (R²=0.840, AIC margin < 2) | **disagree** |
