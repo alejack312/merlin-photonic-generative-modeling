@@ -5,7 +5,7 @@
 - ✅ **v1.0 Photonic Generator** — Phases 1-6 (shipped 2026-07-29)
 - ✅ **v2.0 IQP → Photonic Encoding** — Phases 8-9 (shipped 2026-08-05)
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
-- 🚧 **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 (in progress, started 2026-08-07)
+- 🚧 **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 (in progress, started 2026-08-07; 17.1 added 2026-08-12)
 
 ## Phases
 
@@ -69,7 +69,7 @@ Audit: [`.planning/milestones/v2.1-MILESTONE-AUDIT.md`](milestones/v2.1-MILESTON
 
 **Goal:** Turn the validated weight-1/weight-2 IQP-photonic encoding into the project's actual research payoff — measure trainability (barren-plateau behavior) and hardness-under-loss, validate a continuously-tunable weight-2 gate, add an independent Julia-based numeric verification path, and write up the findings. All four Must-have deliverables (TRAIN/STUDY-01, HARD/STUDY-02, ARB-01, WRITE-01) are decoupled from each other per this milestone's own research (`.planning/research/PITFALLS.md` Pitfall 25) — no phase blocks on another's open-ended risk (specifically, ARB-01's genuinely-open-research status must never become a single point of failure for the other three).
 
-**Note on the "34 requirements" instruction vs. the actual count:** `REQUIREMENTS.md`'s own summary line states "34 total (TRAIN: 8, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7)" — but 8+7+9+4+7 = **35**, not 34. This is an arithmetic error in the requirements doc's own header, not a scope change. All 35 actual requirement IDs (TRAIN-01..08, HARD-01..07, ARB-01..09, VERIFY-01..04, WRITE-01..07) are mapped below and the header has been corrected in `REQUIREMENTS.md`'s traceability section.
+**Note on the "34 requirements" instruction vs. the actual count:** `REQUIREMENTS.md`'s own summary line states "34 total (TRAIN: 8, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7)" — but 8+7+9+4+7 = **35**, not 34. This is an arithmetic error in the requirements doc's own header, not a scope change. All 35 actual requirement IDs (TRAIN-01..08, HARD-01..07, ARB-01..09, VERIFY-01..04, WRITE-01..07) are mapped below and the header has been corrected in `REQUIREMENTS.md`'s traceability section. **Updated 2026-08-12: the count is now 37**, following the owner-authorized addition of TRAIN-09/TRAIN-10 (Phase 17.1, below) — a real scope addition this time, not an arithmetic fix.
 
 **Mid-milestone checkpoint (per `PITFALLS.md` Pitfall 26 — a named roadmap artifact, not left implicit):**
 Target date: **~2026-08-20** (roughly the milestone's midpoint, mirroring v1.0's Jul-25 stall-risk-checkpoint template). At that date, answer four questions with concrete evidence (a running script, a measured number, a committed file — not "in progress"):
@@ -171,9 +171,44 @@ Plans:
 
 ---
 
+### Phase 17.1: Trainability Follow-Up — Bandwidth & Init Sensitivity
+
+**Added 2026-08-12** via `/gsd:insert-phase`-style decimal insertion, not a Phase-17 reopen — Phase 17 stays shipped and verified as-is; this is new, owner-authorized follow-up work discovered by a fresh direct read of 8 literature papers (see `docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section), sequenced immediately after Phase 17 rather than renumbering Phases 18-21.
+
+**Goal:** Resolve two concrete, literature-motivated open questions about Phase 17's already-shipped trainability result, using the exact sweep infrastructure Phase 17 already built (`trainability/sweep.py`, `gradient_variance_sweep.py`, `curve_fit.py`) rather than new machinery: (1) is the measured exponential gradient-decay signature partly or wholly a fixed-bandwidth artifact rather than a circuit/init property? (2) does a literature-sourced, data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) resolve Phase 17's inconclusive `small_angle` result where a fixed-magnitude heuristic didn't? Both measured and reported honestly either direction — this phase can conclude "the original finding holds" just as validly as "it doesn't."
+
+**TRAIN-09 correction (2026-08-12, same day as this phase's addition):** the original literature trigger for TRAIN-09 was Rudolph et al.'s (arXiv:2305.02881) proof that a fixed, n-independent MMD bandwidth causes exponential loss-variance concentration via a Pauli-Z "bodyness" decomposition, with their fix being a bandwidth scaled as `σ∈Θ(n)`. Verified via direct code read (`trainability/target_grid.py`, `trainability/mmd_exact.py`) that this doesn't mechanically transfer: their kernel is bitstring-Hamming-distance where each bit-vector coordinate is one qubit; this project's kernel is Euclidean distance over a **fixed-2D** bin-center grid (`centers` shape `(2^n, 2)` for every n) with an arbitrary, non-spatial bitstring→index mapping — there is no Pauli-Z decomposition of that kernel to control the bandwidth of. The real, *verified* (not assumed) analog: because `2^n` bins pack into the same fixed `[lo,hi]^2` region, bin spacing shrinks from 1.20 (n=2) to 0.17 (n=5-6) as n grows, so the literally-fixed `SIGMA=0.1` becomes progressively less discriminating relative to the grid (kernel value between adjacent bins: ≈0 at n=2 → ≈0.23 at n=5-6, computed directly). TRAIN-09 is redefined around this verified mechanism instead.
+
+**Depends on:** Phase 17 (reuses its sweep infrastructure and CORE dataset as the baseline to compare against). Independent of Phase 18/19 — does not block or wait on either.
+**Requirements:** TRAIN-09, TRAIN-10
+
+**TRAIN-09 design finalized (2026-08-12, post-research, owner-reviewed — supersedes success criterion 1's original "scale sigma per n" wording below):** rather than deriving a single per-n-varying sigma schedule (which requires picking one arbitrary anchor point, a real weakness), the owner chose a fixed sigma **grid** — `{0.03, 0.1, 0.3, 1.0, 3.0, 9.0}`, directly modeled on the sibling project's own `AC12` bandwidth sweep — with Phase 17's full CORE sweep re-run once per grid value (6 independent runs, sigma held constant across the whole n-range within each run), rather than one sigma-schedule sweep. `sigma=0.1` reproduces Phase 17's original CORE CSVs bit-for-bit, used as a built-in consistency check. See `17.1-RESEARCH.md`'s "Owner Decisions" section for full detail.
+
+**Plans:** 6 plans (5 waves — 17.1-01/17.1-02 parallel in wave 1 (independent files); 17.1-03 depends on both (wave 2); 17.1-04 depends on 17.1-03 (wave 3, TRAIN-09's 6-sigma-grid execution); 17.1-05 depends on 17.1-04 (wave 4, TRAIN-10 execution + comparison analysis, sequenced after TRAIN-09 to avoid concurrent heavy compute per this project's documented memory constraint); 17.1-06 depends on 17.1-05 (wave 5, docs write-up))
+
+Plans:
+- [ ] 17.1-01-PLAN.md — TDD: data-dependent init math primitives (`trainability/data_dependent_init.py`), bit-ordering-verified (Pitfall 3)
+- [ ] 17.1-02-PLAN.md — Thread `sigma` through the sweep pipeline (backward-compatible), CLI `--sigma`/CSV columns, chunk/combine sigma-consistency fix (Pitfall 2)
+- [ ] 17.1-03-PLAN.md — Wire `data_dependent` init scheme into the sweep pipeline and CLI (`--scale-factor`)
+- [ ] 17.1-04-PLAN.md — Run TRAIN-09's 6-sigma-grid CORE sweep (weight1 + mixed), sigma=0.1 consistency check
+- [ ] 17.1-05-PLAN.md — Run TRAIN-10's sweep; new `trainability_analysis_1701.py` comparison analysis (does not modify Phase 17's `trainability_analysis.py`)
+- [ ] 17.1-06-PLAN.md — Fold both follow-ups into `docs/trainability-study.md` as new subsections
+
+**Success criteria:**
+1. TRAIN-09: gradient-variance sweep re-run at Phase 17's CORE n-range (weight1 n=2-6, mixed n=2-5), both init schemes, at each of a fixed sigma grid `{0.03, 0.1, 0.3, 1.0, 3.0, 9.0}` (owner-finalized design, see above — supersedes this criterion's original "scale sigma per n" phrasing) — the sigma and bin-spacing values stated explicitly in the sweep's own output/report for every row, not just implied by a formula.
+2. TRAIN-09: same poly-vs-exponential curve-fit analysis (reusing `trainability.curve_fit.fit_and_compare` unchanged) applied to the new sweep at every sigma grid value; explicit statement of whether the exponential-decay verdict for `weight1/uniform` and `mixed/uniform` survives across the sigma grid, weakens, or disappears.
+3. TRAIN-10: Recio-Armengol et al.'s data-dependent init recipe implemented (weight-1 angles from empirical single-bit target-distribution means; weight-2 angles proportional to empirical pairwise covariances, scaled by a stated hyperparameter — `scale_factor=1.0`, owner-decided) as a new init scheme alongside the existing `small_angle`/`uniform` options.
+4. TRAIN-10: gradient-variance sweep re-run under this new init scheme at the same n-range (`n_draws=1`, owner-decided — the init is fully deterministic, so more draws are redundant); explicit statement of whether it produces a clearer (non-inconclusive) trainability verdict than `small_angle` did, and if so which direction.
+5. Both results folded into `docs/trainability-study.md` as new subsections (not silently replacing Phase 17's original reported numbers) — the original CORE dataset and verdict stay on record either way, with these results presented as a follow-up check, honoring this project's honesty-over-narrative convention.
+
+---
+
 ### Phase 18: Hardness-Under-Loss Assessment
 
 **Goal:** Measure whether the sampling-hardness argument survives realistic photon loss, via `Processor.probs()` + `NoiseModel` (not `Analyzer`, which silently ignores loss), grounded in a named asymptotic threshold from the literature, reported honestly either direction. **HARD-03 (full read of arXiv:2510.24137) is the first, near-zero-code step within this phase, not the last** — it gates this phase's central claim (where this project's tested loss levels sit relative to the known threshold) and must not be left implicit.
+
+**Literature grounding added 2026-08-12** (fresh primary-source read of 8 papers, per owner's explicit instruction — see `docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section): Bremner-Montanaro-Shepherd's noise+anticoncentration theorem (arXiv:1610.01808, *Quantum* 1, 8 (2017), Theorem 4) is a second named asymptotic threshold alongside arXiv:2510.24137/Aaronson-Brod, folded into success criterion 4 below — but its noise model (single-qubit depolarizing) is a physically different channel than photon transmission loss (a Fock-space erasure/leakage channel, typically surfacing as herald failure rather than a random bit-flip), so the positioning must state an explicit translation model, not assume equivalence. Its anticoncentration parameter `α` (`Σp_x² ≤ α·2⁻ⁿ`) is the quantity that paper's own hardness-vs-simulability threshold is keyed on, and should be tracked alongside `η` (folded into success criterion 5).
+
 **Depends on:** None beyond already-shipped weight-1/weight-2 modules. Independent of ARB, TRAIN, and VERIFY — this phase does not wait on ARB-01's outcome.
 **Requirements:** HARD-01, HARD-02, HARD-03, HARD-04, HARD-05, HARD-06, HARD-07
 
@@ -181,8 +216,8 @@ Plans:
 1. arXiv:2510.24137 read in full (not abstract-only); its noisy-IQP-specific threshold formula (if stated) extracted and cited — done *before* the loss-sweep methodology below is finalized.
 2. Loss sweep run via `Processor.probs()` + `NoiseModel(transmittance=η)` over a defined η grid.
 3. Cross-checked against Perceval's independently-implemented `LossSimulator`/`LC` ancilla-beamsplitter loss model at ≥1 shared η, agreement confirmed within a stated tolerance.
-4. This project's fractional-loss model explicitly positioned against Aaronson-Brod's fixed-loss-count regime — states plainly which regime this project's tested loss levels actually sit in.
-5. TVD-vs-η tracked against both the lossless reference and an explicitly-defined classically-easy baseline distribution; weight-2 loss sweep (photon loss compounded with `heralded_cz`'s herald-failure probability) included; explicit "what this does/doesn't establish" scope statement written.
+4. This project's fractional-loss model explicitly positioned against Aaronson-Brod's fixed-loss-count regime AND Bremner-Montanaro-Shepherd's depolarizing-noise-threshold regime (arXiv:1610.01808) — states plainly which regime(s) this project's tested loss levels actually sit in, and states explicitly how (or whether) photon loss translates to an effective depolarizing rate for that second comparison to be meaningful, rather than assuming the two noise channels are equivalent.
+5. TVD-vs-η tracked against both the lossless reference and an explicitly-defined classically-easy baseline distribution, alongside the output distribution's anticoncentration parameter `α` as a function of `η` (per arXiv:1610.01808's Theorem 4); weight-2 loss sweep (photon loss compounded with `heralded_cz`'s herald-failure probability) included; explicit "what this does/doesn't establish" scope statement written.
 
 ---
 
@@ -202,15 +237,19 @@ Plans:
 ### Phase 20: Technical Write-Up
 
 **Goal:** Write up STUDY-01 (Phase 17), STUDY-02 (Phase 18), and ARB-01's (Phases 15-16) findings as the project's technical findings document — methodology-stated-before-results, honest negative/inconclusive framing wherever the data warrants it, matching this project's existing GEN-07/LIT-04/Phase-7 rigor bar. Per research (`FEATURES.md`): this phase's *structure* (methodology-first, literature-comparison tables, explicit scope statements) is reasonable to draft early, in parallel with Phases 15-18, as a template to fill in — but the phase cannot be substantively completed until those phases have at least first-pass results.
-**Depends on:** Phase 16 (ARB-01's full outcome), Phase 17 (TRAIN's dataset), Phase 18 (HARD's dataset). Does not require Phase 19 (Julia cross-check results are supplementary evidence, not a stated WRITE-01..06 requirement — include if ready, do not block on it).
+
+**Literature grounding added 2026-08-12** (fresh primary-source read of 8 papers — see `docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section): six additional named baselines are now available beyond the four already on record, folded into success criterion 2. Separately, Herbst et al. (arXiv:2512.24801) gives an explicit theoretical link between the TRAIN and HARD sections — anticoncentration is predicted to drive *both* IQP's sampling hardness and its MMD-loss concentration, so the two sections' findings should be explicitly checked against (not silently left as two unrelated results) — folded into a new success criterion 6.
+
+**Depends on:** Phase 16 (ARB-01's full outcome), Phase 17 (TRAIN's dataset), Phase 17.1 (bandwidth/init follow-up results — added 2026-08-12), Phase 18 (HARD's dataset). Does not require Phase 19 (Julia cross-check results are supplementary evidence, not a stated WRITE-01..06 requirement — include if ready, do not block on it).
 **Requirements:** WRITE-01, WRITE-02, WRITE-03, WRITE-04, WRITE-05, WRITE-06
 
 **Success criteria:**
 1. Methodology-stated-before-results structure exists for each of the trainability, hardness-under-loss, and ARB-01 sections.
-2. Explicit comparison table against each named literature baseline (McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule) — stated per baseline as consistent with / inconsistent with / silent relative to.
+2. Explicit comparison table against each named literature baseline — McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule, plus the six papers added by the 2026-08-12 fresh literature read: Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, hardness threshold) and 2017 (arXiv:1610.01808, noise+hardness), Rudolph et al. (arXiv:2305.02881, MMD bodyness/bandwidth trainability), Mhiri et al. (arXiv:2502.07889, warm-start/small-angle guarantees), Recio-Armengol et al. (arXiv:2503.02934, n=1000 IQP-generative-ML), and Herbst et al. (arXiv:2512.24801, anticoncentration-trainability tradeoff) — stated per baseline as consistent with / inconsistent with / silent relative to.
 3. Honest negative/inconclusive framing applied wherever the data warrants it, in the same direct language already used for GEN-07/LIT-04/Phase 7's neighbor-locality verdict.
 4. Explicit "what this does/doesn't establish" scope paragraph present for each of the three sections.
 5. Self-explanation checkpoint transcripts recorded (owner's own interpretation transcribed first); every reported number traceable to a specific script/test/notebook cell, with a fixed seed where randomness is involved.
+6. The TRAIN and HARD sections explicitly engage with Herbst et al.'s anticoncentration-tradeoff prediction — stated plainly whether this project's own measured TRAIN result (Phase 17) and HARD result (Phase 18) came out consistent or inconsistent with that framework, as the connecting thread between the two otherwise-separate sections rather than two unrelated findings.
 
 ---
 
@@ -231,8 +270,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 **Execution Order (v3.0, in progress) — waves, per dependency structure above:**
 - Wave 1 (parallel, no interdependencies): Phase 14, Phase 15, Phase 17, Phase 18
-- Wave 2: Phase 16 (depends on 15), Phase 19 (depends on 14 + 18)
-- Wave 3: Phase 20 (depends on 16, 17, 18)
+- Wave 2: Phase 16 (depends on 15), Phase 17.1 (depends on 17 — added 2026-08-12), Phase 19 (depends on 14 + 18)
+- Wave 3: Phase 20 (depends on 16, 17, 17.1, 18)
 - Wave 4: Phase 21 (depends on 20)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -254,9 +293,10 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 15. ARB-01 Core Gate De-Risking & Validation | v3.0 | 4/4 | Complete — verified 5/5, TVD at floating-point-noise level | 2026-08-07 |
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 3/3 | Complete — verified 3/3, no bugs found | 2026-08-09 |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 7/7 | Complete — verified 8/8, honest exp-decay signature found (uniform init) | 2026-08-11 |
+| 17.1. Trainability Follow-Up: Bandwidth & Init Sensitivity | v3.0 | 0/6 | Planned — 6 plans across 5 waves | — |
 | 18. Hardness-Under-Loss Assessment | v3.0 | 0/? | Not started | — |
 | 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
 | 21. External-Facing Framing Pass | v3.0 | 0/? | Not started | — |
 
-v2.0 milestone (Phases 8-9) shipped 2026-08-05. v2.1 milestone (Phases 10-13, Weight-2 Implementation) shipped 2026-08-06. v3.0 milestone (Phases 14-21, IQP Circuit Study & Write-Up) roadmap created 2026-08-07 — 35 v1 requirements mapped across 8 phases (see `REQUIREMENTS.md` note on the corrected 34→35 count), 100% coverage validated, no orphans. Phase 16 (ARB-01 Extended Validation & Postselection Bookkeeping) completed 2026-08-09 — verified 3/3 must-haves, ARB-07/08/09 all satisfied, no bugs found. Full phase and requirement detail for shipped milestones archived to `.planning/milestones/v2.0-ROADMAP.md`/`v2.0-REQUIREMENTS.md` and `.planning/milestones/v2.1-ROADMAP.md`/`v2.1-REQUIREMENTS.md`/`v2.1-MILESTONE-AUDIT.md`.
+v2.0 milestone (Phases 8-9) shipped 2026-08-05. v2.1 milestone (Phases 10-13, Weight-2 Implementation) shipped 2026-08-06. v3.0 milestone (Phases 14-21, IQP Circuit Study & Write-Up) roadmap created 2026-08-07 — 35 v1 requirements mapped across 8 phases (see `REQUIREMENTS.md` note on the corrected 34→35 count), 100% coverage validated, no orphans. Phase 16 (ARB-01 Extended Validation & Postselection Bookkeeping) completed 2026-08-09 — verified 3/3 must-haves, ARB-07/08/09 all satisfied, no bugs found. Phase 17 (Trainability/Barren-Plateau Study) completed 2026-08-11 — verified 8/8, honest exponential-decay signature found under uniform init. **Phase 17.1 added 2026-08-12**, inserted after a fresh, owner-instructed direct read of 8 literature papers (not the sibling project's secondhand vault notes) surfaced two concrete, testable follow-up questions about Phase 17's already-shipped result — a possible fixed-bandwidth confound (TRAIN-09, verified via direct code read to be a real geometric effect, not Rudolph et al.'s literal σ∈Θ(n) mechanism which doesn't apply to this project's kernel) and a literature-sourced alternative to the inconclusive `small_angle` init scheme (TRAIN-10, Recio-Armengol et al.). Both owner-authorized as new milestone scope (37 v1 requirements total now, up from 35); Phase 17 itself was not reopened or reversed. **Phase 17.1 planned 2026-08-12**: 6 plans across 5 waves (17.1-01/02 wave 1; 17.1-03 wave 2; 17.1-04 wave 3, TRAIN-09's 6-sigma-grid execution; 17.1-05 wave 4, TRAIN-10 execution + comparison analysis; 17.1-06 wave 5, docs write-up) — TRAIN-09's design finalized post-research to a fixed sigma grid `{0.03, 0.1, 0.3, 1.0, 3.0, 9.0}` (owner-reviewed, supersedes the original per-n sigma-schedule idea), TRAIN-10's `scale_factor=1.0`/`n_draws=1` owner-decided. Full phase and requirement detail for shipped milestones archived to `.planning/milestones/v2.0-ROADMAP.md`/`v2.0-REQUIREMENTS.md` and `.planning/milestones/v2.1-ROADMAP.md`/`v2.1-REQUIREMENTS.md`/`v2.1-MILESTONE-AUDIT.md`.
