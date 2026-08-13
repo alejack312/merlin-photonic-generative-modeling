@@ -17,13 +17,15 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 - [x] **TRAIN-06**: Mixed weight-1+weight-2 generator sweep, reusing Phase 13's validated composability
 - [x] **TRAIN-07**: Cross-reference against `docs/iqp-baseline.md`'s qubit-side empirical plateau rule (97.9% accuracy, 283 rows) — does it transfer to the photonic realization?
 - [x] **TRAIN-08**: Sweep extended toward N≈20-24 if compute allows — the range where the cited precedent's poly-vs-exp fit is known to flip; honestly report if this range isn't reached
+- [ ] **TRAIN-09** *(added 2026-08-12, owner-authorized follow-up to the fresh literature read; corrected same day after verifying Rudolph et al.'s specific bandwidth-scaling formula doesn't transfer to this project's kernel — see below)*: Re-run the gradient-variance sweep with `SIGMA` scaled to hold `sigma/bin-spacing` constant across n, at the same n-range as Phase 17's CORE sweep, to test whether Phase 17's fixed `SIGMA=0.1` (`trainability/sweep.py:29`) is itself sufficient to produce the observed exponential-decay signature via a verified, purely-geometric mechanism — target-grid bin spacing shrinks from 1.20 (n=2) to 0.17 (n=5-6) as `2^n` bins pack into the same fixed `[lo,hi]^2` region (`trainability/target_grid.py`), so a literally-fixed `sigma` becomes progressively less discriminating (kernel value between adjacent bins rises from ≈0 at n=2 to ≈0.23 at n=5-6) independent of circuit structure or init scheme. (Rudolph et al.'s arXiv:2305.02881 `σ∈Θ(n)` prescription was the original literature trigger for this question, but doesn't mechanically apply — their bodyness/Pauli-Z decomposition requires a bitstring-Hamming-distance kernel where each coordinate is one qubit; this project's kernel is a fixed-2D-Euclidean-distance kernel over an arbitrarily-indexed bin grid, verified via direct code read, not the same structure.)
+- [ ] **TRAIN-10** *(added 2026-08-12, owner-authorized follow-up to the fresh literature read)*: Re-run the gradient-variance sweep at the same n-range under Recio-Armengol et al.'s (arXiv:2503.02934) data-dependent initialization (weight-1 angles from empirical single-bit training-data means, weight-2 angles proportional to empirical pairwise covariances) as a real alternative to the fixed-magnitude `small_angle` scheme, and report whether it changes the small_angle/uniform trainability picture
 
 ### Hardness-Under-Loss Assessment (HARD)
 
 - [ ] **HARD-01**: Loss sweep via `Processor.probs()` + `NoiseModel(transmittance=η)` over a defined η grid — NOT `Analyzer`, which was confirmed to silently ignore loss entirely
 - [ ] **HARD-02**: Cross-check against Perceval's independently-implemented `LossSimulator`/`LC` ancilla-beamsplitter loss model, at ≥1 shared η
 - [ ] **HARD-03**: Full read (not abstract-only) of arXiv:2510.24137, with its noisy-IQP-specific threshold formula (if stated) extracted and cited — this is the load-bearing, currently-open gap blocking STUDY-02's central claim
-- [ ] **HARD-04**: Explicit positioning of this project's fractional-loss model against Aaronson-Brod's fixed-loss-count regime — state which regime this project's tested loss levels actually sit in
+- [ ] **HARD-04**: Explicit positioning of this project's fractional-loss model against Aaronson-Brod's fixed-loss-count regime **and** Bremner-Montanaro-Shepherd's depolarizing-noise-threshold regime (arXiv:1610.01808, added 2026-08-12 via fresh literature read) — state which regime(s) this project's tested loss levels actually sit in, and state explicitly how (or whether) photon loss translates to an effective depolarizing rate for the second comparison to be meaningful (the two are physically different noise channels — Fock-space erasure vs. qubit depolarizing — not equivalent by assumption)
 - [ ] **HARD-05**: TVD-vs-η metric tracked against both (a) the lossless reference and (b) an explicitly-defined classically-easy baseline distribution
 - [ ] **HARD-06**: Explicit "what this does/doesn't establish" scope statement, matching `docs/iqp-photonic-encoding.md`'s ENC-02 precedent
 - [ ] **HARD-07**: Weight-2 loss sweep — physical photon loss compounded with `heralded_cz`'s herald-failure probability
@@ -50,7 +52,7 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 ### Technical Write-Up (WRITE)
 
 - [ ] **WRITE-01**: Methodology-stated-before-results structure for each of the trainability, hardness-under-loss, and ARB-01 sections
-- [ ] **WRITE-02**: Explicit comparison table against each named literature baseline (McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule) — consistent with / inconsistent with / silent relative to, stated per baseline
+- [ ] **WRITE-02**: Explicit comparison table against each named literature baseline (McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule, **plus 6 papers added 2026-08-12 via fresh literature read: arXiv:1504.07999, arXiv:1610.01808, arXiv:2305.02881, arXiv:2502.07889, arXiv:2503.02934, arXiv:2512.24801** — listed individually in `ROADMAP.md`'s Phase 20 success criterion 2) — consistent with / inconsistent with / silent relative to, stated per baseline
 - [ ] **WRITE-03**: Honest negative/inconclusive framing wherever the data warrants it, in the same direct language this project already used for GEN-07/LIT-04/Phase 7's neighbor-locality verdict
 - [ ] **WRITE-04**: Explicit "what this does/doesn't establish" scope paragraph for each of the trainability, hardness-under-loss, and ARB-01 sections
 - [ ] **WRITE-05**: Self-explanation checkpoint transcripts recorded in the write-up itself (owner's own interpretation transcribed first, per CLAUDE.md's standing rule)
@@ -110,6 +112,8 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | TRAIN-06 | 17 - Trainability / Barren-Plateau Study | Complete |
 | TRAIN-07 | 17 - Trainability / Barren-Plateau Study | Complete |
 | TRAIN-08 | 17 - Trainability / Barren-Plateau Study | Complete |
+| TRAIN-09 | 17.1 - Trainability Follow-Up: Bandwidth & Init Sensitivity | Complete |
+| TRAIN-10 | 17.1 - Trainability Follow-Up: Bandwidth & Init Sensitivity | Complete |
 | HARD-01 | 18 - Hardness-Under-Loss Assessment | Pending |
 | HARD-02 | 18 - Hardness-Under-Loss Assessment | Pending |
 | HARD-03 | 18 - Hardness-Under-Loss Assessment | Pending |
@@ -129,10 +133,10 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | WRITE-07 | 21 - External-Facing Framing Pass | Pending |
 
 **Coverage:**
-- v1 requirements: **35 total** (TRAIN: 8, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7). Note: this file's summary line previously stated "34 total" — 8+7+9+4+7=35, not 34; corrected here during roadmap creation as an arithmetic-error fix, not a scope change. All 35 IDs listed above were already present in the v1 Requirements section unchanged.
-- Mapped to phases: 35/35 ✓
+- v1 requirements: **37 total** (TRAIN: 10, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7). Note: this file's summary line previously stated "34 total" then corrected to "35 total" (8+7+9+4+7=35, arithmetic-error fix during roadmap creation); now 37 following the 2026-08-12 addition of TRAIN-09/TRAIN-10 (see below) — a real scope addition, not an arithmetic correction.
+- Mapped to phases: 37/37 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-12 — traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; the checkboxes in the v1 Requirements section above were already updated at that time, but this traceability table was missed — flagged by gsd-verifier during Phase 17's own verification pass, fixed here). No scope change; dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) is explicitly supplementary and out of this milestone's formal requirement set, not added here.*
+*Last updated: 2026-08-12 (later same day) — added TRAIN-09 and TRAIN-10, owner-authorized follow-up experiments to Phase 17's trainability study, discovered via a fresh direct read of 8 literature papers (owner's explicit instruction not to rely on the sibling project's secondhand vault notes). TRAIN-09 tests whether Phase 17's fixed MMD bandwidth (not just circuit/init) is itself sufficient to produce the measured exponential-decay signature (Rudolph et al., arXiv:2305.02881). TRAIN-10 tests a literature-sourced data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) as a real alternative to the inconclusive `small_angle` scheme. Both mapped to a new inserted phase, 17.1 (see ROADMAP.md), rather than reopening the already-shipped, already-verified Phase 17 itself. Earlier same-day update: traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; flagged by gsd-verifier during Phase 17's own verification pass, fixed same day). Dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) remains explicitly supplementary and separate from TRAIN-09/10.*
