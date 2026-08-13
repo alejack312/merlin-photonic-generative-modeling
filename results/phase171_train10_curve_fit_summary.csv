@@ -1,0 +1,3 @@
+generator_scope,init_scheme,bin_spacing,n_min,n_max,verdict,exp_r2,exp_aic,exp_b,poly_r2,poly_aic,vs_small_angle_verdict
+weight1,data_dependent,1.2;0.4;0.4;0.171429;0.171429,2,6,inconclusive,0.0,-103.8464822335214,29.76806463538375,-1.1102230246251565e-15,-103.84648223352139,still inconclusive
+mixed,data_dependent,1.2;0.4;0.4;0.171429,2,5,inconclusive,0.2531405398465748,-46.629922981228894,13.060372880359177,0.2531408018501353,-46.629924384457325,still inconclusive
