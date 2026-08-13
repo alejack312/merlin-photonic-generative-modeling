@@ -173,6 +173,170 @@ or plateau if init_scheme == uniform and max(n) >= 6
 
 > Owner interpretation: [pending]
 
+## Bandwidth sensitivity follow-up (TRAIN-09)
+
+**Scope note, stated up front:** this section and the one below it are Phase
+17.1's follow-up checks, run *after* Phase 17 was already complete and
+verified. They do not alter any number or verdict in the sections above —
+they test whether those results hold up under a wider bandwidth/init sweep,
+and report the answer plainly in whichever direction it came out.
+
+### Methodology / what changed
+
+Phase 17's CORE sweep (`weight1` n=2–6, `mixed` n=2–5, both init schemes,
+100 draws/cell) was re-run at a fixed sigma grid
+`{0.03, 0.1, 0.3, 1.0, 3.0, 9.0}` (owner-decided, ~3x log-spacing per step,
+centered on Phase 17's original `SIGMA=0.1` and chosen to bracket the CORE
+bin-spacing range of 0.17–1.2 on both sides), each sigma value held
+**constant across the whole n-range** — six independent fixed-sigma sweeps,
+not one sigma-schedule sweep. An earlier candidate design (a per-n sigma
+*schedule*, scaling sigma with `n` to hold `sigma/bin-spacing` constant)
+was explicitly dropped: it requires picking one arbitrary anchor n to
+normalize against (anchoring at n=2 vs. n=5/6 tests different things and
+neither is more "correct" than the other), and this project's own
+established convention is to sweep one fixed hyperparameter across the
+full n-range per run (exactly how `init_scheme` and Phase 17's original
+`SIGMA` were themselves swept) — the fixed-grid design avoids the
+anchor-choice ambiguity entirely rather than resolving it with a guess.
+This directly follows the sibling project's own `AC12` bandwidth-sweep
+precedent, per `17.1-RESEARCH.md`'s Owner Decisions section.
+
+### Results
+
+**weight1** (n=2–6; sigma column is the fixed kernel bandwidth used for
+that row's whole sweep):
+
+| sigma | init_scheme | winning model | exp R² | exp AIC | poly R² | poly AIC | vs. original |
+|---|---|---|---|---|---|---|---|
+| 0.03 | small_angle | inconclusive | 0.139 | -49.85 | 0.021 | -49.21 | n/a (no exp verdict in original) |
+| 0.1  | small_angle | inconclusive | 0.543 | -47.11 | 0.405 | -45.79 | n/a — matches original row exactly |
+| 0.3  | small_angle | exp | 0.904 | -50.15 | 0.823 | -47.12 | n/a (no exp verdict in original) |
+| 1.0  | small_angle | inconclusive | 0.993 | -73.46 | 0.992 | -73.33 | n/a (no exp verdict in original) |
+| 3.0  | small_angle | inconclusive | 0.997 | -115.13 | 0.995 | -113.68 | n/a (no exp verdict in original) |
+| 9.0  | small_angle | inconclusive | 0.997 | -158.78 | 0.996 | -157.05 | n/a (no exp verdict in original) |
+| 0.03 | uniform | **exp** | 0.999 | -52.40 | 0.998 | -47.73 | **survives** |
+| 0.1  | uniform | **exp** | 0.999 | -53.43 | 0.998 | -48.53 | **survives** — matches original row exactly |
+| 0.3  | uniform | inconclusive | 0.988 | -39.86 | 0.989 | -40.29 | **disappears** |
+| 1.0  | uniform | inconclusive | 0.996 | -55.11 | 0.995 | -54.28 | **disappears** |
+| 3.0  | uniform | **exp** | 0.999 | -95.78 | 0.997 | -92.31 | **survives** (re-emerges) |
+| 9.0  | uniform | **exp** | 0.999 | -139.28 | 0.997 | -135.38 | **survives** (re-emerges) |
+
+**mixed** (n=2–5):
+
+| sigma | init_scheme | winning model | exp R² | exp AIC | poly R² | poly AIC | vs. original |
+|---|---|---|---|---|---|---|---|
+| 0.03 | small_angle | inconclusive | 0.213 | -43.14 | 0.213 | -43.14 | n/a (no exp verdict in original) |
+| 0.1  | small_angle | inconclusive | 0.000 | -41.76 | -0.000 | -41.76 | n/a — matches original row exactly |
+| 0.3  | small_angle | exp | 0.920 | -50.68 | 0.837 | -47.84 | n/a (no exp verdict in original) |
+| 1.0  | small_angle | inconclusive | 0.072 | -50.69 | 0.020 | -50.47 | n/a (no exp verdict in original) |
+| 3.0  | small_angle | inconclusive | 0.337 | -76.62 | 0.337 | -76.62 | n/a (no exp verdict in original) |
+| 9.0  | small_angle | inconclusive | 0.328 | -110.56 | 0.328 | -110.56 | n/a (no exp verdict in original) |
+| 0.03 | uniform | **exp** | 0.911 | -37.73 | 0.825 | -35.01 | **survives** |
+| 0.1  | uniform | **exp** | 0.910 | -37.56 | 0.823 | -34.85 | **survives** — matches original row exactly |
+| 0.3  | uniform | inconclusive | 0.598 | -32.21 | 0.470 | -31.10 | **disappears** |
+| 1.0  | uniform | inconclusive | 0.000 | -29.51 | 0.302 | -30.95 | **disappears** |
+| 3.0  | uniform | inconclusive | 0.330 | -58.71 | 0.330 | -58.71 | **disappears** |
+| 9.0  | uniform | inconclusive | 0.325 | -92.96 | 0.325 | -92.96 | **disappears** |
+
+Full per-cell numbers (all 24 rows, both scopes): `results/phase171_train09_curve_fit_summary.csv`.
+
+**Sigma=0.1 consistency-check footnote:** the `sigma=0.1` row of this grid
+is a built-in sanity check — it should reproduce Phase 17's original CORE
+result exactly, since it re-runs the identical sweep at the identical
+bandwidth through the new sigma-threaded code path. `weight1` matched
+bit-for-bit on every compared row. `mixed` matched exactly on 2 of 8 rows
+and showed a ~1e-13 to 1e-16 relative-magnitude difference on the other 6
+(`small_angle` at n=2,3,4) — diagnosed (Plan 17.1-04) as a deterministic
+environment/floating-point-ordering difference rather than a logic bug
+(re-running the affected cell reproduced this pipeline's own value
+bit-for-bit, and `weight1`'s identical sigma-threading code shows zero
+drift), reported here as an open, non-blocking item rather than smoothed
+over.
+
+### Does the exp-decay verdict survive the sigma grid?
+
+**No, not for either `uniform` cell, and the way it fails is itself the
+finding.** `weight1/uniform` and `mixed/uniform` were the two cells with a
+definite original "exp" verdict. Both survive at sigma in {0.03, 0.1} —
+near Phase 17's original fixed bandwidth — and both flip to
+"inconclusive" at sigma in {0.3, 1.0}. Past that, the two scopes diverge:
+`weight1/uniform` **non-monotonically re-emerges** as "exp" at sigma in
+{3.0, 9.0}, while `mixed/uniform` stays "inconclusive" through sigma=9.0.
+A simple "it was only ever a fixed-bandwidth artifact and fades away as
+sigma grows" story does not fit `weight1`'s re-emergence at large sigma
+either — the true picture is that the verdict is **sigma-dependent in a
+non-trivial, non-monotonic way**, not a stable property of the circuit/init
+pair across bandwidths.
+
+**Plain statement, no hedging:** Phase 17's original "exp" verdict for
+`weight1/uniform` and `mixed/uniform` is **not robust** across this sigma
+grid. It survives only near the original bandwidth and, in `weight1`'s
+case, again at bandwidths far from it — this reveals the original
+fixed-`SIGMA=0.1` result was at least partly a bandwidth-dependent artifact
+of that specific kernel choice, not solely a genuine, bandwidth-independent
+circuit/init property. This does not mean no genuine effect exists (the
+sigma=0.1 and sigma=0.03 agreement, and `weight1`'s large-sigma
+re-emergence, are both real measured signals, not noise) — it means the
+single-bandwidth Phase 17 result cannot be read as bandwidth-independent
+evidence on its own.
+
+## Data-dependent initialization follow-up (TRAIN-10)
+
+### Methodology
+
+Recio-Armengol et al.'s (arXiv:2503.02934, Sec. 8.1.2) data-dependent
+initialization recipe was translated onto this project's grid-bin target
+representation (the paper's own recipe assumes a raw bitstring dataset,
+which this project does not have — its target is `p_real`, a probability
+distribution over `2^n` grid bins built by `trainability/target_grid.py`).
+Weight-1 angles are set to `arcsin(sqrt(<x_k>))`, where `<x_k>` is the
+marginal probability that bit `k` of the sampled bin index equals 1 under
+`p_real` (the project's stand-in for "the mean of the k-th dimension of the
+training data"). For the `mixed` scope, this project's circuit has no
+independent weight-2-only parameter — the weight-2 pair's two qubits `(0,1)`
+receive the covariance-based `weight2_data_dependent_theta` value **in
+place of** their own per-qubit weight-1 rule value, while every other qubit
+keeps the standard weight-1 rule. This design decision was made explicitly
+in Plan 17.1-03 (not silently), since a reader of this document would not
+otherwise have seen it, and is independently verified there by a test that
+reproduces the gradient computation with and without the override and
+confirms the actual sweep output matches only the "with override" version.
+`scale_factor=1.0` (owner-decided, matches the paper's own upper
+grid-search bound, making weight-2 angles directly equal to the raw
+±1-convention covariance) and `n_draws=1` (owner-decided) were used — the
+recipe is fully deterministic given `(n, p_real, scale_factor)`, so
+additional draws would produce bit-identical theta vectors and add no
+rigor, only redundant compute.
+
+### Results
+
+| generator_scope | init_scheme | n range | winning model | exp R² | exp AIC | poly R² | poly AIC |
+|---|---|---|---|---|---|---|---|
+| weight1 | data_dependent | 2–6 (5 pts) | inconclusive | 0.000 | -103.85 | -0.000 | -103.85 |
+| mixed | data_dependent | 2–5 (4 pts) | inconclusive | 0.253 | -46.63 | 0.253 | -46.63 |
+
+Full numbers: `results/phase171_train10_curve_fit_summary.csv`.
+
+**Comparison against the original `small_angle` verdict, stated plainly:**
+
+| generator_scope | original (`small_angle`) verdict | new (`data_dependent`) verdict | clearer result? |
+|---|---|---|---|
+| weight1 | inconclusive (R²≈0.4–0.5) | inconclusive (R²≈0.000) | **no — still inconclusive** |
+| mixed | inconclusive (R²≈0) | inconclusive (R²≈0.253) | **no — still inconclusive** |
+
+### Does a literature-sourced init resolve the inconclusive verdict?
+
+**No, plainly.** Recio-Armengol et al.'s data-dependent initialization did
+**not** produce a clearer (non-inconclusive) verdict than `small_angle` in
+either generator scope — both `weight1/data_dependent` and
+`mixed/data_dependent` remain "inconclusive," in `weight1`'s case with an
+even weaker exp-model fit (R²≈0.000) than the original `small_angle` row
+(R²=0.543) it was meant to potentially clarify. This is a genuine negative
+result for the literature-sourced alternative-init hypothesis, reported
+here exactly as measured: the `small_angle` scheme's inconclusiveness is
+not an artifact of that specific init recipe — it persists under a
+different, principled init strategy too.
+
 ## Independent cross-check: dual-rail encoding + MerLin native autograd
 
 **Scope note, stated up front:** everything in this section is supplementary
@@ -371,3 +535,14 @@ specific target distribution, the rule's prediction and the measured
 gradient-variance trend disagreed. Extending this measurement toward the
 literature's N=20-24 range, or testing other circuit topologies/target
 distributions, would be required before drawing any stronger conclusion.
+
+**Phase 17.1 addendum:** two further follow-up checks exist beyond the
+cross-check above and are documented in their own sections earlier in this
+document — **Bandwidth sensitivity follow-up (TRAIN-09)**, which found
+Phase 17's original "exp" verdict for `weight1/uniform` and `mixed/uniform`
+is not robust across a six-point sigma grid, and **Data-dependent
+initialization follow-up (TRAIN-10)**, which found a literature-sourced
+alternative init did not resolve `small_angle`'s inconclusive verdict in
+either scope. Neither follow-up alters Phase 17's own reported numbers or
+verdicts above; both narrow what those original numbers can be read to
+establish.
