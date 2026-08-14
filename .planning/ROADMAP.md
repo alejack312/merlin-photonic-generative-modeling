@@ -214,6 +214,18 @@ Plans:
 **Depends on:** None beyond already-shipped weight-1/weight-2 modules. Independent of ARB, TRAIN, and VERIFY — this phase does not wait on ARB-01's outcome.
 **Requirements:** HARD-01, HARD-02, HARD-03, HARD-04, HARD-05, HARD-06, HARD-07
 
+**Plans:** 8 plans (5 waves — 18-01/18-02/18-03/18-04 parallel in wave 1, all independent files (literature grounding; weight-1 loss model + HARD-02 cross-check; weight-2 loss model + herald compounding; classically-easy baselines + anticoncentration); 18-05 depends on 18-02/18-03/18-04 (wave 2, sweep integration + CLI + timing probe); 18-06 depends on 18-05 (wave 3, the real compute-heavy sweep run); 18-07 depends on 18-06+18-01 (wave 4, results write-up); 18-08 depends on 18-07 (wave 5, HARD-04 attempt-first checkpoint + HARD-06 scope statement, mirroring Phase 15's ARB-02/Plan-15-03 checkpoint precedent))
+
+Plans:
+- [ ] 18-01-PLAN.md — Read arXiv:1510.05245 (genuine Aaronson-Brod) in full; cite it and Park & Oh's Theorem 1 (arXiv:2510.24137) into docs/iqp-baseline.md (HARD-03)
+- [ ] 18-02-PLAN.md — TDD: weight-1 LC-based loss distribution function (hardness/loss_model.py) + HARD-02 NoiseModel-vs-LC cross-check
+- [ ] 18-03-PLAN.md — TDD: weight-2 (heralded_cz) LC-based loss distribution with ancilla-inclusive herald-failure compounding (hardness/loss_model_weight2.py), HARD-07
+- [ ] 18-04-PLAN.md — TDD: classically-easy baselines (uniform, product-of-marginals) + BMS anticoncentration parameter alpha (hardness/baselines.py), HARD-05
+- [ ] 18-05-PLAN.md — Sweep integration (hardness/sweep.py), chunked/resumable CLI (loss_sweep.py), and a real timing probe before committing compute budget
+- [ ] 18-06-PLAN.md — Run the real weight-1 and mixed loss sweeps across the full eta grid (HARD-01, HARD-05, HARD-07 real data)
+- [ ] 18-07-PLAN.md — Results write-up: docs/hardness-under-loss-study.md methodology + TVD-vs-eta + anticoncentration + herald-compounding results
+- [ ] 18-08-PLAN.md — HARD-04 attempt-first checkpoint (owner sketches eta-to-depolarizing-rate translation) + dual literature positioning + HARD-06 scope statement
+
 **Success criteria:**
 1. arXiv:2510.24137 read in full (not abstract-only); its noisy-IQP-specific threshold formula (if stated) extracted and cited — done *before* the loss-sweep methodology below is finalized.
 2. Loss sweep run via `Processor.probs()` + `NoiseModel(transmittance=η)` over a defined η grid.
@@ -296,7 +308,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 3/3 | Complete — verified 3/3, no bugs found | 2026-08-09 |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 7/7 | Complete — verified 8/8, honest exp-decay signature found (uniform init) | 2026-08-11 |
 | 17.1. Trainability Follow-Up: Bandwidth & Init Sensitivity | v3.0 | 6/6 | Complete — verified 5/5, exp signature not robust to bandwidth; data-dependent init did not resolve inconclusive verdict | 2026-08-13 |
-| 18. Hardness-Under-Loss Assessment | v3.0 | 0/? | Not started | — |
+| 18. Hardness-Under-Loss Assessment | v3.0 | 0/8 | Planned | — |
 | 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
 | 21. External-Facing Framing Pass | v3.0 | 0/? | Not started | — |
