@@ -25,6 +25,10 @@ from iqp_photonic_encoding import (
     photonic_iqp_distribution,
     photonic_weight2_iqp_distribution,
 )
+from hardness.loss_model import photonic_iqp_distribution_lossy
+from hardness.loss_model_weight2 import photonic_weight2_iqp_distribution_lossy
+from hardness.sweep import sample_thetas, ETA_GRID
+from trainability.rng import get_rng
 
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "results", "julia_reference")
 
@@ -118,6 +122,73 @@ def generate_exact_references():
     print("weight2_locked_n2 sample probs:", dict(list(sorted(weight2_locked_n2.items()))[:2]))
 
 
+# ---------------------------------------------------------------------------
+# Task 2: loss-model references, single fixed theta draw per scope
+# (VERIFY-04 target -- Pitfall 4: never a pooled multi-draw mean)
+# ---------------------------------------------------------------------------
+
+# Phase-19-specific seed_base -- deliberately NOT Phase 18's 180814, so this
+# reference generation is obviously independent of Phase 18's own pooled sweep.
+SEED_BASE = 190819
+LOSS_N = 2
+LOSS_ETAS = [ETA_GRID[0], ETA_GRID[len(ETA_GRID) // 2], ETA_GRID[-1]]  # {0.99, 0.80, 0.05}
+
+
+def _eta_suffix(eta):
+    return f"eta{int(round(eta * 100)):03d}"
+
+
+def generate_loss_references():
+    for scope in ("weight1", "mixed"):
+        draw_rng = get_rng(SEED_BASE, scope, LOSS_N, 0)
+        thetas = sample_thetas(draw_rng, LOSS_N)
+        print(f"{scope} (n={LOSS_N}) fixed theta draw: thetas={thetas!r}")
+
+        for eta in LOSS_ETAS:
+            suffix = _eta_suffix(eta)
+            if scope == "weight1":
+                dist, residual, global_perf = photonic_iqp_distribution_lossy(LOSS_N, thetas, eta=eta)
+                total = sum(dist.values()) + residual
+                if abs(total - 1.0) > 1e-9:
+                    raise AssertionError(
+                        f"weight1_loss_n{LOSS_N}_{suffix}: dist+residual={total!r}, expected 1.0"
+                    )
+                path = os.path.join(OUT_DIR, f"weight1_loss_n{LOSS_N}_{suffix}.csv")
+                _write_csv(
+                    dist,
+                    path,
+                    header_comments=[
+                        f"eta={eta!r}",
+                        f"residual={float(residual)!r}",
+                        f"global_perf={float(global_perf)!r}",
+                        f"thetas={thetas!r}",
+                    ],
+                )
+            else:
+                i, j = 0, 1
+                dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+                    LOSS_N, i, j, thetas, eta=eta
+                )
+                total = sum(dist.values()) + residual
+                if abs(total - 1.0) > 1e-9:
+                    raise AssertionError(
+                        f"mixed_loss_n{LOSS_N}_{suffix}: dist+residual={total!r}, expected 1.0"
+                    )
+                path = os.path.join(OUT_DIR, f"mixed_loss_n{LOSS_N}_{suffix}.csv")
+                _write_csv(
+                    dist,
+                    path,
+                    header_comments=[
+                        f"eta={eta!r}",
+                        f"herald_failure_prob={float(herald_failure_prob)!r}",
+                        f"residual={float(residual)!r}",
+                        f"global_perf={float(global_perf)!r}",
+                        f"n={LOSS_N} i={i} j={j} thetas={thetas!r}",
+                    ],
+                )
+
+
 if __name__ == "__main__":
     generate_exact_references()
-    print("Done. Exact-case reference CSVs written to", os.path.abspath(OUT_DIR))
+    generate_loss_references()
+    print("Done. Reference CSVs written to", os.path.abspath(OUT_DIR))
