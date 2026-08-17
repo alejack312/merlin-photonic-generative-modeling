@@ -114,13 +114,13 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | TRAIN-08 | 17 - Trainability / Barren-Plateau Study | Complete |
 | TRAIN-09 | 17.1 - Trainability Follow-Up: Bandwidth & Init Sensitivity | Complete |
 | TRAIN-10 | 17.1 - Trainability Follow-Up: Bandwidth & Init Sensitivity | Complete |
-| HARD-01 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-02 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-03 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-04 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-05 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-06 | 18 - Hardness-Under-Loss Assessment | Pending |
-| HARD-07 | 18 - Hardness-Under-Loss Assessment | Pending |
+| HARD-01 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-02 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-03 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-04 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-05 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-06 | 18 - Hardness-Under-Loss Assessment | Complete |
+| HARD-07 | 18 - Hardness-Under-Loss Assessment | Complete |
 | VERIFY-02 | 19 - Independent Julia Cross-Checks | Pending |
 | VERIFY-03 | 19 - Independent Julia Cross-Checks | Pending |
 | VERIFY-04 | 19 - Independent Julia Cross-Checks | Pending |

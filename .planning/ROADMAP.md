@@ -219,14 +219,16 @@ Plans:
 **Plans:** 8 plans (5 waves — 18-01/18-02/18-03/18-04 parallel in wave 1, all independent files (literature grounding; weight-1 loss model + HARD-02 cross-check; weight-2 loss model + herald compounding; classically-easy baselines + anticoncentration); 18-05 depends on 18-02/18-03/18-04 (wave 2, sweep integration + CLI + timing probe); 18-06 depends on 18-05 (wave 3, the real compute-heavy sweep run); 18-07 depends on 18-06+18-01 (wave 4, results write-up); 18-08 depends on 18-07 (wave 5, HARD-04 attempt-first checkpoint + HARD-06 scope statement, mirroring Phase 15's ARB-02/Plan-15-03 checkpoint precedent))
 
 Plans:
-- [ ] 18-01-PLAN.md — Read arXiv:1510.05245 (genuine Aaronson-Brod) in full; cite it and Park & Oh's Theorem 1 (arXiv:2510.24137) into docs/iqp-baseline.md (HARD-03)
-- [ ] 18-02-PLAN.md — TDD: weight-1 LC-based loss distribution function (hardness/loss_model.py) + HARD-02 NoiseModel-vs-LC cross-check
-- [ ] 18-03-PLAN.md — TDD: weight-2 (heralded_cz) LC-based loss distribution with ancilla-inclusive herald-failure compounding (hardness/loss_model_weight2.py), HARD-07
-- [ ] 18-04-PLAN.md — TDD: classically-easy baselines (uniform, product-of-marginals) + BMS anticoncentration parameter alpha (hardness/baselines.py), HARD-05
-- [ ] 18-05-PLAN.md — Sweep integration (hardness/sweep.py), chunked/resumable CLI (loss_sweep.py), and a real timing probe before committing compute budget
-- [ ] 18-06-PLAN.md — Run the real weight-1 and mixed loss sweeps across the full eta grid (HARD-01, HARD-05, HARD-07 real data)
-- [ ] 18-07-PLAN.md — Results write-up: docs/hardness-under-loss-study.md methodology + TVD-vs-eta + anticoncentration + herald-compounding results
-- [ ] 18-08-PLAN.md — HARD-04 attempt-first checkpoint (owner sketches eta-to-depolarizing-rate translation) + dual literature positioning + HARD-06 scope statement
+- [x] 18-01-PLAN.md — Read arXiv:1510.05245 (genuine Aaronson-Brod) in full; cite it and Park & Oh's Theorem 1 (arXiv:2510.24137) into docs/iqp-baseline.md (HARD-03)
+- [x] 18-02-PLAN.md — TDD: weight-1 LC-based loss distribution function (hardness/loss_model.py) + HARD-02 NoiseModel-vs-LC cross-check
+- [x] 18-03-PLAN.md — TDD: weight-2 (heralded_cz) LC-based loss distribution with ancilla-inclusive herald-failure compounding (hardness/loss_model_weight2.py), HARD-07
+- [x] 18-04-PLAN.md — TDD: classically-easy baselines (uniform, product-of-marginals) + BMS anticoncentration parameter alpha (hardness/baselines.py), HARD-05
+- [x] 18-05-PLAN.md — Sweep integration (hardness/sweep.py), chunked/resumable CLI (loss_sweep.py), and a real timing probe before committing compute budget
+- [x] 18-06-PLAN.md — Run the real weight-1 and mixed loss sweeps across the full eta grid (HARD-01, HARD-05, HARD-07 real data)
+- [x] 18-07-PLAN.md — Results write-up: docs/hardness-under-loss-study.md methodology + TVD-vs-eta + anticoncentration + herald-compounding results
+- [x] 18-08-PLAN.md — HARD-04 attempt-first checkpoint (owner sketches eta-to-depolarizing-rate translation) + dual literature positioning + HARD-06 scope statement
+
+**Result: Complete — verified 5/5 must-haves.** Real weight-1 loss sweep (n=2..6, full 7-point eta grid, `results/phase18_weight1_loss_sweep.csv`) and mixed-scope sweep (n=2..4 CORE, `results/phase18_mixed_loss_sweep.csv`; n=5 confirmed a hard memory ceiling on this hardware, reproduced 3x, not a CORE requirement) both complete with real, finite TVD-vs-eta and anticoncentration-alpha data, plus herald-failure compounding shown to genuinely diverge from a naive analytical decomposition. Loss mechanism corrected mid-planning (`pcvl.LC(loss)` + explicit `min_detected_photons_filter(0)`, never `NoiseModel`, which was confirmed to silently no-op) and cross-checked against Perceval's own `NoiseModel` on a simplified circuit within stated tolerance. HARD-04's attempt-first checkpoint (owner-driven, per this project's CLAUDE.md convention): after a literature check confirmed no principled η-to-depolarizing-rate translation exists (photon loss's established formalism is the pure-loss/bosonic-amplitude-damping channel, structurally distinct from depolarizing noise), the owner chose to state this plainly rather than fabricate a number — positioned against loss-native thresholds instead (Aaronson-Brod's fixed-count regime; a newly-verified 2025 lossy-Gaussian-boson-sampling logarithmic-fraction result, read in full and explicitly flagged as a different photonic encoding than this project's), with BMS's depolarizing threshold kept qualitative-only. A staff-engineer-style code review (6 angles) found zero correctness bugs; two real, pre-existing gaps it surfaced (an unverified "Van den Nest" citation; two documented pitfalls in the weight-2 loss model with no regression tests) were fixed before closing the phase — the citation independently confirmed correct via a paper already in this project's corpus, and both missing regression tests added and live-verified against the actual documented crash/conflation behavior. 268/268 full suite passes. See `18-VERIFICATION.md` for the independently-reproduced evidence.
 
 **Success criteria:**
 1. arXiv:2510.24137 read in full (not abstract-only); its noisy-IQP-specific threshold formula (if stated) extracted and cited — done *before* the loss-sweep methodology below is finalized.
@@ -310,7 +312,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 16. ARB-01 Extended Validation & Postselection Bookkeeping | v3.0 | 3/3 | Complete — verified 3/3, no bugs found | 2026-08-09 |
 | 17. Trainability / Barren-Plateau Study | v3.0 | 7/7 | Complete — verified 8/8, honest exp-decay signature found (uniform init) | 2026-08-11 |
 | 17.1. Trainability Follow-Up: Bandwidth & Init Sensitivity | v3.0 | 6/6 | Complete — verified 5/5, exp signature not robust to bandwidth; data-dependent init did not resolve inconclusive verdict | 2026-08-13 |
-| 18. Hardness-Under-Loss Assessment | v3.0 | 0/8 | Planned | — |
+| 18. Hardness-Under-Loss Assessment | v3.0 | 8/8 | Complete — verified 5/5, no correctness bugs, HARD-04 resolved honestly (no forced translation) | 2026-08-17 |
 | 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
 | 21. External-Facing Framing Pass | v3.0 | 0/? | Not started | — |
