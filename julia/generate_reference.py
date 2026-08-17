@@ -118,8 +118,42 @@ def generate_exact_references():
         ],
     )
 
+    # --- VERIFY-03 gap closure: weight-2 asymmetric-theta reference ---
+    # Same (n, i, j) as the locked case, but thetas[i] != thetas[j] and both
+    # nonzero (reusing this file's own [0.3, 1.1] convention from qubit_n2/
+    # weight1_n2 above, for consistency). This exists specifically to close
+    # a real gap an independent review (Codex/gpt-5.5, requested by the
+    # owner) found in the locked case: thetas=[0.0, 0.0] makes the pi/4 pair
+    # term the ONLY diagonal phase, which happens to produce a bitstring
+    # distribution symmetric under a 00<->11 and/or 01<->10 relabeling
+    # (P(01)=P(10)=0, P(00)=P(11)=0.5 exactly) -- so a hidden Julia/Python
+    # bit-to-rail convention mismatch would be numerically INVISIBLE to that
+    # test case; a wrong labeling would still print a passing TVD. Distinct,
+    # nonzero, non-special thetas break every one of those relabeling
+    # symmetries, so all four bitstring probabilities differ and a
+    # convention bug becomes detectable.
+    thetas_asym = [0.3, 1.1]
+    weight2_asym_n2, residual_w2_asym, herald_failure_prob_asym = photonic_weight2_iqp_distribution(
+        n, i, j, thetas_asym
+    )
+    _assert_sums_to(weight2_asym_n2, 1.0 - residual_w2_asym, 1e-9, "weight2_asymmetric_n2")
+    print(
+        f"weight2_asymmetric_n2: herald_failure_prob={float(herald_failure_prob_asym)!r}, "
+        f"residual={float(residual_w2_asym)!r}"
+    )
+    _write_csv(
+        weight2_asym_n2,
+        os.path.join(OUT_DIR, "weight2_asymmetric_n2.csv"),
+        header_comments=[
+            f"herald_failure_prob={float(herald_failure_prob_asym)!r}",
+            f"residual={float(residual_w2_asym)!r}",
+            f"n={n} i={i} j={j} thetas={thetas_asym!r}",
+        ],
+    )
+
     print("qubit_n2 sum:", sum(qubit_n2.values()))
     print("weight2_locked_n2 sample probs:", dict(list(sorted(weight2_locked_n2.items()))[:2]))
+    print("weight2_asymmetric_n2 sample probs:", dict(sorted(weight2_asym_n2.items())))
 
 
 # ---------------------------------------------------------------------------

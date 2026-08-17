@@ -201,12 +201,12 @@ function embed_hadamard6()
     return U
 end
 
-function embed_correction6(theta)
+function embed_correction6(theta_i, theta_j)
     U = zeros(ComplexF64, 6, 6)
-    U[1, 1] = exp(im * theta)    # A0 (bit 0) -- Zi eigenvalue +1
-    U[2, 2] = exp(-im * theta)   # A1 (bit 1) -- Zi eigenvalue -1
-    U[3, 3] = exp(im * theta)    # B0 (bit 0)
-    U[4, 4] = exp(-im * theta)   # B1 (bit 1)
+    U[1, 1] = exp(im * theta_i)    # A0 (bit 0) -- Zi eigenvalue +1
+    U[2, 2] = exp(-im * theta_i)   # A1 (bit 1) -- Zi eigenvalue -1
+    U[3, 3] = exp(im * theta_j)    # B0 (bit 0)
+    U[4, 4] = exp(-im * theta_j)   # B1 (bit 1)
     U[5, 5] = 1.0
     U[6, 6] = 1.0
     return U
@@ -222,101 +222,6 @@ function embed_cz6(V::Matrix{Float64})
     end
     return U
 end
-
-state_prep = embed_hadamard6()
-correction = embed_correction6(pi / 4)
-cz_embed = embed_cz6(V180)
-conjugation = embed_hadamard6()
-
-# Application order: state_prep first, then cz gate, then the pi/4
-# correction, then conjugation (see header note on this choice).
-FULL = conjugation * correction * cz_embed * state_prep
-
-unitarity_defect_full = maximum(abs.(FULL' * FULL - I(6)))
-println()
-println("Composite 6-mode unitary max |U'U - I| entry: ", unitarity_defect_full)
-@assert isapprox(unitarity_defect_full, 0.0; atol=1e-9) "Composite circuit matrix is not unitary"
-println("PASS: composite 6-mode circuit matrix is unitary.")
-
-# ---------------------------------------------------------------------------
-# Task 2: run the circuit, herald by hand, compare against
-# results/julia_reference/weight2_locked_n2.csv
-# ---------------------------------------------------------------------------
-
-interf = UserDefinedInterferometer(FULL)
-
-# Input: bit=0 on both qubits (photon in A0, B0), ancilla prepared with one
-# photon each in H1, H2 -- matches thetas=[0,0]'s all-zero-bitstring start,
-# same as any standard IQP circuit's input convention.
-input_state = Input{Bosonic}(ModeOccupation([1, 0, 1, 0, 1, 1]))
-
-# All 10 ways to distribute the 2 non-ancilla photons across the 4 data
-# modes, with the ancilla output fixed at exactly 1 photon each (the herald
-# condition). The first 4 are the valid dual-rail bitstrings; the remaining
-# 6 are bunched/invalid (residual).
-valid_patterns = Dict(
-    "00" => [1, 0, 1, 0],
-    "01" => [1, 0, 0, 1],
-    "10" => [0, 1, 1, 0],
-    "11" => [0, 1, 0, 1],
-)
-bunched_patterns = [
-    [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2],
-    [1, 1, 0, 0], [0, 0, 1, 1],
-]
-
-function herald_success_prob(data_pattern)
-    out = FockDetection(ModeOccupation(vcat(data_pattern, [1, 1])))
-    ev = Event(input_state, out, interf)
-    return compute_probability!(ev)
-end
-
-println()
-println("=" ^ 70)
-println("Task 2: full weight-2 locked-gate circuit, herald-by-hand")
-println("=" ^ 70)
-
-raw_valid = Dict{String,Float64}()
-for (bitstring, pattern) in valid_patterns
-    raw_valid[bitstring] = herald_success_prob(pattern)
-    println("bitstring=$bitstring pattern=$pattern raw_prob=$(raw_valid[bitstring])")
-end
-
-raw_bunched_total = 0.0
-global raw_bunched_total
-for pattern in bunched_patterns
-    global raw_bunched_total
-    p = herald_success_prob(pattern)
-    raw_bunched_total += p
-    if p > 1e-12
-        println("bunched pattern=$pattern raw_prob=$p")
-    end
-end
-
-herald_success_total = sum(values(raw_valid)) + raw_bunched_total
-herald_failure_prob = 1.0 - herald_success_total
-
-println()
-println("Sum of raw valid-pattern probabilities: ", sum(values(raw_valid)))
-println("Sum of raw bunched (residual, pre-herald-renorm) probabilities: ", raw_bunched_total)
-println("Total herald-success probability: ", herald_success_total)
-println("Measured herald_failure_prob: ", herald_failure_prob)
-println("Expected herald_failure_prob (1 - 2/27): ", 1.0 - 2.0 / 27.0)
-
-# Renormalize by the herald-success total, matching
-# photonic_weight2_iqp_distribution's own documented contract:
-# sum(dist) + residual == 1.0 (verified in julia/generate_reference.py's
-# header comments / 19-01-SUMMARY.md decision log).
-julia_dist = Dict(k => v / herald_success_total for (k, v) in raw_valid)
-julia_residual = raw_bunched_total / herald_success_total
-
-println()
-println("Renormalized Julia distribution (sum(dist)+residual should be 1.0):")
-for k in sort(collect(keys(julia_dist)))
-    println("  $k => $(julia_dist[k])")
-end
-println("  residual => $julia_residual")
-println("  sum(dist)+residual = ", sum(values(julia_dist)) + julia_residual)
 
 # ---------------------------------------------------------------------------
 # Read the Python reference CSV and compute TVD (reimplementing the exact
@@ -360,37 +265,168 @@ function total_variation_distance(a::Dict{String,Float64}, b::Dict{String,Float6
     return 0.5 * total
 end
 
-ref_path = joinpath(@__DIR__, "..", "results", "julia_reference", "weight2_locked_n2.csv")
-python_dist, python_header = read_reference_csv(ref_path)
+# ---------------------------------------------------------------------------
+# Task 2: run the full circuit for a given (theta_i, theta_j) pair, herald by
+# hand, and compare against a Python reference CSV. Shared by the locked
+# case (thetas=[0,0], theta_i=theta_j=pi/4 after folding) and the
+# gap-closure asymmetric case below (see header note added post-19-04).
+# ---------------------------------------------------------------------------
 
-println()
-println("=" ^ 70)
-println("Comparison against Python reference: ", ref_path)
-println("=" ^ 70)
-println("Python header: ", python_header)
-println("Python distribution: ", python_dist)
+function run_case(theta_i, theta_j, ref_csv_name, case_label)
+    state_prep = embed_hadamard6()
+    correction = embed_correction6(theta_i, theta_j)
+    cz_embed = embed_cz6(V180)
+    conjugation = embed_hadamard6()
 
-tvd = total_variation_distance(julia_dist, python_dist)
-println()
-println("Measured TVD (Julia vs. Python): ", tvd)
+    # Application order: state_prep first, then cz gate, then the
+    # correction, then conjugation (see header note on this choice).
+    FULL = conjugation * correction * cz_embed * state_prep
 
-python_herald_failure = haskey(python_header, "herald_failure_prob") ?
-    parse(Float64, python_header["herald_failure_prob"]) : NaN
-herald_failure_diff = abs(herald_failure_prob - python_herald_failure)
-println("Python herald_failure_prob: ", python_herald_failure)
-println("Julia herald_failure_prob: ", herald_failure_prob)
-println("|difference|: ", herald_failure_diff)
+    unitarity_defect_full = maximum(abs.(FULL' * FULL - I(6)))
+    println()
+    println("[$case_label] Composite 6-mode unitary max |U'U - I| entry: ", unitarity_defect_full)
+    @assert isapprox(unitarity_defect_full, 0.0; atol=1e-9) "Composite circuit matrix is not unitary"
+    println("[$case_label] PASS: composite 6-mode circuit matrix is unitary.")
 
-TOL = 1e-6
-tvd_pass = tvd <= TOL
-herald_pass = herald_failure_diff <= 1e-4  # looser: this is a probability, not an exact-arithmetic quantity
+    interf = UserDefinedInterferometer(FULL)
 
-println()
-println("=" ^ 70)
-if tvd_pass && herald_pass
-    println("RESULT: GO -- TVD=$tvd <= $TOL, herald_failure_prob matches within tolerance.")
-else
-    println("RESULT: DISAGREEMENT -- TVD=$tvd (tol=$TOL), herald_failure diff=$herald_failure_diff")
-    println("See results/phase19_verify03_weight2_results.md for the honest verdict and analysis.")
+    # Input: bit=0 on both qubits (photon in A0, B0), ancilla prepared with
+    # one photon each in H1, H2 -- the standard all-zero-bitstring IQP input
+    # convention (the diagonal-phase layer above is where thetas actually
+    # act, not the input state).
+    input_state = Input{Bosonic}(ModeOccupation([1, 0, 1, 0, 1, 1]))
+
+    # All 10 ways to distribute the 2 non-ancilla photons across the 4 data
+    # modes, with the ancilla output fixed at exactly 1 photon each (the
+    # herald condition). The first 4 are the valid dual-rail bitstrings; the
+    # remaining 6 are bunched/invalid (residual).
+    valid_patterns = Dict(
+        "00" => [1, 0, 1, 0],
+        "01" => [1, 0, 0, 1],
+        "10" => [0, 1, 1, 0],
+        "11" => [0, 1, 0, 1],
+    )
+    bunched_patterns = [
+        [2, 0, 0, 0], [0, 2, 0, 0], [0, 0, 2, 0], [0, 0, 0, 2],
+        [1, 1, 0, 0], [0, 0, 1, 1],
+    ]
+
+    function herald_success_prob(data_pattern)
+        out = FockDetection(ModeOccupation(vcat(data_pattern, [1, 1])))
+        ev = Event(input_state, out, interf)
+        return compute_probability!(ev)
+    end
+
+    println()
+    println("=" ^ 70)
+    println("[$case_label] Task 2: full weight-2 circuit (theta_i=$theta_i, theta_j=$theta_j), herald-by-hand")
+    println("=" ^ 70)
+
+    raw_valid = Dict{String,Float64}()
+    for (bitstring, pattern) in valid_patterns
+        raw_valid[bitstring] = herald_success_prob(pattern)
+        println("[$case_label] bitstring=$bitstring pattern=$pattern raw_prob=$(raw_valid[bitstring])")
+    end
+
+    raw_bunched_total = 0.0
+    for pattern in bunched_patterns
+        p = herald_success_prob(pattern)
+        raw_bunched_total += p
+        if p > 1e-12
+            println("[$case_label] bunched pattern=$pattern raw_prob=$p")
+        end
+    end
+
+    herald_success_total = sum(values(raw_valid)) + raw_bunched_total
+    herald_failure_prob = 1.0 - herald_success_total
+
+    println()
+    println("[$case_label] Sum of raw valid-pattern probabilities: ", sum(values(raw_valid)))
+    println("[$case_label] Sum of raw bunched (residual, pre-herald-renorm) probabilities: ", raw_bunched_total)
+    println("[$case_label] Total herald-success probability: ", herald_success_total)
+    println("[$case_label] Measured herald_failure_prob: ", herald_failure_prob)
+
+    # Renormalize by the herald-success total, matching
+    # photonic_weight2_iqp_distribution's own documented contract:
+    # sum(dist) + residual == 1.0 (verified in julia/generate_reference.py's
+    # header comments / 19-01-SUMMARY.md decision log).
+    julia_dist = Dict(k => v / herald_success_total for (k, v) in raw_valid)
+    julia_residual = raw_bunched_total / herald_success_total
+
+    println()
+    println("[$case_label] Renormalized Julia distribution (sum(dist)+residual should be 1.0):")
+    for k in sort(collect(keys(julia_dist)))
+        println("[$case_label]   $k => $(julia_dist[k])")
+    end
+    println("[$case_label]   residual => $julia_residual")
+    println("[$case_label]   sum(dist)+residual = ", sum(values(julia_dist)) + julia_residual)
+
+    ref_path = joinpath(@__DIR__, "..", "results", "julia_reference", ref_csv_name)
+    python_dist, python_header = read_reference_csv(ref_path)
+
+    println()
+    println("=" ^ 70)
+    println("[$case_label] Comparison against Python reference: ", ref_path)
+    println("=" ^ 70)
+    println("[$case_label] Python header: ", python_header)
+    println("[$case_label] Python distribution: ", python_dist)
+
+    tvd = total_variation_distance(julia_dist, python_dist)
+    println()
+    println("[$case_label] Measured TVD (Julia vs. Python): ", tvd)
+
+    python_herald_failure = haskey(python_header, "herald_failure_prob") ?
+        parse(Float64, python_header["herald_failure_prob"]) : NaN
+    herald_failure_diff = abs(herald_failure_prob - python_herald_failure)
+    println("[$case_label] Python herald_failure_prob: ", python_herald_failure)
+    println("[$case_label] Julia herald_failure_prob: ", herald_failure_prob)
+    println("[$case_label] |difference|: ", herald_failure_diff)
+
+    TOL = 1e-6
+    tvd_pass = tvd <= TOL
+    herald_pass = herald_failure_diff <= 1e-4  # looser: this is a probability, not an exact-arithmetic quantity
+
+    println()
+    println("=" ^ 70)
+    if tvd_pass && herald_pass
+        println("[$case_label] RESULT: GO -- TVD=$tvd <= $TOL, herald_failure_prob matches within tolerance.")
+    else
+        println("[$case_label] RESULT: DISAGREEMENT -- TVD=$tvd (tol=$TOL), herald_failure diff=$herald_failure_diff")
+        println("[$case_label] See results/phase19_verify03_weight2_results.md for the honest verdict and analysis.")
+    end
+    println("=" ^ 70)
+
+    return (tvd=tvd, herald_failure_diff=herald_failure_diff, tvd_pass=tvd_pass, herald_pass=herald_pass, julia_dist=julia_dist)
 end
-println("=" ^ 70)
+
+# Case 1: the original locked case (thetas=[0,0] externally, folds to
+# theta_i=theta_j=pi/4 -- a pure weight-2 pair term, no weight-1 asymmetry).
+result_locked = run_case(pi / 4, pi / 4, "weight2_locked_n2.csv", "locked")
+
+# Case 2: gap-closure asymmetric case (added post-19-04, prompted by an
+# independent Codex/gpt-5.5 review). thetas=[0.3, 1.1] externally folds to
+# theta_i=0.3+pi/4, theta_j=1.1+pi/4 -- distinct and nonzero.
+#
+# Caveat, stated plainly rather than oversold: this breaks the DEGENERACY
+# the locked case had (where P(01)=P(10)=0 exactly, so a mislabeled
+# convention could still trivially match), and in a hand-derivation checked
+# separately against a bare-qubit (non-photonic) numpy simulation, this
+# circuit's own H-diagonal-phase-H structure starting from |00> still seems
+# to produce P(00)=P(11) and P(01)=P(10) for every theta_i/theta_j tried --
+# i.e. this specific asymmetric case still can't distinguish a
+# simultaneous-both-qubits bit-flip mislabeling, or a qubit-order swap,
+# from the correct convention. It DOES catch a single-qubit rail-convention
+# error (e.g. Julia's A0/A1 meaning flipped for one qubit only), which the
+# old locked case could not, since that breaks P(00) vs P(01)/P(10)
+# symmetry. Not claimed as a complete proof this residual symmetry always
+# holds -- just what was observed and hand-checked here, offered candidly.
+result_asym = run_case(0.3 + pi / 4, 1.1 + pi / 4, "weight2_asymmetric_n2.csv", "asymmetric")
+
+println()
+println("#" ^ 70)
+if result_locked.tvd_pass && result_locked.herald_pass && result_asym.tvd_pass && result_asym.herald_pass
+    println("OVERALL RESULT: GO -- both locked and asymmetric cases pass.")
+else
+    println("OVERALL RESULT: DISAGREEMENT in at least one case -- see per-case output above.")
+end
+println("#" ^ 70)

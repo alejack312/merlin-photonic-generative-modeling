@@ -156,7 +156,25 @@ extend to other `(i,j)` pairs, n=3, or non-locked pair angles (the catalog
 gate `heralded_cz` only realizes the fixed `pi/4` angle in the first
 place).
 
-**Verdict: GO.**
+**Gap-closure follow-up (asymmetric-theta case).** An independent Codex
+(gpt-5.5) review the owner requested of the transpose fix above raised a
+real, separate concern: at `thetas=[0.0, 0.0]` the resulting distribution
+(`P(01)=P(10)=0`, `P(00)=P(11)≈0.5`) is degenerate enough that a hidden
+Julia/Python bit-to-rail convention error could in principle produce the
+same-looking passing result. A second case was added, `thetas=[0.3, 1.1]`
+(`weight2_asymmetric_n2.csv`), which also passes: TVD = `4.50e-15`. While
+picking this theta pair, a hand check against a bare-qubit (non-photonic)
+numpy simulation of the same circuit shape suggested `P(00)=P(11)` and
+`P(01)=P(10)` may hold for *any* theta choice in this circuit family — not
+proven rigorously, but consistent across every pair tried. If that holds,
+the new case catches a single-qubit rail-convention error (which the
+locked case could not) but likely still can't catch a simultaneous
+both-qubits bit-flip or a qubit-order swap. This residual is recorded
+candidly in `results/phase19_verify03_weight2_results.md` rather than
+resolved by further scope (e.g. n=3) — the owner reviewed it and chose to
+ship the improvement as-is.
+
+**Verdict: GO (both cases).**
 
 ## VERIFY-04: BosonSampling.jl loss-model cross-check
 
@@ -257,7 +275,7 @@ disagreement.
 |---|---|---|
 | VERIFY-02 | Yao.jl qubit-side, n=2/n=3 | **GO** |
 | VERIFY-03 (weight-1) | BosonSampling.jl photonic, weight-1, n=2/n=3 | **GO** |
-| VERIFY-03 (weight-2) | BosonSampling.jl photonic, weight-2 Knill-CZ, n=2 locked | **GO** |
+| VERIFY-03 (weight-2) | BosonSampling.jl photonic, weight-2 Knill-CZ, n=2 locked + asymmetric-theta | **GO** |
 | VERIFY-04 | BosonSampling.jl native loss, weight-1 + mixed, n=2, eta in {0.99, 0.80, 0.05} | **GO** |
 
 All three of Phase 19's requirements (VERIFY-02, VERIFY-03, VERIFY-04) are
