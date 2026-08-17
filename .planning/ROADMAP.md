@@ -244,6 +244,15 @@ Plans:
 **Goal:** Independently cross-check the Python/Perceval pipeline's exact and lossy distributions using the Julia toolchain confirmed working in Phase 14 — the full cross-check scripts, sequenced after real Python-side numbers exist to diff against.
 **Depends on:** Phase 14 (Julia toolchain must be confirmed working first); Phase 18 (VERIFY-04 specifically needs HARD's TVD-vs-η dataset to cross-check against). VERIFY-02/03 reuse the already-shipped weight-1/weight-2 exact distributions (Phases 9, 11-13) and are bundled into this same phase rather than run separately, to keep the Julia toolchain's engagement narrow and time-boxed (per `PITFALLS.md` Pitfall 23) instead of returning to it multiple times.
 **Requirements:** VERIFY-02, VERIFY-03, VERIFY-04
+**Plans:** 6 plans (3 waves — 19-01 alone in wave 1, generates every Python reference distribution the Julia scripts diff against; 19-02/19-03/19-04/19-05 parallel in wave 2, all depend only on 19-01 (Yao.jl qubit-side; BosonSampling.jl weight-1; BosonSampling.jl weight-2/Knill-CZ, isolated as the phase's highest stall risk per 19-CONTEXT.md; BosonSampling.jl native loss-model cross-check); 19-06 depends on all four wave-2 plans (wave 3, results write-up + REQUIREMENTS.md correction))
+
+Plans:
+- [ ] 19-01-PLAN.md — Python reference-distribution generator (exact qubit/weight-1/weight-2 cases + fixed-single-draw loss cases at 3 eta values)
+- [ ] 19-02-PLAN.md — VERIFY-02: Yao.jl independent qubit-side IQP cross-check (n=2, n=3)
+- [ ] 19-03-PLAN.md — VERIFY-03 (weight-1 leg): BosonSampling.jl independent dual-rail weight-1 cross-check (n=2, n=3)
+- [ ] 19-04-PLAN.md — VERIFY-03 (weight-2 leg): Knill-CZ literature sourcing + BosonSampling.jl cross-check (isolated, time-boxed stall risk)
+- [ ] 19-05-PLAN.md — VERIFY-04: BosonSampling.jl native-loss-API cross-check against Phase 18's TVD-vs-η numbers (n=2, 3 eta values)
+- [ ] 19-06-PLAN.md — docs/julia-cross-check-study.md write-up + REQUIREMENTS.md status correction
 
 **Success criteria:**
 1. Yao.jl reproduces the exact qubit-side IQP reference distribution (weight-1, at least n=2) within a stated tolerance of the existing Python/NumPy implementation.
