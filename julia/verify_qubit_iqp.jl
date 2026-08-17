@@ -149,3 +149,73 @@ end
 d2_sanity = probs_to_bitstring_dict(reg2_probe, 2)
 @assert isapprox(sum(values(d2_sanity)), 1.0; atol=1e-9)
 println("n=2 bitstring dict (sanity, keyed by this repo's own convention): ", d2_sanity)
+
+# ---------------------------------------------------------------------------
+# Task 2: n=2/n=3 cross-check against the Python reference CSVs
+# ---------------------------------------------------------------------------
+#
+# Same shared theta values Plan 19-01's generate_reference.py used to
+# produce results/julia_reference/qubit_n2.csv / qubit_n3.csv (CONTEXT.md's
+# "same test inputs" lock) -- hardcoded here to match the Python side
+# exactly.
+THETAS_N2 = [0.3, 1.1]
+THETAS_N3 = [0.3, 1.1, 0.75]
+
+"""
+    read_reference_csv(path)
+
+Read a `results/julia_reference/*.csv` file (bitstring,probability, with
+optional leading `# key=value` comment lines and a header row) into a
+Dict{String,Float64}. Uses DelimitedFiles with an explicit String element
+type so bitstring keys like "00"/"01" are preserved as strings rather than
+being parsed as numbers (which would silently drop leading zeros).
+"""
+function read_reference_csv(path)
+    raw = readdlm(path, ',', String; comments=true, comment_char='#')
+    d = Dict{String,Float64}()
+    for row in 2:size(raw, 1)  # skip header row ("bitstring","probability")
+        bitstring = raw[row, 1]
+        prob = parse(Float64, raw[row, 2])
+        d[bitstring] = prob
+    end
+    return d
+end
+
+"""
+    total_variation_distance(dist_a, dist_b)
+
+Reimplementation (not an import/shell-out) of
+iqp_photonic_encoding.py::total_variation_distance: 0.5 * sum(|a(x)-b(x)|)
+over the union of both distributions' keys.
+"""
+function total_variation_distance(dist_a::Dict{String,Float64}, dist_b::Dict{String,Float64})
+    all_keys = union(keys(dist_a), keys(dist_b))
+    return 0.5 * sum(abs(get(dist_a, k, 0.0) - get(dist_b, k, 0.0)) for k in all_keys)
+end
+
+REPO_ROOT = joinpath(@__DIR__, "..")
+REF_DIR = joinpath(REPO_ROOT, "results", "julia_reference")
+
+# --- n=2 ---
+reg_n2 = build_qubit_iqp_circuit(2, THETAS_N2)
+julia_n2 = probs_to_bitstring_dict(reg_n2, 2)
+python_n2 = read_reference_csv(joinpath(REF_DIR, "qubit_n2.csv"))
+tvd_n2 = total_variation_distance(julia_n2, python_n2)
+println("n=2: Julia dict=", julia_n2)
+println("n=2: Python dict=", python_n2)
+println("n=2 TVD = ", tvd_n2)
+
+# --- n=3 ---
+reg_n3 = build_qubit_iqp_circuit(3, THETAS_N3)
+julia_n3 = probs_to_bitstring_dict(reg_n3, 3)
+python_n3 = read_reference_csv(joinpath(REF_DIR, "qubit_n3.csv"))
+tvd_n3 = total_variation_distance(julia_n3, python_n3)
+println("n=3: Julia dict=", julia_n3)
+println("n=3: Python dict=", python_n3)
+println("n=3 TVD = ", tvd_n3)
+
+TVD_TOLERANCE = 1e-6
+@assert tvd_n2 <= TVD_TOLERANCE "VERIFY-02 n=2 TVD $(tvd_n2) exceeds tolerance $(TVD_TOLERANCE)"
+@assert tvd_n3 <= TVD_TOLERANCE "VERIFY-02 n=3 TVD $(tvd_n3) exceeds tolerance $(TVD_TOLERANCE)"
+
+println("PASS: VERIFY-02 -- Yao.jl independently reproduces the qubit-side IQP distribution at n=2 (TVD=", tvd_n2, ") and n=3 (TVD=", tvd_n3, ") within tolerance ", TVD_TOLERANCE)
