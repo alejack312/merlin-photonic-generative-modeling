@@ -1,0 +1,8 @@
+# herald_failure_prob=0.9259259259259255
+# residual=0.0
+# n=2 i=0 j=1 thetas=[0.0, 0.0]
+bitstring,probability
+00,0.49999999999999634
+01,0.0
+10,0.0
+11,0.49999999999999656
