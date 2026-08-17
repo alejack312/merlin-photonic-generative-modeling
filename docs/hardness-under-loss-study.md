@@ -295,13 +295,209 @@ leakage bucket (`STATE.md`'s Accumulated Context, established during Phase
 
 ## HARD-04/HARD-06: Positioning and Scope Statement (Plan 18-08)
 
-*This section is intentionally incomplete at this point in the phase's
-execution -- it is not abandoned.* HARD-04's eta-to-effective-depolarizing-rate
-translation (grounded in this project's own heralded-CZ/CP(alpha) failure
-mechanics, per `18-CONTEXT.md`'s locked derivation approach) and HARD-06's
-final scope statement are completed by **Plan 18-08**, after the owner's
-attempt-first checkpoint on the translation derivation (this project's
-`CLAUDE.md` requires the owner to attempt any core conceptual derivation
-before it is implemented for them, matching the ARB-02 checkpoint
-precedent). Plan 18-08 appends its sections here without restructuring
-anything written above.
+### Owner's attempt-first response (recorded as-given, per this project's
+### `CLAUDE.md` attempt-first gating and the ENC-01/ARB-02 transcript style)
+
+Before any write-up was drafted, the owner was presented with the confirmed
+ingredients above (this project's own weight-1/weight-2 loss mechanics, BMS's
+depolarizing-channel definition `D_eps(rho) = (1-eps)*rho + eps*I/2`, the
+discard-vs-guess structural gap between the two, and three unbiased candidate
+eta->epsilon directions -- erasure-as-depolarizing, compounded-gate-failure-
+rate, and fitted-effective-channel) and asked to attempt the translation
+themselves first.
+
+**The owner's actual answer:** there is no established, principled eta->epsilon
+translation in the literature for this project's loss channel. Computing one
+from scratch -- e.g. the "fitted effective channel" option's diamond-norm-
+closest-depolarizing-channel calculation -- is mathematically possible but
+would be original numerics work outside this project's stated scope (the
+owner's explicit call, not a fallback after attempting and failing: forcing a
+number here would misrepresent an unowned research contribution as a
+established translation). Rather than picking one of the three candidate
+directions and forcing a number, the owner's decision was to state this
+plainly and instead lean on hardness results that are already stated
+**natively in terms of photon-loss fraction/count**, avoiding the translation
+question entirely:
+
+- Aaronson-Brod's fixed-loss-count regime (arXiv:1510.05245, already read in
+  Plan 18-01) -- hardness holds for a fixed constant count `k` of lost
+  photons, and the paper's own text (Plan 18-01's verbatim-quoted finding)
+  says this weakens once `k` scales with `n`.
+- A newer (2025) result on lossy Gaussian boson sampling, arXiv:2511.07853,
+  which the owner had a literature check run for them (offloadable per this
+  project's `CLAUDE.md` -- "summarizing papers, doc lookups" -- distinct from
+  the core conceptual call, which the owner made themselves) and which states
+  its threshold natively in terms of photon-loss fraction: "hardness
+  maintained when at most a logarithmic fraction of photons is lost."
+- BMS's depolarizing threshold (arXiv:1610.01808, already read) is mentioned
+  only as a structurally different, not-directly-comparable noise model --
+  explicitly flagged as such, never forced into a shared number with the
+  above two.
+
+**The owner's explicit caveat, carried forward rather than smoothed over:**
+arXiv:2511.07853 needed to be checked directly before citing it, since it was
+relayed as a search summary rather than a primary-source read. That check was
+done as part of writing this section (see below) -- it confirmed the relayed
+claim's substance but also surfaced that the paper is about a genuinely
+*different* photonic model than this project's own (Gaussian boson sampling,
+not discrete Fock-state/dual-rail IQP), which gets the same explicit
+"different model, don't assume transferable" treatment BMS already receives
+in this document.
+
+**No `hardness/depolarizing_translation.py` was written.** The plan's
+must-haves allow for either a closed-form function or a documented statement
+that no closed form applies (the "fitted effective channel, no simple closed
+form" case). What actually happened here is a third, more basic case: the
+owner's confirmed decision was not to compute *any* eta->epsilon number at
+all -- not because a closed form doesn't exist for a chosen direction, but
+because choosing and computing one would be original research work this
+project's scope does not call for. A fabricated or placeholder function would
+misrepresent that decision, so none was created; this is a purely
+documentation-based resolution of HARD-04, consistent with the plan's stated
+allowance for a non-code deliverable.
+
+### Verifying arXiv:2511.07853 (Go, Oh, Jeong, "Sufficient conditions for
+### hardness of lossy Gaussian boson sampling," Nov 2025) directly
+
+Downloaded and read (`docs/papers/2511.07853.pdf`, first 4 pages: abstract,
+setup, Theorem 1, Lemma 1) rather than trusting the relayed summary alone, per
+this project's own established Plan-18-01 standard for primary-source
+citations.
+
+**Confirmed setup (structurally different from this project):** the paper's
+object is Gaussian boson sampling -- `M` single-mode squeezed vacuum states
+sent through a Haar-random `M`-mode linear-optical unitary, output
+probabilities given by a hafnian of a covariance-derived matrix (Eq. 1), not
+this project's discrete-photon dual-rail/heralded-CZ IQP construction. Photon
+loss is modeled via a beamsplitter loss channel (Fig. 1b): each input mode
+interacts with an ancillary vacuum mode through a beamsplitter of
+transmittance `sqrt(eta)`, and the ancillary mode is traced out -- physically
+the same kind of per-mode transmittance channel this project's own
+`pcvl.LC(1-eta)` implements, even though the sampled quantum object (Gaussian
+continuous-variable vs discrete Fock-state) is not the same.
+
+**Confirmed result (Theorem 1, p.3):** there exists a threshold transmittance
+`eta_th` satisfying `(1 - eta_th) * N = O(log N)`, such that for any actual
+transmittance `eta* >= eta_th`, lossy GBS is at least as hard as ideal GBS
+(under the paper's stated complexity-theoretic conjectures), where `N` is the
+mean number of *output* photons. The paper's own restated implication (p.3,
+right column): "the mean number of lost photons... is at most logarithmically
+related to the mean number of input photons... our result implies the
+classical hardness of lossy GBS when at most a *logarithmic* number of
+photons is lost on average." This confirms the relayed claim's substance.
+
+**The caveat that must be carried forward, stated explicitly:** `O(log N)`
+is an asymptotic existence statement (there exists *some* threshold with this
+scaling, with an unspecified constant factor), not a literal formula that
+hands back one numeric threshold for a given `N` -- the same caveat this
+document already applies to BMS's Theorem 4. Any comparison below is
+illustrative, not a claim that this project's small, fixed-`n` sweep
+demonstrates or refutes the asymptotic scaling itself.
+
+### Dual/triple positioning: where this project's tested eta range actually sits
+
+**The eta->(expected lost-photon count) translation used below is stated
+explicitly, per the plan's requirement, and it is deliberately the *simplest*
+possible one -- a direct expectation over this project's own per-mode-uniform
+loss model, not a fitted or derived quantity:** under `pcvl.LC(1-eta)`
+applied uniformly to every mode carrying a photon, each of the pipeline's `N`
+photons survives independently with probability `eta`, so the expected number
+of lost photons is `N * (1 - eta)`. For this project's two scopes:
+
+- **weight-1:** `N = n` (one photon per qubit, dual-rail encoded across `2n`
+  modes, no ancilla).
+- **mixed (weight-1 + weight-2):** `N = n + 2` (the `n` data-qubit photons
+  plus the 2 `heralded_cz` ancilla photons, all `2n+2` modes exposed to loss
+  per the Methodology section's HARD-07 lock).
+
+**Against Aaronson-Brod's fixed-count regime.** This project's loss model is
+a fractional *rate* (`eta`), never a fixed *count* -- AB's guarantee is
+strongest for a `k` held constant as `n` grows, but this project's sweep
+design holds `eta` (not the expected count) fixed across the `n`-range at
+each scope. Since expected lost count `N*(1-eta)` scales linearly with `N`
+(and `N` scales with `n`) at any fixed non-lossless `eta`, this project's own
+sweep structurally sits in exactly the regime AB's own text (Plan 18-01's
+verbatim-quoted finding) calls too weak for "any strong complexity claims":
+a *fraction* of photons lost, not a fixed count. This holds for every `eta <
+1` tested here, not just the lowest ones -- it is a property of the sweep's
+design (fixed `eta`, growing `n`), not of any single measured cell.
+
+**Against arXiv:2511.07853's logarithmic-fraction regime.** Both scopes'
+largest reached `n` happen to expose the same total photon budget, `N=6`
+(weight1 `n=6`: `N=n=6`; mixed `n=4`: `N=n+2=6`) -- `log(N) = log(6) approx
+1.79`. Computing `N*(1-eta)` against that reference across this project's
+actual `ETA_GRID`:
+
+| eta | expected lost photons (N=6) | vs log(6)=1.79 |
+|---|---|---|
+| 0.99 | 0.06 | within |
+| 0.95 | 0.30 | within |
+| 0.90 | 0.60 | within |
+| 0.80 | 1.20 | within |
+| 0.60 | 2.40 | exceeds |
+| 0.35 | 3.90 | exceeds |
+| 0.05 | 5.70 | exceeds |
+
+Stated as an honest, small-n-limited observation (not an asymptotic claim,
+per the caveat above and matching `18-RESEARCH.md` Finding 3's identical
+caveat for BMS): at this project's largest reached `n` in each scope, the
+four highest-loss eta points tested (`0.99, 0.95, 0.90, 0.80`) sit inside the
+"expected lost photons at most `log(N)`" illustrative regime this newer
+paper's Theorem 1 associates with preserved hardness (for its own,
+structurally different GBS model); the three lowest (`0.60, 0.35, 0.05`) do
+not. This is a genuine, computed crossover, not an assumed one -- but it says
+nothing about this project's own circuit's hardness, since Theorem 1 is proved
+for lossy GBS specifically, not for this project's dual-rail heralded-gate
+IQP construction. The value of the observation is narrower: it shows that
+this project's actual tested loss range spans both sides of the *kind* of
+loss-fraction threshold the most recent literature on photon-loss hardness
+uses, rather than sitting entirely on one side of it.
+
+**Against BMS's depolarizing regime.** No numeric comparison is made here, by
+the owner's explicit decision above -- BMS's Theorem 4 is stated in terms of
+an effective depolarizing rate `epsilon` on a qubit-level noise channel, and
+this document does not compute or assume any `eta->epsilon` value. The
+qualitative distinction already on record in the Anticoncentration section
+above stands: BMS's `alpha` normalization is the same quantity this project
+measures directly (`hardness/baselines.py::anticoncentration_alpha`), but
+using it inside Theorem 4's actual bound requires the `epsilon` this document
+declines to fabricate. BMS remains cited as a structurally different,
+not-directly-comparable noise model -- not merged with, or substituted for,
+the two loss-native comparisons above.
+
+### HARD-06: What this phase does and does not establish
+
+This phase measures TVD-to-lossless, TVD-to-two-classically-easy-baselines,
+and anticoncentration degradation under a specific, fractional, uniform
+per-mode photon-loss model, at small, fixed `n` (weight1 `n=2..6`, mixed
+`n=2..4`), for this project's own dual-rail/heralded-gate IQP circuit family.
+
+It does **not**:
+
+- Constitute a complexity-theoretic proof of a loss threshold for this
+  project's circuit (already excluded from this milestone's scope, per
+  `.planning/REQUIREMENTS.md`'s Out-of-Scope table).
+- Demonstrate an asymptotic transition -- this project's reachable `n` is too
+  small to exhibit scaling behavior on its own, the same honesty caveat
+  already applied to Phase 17's own n-scaling claims (`docs/trainability-
+  study.md`'s TRAIN-05/TRAIN-08 sections).
+- Establish, derive, or assume any eta->epsilon depolarizing-rate translation
+  -- the owner's explicit, on-record decision (above) was that no established
+  translation exists and none was fabricated for this document. Any future
+  comparison to BMS's depolarizing-threshold literature specifically (as
+  opposed to the loss-native comparisons above) would require that unresolved
+  translation to be done first, as original work, not inherited from this
+  phase.
+- Claim that the illustrative `eta->(expected lost-photon count)` crossover
+  against arXiv:2511.07853's logarithmic-fraction threshold, above, says
+  anything about this project's own circuit's classical hardness -- that
+  paper's Theorem 1 is proved for a different photonic model (lossy Gaussian
+  boson sampling), not this project's dual-rail heralded-gate IQP
+  construction. The crossover is reported as a structural observation about
+  where this project's tested loss range falls relative to the *kind* of
+  threshold recent photon-loss-hardness literature uses, nothing stronger.
+
+This closes HARD-04 (positioning stated plainly, using loss-native regimes
+instead of a fabricated translation, with the fabrication decision itself
+on record) and HARD-06 (this explicit scope statement), completing all of
+HARD-01 through HARD-07 for Phase 18.
