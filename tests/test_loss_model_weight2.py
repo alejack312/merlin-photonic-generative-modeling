@@ -266,6 +266,128 @@ def test_pitfall_2_regression_broken_helper_is_loss_invariant_correct_fn_is_not(
     )
 
 
+# --- Case 5: Pitfall-3 regression, demonstrated not just avoided ----------
+
+
+def _broken_weight2_with_add_herald(n, i, j, thetas, eta):
+    """Deliberately-broken reference reproducing
+    photonic_weight2_iqp_distribution_lossy's exact wiring but REGISTERING
+    add_herald() on the two ancilla modes and letting Processor.with_input()
+    auto-fill them from a reduced (2n-mode) input state -- the Pitfall-3
+    regression this test file must prove is real, not just avoided by never
+    calling add_herald(). Local to this test file only, never exported from
+    hardness/loss_model_weight2.py: this is a broken code path, not a
+    supported one."""
+    thetas_folded = list(thetas)
+    thetas_folded[i] += np.pi / 4
+    thetas_folded[j] += np.pi / 4
+
+    total_modes = 2 * n + 2
+    loss = 1.0 - eta
+    proc = pcvl.Processor("SLOS", total_modes)
+    for m in range(total_modes):
+        proc.add(m, pcvl.LC(loss))
+
+    proc.add(0, build_state_prep_circuit(n))
+    proc.add(0, build_diagonal_layer_circuit(n, thetas_folded))
+
+    cz_circuit, herald_spec = build_cz_insertion(n, i, j)
+    mapping = {
+        2 * i: 0, 2 * i + 1: 1,
+        2 * j: 2, 2 * j + 1: 3,
+        2 * n: 4, 2 * n + 1: 5,
+    }
+    proc.add(mapping, cz_circuit)
+
+    proc.add(0, build_conjugation_circuit(n))
+    proc.add(0, build_readout_circuit(n))
+    proc.min_detected_photons_filter(0)
+
+    # The deliberately-broken part: registering add_herald() and then
+    # supplying only the reduced (2n-mode) data input, letting the herald
+    # ancilla modes auto-fill. Documented (18-RESEARCH.md Pitfall 3,
+    # re-confirmed live 2026-08-17) to crash Processor.probs() for
+    # PBS-containing circuits like this one -- matching the already-corrected
+    # STATE.md decision-log account of Perceval#783's actual trigger
+    # condition (herald modes omitted from with_input(), not add_herald()
+    # itself).
+    proc.add_herald(2 * n, herald_spec[2 * n])
+    proc.add_herald(2 * n + 1, herald_spec[2 * n + 1])
+
+    reduced_input = pcvl.BasicState("|" + ",".join(["{P:H},0"] * n) + ">")
+    proc.with_input(reduced_input)
+    return proc.probs()
+
+
+def test_pitfall_3_regression_add_herald_with_pbs_crashes():
+    """Proves 18-RESEARCH.md Pitfall 3 is real, not just avoided:
+    registering add_herald() on heralded_cz's ancilla modes and letting
+    Processor auto-fill them from a reduced input crashes Processor.probs()
+    for this PBS-containing circuit. photonic_weight2_iqp_distribution_lossy
+    avoids this entirely by never calling add_herald() and always supplying
+    the full (2n+2)-mode annotated input explicitly (_weight2_input_state)."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+
+    with pytest.raises(Exception):
+        _broken_weight2_with_add_herald(n, i, j, thetas, eta=0.8)
+
+    # The real, correct function has no such crash risk -- same n/i/j/thetas.
+    dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=0.8
+    )
+    assert dist  # ran successfully, produced a non-empty distribution
+
+
+# --- Case 6: Pitfall-4 regression, demonstrated not just avoided ----------
+
+
+def test_pitfall_4_regression_global_perf_is_not_a_herald_failure_proxy():
+    """Proves 18-RESEARCH.md Pitfall 4 is real: global_perf stays pinned
+    near its lossless value across the entire eta sweep (min_detected_
+    photons_filter(0) keeps essentially all probability mass, so nothing
+    gets filtered out) while herald_failure_prob genuinely degrades with
+    eta -- a caller who mistakenly reads global_perf as a proxy for
+    herald-mechanism degradation would see no usable signal at all, not
+    just a numerically-different one."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+    eta_grid = [1.0, 0.7, 0.4, 0.1]
+
+    hfp_values = []
+    global_perf_values = []
+    for eta in eta_grid:
+        _, _, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+            n, i, j, thetas, eta=eta
+        )
+        hfp_values.append(herald_failure_prob)
+        global_perf_values.append(global_perf)
+
+    # global_perf stays pinned -- uninformative about herald degradation.
+    for gp in global_perf_values:
+        assert abs(gp - global_perf_values[0]) <= 1e-6, (
+            f"expected global_perf to stay pinned (uninformative) across the "
+            f"eta sweep, got {global_perf_values} -- if this fails, Pitfall "
+            "4's conflation risk may no longer be reproducible and this "
+            "regression test needs to be revisited"
+        )
+
+    # herald_failure_prob genuinely moves -- the real signal a caller needs.
+    assert hfp_values[-1] > hfp_values[0] + 1e-3, (
+        f"expected herald_failure_prob to genuinely degrade across the eta "
+        f"sweep, got {hfp_values}"
+    )
+
+    # The two quantities materially diverge -- proving they are not
+    # interchangeable, per the module docstring's explicit warning.
+    for hfp, gp in zip(hfp_values, global_perf_values):
+        assert abs(hfp - gp) > 1e-3, (
+            f"expected herald_failure_prob ({hfp}) and global_perf ({gp}) to "
+            "materially diverge -- if they ever converge, the conflation "
+            "risk documented as Pitfall 4 would no longer be real"
+        )
+
+
 # --- Validation: eta out of range -------------------------------------
 
 
