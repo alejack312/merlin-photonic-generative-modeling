@@ -45,9 +45,9 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 ### Independent Julia Verifier (VERIFY)
 
 - [x] **VERIFY-01**: Julia toolchain installed (`juliaup`, Yao.jl, BosonSampling.jl) with a hello-world circuit run successfully — the de-risking spike; sequenced early in the roadmap as this milestone's stall-risk checkpoint
-- [ ] **VERIFY-02**: Yao.jl independent cross-check of the exact qubit-side IQP reference distribution (weight-1, at least n=2) against the existing Python/NumPy implementation
-- [ ] **VERIFY-03**: BosonSampling.jl independent cross-check of the photonic-level exact distribution (weight-1 and/or weight-2) against Perceval's results, at least one shared test case
-- [ ] **VERIFY-04**: BosonSampling.jl cross-check of STUDY-02's loss-model numbers at ≥1 shared η against the Python-computed TVD-vs-η result
+- [x] **VERIFY-02**: Yao.jl independent cross-check of the exact qubit-side IQP reference distribution (weight-1, at least n=2) against the existing Python/NumPy implementation
+- [x] **VERIFY-03**: BosonSampling.jl independent cross-check of the photonic-level exact distribution (weight-1 and/or weight-2) against Perceval's results, at least one shared test case
+- [x] **VERIFY-04**: BosonSampling.jl cross-check of STUDY-02's loss-model numbers at ≥1 shared η against the Python-computed TVD-vs-η result
 
 ### Technical Write-Up (WRITE)
 
@@ -121,9 +121,9 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | HARD-05 | 18 - Hardness-Under-Loss Assessment | Complete |
 | HARD-06 | 18 - Hardness-Under-Loss Assessment | Complete |
 | HARD-07 | 18 - Hardness-Under-Loss Assessment | Complete |
-| VERIFY-02 | 19 - Independent Julia Cross-Checks | Pending |
-| VERIFY-03 | 19 - Independent Julia Cross-Checks | Pending |
-| VERIFY-04 | 19 - Independent Julia Cross-Checks | Pending |
+| VERIFY-02 | 19 - Independent Julia Cross-Checks | Complete |
+| VERIFY-03 | 19 - Independent Julia Cross-Checks | Complete |
+| VERIFY-04 | 19 - Independent Julia Cross-Checks | Complete |
 | WRITE-01 | 20 - Technical Write-Up | Pending |
 | WRITE-02 | 20 - Technical Write-Up | Pending |
 | WRITE-03 | 20 - Technical Write-Up | Pending |
