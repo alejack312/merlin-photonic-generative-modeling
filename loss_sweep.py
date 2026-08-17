@@ -5,6 +5,11 @@ Root-level script matching this repo's `gradient_variance_sweep.py`/
 (Plan 18-05) for a given generator scope across one or more system sizes and
 eta values, writing a single flat CSV.
 
+The default ``--backend polarization`` preserves Phase 18's original
+Processor+LC implementation. ``--backend merlin-dual-rail`` runs the
+established polarization-free QuantumLayer parallel with the same eta grid,
+theta substreams, metrics, and herald-accounting convention.
+
 Usage:
     python loss_sweep.py --scope weight1 --n-values 2 3 4 5 6 --n-draws 5 \\
         --out results/phase18_weight1_loss_sweep.csv
@@ -49,6 +54,7 @@ from hardness import sweep
 FIELDNAMES = [
     "n",
     "generator_scope",
+    "simulation_backend",
     "eta",
     "n_draws",
     "tvd_to_lossless_mean",
@@ -81,6 +87,16 @@ def parse_args():
         required=True,
         choices=["weight1", "mixed"],
         help="Generator scope: weight1-only or mixed weight-1+weight-2.",
+    )
+    parser.add_argument(
+        "--backend",
+        choices=list(sweep.BACKENDS),
+        default="polarization",
+        help=(
+            "Loss simulation backend (default: polarization). The "
+            "merlin-dual-rail backend runs the equivalent polarization-free "
+            "QuantumLayer circuit with MerLin's photon-loss transform."
+        ),
     )
     parser.add_argument(
         "--n-values",
@@ -172,17 +188,18 @@ def _chunk_dir(out_path):
     return d
 
 
-def _chunk_path(out_path, scope, n, eta, draw_start, draw_count):
+def _chunk_path(out_path, backend, scope, n, eta, draw_start, draw_count):
     return os.path.join(
         _chunk_dir(out_path),
-        f"{scope}_n{n}_eta{eta:g}_{draw_start}-{draw_start + draw_count}.npy",
+        f"{backend}_{scope}_n{n}_eta{eta:g}_{draw_start}-{draw_start + draw_count}.npy",
     )
 
 
-def _row_from_summary(n, scope, eta, summary):
+def _row_from_summary(n, scope, backend, eta, summary):
     return {
         "n": n,
         "generator_scope": scope,
+        "simulation_backend": backend,
         "eta": eta,
         "n_draws": summary["n_draws"],
         "tvd_to_lossless_mean": summary["tvd_to_lossless_mean"],
@@ -217,9 +234,18 @@ def run_chunk(args):
             draw_count=args.draw_count,
             weight2_pair=WEIGHT2_PAIR,
             seed_base=SEED_BASE,
+            backend=args.backend,
         )
         elapsed = time.time() - start
-        path = _chunk_path(args.out, args.scope, n, eta, args.draw_start, args.draw_count)
+        path = _chunk_path(
+            args.out,
+            args.backend,
+            args.scope,
+            n,
+            eta,
+            args.draw_start,
+            args.draw_count,
+        )
         np.save(path, raw)
         print(
             f"n={n} eta={eta:g} draws=[{args.draw_start},{args.draw_start + args.draw_count}): "
@@ -235,13 +261,16 @@ def combine_chunks(args, writer, f):
     n = args.n_values[0]
     rows = []
     for eta in args.eta_grid:
-        pattern = os.path.join(_chunk_dir(args.out), f"{args.scope}_n{n}_eta{eta:g}_*.npy")
+        pattern = os.path.join(
+            _chunk_dir(args.out),
+            f"{args.backend}_{args.scope}_n{n}_eta{eta:g}_*.npy",
+        )
         chunk_files = sorted(glob.glob(pattern))
         if not chunk_files:
             raise FileNotFoundError(f"no chunk files found matching {pattern}")
         arrays = [np.load(p) for p in chunk_files]
         summary = sweep.combine_pooled_cells(arrays, args.scope)
-        row = _row_from_summary(n, args.scope, eta, summary)
+        row = _row_from_summary(n, args.scope, args.backend, eta, summary)
         writer.writerow(row)
         f.flush()
         os.fsync(f.fileno())
@@ -272,9 +301,10 @@ def run(args, writer, f):
                 draw_count=args.n_draws,
                 weight2_pair=WEIGHT2_PAIR,
                 seed_base=SEED_BASE,
+                backend=args.backend,
             )
             elapsed = time.time() - start
-            row = _row_from_summary(n, args.scope, eta, summary)
+            row = _row_from_summary(n, args.scope, args.backend, eta, summary)
             rows.append(row)
             writer.writerow(row)
             f.flush()

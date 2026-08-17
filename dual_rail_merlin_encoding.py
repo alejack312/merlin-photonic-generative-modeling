@@ -144,7 +144,15 @@ def make_weight1_circuit_and_input(n):
     return circuit, dual_rail_all_zero_input(n), [p.name for p in params]
 
 
-def make_weight1_quantum_layer(n):
+def _validate_eta(eta):
+    """Validate and normalize a uniform per-mode transmittance."""
+    eta = float(eta)
+    if not 0.0 <= eta <= 1.0:
+        raise ValueError(f"eta must be in [0.0, 1.0], got {eta!r}")
+    return eta
+
+
+def make_weight1_quantum_layer(n, eta=1.0):
     """Factory for a MerLin QuantumLayer wrapping the full weight-1 dual-rail
     circuit for n qubits. All n thetas are bundled into ONE trainable
     parameter tensor of shape (n,) (MerLin's own prefix-matching behavior for
@@ -156,12 +164,18 @@ def make_weight1_quantum_layer(n):
     directly), meaning UNBUNCHED and FOCK give identical results here -- but
     FOCK is used uniformly across both weight-1 and weight-2 factories for
     consistency and because weight-2's default-UNBUNCHED silently dropped
-    real probability mass (see make_weight2_quantum_layer's docstring)."""
+    real probability mass (see make_weight2_quantum_layer's docstring).
+
+    ``eta`` is the uniform per-mode photon transmittance. MerLin applies it
+    as a differentiable photon-loss transform over the full Fock output,
+    including lower-photon-number sectors; eta=1 is lossless."""
+    eta = _validate_eta(eta)
     circuit, input_state, _ = make_weight1_circuit_and_input(n)
     return ML.QuantumLayer(
         circuit=circuit,
         input_state=input_state,
         trainable_parameters=["theta"],
+        noise=pcvl.NoiseModel(transmittance=eta),
         measurement_strategy=ML.MeasurementStrategy.probs(
             computation_space=ML.ComputationSpace.FOCK
         ),
@@ -187,14 +201,16 @@ def _bitstring_dist_from_layer_output(layer, out_flat, n):
     return dist, residual
 
 
-def dual_rail_photonic_iqp_distribution(n, thetas):
+def dual_rail_photonic_iqp_distribution(n, thetas, eta=1.0):
     """Weight-1 dual-rail analogue of photonic_iqp_distribution: builds the
     dual-rail circuit for the given theta values, runs it through MerLin's
     QuantumLayer (native torch forward pass, not Perceval's own Analyzer),
     and returns (dist, residual) in the exact same shape as the polarization
-    encoding's function -- {bitstring: probability}, residual float."""
+    encoding's function -- {bitstring: probability}, residual float. Lost
+    data photons produce invalid dual-rail pairs and are accumulated into
+    residual rather than silently discarded."""
     assert len(thetas) == n
-    layer = make_weight1_quantum_layer(n)
+    layer = make_weight1_quantum_layer(n, eta=eta)
     with torch.no_grad():
         theta_tensor = dict(layer.named_parameters())["theta"]
         theta_tensor.copy_(torch.tensor(thetas, dtype=theta_tensor.dtype))
@@ -318,7 +334,7 @@ def make_weight2_circuit_and_input(n, i, j):
     return flat, dual_rail_weight2_input_state(n), herald_spec
 
 
-def make_weight2_quantum_layer(n, i, j):
+def make_weight2_quantum_layer(n, i, j, eta=1.0):
     """Factory for a MerLin QuantumLayer wrapping the full weight-2 dual-rail
     circuit (qubits i, j coupled via the CZ-insertion core) for n qubits.
     Returns (layer, herald_spec).
@@ -333,12 +349,19 @@ def make_weight2_quantum_layer(n, i, j):
     correct ~0.9259 (Phase 10's independently-established 2/27 success
     rate, reproduced exactly by bare Perceval on this identical circuit).
     FOCK fixes this by enumerating the true, unrestricted n+2-photon Fock
-    space (792 states at n=3, vs UNBUNCHED's silently-wrong 56)."""
+    space (792 states at n=3, vs UNBUNCHED's silently-wrong 56).
+
+    ``eta`` is applied uniformly to every data and ancilla mode. Manual
+    herald filtering must therefore happen after the layer forward pass so
+    lost herald photons contribute to herald failure.
+    """
+    eta = _validate_eta(eta)
     circuit, input_state, herald_spec = make_weight2_circuit_and_input(n, i, j)
     layer = ML.QuantumLayer(
         circuit=circuit,
         input_state=input_state,
         trainable_parameters=["theta"],
+        noise=pcvl.NoiseModel(transmittance=eta),
         measurement_strategy=ML.MeasurementStrategy.probs(
             computation_space=ML.ComputationSpace.FOCK
         ),
@@ -346,16 +369,19 @@ def make_weight2_quantum_layer(n, i, j):
     return layer, herald_spec
 
 
-def dual_rail_photonic_weight2_iqp_distribution(n, i, j, thetas):
+def dual_rail_photonic_weight2_iqp_distribution(n, i, j, thetas, eta=1.0):
     """Weight-2 dual-rail analogue of photonic_weight2_iqp_distribution:
     builds the dual-rail weight-2 circuit for the given theta values, runs it
     through MerLin's QuantumLayer, and manually filters/renormalizes on the
     2 tail ancilla modes matching herald_spec (see module docstring for why
     this sidesteps MerLin's "no heralding in experiment=" restriction).
     Returns (dist, residual, herald_failure_prob) -- identical 3-tuple shape
-    to photonic_weight2_iqp_distribution."""
+    to photonic_weight2_iqp_distribution. Photon loss is applied before this
+    manual classification, so data loss becomes residual when the herald
+    succeeds and ancilla loss compounds with the gate's intrinsic herald
+    failure probability."""
     assert len(thetas) == n
-    layer, herald_spec = make_weight2_quantum_layer(n, i, j)
+    layer, herald_spec = make_weight2_quantum_layer(n, i, j, eta=eta)
     with torch.no_grad():
         theta_tensor = dict(layer.named_parameters())["theta"]
         theta_tensor.copy_(torch.tensor(thetas, dtype=theta_tensor.dtype))

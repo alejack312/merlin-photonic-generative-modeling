@@ -293,6 +293,72 @@ accounted in that gate's own failure-probability column, not a generic
 leakage bucket (`STATE.md`'s Accumulated Context, established during Phase
 15).
 
+## MerLin dual-rail parallel
+
+The Phase 18 experiment was also rerun through MerLin 0.4.0 without
+polarization encoding. This is an **encoding parallel**, not a claim that
+MerLin accepts the original `PBS`/polarization-annotated `Processor`: the
+existing `dual_rail_merlin_encoding.py` circuits represent each qubit as two
+ordinary spatial modes, flatten the heralded-CZ network to a unitary
+`pcvl.Circuit`, execute it through `QuantumLayer`, and apply the same manual
+herald filtering afterward.
+
+Photon loss is supplied as
+`pcvl.NoiseModel(transmittance=eta)` to `QuantumLayer`. MerLin's
+`PhotonLossTransform` expands the result into every reachable lower-photon
+Fock sector before the existing residual/herald classification. Three
+details are load-bearing:
+
+- `ComputationSpace.FOCK` remains explicit; `UNBUNCHED` would discard real
+  Hong-Ou-Mandel bunching probability before loss is even classified.
+- The noise model covers the entire layer, including both herald ancillas.
+- Manual herald/postselection runs after loss, so a lost herald photon is
+  counted as herald failure rather than disappearing from the calculation.
+
+The loss transform itself was cross-checked on the identical dual-rail
+circuits against explicit front-loaded `pcvl.LC(1-eta)` components. At
+`n=2`, `eta=0.6`, and `thetas=[0.3,0.9]`, raw-distribution TVD was
+`9.92e-8` for weight-1 and `2.00e-7` for heralded CZ; herald-failure
+probability differed by `3.55e-7`. These are float32-scale discrepancies,
+not a change in the modeled channel.
+
+The full original sweep design was then repeated unchanged: the same
+seven-point eta grid, five deterministic theta draws per cell, seed base
+`180814`, weight-1 `n=2..6`, and mixed `n=2..4`. Results are in:
+
+- `results/phase18_merlin_dual_rail_weight1_loss_sweep.csv`
+- `results/phase18_merlin_dual_rail_mixed_loss_sweep.csv`
+- `results/phase18_backend_comparison.csv` (both values and absolute delta
+  for every shared per-cell metric)
+
+![MerLin dual-rail weight-1 TVD vs eta](../results/phase18_merlin_dual_rail_weight1_tvd_plot.png)
+
+![MerLin dual-rail mixed TVD vs eta](../results/phase18_merlin_dual_rail_mixed_tvd_plot.png)
+
+![MerLin dual-rail anticoncentration alpha vs eta](../results/phase18_merlin_dual_rail_anticoncentration_plot.png)
+
+### What agrees, and what does not
+
+The loss-driven quantities agree tightly across the polarization/LC and
+MerLin/dual-rail studies. Across all 56 matched cells, the maximum absolute
+difference in mean TVD-to-each-backend's-own-lossless-reference is
+`3.84e-6`. For the mixed circuit, maximum mean herald-failure and
+herald-success differences are both `6.17e-7`. In particular, both paths
+measure the same lossless `2/27` herald-success baseline and its monotonic
+collapse to about `0.00087` at `eta=0.05`.
+
+The absolute output-shape metrics do **not** agree pointwise for identical
+numeric theta draws. Maximum mean differences are `0.1434` for TVD to
+uniform, `0.05382` for TVD to the product-of-marginals baseline, and
+`5.7774` for anticoncentration alpha. This is expected from the scope of the
+existing MerLin implementation: it is a separately validated dual-rail
+parallel circuit family, not the literal polarization circuit or an asserted
+pointwise theta-to-distribution identity. The result therefore supports a
+narrow, useful conclusion: MerLin reproduces Phase 18's **uniform-loss
+response and ancilla-loss/herald compounding** to numerical precision, while
+encoding-dependent lossless distribution shape remains genuinely different
+and must not be presented as backend-identical.
+
 ## HARD-04/HARD-06: Positioning and Scope Statement (Plan 18-08)
 
 ### Owner's attempt-first response (recorded as-given, per this project's

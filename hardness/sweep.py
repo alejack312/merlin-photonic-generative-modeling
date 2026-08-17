@@ -7,6 +7,11 @@ product_of_marginals_baseline, anticoncentration_alpha) together into the one
 per-cell integration function Plan 18-06 needs to actually run the real
 photon-loss sweep: `pooled_cell_for_neta`.
 
+Both the original ``polarization`` Processor+LC backend and the
+``merlin-dual-rail`` QuantumLayer+NoiseModel backend implement this same
+cell contract. Backend selection is deliberately absent from the RNG key so
+matched cells receive identical theta draws.
+
 Everything here operates on ONE (n, eta, generator_scope) cell at a time,
 pooled/averaged across independent random-theta draws -- mirroring
 `trainability/sweep.py::pooled_gradients_for_cell`'s "raw array now,
@@ -26,6 +31,10 @@ from hardness.baselines import (
 )
 from hardness.loss_model import photonic_iqp_distribution_lossy
 from hardness.loss_model_weight2 import photonic_weight2_iqp_distribution_lossy
+from dual_rail_merlin_encoding import (
+    dual_rail_photonic_iqp_distribution,
+    dual_rail_photonic_weight2_iqp_distribution,
+)
 from iqp_photonic_encoding import total_variation_distance
 from trainability.rng import get_rng
 
@@ -43,6 +52,50 @@ ETA_GRID = [0.99, 0.95, 0.90, 0.80, 0.60, 0.35, 0.05]
 # Mixed scope adds herald_failure_prob (weight-1 has no herald).
 WEIGHT1_QUANTITIES = ["tvd_to_lossless", "tvd_to_uniform", "tvd_to_product_marginals", "alpha"]
 MIXED_QUANTITIES = WEIGHT1_QUANTITIES + ["herald_failure_prob"]
+BACKENDS = ("polarization", "merlin-dual-rail")
+
+
+def _validate_backend(backend):
+    if backend not in BACKENDS:
+        raise ValueError(f"unknown backend: {backend!r}; expected one of {BACKENDS}")
+    return backend
+
+
+def _distribution_for_backend(n, thetas, eta, scope, backend, weight2_pair):
+    """Run one loss-model backend and normalize its return contract.
+
+    The polarization Processor functions expose ``global_perf`` while the
+    MerLin layer includes every loss sector directly in its normalized output.
+    The sweep does not use ``global_perf``, so this adapter returns only the
+    distribution, residual, and optional herald-failure probability shared by
+    both implementations.
+    """
+    _validate_backend(backend)
+    if scope == "weight1":
+        if backend == "polarization":
+            dist, residual, _global_perf = photonic_iqp_distribution_lossy(
+                n, thetas, eta=eta
+            )
+        else:
+            dist, residual = dual_rail_photonic_iqp_distribution(
+                n, thetas, eta=eta
+            )
+        return dist, residual, None
+
+    i, j = weight2_pair
+    if backend == "polarization":
+        dist, residual, herald_failure_prob, _global_perf = (
+            photonic_weight2_iqp_distribution_lossy(
+                n, i, j, thetas, eta=eta
+            )
+        )
+    else:
+        dist, residual, herald_failure_prob = (
+            dual_rail_photonic_weight2_iqp_distribution(
+                n, i, j, thetas, eta=eta
+            )
+        )
+    return dist, residual, herald_failure_prob
 
 
 def sample_thetas(rng, n):
@@ -68,7 +121,16 @@ def _quantities_for_scope(scope):
     raise ValueError(f"unknown scope: {scope!r}")
 
 
-def _raw_values_for_cell(n, eta, scope, draw_start, draw_count, weight2_pair=(0, 1), seed_base=180814):
+def _raw_values_for_cell(
+    n,
+    eta,
+    scope,
+    draw_start,
+    draw_count,
+    weight2_pair=(0, 1),
+    seed_base=180814,
+    backend="polarization",
+):
     """Raw (not summarized) per-draw quantity values for ONE (n, eta, scope)
     cell, over draw indices [draw_start, draw_start + draw_count).
 
@@ -104,6 +166,7 @@ def _raw_values_for_cell(n, eta, scope, draw_start, draw_count, weight2_pair=(0,
     """
     if scope not in ("weight1", "mixed"):
         raise ValueError(f"unknown scope: {scope!r}")
+    _validate_backend(backend)
     if not (0.0 <= eta <= 1.0):
         raise ValueError(f"eta must be in [0.0, 1.0], got {eta!r}")
 
@@ -113,27 +176,18 @@ def _raw_values_for_cell(n, eta, scope, draw_start, draw_count, weight2_pair=(0,
         draw_rng = get_rng(seed_base, scope, n, draw)
         thetas = sample_thetas(draw_rng, n)
 
-        if scope == "weight1":
-            lossless_dist, _residual, _perf = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
-        else:
-            i, j = weight2_pair
-            lossless_dist, _residual, _herald_fail, _perf = photonic_weight2_iqp_distribution_lossy(
-                n, i, j, thetas, eta=1.0
-            )
+        lossless_dist, _residual, _herald_fail = _distribution_for_backend(
+            n, thetas, 1.0, scope, backend, weight2_pair
+        )
 
         # Product-of-marginals computed ONCE per draw, from this draw's own
         # lossless (eta=1.0) reference -- 18-CONTEXT.md's explicit lock.
         product_marginals = product_of_marginals_baseline(lossless_dist, n)
         uniform = uniform_baseline(n)
 
-        if scope == "weight1":
-            lossy_dist, _residual, _perf = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
-            herald_failure_prob = None
-        else:
-            i, j = weight2_pair
-            lossy_dist, _residual, herald_failure_prob, _perf = photonic_weight2_iqp_distribution_lossy(
-                n, i, j, thetas, eta=eta
-            )
+        lossy_dist, _residual, herald_failure_prob = _distribution_for_backend(
+            n, thetas, eta, scope, backend, weight2_pair
+        )
 
         values = {
             "tvd_to_lossless": total_variation_distance(lossy_dist, lossless_dist),
@@ -168,7 +222,16 @@ def _summarize_raw(raw_array, scope):
     return summary
 
 
-def pooled_cell_for_neta(n, eta, scope, draw_start, draw_count, weight2_pair=(0, 1), seed_base=180814):
+def pooled_cell_for_neta(
+    n,
+    eta,
+    scope,
+    draw_start,
+    draw_count,
+    weight2_pair=(0, 1),
+    seed_base=180814,
+    backend="polarization",
+):
     """Compute, for ONE (n, eta, generator_scope) cell, all of HARD-05's/
     HARD-07's required per-cell quantities in one place: TVD-to-lossless-
     reference, TVD-to-uniform-baseline, TVD-to-product-of-marginals-baseline,
@@ -188,7 +251,14 @@ def pooled_cell_for_neta(n, eta, scope, draw_start, draw_count, weight2_pair=(0,
         or double-counting any already-completed draws.
     """
     raw = _raw_values_for_cell(
-        n, eta, scope, draw_start, draw_count, weight2_pair=weight2_pair, seed_base=seed_base
+        n,
+        eta,
+        scope,
+        draw_start,
+        draw_count,
+        weight2_pair=weight2_pair,
+        seed_base=seed_base,
+        backend=backend,
     )
     summary = _summarize_raw(raw, scope)
     return summary, raw
