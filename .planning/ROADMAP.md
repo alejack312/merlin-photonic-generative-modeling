@@ -247,12 +247,14 @@ Plans:
 **Plans:** 6 plans (4 waves — 19-01 alone in wave 1, generates every Python reference distribution the Julia scripts diff against; 19-02/19-03/19-04 parallel in wave 2, all depend only on 19-01 (Yao.jl qubit-side; BosonSampling.jl weight-1; BosonSampling.jl weight-2/Knill-CZ, isolated as the phase's highest stall risk per 19-CONTEXT.md); 19-05 depends on 19-01 + 19-04 (wave 3, BosonSampling.jl native loss-model cross-check — sequenced after 19-04 so it deterministically reads 19-04's finished weight-2 outcome before deciding whether the mixed-scope loss leg is attemptable); 19-06 depends on 19-02/19-03/19-04/19-05 (wave 4, results write-up + REQUIREMENTS.md correction, sequenced after 19-05 completes))
 
 Plans:
-- [ ] 19-01-PLAN.md — Python reference-distribution generator (exact qubit/weight-1/weight-2 cases + fixed-single-draw loss cases at 3 eta values)
-- [ ] 19-02-PLAN.md — VERIFY-02: Yao.jl independent qubit-side IQP cross-check (n=2, n=3)
-- [ ] 19-03-PLAN.md — VERIFY-03 (weight-1 leg): BosonSampling.jl independent dual-rail weight-1 cross-check (n=2, n=3)
-- [ ] 19-04-PLAN.md — VERIFY-03 (weight-2 leg): Knill-CZ literature sourcing + BosonSampling.jl cross-check (isolated, time-boxed stall risk)
-- [ ] 19-05-PLAN.md — VERIFY-04: BosonSampling.jl native-loss-API cross-check against Phase 18's TVD-vs-η numbers (n=2, 3 eta values)
-- [ ] 19-06-PLAN.md — docs/julia-cross-check-study.md write-up + REQUIREMENTS.md status correction
+- [x] 19-01-PLAN.md — Python reference-distribution generator (exact qubit/weight-1/weight-2 cases + fixed-single-draw loss cases at 3 eta values)
+- [x] 19-02-PLAN.md — VERIFY-02: Yao.jl independent qubit-side IQP cross-check (n=2, n=3)
+- [x] 19-03-PLAN.md — VERIFY-03 (weight-1 leg): BosonSampling.jl independent dual-rail weight-1 cross-check (n=2, n=3)
+- [x] 19-04-PLAN.md — VERIFY-03 (weight-2 leg): Knill-CZ literature sourcing + BosonSampling.jl cross-check (isolated, time-boxed stall risk)
+- [x] 19-05-PLAN.md — VERIFY-04: BosonSampling.jl native-loss-API cross-check against Phase 18's TVD-vs-η numbers (n=2, 3 eta values)
+- [x] 19-06-PLAN.md — docs/julia-cross-check-study.md write-up + REQUIREMENTS.md status correction
+
+**Result: Complete — verified 5/5 must-haves.** All four independent cross-checks reached a genuine GO: VERIFY-02 (Yao.jl qubit-side, TVD 2.26e-17/1.12e-16 at n=2/3), VERIFY-03 weight-1 (BosonSampling.jl, TVD 2.36e-16/3.04e-16 at n=2/3), VERIFY-03 weight-2 (Knill-CZ, TVD 3.50e-15 — a real matrix-transpose convention bug found via Knill's own Eq. 6 zero-leak constraint, fixed, and independently confirmed via Codex/gpt-5.5 review to be a legitimate correction, not a coincidental double-bug), and VERIFY-04 (BosonSampling.jl native loss API, TVD ≤1.75e-14 across 3 η values for both weight-1 and mixed scope — two real findings: η-as-transmission-amplitude-not-probability, and a package dispatch gap, both fixed and documented). `docs/julia-cross-check-study.md` written as the canonical results document; `REQUIREMENTS.md`'s VERIFY-02/03/04 rows corrected to Complete. gsd-verifier independently re-ran all four Julia scripts live rather than trusting SUMMARY claims. A follow-up Codex review (requested by the owner) confirmed the transpose fix's reasoning holds up, but flagged a real, separate methodological gap worth the owner's attention: the weight-2 locked-gate test case (thetas=[0,0]) produces a distribution symmetric under bit-relabeling (00/11 at 50% each, 01/10 both exactly 0), which cannot fully rule out a hidden Julia/Python bitstring-convention mismatch — the passing TVD is real evidence of correctness but not a complete proof against this specific failure mode. Not fixed in this phase; flagged as an open item.
 
 **Success criteria:**
 1. Yao.jl reproduces the exact qubit-side IQP reference distribution (weight-1, at least n=2) within a stated tolerance of the existing Python/NumPy implementation.
@@ -322,7 +324,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 17. Trainability / Barren-Plateau Study | v3.0 | 7/7 | Complete — verified 8/8, honest exp-decay signature found (uniform init) | 2026-08-11 |
 | 17.1. Trainability Follow-Up: Bandwidth & Init Sensitivity | v3.0 | 6/6 | Complete — verified 5/5, exp signature not robust to bandwidth; data-dependent init did not resolve inconclusive verdict | 2026-08-13 |
 | 18. Hardness-Under-Loss Assessment | v3.0 | 8/8 | Complete — verified 5/5, no correctness bugs, HARD-04 resolved honestly (no forced translation) | 2026-08-17 |
-| 19. Independent Julia Cross-Checks | v3.0 | 0/? | Not started | — |
+| 19. Independent Julia Cross-Checks | v3.0 | 6/6 | Complete — verified 5/5, all 4 legs GO (1 real transpose bug found+fixed) | 2026-08-17 |
 | 20. Technical Write-Up | v3.0 | 0/? | Not started | — |
 | 21. External-Facing Framing Pass | v3.0 | 0/? | Not started | — |
 
