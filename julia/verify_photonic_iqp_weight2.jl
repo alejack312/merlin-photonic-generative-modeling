@@ -407,19 +407,20 @@ result_locked = run_case(pi / 4, pi / 4, "weight2_locked_n2.csv", "locked")
 # independent Codex/gpt-5.5 review). thetas=[0.3, 1.1] externally folds to
 # theta_i=0.3+pi/4, theta_j=1.1+pi/4 -- distinct and nonzero.
 #
-# Caveat, stated plainly rather than oversold: this breaks the DEGENERACY
-# the locked case had (where P(01)=P(10)=0 exactly, so a mislabeled
-# convention could still trivially match), and in a hand-derivation checked
-# separately against a bare-qubit (non-photonic) numpy simulation, this
-# circuit's own H-diagonal-phase-H structure starting from |00> still seems
-# to produce P(00)=P(11) and P(01)=P(10) for every theta_i/theta_j tried --
-# i.e. this specific asymmetric case still can't distinguish a
-# simultaneous-both-qubits bit-flip mislabeling, or a qubit-order swap,
-# from the correct convention. It DOES catch a single-qubit rail-convention
-# error (e.g. Julia's A0/A1 meaning flipped for one qubit only), which the
-# old locked case could not, since that breaks P(00) vs P(01)/P(10)
-# symmetry. Not claimed as a complete proof this residual symmetry always
-# holds -- just what was observed and hand-checked here, offered candidly.
+# This breaks the DEGENERACY the locked case had (P(01)=P(10)=0 exactly, so
+# a mislabeled convention could trivially match) and DOES catch a
+# single-qubit rail-convention error (e.g. Julia's A0/A1 meaning flipped
+# for one qubit only). It provably still cannot catch a simultaneous
+# both-qubits bit-flip or a qubit-order swap -- P(00)=P(11) and
+# P(01)=P(10) hold for ANY theta_i/theta_j here, not by coincidence: this
+# circuit's diagonal layer realizes the two-vertex CZ|++> graph state (up
+# to local Z phase), whose single-qubit marginal is exactly maximally
+# mixed (I/2) for any local rotation -- Hein, Eisert & Briegel, Phys. Rev.
+# A 69, 062311 (2004), arXiv:quant-ph/0307130, Eqs. 9-10 & 41. Both
+# marginals uniform simultaneously + normalization forces the anti-diagonal
+# symmetry exactly. Specific to the pi/4-locked pair angle (the only one
+# heralded_cz realizes), not a generic IQP property. Full derivation in
+# results/phase19_verify03_weight2_results.md.
 result_asym = run_case(0.3 + pi / 4, 1.1 + pi / 4, "weight2_asymmetric_n2.csv", "asymmetric")
 
 println()

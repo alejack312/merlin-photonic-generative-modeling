@@ -185,34 +185,69 @@ separately rather than one shared locked value).
 **Result:** both cases pass. Asymmetric-case TVD = `4.50e-15` (locked case:
 `3.50e-15`), both far under the `1e-6` tolerance.
 
-**Honest caveat on what this does and doesn't close** (stated candidly, not
-as a proven fact): while investigating what theta choice would make the
-distribution asymmetric, a hand derivation against a bare-qubit (non-
-photonic, pure numpy) simulation of the same `H → diagonal-phase → H`
-circuit shape starting from `|00⟩` suggested that `P(00)=P(11)` and
-`P(01)=P(10)` hold for *every* `theta_i`/`theta_j` pair tried in this
-specific circuit structure — not just the locked case. Several theta pairs
-were checked this way (including swapping `theta_i`/`theta_j`, which left
-every probability unchanged), and the pattern held every time. This wasn't
-proven rigorously in general, but it was consistent enough across cases
-that it looks like a structural property of this circuit shape rather than
-a coincidence of any one theta choice. If that's right, it means:
+**What this does and doesn't close — now a proof, not a hedge.** While
+investigating what theta choice would make the distribution asymmetric, a
+hand derivation against a bare-qubit (non-photonic, pure numpy) simulation
+of the same `H → diagonal-phase → H` circuit shape starting from `|00⟩`
+suggested `P(00)=P(11)` and `P(01)=P(10)` for *every* `theta_i`/`theta_j`
+pair tried, not just the locked case. That observation was then run down to
+an actual proof, independently checked against the primary source (not
+just accepted from an AI-provided citation):
 
-- The new asymmetric case **does** catch a single-qubit rail-convention
-  error (e.g. Julia's `A0` meaning bit `0` when it should mean bit `1` for
-  just one of the two qubits) — the old locked case could not, since
-  `P(00)` and `P(01)` were both consistent with either labeling there.
-- It likely still **cannot** catch two specific mislabelings: flipping
-  *both* qubits' bit conventions at once, or swapping which qubit's output
-  comes first in the bitstring — both of these appear to leave the
-  distribution's shape unchanged for this circuit family, regardless of
-  theta choice, so no numeric distribution-matching test built this way can
-  distinguish them from the correct convention.
+**M. Hein, J. Eisert, H.J. Briegel, "Multi-party entanglement in graph
+states," Phys. Rev. A 69, 062311 (2004),
+[arXiv:quant-ph/0307130](https://arxiv.org/abs/quant-ph/0307130)** (PDF
+saved at `docs/papers/quant-ph_0307130.pdf`). Their Eqs. (9)–(10) define a
+graph state as `Π_{(a,b)∈E} CZ^{(a,b)} |+⟩^V` — i.e. our circuit's diagonal
+layer, via the operator identity `exp(iπ/4·Z₁Z₂) = e^{-iπ/4}·CZ·exp(iπ/4·Z₁)·exp(iπ/4·Z₂)`
+(the same identity already derived independently in
+`docs/iqp-photonic-encoding.md`'s Ingredient 2), is — up to global phase and
+local `Z` rotations from `theta_i`/`theta_j` — exactly `CZ|++⟩`, the
+two-vertex connected graph state. Their Eq. (41) (the bipartite
+reduced-state formula) was worked through by hand for this exact case
+(2-vertex graph, single edge, bipartition `A={qubit 1}`): it gives
+`tr₂[|G⟩⟨G|] = ½(|+⟩⟨+| + |−⟩⟨−|) = I/2` — the single-qubit reduced state is
+*exactly* maximally mixed, for any local `Z` rotation applied before or
+after (local unitaries can't change a maximally-mixed marginal, since
+`U(I/2)U† = I/2` for any `U`). That gives `P(X₁=0)=P(X₁=1)=½` and
+`P(X₂=0)=P(X₂=1)=½` for *every* `theta_i`, `theta_j` — not just an
+observed pattern.
 
-No further test-design change was made to chase that residual case (e.g.
+From there, both marginal constraints plus normalization
+(`P(00)+P(01)=½`, `P(00)+P(10)=½`, `P(00)+P(01)+P(10)+P(11)=1`) — three
+independent linear constraints on four unknowns — force `P(01)=P(10)` and
+`P(00)=P(11)` exactly. (Uniform marginals on *each* qubit individually
+would not be enough on their own — a distribution like
+`P(00)=0.5,P(11)=0,P(01)=0,P(10)=0.5` has a uniform `X₁` marginal but not a
+uniform `X₂` marginal; it's *both* marginals being uniform simultaneously
+that pins down the anti-diagonal symmetry.) The resulting closed form,
+`P(00)=P(11)=(1+cos(2θ_i)cos(2θ_j))/4`, `P(01)=P(10)=(1-cos(2θ_i)cos(2θ_j))/4`,
+was checked against the bare-qubit numpy simulation across 6 independent
+theta pairs (including new ones beyond the two originally spot-checked)
+and matched to machine precision every time.
+
+**Scope of the proof — this is not a generic IQP property.** It depends on
+the pair angle being locked at exactly `π/4`, the maximally-entangling `CZ`
+point. `heralded_cz` only ever realizes that fixed angle, so this circuit
+can never escape the symmetry regardless of theta choice — but a
+differently-angled two-qubit interaction (`exp(icZ_iZ_j)` for `c≠π/4 mod π/2`)
+would generally break it, since the single-qubit marginal would no longer
+be exactly maximally mixed.
+
+Net effect on the gap: the new asymmetric case **does** catch a
+single-qubit rail-convention error (e.g. Julia's `A0` meaning bit `0` when
+it should mean bit `1` for just one of the two qubits) — the old locked
+case could not, since `P(00)` and `P(01)` were both consistent with either
+labeling there. It **provably cannot** catch two specific mislabelings —
+flipping *both* qubits' bit conventions at once, or swapping which qubit's
+output comes first in the bitstring — since both leave the distribution's
+shape exactly unchanged for any theta, by the graph-state argument above.
+This residual is now a proven structural fact of the `π/4`-locked
+`heralded_cz` construction, not a testing gap that a cleverer theta choice
+could close. No further test-design change was made to chase it (e.g.
 extending to `n=3` with an untouched third qubit) — the owner reviewed this
 finding and chose to ship the improvement made here and record the
-residual honestly rather than open further scope in this phase.
+residual precisely rather than open further scope in this phase.
 
 ## Scope and honesty notes
 

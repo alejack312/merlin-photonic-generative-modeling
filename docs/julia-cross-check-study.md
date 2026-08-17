@@ -162,17 +162,26 @@ real, separate concern: at `thetas=[0.0, 0.0]` the resulting distribution
 (`P(01)=P(10)=0`, `P(00)=P(11)≈0.5`) is degenerate enough that a hidden
 Julia/Python bit-to-rail convention error could in principle produce the
 same-looking passing result. A second case was added, `thetas=[0.3, 1.1]`
-(`weight2_asymmetric_n2.csv`), which also passes: TVD = `4.50e-15`. While
-picking this theta pair, a hand check against a bare-qubit (non-photonic)
-numpy simulation of the same circuit shape suggested `P(00)=P(11)` and
-`P(01)=P(10)` may hold for *any* theta choice in this circuit family — not
-proven rigorously, but consistent across every pair tried. If that holds,
-the new case catches a single-qubit rail-convention error (which the
-locked case could not) but likely still can't catch a simultaneous
-both-qubits bit-flip or a qubit-order swap. This residual is recorded
-candidly in `results/phase19_verify03_weight2_results.md` rather than
-resolved by further scope (e.g. n=3) — the owner reviewed it and chose to
-ship the improvement as-is.
+(`weight2_asymmetric_n2.csv`), which also passes: TVD = `4.50e-15` — and
+does catch a single-qubit rail-convention error the locked case could not.
+
+The residual — a simultaneous both-qubits bit-flip or a qubit-order swap
+remaining undetectable regardless of theta — turned out to be provable, not
+just observed. Hein, Eisert & Briegel's graph-state paper
+(Phys. Rev. A 69, 062311 (2004), arXiv:quant-ph/0307130, verified directly
+against the primary source, not just an AI-provided citation) shows that
+this circuit's diagonal layer, up to global/local-`Z` phase, realizes
+exactly the two-vertex `CZ|++⟩` graph state; their Eq. (41) reduced-state
+formula gives each qubit's single-qubit marginal as exactly maximally mixed
+(`I/2`) for *any* `theta_i`/`theta_j`, since local `Z` rotations can't
+change a maximally-mixed marginal. Both marginals being uniform
+simultaneously (not just one) forces `P(01)=P(10)` and `P(00)=P(11)`
+exactly via linear algebra on the normalization constraint — reproducing
+the closed form `P(00)=P(11)=(1+cos2θ_i·cos2θ_j)/4` checked to machine
+precision against 6 independent theta pairs. This is specific to the pair
+angle being locked at exactly `π/4` (the maximally-entangling `CZ` point,
+the only angle `heralded_cz` realizes) — not a generic IQP property. Full
+derivation in `results/phase19_verify03_weight2_results.md`.
 
 **Verdict: GO (both cases).**
 
