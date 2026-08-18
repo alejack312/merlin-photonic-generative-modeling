@@ -74,7 +74,7 @@ None - plan executed exactly as written. The single task's content matched the p
 
 ## Issues Encountered
 
-None.
+**Concurrent-session commit-attribution mixing (operational note, not a code defect).** This phase's plans run with `wave: 1`/no cross-dependency between 20-01/20-02/20-03, and a concurrent session executing Plan 20-02 (`docs/hardness-under-loss-study.md`'s literature table + Herbst cross-reference note) was working in this same shared working directory at the same time. That session's own metadata commit (`610230d`, labeled `docs(20-02)`) swept up this plan's already-staged `.planning/ROADMAP.md`, `.planning/STATE.md`, and this `20-03-SUMMARY.md` file alongside its own `docs/hardness-under-loss-study.md` changes — the same pattern already documented multiple times in `STATE.md` for Phase 18's concurrent-plan execution. Content verified intact and unaltered (this file's content matches what this plan wrote; `docs/iqp-photonic-encoding.md`'s own changes are cleanly isolated in this plan's own commit `0ae0a0c`). No history was rewritten to fix the attribution; flagged here for the record, consistent with this project's established handling of the same situation in Phase 18.
 
 ## User Setup Required
 
