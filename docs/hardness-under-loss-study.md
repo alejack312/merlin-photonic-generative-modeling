@@ -531,6 +531,105 @@ declines to fabricate. BMS remains cited as a structurally different,
 not-directly-comparable noise model -- not merged with, or substituted for,
 the two loss-native comparisons above.
 
+### Literature comparison table (WRITE-02)
+
+All 11 baselines named in `.planning/REQUIREMENTS.md`'s WRITE-02 /
+`ROADMAP.md` Phase 20 success criterion 2, filtered to HARD-specific
+relevance (per `20-CONTEXT.md`'s locked "each table lists only the
+baselines actually relevant to that section" decision). Five get a
+substantive verdict with reasoning (below the table); six are HARD-silent
+one-liners, since their subject matter is TRAIN- or ARB-specific and does
+not bear on a loss/hardness comparison. Citation style (theorem/section/page
+cited inline, then relevance stated) follows `docs/iqp-baseline.md`'s
+"Fresh Primary-Source Verification" precedent, not a terse table-only
+format.
+
+| # | Baseline | Verdict | One-line reason |
+|---|---|---|---|
+| 1 | Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5) | silent (regime mismatch, per the paper's own text) | This project's fixed-eta/growing-n sweep sits in the fractional-loss regime AB's own discussion calls insufficient for a strong complexity claim -- no falsifiable AB prediction to check HARD's numbers against |
+| 2 | arXiv:2510.24137 (Park & Oh), Theorem 1 | silent (structural match, no hardness claim to test) | Closest physical match to this project's per-mode-transmittance channel, but Theorem 1 bounds one classical algorithm's (MPS) efficiency, not a hardness lower bound |
+| 3 | Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) | silent (by owner decision) | No eta-to-epsilon depolarizing-rate translation exists or was derived (HARD-04's on-record decision) -- no honest numeric comparison is possible |
+| 4 | Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1) | silent (background context only) | Foundational noiseless-IQP hardness threshold BMS-2017 extends; makes no noise/loss claim of its own to compare against HARD's sweep |
+| 5 | Herbst et al. (arXiv:2512.24801) | inconsistent -- see Cross-reference note below | Measured alpha(eta) decreases (not increases) as loss increases, the reverse of `docs/iqp-baseline.md`'s original speculative direction |
+| 6 | McClean et al. (barren-plateau protocol) | silent (TRAIN-specific) | Gradient-variance-vs-system-size diagnostic; makes no hardness/loss claim |
+| 7 | arXiv:2405.01395 (two-photon gate construction) | silent (ARB-specific) | `heralded_cz`/`CP(alpha)` construction paper; not a trainability or hardness result |
+| 8 | `docs/iqp-baseline.md`'s own empirical rule | silent (TRAIN-specific) | Qubit-side plateau-prediction rule keyed on init_scheme/n; no loss axis |
+| 9 | Rudolph et al. (arXiv:2305.02881) | silent (TRAIN-specific) | MMD kernel-bandwidth trainability result; no loss/hardness claim |
+| 10 | Mhiri et al. (arXiv:2502.07889) | silent (TRAIN-specific) | Warm-start/small-angle curvature guarantees; no loss/hardness claim |
+| 11 | Recio-Armengol et al. (arXiv:2503.02934) | silent (TRAIN-specific) | Data-dependent-initialization trainability result; no loss/hardness claim |
+
+**Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5) -- silent, by regime
+mismatch stated in the paper's own text.** Already engaged at length in the
+"Dual/triple positioning" section above ("Against Aaronson-Brod's
+fixed-loss-count regime"). The verdict that section already reaches, restated
+here rather than re-derived: AB's strong hardness guarantee is for a fixed
+constant photon-loss count `k`; this project's loss model is a fractional
+rate `eta` held fixed while `n` (and thus the expected lost-photon count
+`N*(1-eta)`) grows -- exactly the "constant fraction lost" regime AB's own
+discussion (p.9) calls insufficient for "any strong complexity claims." There
+is no AB-derived numeric threshold this project's measured TVD/alpha values
+could agree or disagree with in that regime, so the honest table entry is
+silent, not a forced consistent/inconsistent call.
+
+**arXiv:2510.24137 (Park & Oh), Theorem 1 -- silent, structural match without
+a testable hardness claim.** Already engaged in this doc's Methodology
+section and the "Dual/triple positioning" discussion. Theorem 1's
+per-mode-transmittance beamsplitter-loss model is the closest physical match
+in the literature to this project's own `pcvl.LC(1-eta)` channel (both use a
+uniform transmittance parameter across modes) -- but Theorem 1 is an upper
+bound on where **one specific classical simulation method (MPS)** is
+efficient, not a lower bound on sampling hardness; the paper states this
+asymmetry itself. It therefore gives no hardness threshold to compare HARD's
+measured numbers against. This is distinct from the same paper's Section V
+"Noisy IQP Sampling" result (qubit-level dephasing/depolarizing noise), which
+is never the one cited here.
+
+**Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) -- silent by
+owner decision, not a forced verdict.** This document's own HARD-04 section
+(above, "Owner's attempt-first response") already records the owner's
+explicit choice not to fabricate an eta-to-epsilon depolarizing-rate
+translation between this project's photon-loss channel and BMS's
+qubit-level-depolarizing noise model. Without that translation, no honest
+numeric comparison against Theorem 4's threshold can be stated -- the
+"Against BMS's depolarizing regime" subsection above already reaches this
+same conclusion; this row restates it rather than re-litigating the decision.
+
+**Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1) --
+silent, background context only.** This is the foundational (noiseless) IQP
+sampling-hardness threshold (1/192 ell1-error, conditional on average-case
+hardness conjectures) that BMS-2017's noise extension builds on. It makes no
+noise or loss claim of its own -- nothing in Theorem 1 varies with a photon
+transmittance or depolarizing rate -- so there is no prediction to test
+HARD's loss sweep against. It is noted here as background/lineage for
+BMS-2017, not assigned a consistent/inconsistent verdict.
+
+**Herbst et al. (arXiv:2512.24801) -- see the Cross-reference note at the end
+of this document.** One-clause summary of the verdict reached there: HARD's
+measured alpha(eta) decreases (i.e. the output distribution becomes *more*
+anticoncentrated, not less) as loss increases, the reverse of
+`docs/iqp-baseline.md`'s original speculative guess about which direction
+Phase 18 would find -- so under Herbst et al.'s framework, this project's own
+measured HARD result is **inconsistent** with that earlier speculative
+framing's predicted consequence for trainability, not consistent with it.
+
+**Silent rows (HARD-irrelevant by subject matter, one line each):**
+
+- **McClean et al.** (barren-plateau gradient-variance-vs-system-size
+  protocol) -- TRAIN-specific; no hardness or loss claim.
+- **arXiv:2405.01395** (two-photon gate construction paper underlying
+  `heralded_cz`/`CP(alpha)`) -- ARB-specific; a gate-construction reference,
+  not a trainability or hardness result.
+- **`docs/iqp-baseline.md`'s own empirical rule** (qubit-side plateau
+  prediction keyed on init_scheme/n) -- TRAIN-specific; has no loss axis to
+  compare against HARD's eta sweep.
+- **Rudolph et al.** (arXiv:2305.02881, MMD kernel-bandwidth trainability) --
+  TRAIN-specific; a bandwidth/variance result, not a loss/hardness claim.
+- **Mhiri et al.** (arXiv:2502.07889, warm-start curvature guarantees) --
+  TRAIN-specific; an initialization-scheme result, not a loss/hardness claim.
+- **Recio-Armengol et al.** (arXiv:2503.02934, data-dependent
+  initialization) -- TRAIN-specific; an initialization-scheme result, not a
+  loss/hardness claim.
+
 ### HARD-06: What this phase does and does not establish
 
 This phase measures TVD-to-lossless, TVD-to-two-classically-easy-baselines,
