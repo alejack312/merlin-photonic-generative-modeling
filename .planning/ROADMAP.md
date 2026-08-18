@@ -299,6 +299,11 @@ Plans:
 **Goal:** Produce an external-facing framing pass (README/case-study level) of the milestone's findings, following this project's established "mechanism-not-magic, ownership-forward" convention — kept separate from Phase 20's candid internal write-up, which stays unvarnished as-is.
 **Depends on:** Phase 20 (the internal write-up must exist before it can be externally reframed).
 **Requirements:** WRITE-07
+**Plans:** 2 plans (1 wave, both parallel and independent — 21-01 (cross-repo: extends the portfolio case-study page at C:/Users/cuqui/projects/alejandro-jackson, ends in a human-verify checkpoint since push is explicitly gated) and 21-02 (this repo's README pitch section) touch disjoint files in disjoint repos and are both drafted directly from `docs/technical-findings.md`'s already-locked numbers, so neither structurally blocks the other)
+
+Plans:
+- [ ] 21-01-PLAN.md — Extend the alejandro-jackson case-study page with v3.0 TRAIN/HARD co-lead findings + ARB-01/Julia supporting evidence + updated Role/authorship section
+- [ ] 21-02-PLAN.md — Add a short v3.0 pitch section to this repo's README, linking out to the case-study page and docs/technical-findings.md
 
 **Success criteria:**
 1. External-facing summary (README section and/or case-study material) written, distinct from Phase 20's internal technical document.
