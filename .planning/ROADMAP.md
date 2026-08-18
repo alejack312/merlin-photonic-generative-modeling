@@ -274,6 +274,14 @@ Plans:
 **Depends on:** Phase 16 (ARB-01's full outcome), Phase 17 (TRAIN's dataset), Phase 17.1 (bandwidth/init follow-up results — added 2026-08-12), Phase 18 (HARD's dataset). Does not require Phase 19 (Julia cross-check results are supplementary evidence, not a stated WRITE-01..06 requirement — include if ready, do not block on it).
 **Requirements:** WRITE-01, WRITE-02, WRITE-03, WRITE-04, WRITE-05, WRITE-06
 
+**Plans:** 4 plans (2 waves — 20-01/20-02/20-03 parallel in wave 1, three independent files (20-01 additionally carries TRAIN-07's mandatory self-explanation checkpoint as its Task 1); 20-04 depends on all three (wave 2, docs/technical-findings.md synthesis))
+
+Plans:
+- [ ] 20-01-PLAN.md — TRAIN-07 self-explanation checkpoint + TRAIN literature table + Herbst cross-reference note (docs/trainability-study.md)
+- [ ] 20-02-PLAN.md — HARD literature table + Herbst cross-reference note + stale header fix (docs/hardness-under-loss-study.md)
+- [ ] 20-03-PLAN.md — ARB-01/ARB-02 scope subsection + literature table (docs/iqp-photonic-encoding.md)
+- [ ] 20-04-PLAN.md — docs/technical-findings.md synthesis doc (mirrors all three tables, links to source docs)
+
 **Success criteria:**
 1. Methodology-stated-before-results structure exists for each of the trainability, hardness-under-loss, and ARB-01 sections.
 2. Explicit comparison table against each named literature baseline — McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule, plus the six papers added by the 2026-08-12 fresh literature read: Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, hardness threshold) and 2017 (arXiv:1610.01808, noise+hardness), Rudolph et al. (arXiv:2305.02881, MMD bodyness/bandwidth trainability), Mhiri et al. (arXiv:2502.07889, warm-start/small-angle guarantees), Recio-Armengol et al. (arXiv:2503.02934, n=1000 IQP-generative-ML), and Herbst et al. (arXiv:2512.24801, anticoncentration-trainability tradeoff) — stated per baseline as consistent with / inconsistent with / silent relative to.
