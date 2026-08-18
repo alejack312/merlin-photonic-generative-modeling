@@ -6,10 +6,20 @@ both classically-easy baselines), and the weight-2 herald-compounding
 results. Mirrors `docs/trainability-study.md`'s established Phase-17
 structure (methodology stated before any results, per this project's
 `WRITE-01` convention) and `docs/iqp-photonic-encoding.md`'s `ENC-02` rigor
-bar. This document does not yet contain HARD-04's depolarizing-translation
-positioning or HARD-06's final scope statement -- those sections are
-appended by Plan 18-08 after the owner's attempt-first checkpoint (see the
-placeholder heading at the end of this document).
+bar. As of Plan 18-08, this document is complete. It contains: methodology
+(loss mechanism, eta grid, n-range, seed/theta-init convention, classically-
+easy baselines); HARD-01/HARD-02 results (loss sweep mechanism and its
+cross-check against Perceval's `NoiseModel`); HARD-05 results (TVD vs eta,
+both generator scopes, both classically-easy baselines); anticoncentration
+results (`alpha(eta)`); HARD-07 results (weight-2 herald compounding); the
+MerLin dual-rail parallel (an independent encoding cross-check); HARD-04's
+positioning against loss-native hardness regimes and HARD-06's final scope
+statement (`## HARD-04/HARD-06`, including the owner's attempt-first
+response and a direct primary-source verification of arXiv:2511.07853); and,
+added by Phase 20, a literature comparison table (WRITE-02, `### Literature
+comparison table`) and a cross-reference note against Herbst et al.'s
+anticoncentration-tradeoff prediction (`### Cross-reference: Herbst et al.'s
+anticoncentration-tradeoff prediction`, at the end of this document).
 
 ## Methodology
 
@@ -666,3 +676,63 @@ This closes HARD-04 (positioning stated plainly, using loss-native regimes
 instead of a fabricated translation, with the fabrication decision itself
 on record) and HARD-06 (this explicit scope statement), completing all of
 HARD-01 through HARD-07 for Phase 18.
+
+### Cross-reference: Herbst et al.'s anticoncentration-tradeoff prediction
+
+`docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section cites
+Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) for a formal result:
+circuits whose output distributions anticoncentrate are predicted to have
+*both* increased classical-simulability-under-noise (the hardness side) and
+increased MMD-type-loss concentration (the trainability side) -- the two
+effects are predicted to co-occur, not trade off against each other. This
+document's own Anticoncentration section (above) already reports the real,
+measured `alpha(eta)` values this prediction can be checked against.
+
+**The measured direction, stated plainly:** `alpha(eta)` decreases
+monotonically as `eta` decreases (i.e. as photon loss increases), for both
+weight-1 and mixed scope, crossing below the `alpha=1` uniform-reference
+line at every measured `n`. In this project's own measured data, **more
+loss makes the output distribution more anticoncentrated, not less.**
+
+**This corrects `docs/iqp-baseline.md`'s earlier speculative framing.**
+That note (written 2026-08-12, before this phase's real sweep existed)
+guessed the opposite direction: "if Phase 18 finds photon loss erodes
+anticoncentration... trainability should correspondingly improve at higher
+loss." The real measured direction is the reverse of that guess -- loss
+*increases* anticoncentration here, it does not erode it -- so the
+speculative note's premise does not hold as originally phrased. This is
+stated here explicitly, rather than silently left uncorrected, matching this
+project's established pattern of catching and correcting its own earlier
+statements once real data exists (e.g. the Van den Nest attribution
+correction, the Aaronson-Brod/Park-Oh misattribution correction).
+
+**Under Herbst et al.'s own framework, this measured direction points the
+other way from the original speculative guess's practical conclusion.**
+Since anticoncentration is predicted to drive BOTH increased
+classical-simulability *and* increased MMD-loss concentration together (not
+a trade-off), and this project's own measured `alpha(eta)` shows loss
+*increasing* anticoncentration, the framework's predicted consequence for
+trainability is that training should, if anything, get **worse** (not
+better) as loss increases -- the opposite of `docs/iqp-baseline.md`'s
+original speculative guess ("trainability should correspondingly improve at
+higher loss").
+
+**The TRAIN-side half of this cross-reference is recorded separately in
+`docs/trainability-study.md`'s equivalent cross-reference note** (in that
+document's "What this does/doesn't establish" section) -- Phase 17/17.1's
+own gradient-variance findings are not restated here; see that document for
+the trainability-side measurement and verdict.
+
+**A hedge that must be stated explicitly, not smoothed over:** TRAIN and
+HARD do not share a common independent variable. TRAIN's sweep (Phase 17)
+varies `n` at `eta=1` (no loss at all); HARD's sweep (this phase) varies
+`eta` at small fixed `n`. Neither phase varies both `n` and `eta` together
+on a single dataset, so this project cannot directly test Herbst et al.'s
+co-occurrence prediction with one combined experiment -- this is a
+qualitative, hedged cross-reference between two separately-measured trends,
+each already reported honestly in its own document, not a joint experiment
+that jointly confirms or refutes the prediction. Per this project's
+`CLAUDE.md` convention (Claude organizes and computes; the owner reviews and
+owns interpretive conclusions), this cross-reference is flagged here as
+requiring the owner's own review before being treated as a settled
+interpretation, not asserted as a confident conclusion.
