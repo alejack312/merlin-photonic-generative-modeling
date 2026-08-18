@@ -10,20 +10,21 @@ document rather than re-deriving any of it.
 
 Gradients are computed by **exact parameter-shift** (`shift = pi/4`, no
 division) directly on `photonic_iqp_distribution` /
-`photonic_weight2_iqp_distribution` (`iqp_photonic_encoding.py`) — **not**
+`photonic_weight2_iqp_distribution` (`iqp_photonic_encoding.py`), **not**
 MerLin `QuantumLayer` autograd. `QuantumLayer` categorically rejects this
 project's polarization-annotated `BasicState`s
 (`ValueError: BasicState with annotations is not supported`, confirmed
 live and recorded in `.planning/STATE.md`'s Accumulated Context), so
-autograd through it is structurally unavailable for this circuit family —
-this is not a style preference, it's the only mechanism that works here.
+autograd through it is structurally unavailable for this circuit family.
+Parameter-shift is used here because it is the only mechanism that works,
+not because of a style preference.
 `trainability/param_shift.py` implements the shift; `trainability/rng.py`
 provides deterministic, reorder-safe RNG substreams so adding an n-value or
 init scheme never reshuffles another cell's random draws.
 
 The loss whose gradient is measured is **MMD² between the circuit's output
 distribution and v1.0's K=2^n-generalized target distribution**
-(`trainability/target_grid.py`, Plan 17-03) — a fresh `2^n`-bin grid built
+(`trainability/target_grid.py`, Plan 17-03): a fresh `2^n`-bin grid built
 at every sweep point, cross-validated bit-faithfully against v1.0's
 original `compute_p_real` at its own K=462 shape. MMD² is computed via the
 **exact closed form** (`trainability/mmd_exact.py`, a numpy port of
@@ -31,8 +32,8 @@ original `compute_p_real` at its own K=462 shape. MMD² is computed via the
 Carlo sampling anywhere in this pipeline. A Monte-Carlo fallback was
 deliberately **not implemented**: exact enumeration is tractable across
 this project's entire reachable n range (the photonic-simulation cost
-itself, not the `2^n`-sized kernel matrix, is what bounds how far n can go
-— see the Honest max-n statement below), so a fallback path would have
+itself, not the `2^n`-sized kernel matrix, is what bounds how far n can go;
+see the Honest max-n statement below), so a fallback path would have
 been unused code.
 
 ## Parameter-initialization and normalization (TRAIN-03)
@@ -44,7 +45,7 @@ Two initialization regimes were swept, matching the split
 - **`uniform`**: `theta ~ Uniform(0, 2*pi)` per parameter.
 
 **Normalization convention:** this circuit's gates (phase shifters, `WP`,
-beamsplitters) are all passive/unitary — total photon number is conserved
+beamsplitters) are all passive/unitary: total photon number is conserved
 by construction, with no separate energy-normalization parameter anywhere
 in the pipeline. `theta` is a bare phase-gate angle in radians, used
 directly as the `WP(theta, 0) = exp(i*theta*Z)` generator's argument; there
@@ -57,14 +58,14 @@ Two generator scopes were swept:
 - **`weight1`**: one weight-1 `WP(theta_k, 0)` phase gate per qubit, `k = 0..n-1`.
 - **`mixed`**: the same `n` weight-1 gates, plus **one fixed weight-2
   `Z_i * Z_j` pair at `(i, j) = (0, 1)`**, composed via
-  `photonic_weight2_iqp_distribution` — Phase 13's validated
+  `photonic_weight2_iqp_distribution`: Phase 13's validated
   weight-1+weight-2 composability path.
 
 **Why this split, and why exactly this mix:** `photonic_weight2_iqp_distribution`
 is the *only* already-shipped, already-validated multi-generator
 composition this project has (Phase 13, `test_wt2_composability_mixed_generators_n3`
 and related tests). Rather than inventing a new circuit topology or mix
-ratio for this study, Phase 17 reuses that exact composition as-is — one
+ratio for this study, Phase 17 reuses that exact composition as-is: one
 weight-2 pair added to the full weight-1 layer, at the lowest-index pair
 `(0,1)` so the same circuit shape generalizes unchanged across every swept
 `n >= 2`.
@@ -88,7 +89,7 @@ Full per-cell numbers (including fitted parameters) are in
 **A fit-quality caveat, reported honestly rather than smoothed over:** two
 of the "exp"-winning fits (`weight1/uniform`'s R²=0.999 fit and, more
 severely, `mixed/uniform`'s R²=0.910 fit) show a large-magnitude,
-near-cancelling `a`/`c` pair (e.g. `mixed/uniform`: `a=153.6, c=-153.5`) —
+near-cancelling `a`/`c` pair (e.g. `mixed/uniform`: `a=153.6, c=-153.5`).
 `scipy.optimize.curve_fit` reported `Covariance of the parameters could not
 be estimated` for at least one cell during this run, a symptom of a
 poorly-identified (not just poorly-fit) parameterization at only 4-5 data
@@ -106,7 +107,7 @@ determined decay constant.
 
 **Relative to `docs/iqp-baseline.md`'s n≥6 qubit-baseline threshold:**
 reached for `weight1` (n_max=6 satisfies n≥6 exactly at the boundary), **not
-reached** for `mixed` (n_max=5, one short of the threshold — mixed's
+reached** for `mixed` (n_max=5, one short of the threshold: mixed's
 per-call cost, driven by the weight-2 heralded-CZ/CP(alpha) postselection
 overhead, made n=6 substantially more expensive than n=6 weight-1; see
 `17-RESEARCH.md`'s measured per-n costs).
@@ -116,8 +117,8 @@ the N=2-10-vs-N=24 poly-vs-exp fit flip this project's own pitfalls
 research flagged): not reached, for either generator scope.** This is a
 compute-cost fact, not a scheduling shortfall: this repo's photonic
 Fock-space output enumerates every photon-number-conserving Fock state
-across `2n` (or `2n+2`) modes — a space of size `C(3n-1,n)` (weight-1) or
-`C(3n+3,n+2)` (weight-2) — not `2^n`. Stirling's approximation puts
+across `2n` (or `2n+2`) modes: a space of size `C(3n-1,n)` (weight-1) or
+`C(3n+3,n+2)` (weight-2), not `2^n`. Stirling's approximation puts
 `C(3n-1,n) ~ (27/4)^n/sqrt(n) ~ 6.75^n`, a materially faster-growing
 function of `n` than the qubit-side literature's `2^n`. `17-RESEARCH.md`'s
 directly-measured single-call costs in this repo's own venv confirm the
@@ -125,18 +126,18 @@ growth is real, not a theoretical worst case: weight-1 goes from 0.033s at
 n=2 to 247s at n=8 (single distribution call); weight-2 from 0.041s at n=2
 to 71s at n=6. At the ≥100-draws x ~3-tracked-params x 2-shifts-per-param
 cost structure this sweep uses, n=7 weight-1 was estimated at ~5 hours and
-n=8 weight-1 at ~3 days of compute for a single init scheme — well past
-what fits inside this phase's timeline without becoming the open-ended
-compute struggle this project's `CLAUDE.md` explicitly warns against
-(the PennyLane-stall pattern).
+n=8 weight-1 at ~3 days of compute for a single init scheme. This is well
+past what fits inside this phase's timeline without becoming the
+open-ended compute struggle this project's `CLAUDE.md` explicitly warns
+against (the PennyLane-stall pattern).
 
 **Stretch attempt status, final outcome:** a background job targeting n=7
 (weight-1) and n=6 (mixed) was launched during Plan 17-06 with no
 time-box, per this phase's locked no-time-box decision. Weight-1 n=7
 failed 4/4 consecutive chunked attempts with an identical `MemoryError` on
-the very first circuit evaluation of each attempt — including when
+the very first circuit evaluation of each attempt (including when
 isolated in a completely fresh process with ~14GB free RAM immediately
-beforehand — indicating a genuine single-call memory ceiling on this
+beforehand), indicating a genuine single-call memory ceiling on this
 hardware at n=7 weight-1, not a fixable cross-call leak (contrast the
 mixed n=5 CORE cell earlier in this phase, where chunking *did* resolve a
 real cross-call leak). The owner manually stopped the job rather than let
@@ -146,7 +147,7 @@ document's verdict is based on. This gap between the reached range (n<=6)
 and the literature's N=20-24 fit-flip threshold is real and is reported
 here plainly, not reframed as "future work." (A subsequent, independent
 dual-rail/MerLin cross-check *did* reach n=7-8 without hitting this same
-ceiling — see the new section below — but that used a different physical
+ceiling (see the new section below), but that used a different physical
 circuit and computational method, not a fix to this pipeline.)
 
 ## Cross-reference verdict (TRAIN-07)
@@ -154,7 +155,7 @@ circuit and computational method, not a fix to this pipeline.)
 `docs/iqp-baseline.md`'s empirical rule, applied directly to this project's
 own measured n range (its `not complete_graph_like` escape-hatch clause is
 a qubit-side structural notion this project's weight-1/mixed photonic
-circuits have no established mapping onto — treated as inapplicable here,
+circuits have no established mapping onto: treated as inapplicable here,
 not silently assumed to hold, since this project's circuits were never
 constructed with "complete-graph-like" as a design axis one way or the
 other):
@@ -250,7 +251,7 @@ or plateau if init_scheme == uniform and max(n) >= 6
 
 **Scope note, stated up front:** this section and the one below it are Phase
 17.1's follow-up checks, run *after* Phase 17 was already complete and
-verified. They do not alter any number or verdict in the sections above —
+verified. They do not alter any number or verdict in the sections above:
 they test whether those results hold up under a wider bandwidth/init sweep,
 and report the answer plainly in whichever direction it came out.
 
@@ -261,7 +262,7 @@ Phase 17's CORE sweep (`weight1` n=2–6, `mixed` n=2–5, both init schemes,
 `{0.03, 0.1, 0.3, 1.0, 3.0, 9.0}` (owner-decided, ~3x log-spacing per step,
 centered on Phase 17's original `SIGMA=0.1` and chosen to bracket the CORE
 bin-spacing range of 0.17–1.2 on both sides), each sigma value held
-**constant across the whole n-range** — six independent fixed-sigma sweeps,
+**constant across the whole n-range**: six independent fixed-sigma sweeps,
 not one sigma-schedule sweep. An earlier candidate design (a per-n sigma
 *schedule*, scaling sigma with `n` to hold `sigma/bin-spacing` constant)
 was explicitly dropped: it requires picking one arbitrary anchor n to
@@ -269,7 +270,7 @@ normalize against (anchoring at n=2 vs. n=5/6 tests different things and
 neither is more "correct" than the other), and this project's own
 established convention is to sweep one fixed hyperparameter across the
 full n-range per run (exactly how `init_scheme` and Phase 17's original
-`SIGMA` were themselves swept) — the fixed-grid design avoids the
+`SIGMA` were themselves swept). The fixed-grid design avoids the
 anchor-choice ambiguity entirely rather than resolving it with a guess.
 This directly follows the sibling project's own `AC12` bandwidth-sweep
 precedent, per `17.1-RESEARCH.md`'s Owner Decisions section.
@@ -282,13 +283,13 @@ that row's whole sweep):
 | sigma | init_scheme | winning model | exp R² | exp AIC | poly R² | poly AIC | vs. original |
 |---|---|---|---|---|---|---|---|
 | 0.03 | small_angle | inconclusive | 0.139 | -49.85 | 0.021 | -49.21 | n/a (no exp verdict in original) |
-| 0.1  | small_angle | inconclusive | 0.543 | -47.11 | 0.405 | -45.79 | n/a — matches original row exactly |
+| 0.1  | small_angle | inconclusive | 0.543 | -47.11 | 0.405 | -45.79 | n/a, matches original row exactly |
 | 0.3  | small_angle | exp | 0.904 | -50.15 | 0.823 | -47.12 | n/a (no exp verdict in original) |
 | 1.0  | small_angle | inconclusive | 0.993 | -73.46 | 0.992 | -73.33 | n/a (no exp verdict in original) |
 | 3.0  | small_angle | inconclusive | 0.997 | -115.13 | 0.995 | -113.68 | n/a (no exp verdict in original) |
 | 9.0  | small_angle | inconclusive | 0.997 | -158.78 | 0.996 | -157.05 | n/a (no exp verdict in original) |
 | 0.03 | uniform | **exp** | 0.999 | -52.40 | 0.998 | -47.73 | **survives** |
-| 0.1  | uniform | **exp** | 0.999 | -53.43 | 0.998 | -48.53 | **survives** — matches original row exactly |
+| 0.1  | uniform | **exp** | 0.999 | -53.43 | 0.998 | -48.53 | **survives**, matches original row exactly |
 | 0.3  | uniform | inconclusive | 0.988 | -39.86 | 0.989 | -40.29 | **disappears** |
 | 1.0  | uniform | inconclusive | 0.996 | -55.11 | 0.995 | -54.28 | **disappears** |
 | 3.0  | uniform | **exp** | 0.999 | -95.78 | 0.997 | -92.31 | **survives** (re-emerges) |
@@ -299,13 +300,13 @@ that row's whole sweep):
 | sigma | init_scheme | winning model | exp R² | exp AIC | poly R² | poly AIC | vs. original |
 |---|---|---|---|---|---|---|---|
 | 0.03 | small_angle | inconclusive | 0.213 | -43.14 | 0.213 | -43.14 | n/a (no exp verdict in original) |
-| 0.1  | small_angle | inconclusive | 0.000 | -41.76 | -0.000 | -41.76 | n/a — matches original row exactly |
+| 0.1  | small_angle | inconclusive | 0.000 | -41.76 | -0.000 | -41.76 | n/a, matches original row exactly |
 | 0.3  | small_angle | exp | 0.920 | -50.68 | 0.837 | -47.84 | n/a (no exp verdict in original) |
 | 1.0  | small_angle | inconclusive | 0.072 | -50.69 | 0.020 | -50.47 | n/a (no exp verdict in original) |
 | 3.0  | small_angle | inconclusive | 0.337 | -76.62 | 0.337 | -76.62 | n/a (no exp verdict in original) |
 | 9.0  | small_angle | inconclusive | 0.328 | -110.56 | 0.328 | -110.56 | n/a (no exp verdict in original) |
 | 0.03 | uniform | **exp** | 0.911 | -37.73 | 0.825 | -35.01 | **survives** |
-| 0.1  | uniform | **exp** | 0.910 | -37.56 | 0.823 | -34.85 | **survives** — matches original row exactly |
+| 0.1  | uniform | **exp** | 0.910 | -37.56 | 0.823 | -34.85 | **survives**, matches original row exactly |
 | 0.3  | uniform | inconclusive | 0.598 | -32.21 | 0.470 | -31.10 | **disappears** |
 | 1.0  | uniform | inconclusive | 0.000 | -29.51 | 0.302 | -30.95 | **disappears** |
 | 3.0  | uniform | inconclusive | 0.330 | -58.71 | 0.330 | -58.71 | **disappears** |
@@ -314,12 +315,12 @@ that row's whole sweep):
 Full per-cell numbers (all 24 rows, both scopes): `results/phase171_train09_curve_fit_summary.csv`.
 
 **Sigma=0.1 consistency-check footnote:** the `sigma=0.1` row of this grid
-is a built-in sanity check — it should reproduce Phase 17's original CORE
+is a built-in sanity check: it should reproduce Phase 17's original CORE
 result exactly, since it re-runs the identical sweep at the identical
 bandwidth through the new sigma-threaded code path. `weight1` matched
 bit-for-bit on every compared row. `mixed` matched exactly on 2 of 8 rows
 and showed a ~1e-13 to 1e-16 relative-magnitude difference on the other 6
-(`small_angle` at n=2,3,4) — diagnosed (Plan 17.1-04) as a deterministic
+(`small_angle` at n=2,3,4): diagnosed (Plan 17.1-04) as a deterministic
 environment/floating-point-ordering difference rather than a logic bug
 (re-running the affected cell reproduced this pipeline's own value
 bit-for-bit, and `weight1`'s identical sigma-threading code shows zero
@@ -330,26 +331,26 @@ over.
 
 **No, not for either `uniform` cell, and the way it fails is itself the
 finding.** `weight1/uniform` and `mixed/uniform` were the two cells with a
-definite original "exp" verdict. Both survive at sigma in {0.03, 0.1} —
-near Phase 17's original fixed bandwidth — and both flip to
+definite original "exp" verdict. Both survive at sigma in {0.03, 0.1}
+(near Phase 17's original fixed bandwidth) and both flip to
 "inconclusive" at sigma in {0.3, 1.0}. Past that, the two scopes diverge:
 `weight1/uniform` **non-monotonically re-emerges** as "exp" at sigma in
 {3.0, 9.0}, while `mixed/uniform` stays "inconclusive" through sigma=9.0.
 A simple "it was only ever a fixed-bandwidth artifact and fades away as
 sigma grows" story does not fit `weight1`'s re-emergence at large sigma
-either — the true picture is that the verdict is **sigma-dependent in a
+either: the true picture is that the verdict is **sigma-dependent in a
 non-trivial, non-monotonic way**, not a stable property of the circuit/init
 pair across bandwidths.
 
 **Plain statement, no hedging:** Phase 17's original "exp" verdict for
 `weight1/uniform` and `mixed/uniform` is **not robust** across this sigma
 grid. It survives only near the original bandwidth and, in `weight1`'s
-case, again at bandwidths far from it — this reveals the original
+case, again at bandwidths far from it: this reveals the original
 fixed-`SIGMA=0.1` result was at least partly a bandwidth-dependent artifact
 of that specific kernel choice, not solely a genuine, bandwidth-independent
 circuit/init property. This does not mean no genuine effect exists (the
 sigma=0.1 and sigma=0.03 agreement, and `weight1`'s large-sigma
-re-emergence, are both real measured signals, not noise) — it means the
+re-emergence, are both real measured signals, not noise); it means the
 single-bandwidth Phase 17 result cannot be read as bandwidth-independent
 evidence on its own.
 
@@ -360,13 +361,13 @@ evidence on its own.
 Recio-Armengol et al.'s (arXiv:2503.02934, Sec. 8.1.2) data-dependent
 initialization recipe was translated onto this project's grid-bin target
 representation (the paper's own recipe assumes a raw bitstring dataset,
-which this project does not have — its target is `p_real`, a probability
+which this project does not have: its target is `p_real`, a probability
 distribution over `2^n` grid bins built by `trainability/target_grid.py`).
 Weight-1 angles are set to `arcsin(sqrt(<x_k>))`, where `<x_k>` is the
 marginal probability that bit `k` of the sampled bin index equals 1 under
 `p_real` (the project's stand-in for "the mean of the k-th dimension of the
 training data"). For the `mixed` scope, this project's circuit has no
-independent weight-2-only parameter — the weight-2 pair's two qubits `(0,1)`
+independent weight-2-only parameter: the weight-2 pair's two qubits `(0,1)`
 receive the covariance-based `weight2_data_dependent_theta` value **in
 place of** their own per-qubit weight-1 rule value, while every other qubit
 keeps the standard weight-1 rule. This design decision was made explicitly
@@ -376,7 +377,7 @@ reproduces the gradient computation with and without the override and
 confirms the actual sweep output matches only the "with override" version.
 `scale_factor=1.0` (owner-decided, matches the paper's own upper
 grid-search bound, making weight-2 angles directly equal to the raw
-±1-convention covariance) and `n_draws=1` (owner-decided) were used — the
+±1-convention covariance) and `n_draws=1` (owner-decided) were used: the
 recipe is fully deterministic given `(n, p_real, scale_factor)`, so
 additional draws would produce bit-identical theta vectors and add no
 rigor, only redundant compute.
@@ -394,20 +395,20 @@ Full numbers: `results/phase171_train10_curve_fit_summary.csv`.
 
 | generator_scope | original (`small_angle`) verdict | new (`data_dependent`) verdict | clearer result? |
 |---|---|---|---|
-| weight1 | inconclusive (R²≈0.4–0.5) | inconclusive (R²≈0.000) | **no — still inconclusive** |
-| mixed | inconclusive (R²≈0) | inconclusive (R²≈0.253) | **no — still inconclusive** |
+| weight1 | inconclusive (R²≈0.4–0.5) | inconclusive (R²≈0.000) | **no, still inconclusive** |
+| mixed | inconclusive (R²≈0) | inconclusive (R²≈0.253) | **no, still inconclusive** |
 
 ### Does a literature-sourced init resolve the inconclusive verdict?
 
 **No, plainly.** Recio-Armengol et al.'s data-dependent initialization did
 **not** produce a clearer (non-inconclusive) verdict than `small_angle` in
-either generator scope — both `weight1/data_dependent` and
+either generator scope: both `weight1/data_dependent` and
 `mixed/data_dependent` remain "inconclusive," in `weight1`'s case with an
 even weaker exp-model fit (R²≈0.000) than the original `small_angle` row
 (R²=0.543) it was meant to potentially clarify. This is a genuine negative
 result for the literature-sourced alternative-init hypothesis, reported
 here exactly as measured: the `small_angle` scheme's inconclusiveness is
-not an artifact of that specific init recipe — it persists under a
+not an artifact of that specific init recipe: it persists under a
 different, principled init strategy too.
 
 ## Independent cross-check: dual-rail encoding + MerLin native autograd
@@ -416,7 +417,7 @@ different, principled init strategy too.
 work done *after* Phase 17 was already complete and verified (8/8
 must-haves, `.planning/phases/17-trainability-barren-plateau-study/17-VERIFICATION.md`).
 It is not tracked as a phase requirement in `ROADMAP.md`/`REQUIREMENTS.md`
-and does not change Phase 17's own verdict above — it is an independent
+and does not change Phase 17's own verdict above: it is an independent
 second measurement of the same underlying question, using a different
 circuit and a different computational method, kept here because it bears
 directly on TRAIN-05/TRAIN-08's max-n question.
@@ -427,19 +428,19 @@ The Methodology section above states plainly that MerLin `QuantumLayer`
 autograd is unavailable for this project's polarization-annotated circuits.
 That remains true. What changed: `dual_rail_merlin_encoding.py` (added
 after Phase 17 closed) re-implements the same abstract weight-1/weight-2
-IQP generator family in a **polarization-free spatial dual-rail basis** —
+IQP generator family in a **polarization-free spatial dual-rail basis**:
 `BS()` in place of `HWP(pi/8)`, `PS(theta)` in place of `WP(theta,0)`, no
 `PBS()` needed since the circuit is already dual rail throughout. MerLin's
 restriction is specifically on polarization annotations, not on dual rail
 itself, so `QuantumLayer` accepts this circuit with no issue. This is a
 **different physical encoding of the same abstract circuit**, not a fix or
-optimization of the polarization pipeline above — the two are independent
+optimization of the polarization pipeline above: the two are independent
 measurements, not before/after versions of one pipeline.
 
 `trainability/dual_rail_autograd_sweep.py` computes the same MMD² loss
 against the same per-n target grid (`trainability/target_grid.py`, reused
-unmodified), but keeps the entire computation — MerLin's raw output, the
-bin-mapping to the target grid, the MMD² quadratic form — in torch tensors
+unmodified), but keeps the entire computation (MerLin's raw output, the
+bin-mapping to the target grid, the MMD² quadratic form) in torch tensors
 throughout, so `.backward()` yields exact gradients for **all** n circuit
 parameters from one forward+backward pass. This is structurally different
 from parameter-shift's 2-evaluations-per-tracked-parameter cost, and this
@@ -458,7 +459,7 @@ ceiling described above. Two compounding, distinct reasons, not one:
 
 1. **Fewer circuit evaluations per draw** (inherent to the method, not an
    implementation detail): parameter-shift needs 2 Perceval evaluations
-   *per tracked parameter* — at n=8 tracking all 8 params, 16 evaluations
+   *per tracked parameter*: at n=8 tracking all 8 params, 16 evaluations
    per draw. Reverse-mode autograd gets every parameter's gradient from one
    forward + one backward pass, regardless of parameter count.
 2. **Cheaper per-evaluation cost, via reuse** (partly a fixable gap in how
@@ -467,10 +468,10 @@ ceiling described above. Two compounding, distinct reasons, not one:
    bake theta in as a concrete float and rebuild a fresh `pcvl.Processor` +
    `Analyzer` from scratch on every single call. MerLin's `QuantumLayer`
    builds its differentiable computation graph once per circuit topology
-   and reuses it across draws — only parameter *values* change between
+   and reuses it across draws: only parameter *values* change between
    calls. Measured directly: at n=8, `QuantumLayer` construction takes
    ~40s (one-time), then each subsequent forward+backward pass on that
-   same layer takes ~0.2s — cheaper than a *single* `Analyzer` call was at
+   same layer takes ~0.2s, cheaper than a *single* `Analyzer` call was at
    the smaller n=6 in this phase's own CORE sweep (~1.57s, backed out from
    that sweep's logged per-cell timings: ~950s / 600 calls).
 
@@ -490,8 +491,8 @@ avoid competing with the owner's other active work for RAM.
 
 Full numbers: `results/phase17_dual_rail_curve_fit_summary.csv`.
 
-**Comparison against this phase's own CORE verdict, stated plainly —
-agreements and disagreements both:**
+**Comparison against this phase's own CORE verdict, stated plainly
+(agreements and disagreements both):**
 
 | generator_scope | init_scheme | CORE verdict (n<=6, polarization) | dual-rail verdict (n<=7/8) | agreement |
 |---|---|---|---|---|
@@ -501,7 +502,7 @@ agreements and disagreements both:**
 | mixed | uniform | exp (R²=0.910) | **inconclusive** (R²=0.840, AIC margin < 2) | **disagree** |
 
 The `mixed/uniform` disagreement is reported exactly as found, not
-resolved or explained away here — it could reflect the extra 2 data points
+resolved or explained away here: it could reflect the extra 2 data points
 changing the fit, a real difference between the two physical encodings, or
 both. Distinguishing between those requires the owner's own analysis, not
 an assertion in this document.
@@ -544,7 +545,7 @@ general caveats:** agreement between two *different physical circuits*
 answering the same abstract question is stronger evidence than either
 alone, but the two encodings are not guaranteed to have identical
 trainability behavior even if they realize "the same" IQP generator
-family — dual rail and polarization differ in gate composition, ancilla
+family: dual rail and polarization differ in gate composition, ancilla
 structure (weight-2), and every other implementation detail below the
 abstract operator level. A disagreement (as seen in `mixed/uniform`) is
 therefore genuinely ambiguous between "thin-data artifact" and "encoding
@@ -575,7 +576,7 @@ was run. It took 2929.4s (~48.8 min) and raised `MemoryError` inside
 MerLin's `SLOSComputeGraph._build_graph_structure`
 (`merlin/pcvl_pytorch/slos_torchscript.py`), during `QuantumLayer`
 construction, before any forward/backward pass executed. n=9 was not
-attempted — the process exited on the n=8 failure. For reference: mixed
+attempted: the process exited on the n=8 failure. For reference: mixed
 n=8 has `2n+2=18` modes and `n+2=10` total photons
 (`C(27,10) ≈ 8.4 million` Fock states); mixed n=7 (the largest completed
 cell) has 16 modes and 9 photons (`C(24,9) ≈ 1.3 million` Fock states).
@@ -598,11 +599,11 @@ This is an empirical measurement at this project's own small, compute-bound
 n range (n<=6), not a proof of any asymptotic trainability property. A
 measured exponential-decay signature at n=2..6 does not, by itself,
 establish that this photonic realization inherits the qubit-side rule's
-behavior at hardware-relevant scale (n in the tens to hundreds) — the same
+behavior at hardware-relevant scale (n in the tens to hundreds); the same
 caution `docs/iqp-baseline.md` itself raises about average-case barren-plateau
 statements applies here too. Nor does the one measured disagreement
 (`mixed/uniform`) establish that the qubit-side rule fails to transfer to
-photonic encodings in general — it establishes that, at this specific small
+photonic encodings in general: it establishes that, at this specific small
 n range, with this specific mixed weight-1+weight-2 circuit and this
 specific target distribution, the rule's prediction and the measured
 gradient-variance trend disagreed. Extending this measurement toward the
@@ -611,7 +612,7 @@ distributions, would be required before drawing any stronger conclusion.
 
 **Phase 17.1 addendum:** two further follow-up checks exist beyond the
 cross-check above and are documented in their own sections earlier in this
-document — **Bandwidth sensitivity follow-up (TRAIN-09)**, which found
+document: **Bandwidth sensitivity follow-up (TRAIN-09)**, which found
 Phase 17's original "exp" verdict for `weight1/uniform` and `mixed/uniform`
 is not robust across a six-point sigma grid, and **Data-dependent
 initialization follow-up (TRAIN-10)**, which found a literature-sourced
@@ -634,83 +635,83 @@ claim).
 **Substantive rows:**
 
 - **McClean, Boixo, Smelyanskiy, Babbush & Neven, "Barren plateaus in
-  quantum neural network training landscapes"** — before drafting this
+  quantum neural network training landscapes"**: before drafting this
   row, the paper's actual arXiv ID and core claim were confirmed live
   against the arXiv API (not trusted from this repo's own prior
   WebSearch-sourced summaries, per `20-RESEARCH.md`'s flagged gap):
   **arXiv:1803.11173**, *Nature Communications* 9, 4812 (2018). The
-  fetched abstract confirms the paper's core claim — for a wide class of
+  fetched abstract confirms the paper's core claim: for a wide class of
   parameterized quantum circuits, gradient magnitude along any fixed
-  direction becomes exponentially small as a function of qubit count —
+  direction becomes exponentially small as a function of qubit count,
   which is the same diagnostic shape (gradient-variance-vs-system-size)
   Phase 17's own methodology uses. **Verdict: consistent with the
   well-known protocol shape.** Confidence caveat, stated honestly rather
   than silently upgraded: this confirmation is a direct primary-source
   fetch of the paper's own abstract/metadata via the arXiv API, not a full
-  PDF read — unlike the other 10 baselines in this list, all of which have
+  PDF read, unlike the other 10 baselines in this list, all of which have
   a downloaded PDF in `docs/papers/`. It should be read as more reliable
   than a WebSearch-level summary, but at a lower confidence tier than this
   project's fully-read papers.
-- **`docs/iqp-baseline.md`'s own empirical rule** — see the Cross-reference
+- **`docs/iqp-baseline.md`'s own empirical rule**: see the Cross-reference
   verdict (TRAIN-07) table above rather than re-deriving it here.
   **Verdict: split.** `weight1/uniform` **agrees** with the rule (predicts
   plateau at n_max=6>=6, measured shows decay); `mixed/uniform`
   **disagrees** (rule predicts no-plateau since n_max=5<6, but measured
-  data shows exponential decay anyway) — see the owner's interpretation of
+  data shows exponential decay anyway); see the owner's interpretation of
   this split immediately above. Both `small_angle` rows are inconclusive
   on both sides, with no verdict to compare.
-- **Rudolph et al. (arXiv:2305.02881, Theorem 2)** — **verdict:
+- **Rudolph et al. (arXiv:2305.02881, Theorem 2)**: **verdict:
   directionally consistent with TRAIN-09's bandwidth-sensitivity finding,
   mechanistically non-transferable.** The original fixed-`SIGMA=0.1`
   "exp" verdict for both `uniform` rows is exactly the regime Theorem 2
   identifies as independently sufficient to cause exponential MMD
   concentration (a constant, n-independent bandwidth), and TRAIN-09 found
-  that verdict is indeed not robust once bandwidth is varied — directional
+  that verdict is indeed not robust once bandwidth is varied: directional
   agreement on the *risk*. The paper's own bodyness decomposition assumes
   a bitstring-Hamming-distance kernel, which does not mechanically
   transfer to this project's Euclidean-distance kernel over grid bin
   centers (already stated in the TRAIN-09 section and in
-  `docs/iqp-baseline.md`) — so the *mechanism* the paper proves does not
+  `docs/iqp-baseline.md`), so the *mechanism* the paper proves does not
   directly apply here, even though the qualitative risk it flags does.
   Both halves are reported, not collapsed to one word.
-- **Mhiri et al. (arXiv:2502.07889, p.5-6, Appendix H)** — **verdict:
+- **Mhiri et al. (arXiv:2502.07889, p.5-6, Appendix H)**: **verdict:
   consistent.** Their proof that small-angle/warm-start guarantees are not
-  general — with structured/commuting circuits flagged as the specific
-  risk case ("an extreme example... is one that completely commutes with
+  general (with structured/commuting circuits flagged as the specific
+  risk case, "an extreme example... is one that completely commutes with
   the observable or state... its variance trivially becomes zero," p.5-6)
-  — is a citable theoretical reason both `small_angle` rows (weight1 and
+  is a citable theoretical reason both `small_angle` rows (weight1 and
   mixed) came out inconclusive rather than a clean plateau either way,
   matching this project's IQP-style commuting-diagonal-gate structure.
-- **Recio-Armengol et al. (arXiv:2503.02934, Sec. 9.3 and Sec. 8.1.2)** —
+- **Recio-Armengol et al. (arXiv:2503.02934, Sec. 9.3 and Sec. 8.1.2)**:
   **verdict: consistent for the uniform-init exponential-concentration
   finding.** Their Sec. 9.3 analytical derivation (`⟨Z_1⟩ = ∏cos(2θ_k)`
   over n terms causing generic exponential concentration under uniform
   init) matches this project's own empirical `uniform`-init signature.
   Their Sec. 8.1.2 proposed fix (data-dependent init) was directly
   implemented and tested as TRAIN-10 and found **not** to resolve
-  `small_angle`'s inconclusive verdict in either generator scope — a
+  `small_angle`'s inconclusive verdict in either generator scope: a
   genuine negative result for the literature-sourced alternative-init
   hypothesis, reported here exactly as measured, not softened.
-- **Herbst et al. (arXiv:2512.24801)** — this baseline's substantive
+- **Herbst et al. (arXiv:2512.24801)**: this baseline's substantive
   content is the cross-reference note below. **Verdict: see
-  Cross-reference note below** — TRAIN's own zero-loss data shows a
+  Cross-reference note below.** TRAIN's own zero-loss data shows a
   genuine (if bandwidth-fragile) untrainability signature for `uniform`
   init, which is not in tension with Herbst et al.'s framework, but TRAIN
   never varies loss and so cannot itself confirm or refute the paper's
   eta-dependent co-occurrence prediction.
 
-**Silent rows** (one line each — these baselines don't bear on TRAIN
+**Silent rows** (one line each: these baselines don't bear on TRAIN
 specifically):
 
-- **Aaronson-Brod (arXiv:1510.05245)** — lost-photon hardness result;
+- **Aaronson-Brod (arXiv:1510.05245)**: lost-photon hardness result;
   HARD-specific, not a trainability claim.
-- **arXiv:2510.24137 (Park & Oh)** — MPS-simulability/noisy-IQP hardness
+- **arXiv:2510.24137 (Park & Oh)**: MPS-simulability/noisy-IQP hardness
   result; HARD-specific.
-- **arXiv:2405.01395** — two-photon gate construction paper; ARB-specific,
+- **arXiv:2405.01395**: two-photon gate construction paper; ARB-specific,
   makes no trainability or hardness claim of its own.
-- **Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999)** — foundational
+- **Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999)**: foundational
   noiseless-IQP hardness threshold; no trainability claim.
-- **Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808)** — depolarizing-noise
+- **Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808)**: depolarizing-noise
   hardness threshold; HARD-specific, no direct trainability claim of its
   own.
 
@@ -720,13 +721,13 @@ specifically):
 Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) for a formal result:
 circuits whose output distributions anticoncentrate are predicted to have
 *both* increased classical-simulability-under-noise (the hardness side)
-and increased MMD-type-loss concentration (the trainability side) — the
+and increased MMD-type-loss concentration (the trainability side): the
 two effects are predicted to co-occur, not trade off against each other.
 
 **TRAIN's own measured facts, stated plainly:** at Phase 17's original
 fixed bandwidth (`SIGMA=0.1`), both `uniform`-init cells (`weight1` and
 `mixed`) show an exponential gradient-decay signature (R²=0.999 and
-R²=0.910 respectively) — exactly the concentrated-loss-landscape signature
+R²=0.910 respectively): exactly the concentrated-loss-landscape signature
 Herbst et al.'s framework predicts should accompany anticoncentration.
 TRAIN-09's bandwidth-sensitivity follow-up found this signature is **not**
 robust across a wider sigma grid: both cells' "exp" verdict survives only
@@ -737,11 +738,11 @@ does not. This caveat must be stated alongside the headline exponential-decay
 result, not in its place.
 
 **What TRAIN's own dataset cannot do:** TRAIN never varies loss (`eta`) at
-all — Phase 17/17.1's entire sweep is run at `eta=1` (no photon loss),
+all: Phase 17/17.1's entire sweep is run at `eta=1` (no photon loss),
 varying only `n` and the bandwidth/init hyperparameters. Herbst et al.'s
 prediction is specifically about how anticoncentration (and its knock-on
 effects on both hardness and MMD-loss concentration) changes as loss
-increases — a claim about the `eta` axis. TRAIN's data alone cannot
+increases: a claim about the `eta` axis. TRAIN's data alone cannot
 confirm or refute that axis; it can only establish that a genuine (if
 bandwidth-fragile) concentration signature exists for `uniform` init at
 zero loss, which is a necessary precondition for the co-occurrence
@@ -751,20 +752,20 @@ prediction to be interesting here, not a test of the prediction itself.
 own equivalent cross-reference note (added by a parallel plan in this
 phase) reports the measured `eta`-side trend directly: `alpha(eta)`
 decreases (the output becomes *more* anticoncentrated) as loss increases,
-for both weight-1 and mixed scope — the reverse of `docs/iqp-baseline.md`'s
+for both weight-1 and mixed scope; the reverse of `docs/iqp-baseline.md`'s
 original speculative guess, and, under Herbst et al.'s framework, implying
 trainability should get worse (not better) as loss increases. See that
 document for the measured HARD-side trend and verdict; it is not restated
 here.
 
 **Combined statement, hedged appropriately:** TRAIN and HARD do not share
-a common independent variable — TRAIN sweeps `n` at fixed `eta=1`; HARD
+a common independent variable: TRAIN sweeps `n` at fixed `eta=1`; HARD
 sweeps `eta` at small fixed `n`. Neither phase varies both together on one
 dataset, so this project cannot directly test Herbst et al.'s co-occurrence
 prediction with a single combined experiment. What can be said,
 qualitatively: TRAIN's zero-loss data shows a genuine (if
 bandwidth-sensitive) untrainability signature for `uniform` init, and
-HARD's data shows anticoncentration increasing (not decreasing) with loss —
+HARD's data shows anticoncentration increasing (not decreasing) with loss;
 under Herbst et al.'s framework taken together, these two separately-measured
 facts are not in tension with each other (nothing in either dataset
 contradicts the other), but this is a weak, interpretive alignment between
@@ -772,7 +773,7 @@ two independently-measured trends across two different axes, not a joint
 confirmation of the prediction. Per this project's `CLAUDE.md` convention
 (Claude organizes and computes; the owner reviews and owns interpretive
 conclusions), this combined reading is offered as an organized statement of
-the measured facts, not asserted as a settled conclusion — distinguishing
+the measured facts, not asserted as a settled conclusion: distinguishing
 what's actually consistent (no contradiction found) from what remains
 untested (the actual eta-dependence of TRAIN's own gradient variance, never
 measured in this project).

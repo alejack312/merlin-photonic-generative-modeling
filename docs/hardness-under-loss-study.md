@@ -26,17 +26,17 @@ anticoncentration-tradeoff prediction`, at the end of this document).
 **Loss mechanism.** Photon loss is applied via `pcvl.LC(1 - eta)` component
 insertion, front-loaded onto every mode of a `Processor` *before* the rest
 of the circuit is added (`hardness/loss_model.py`,
-`hardness/loss_model_weight2.py`) -- **never** the `noise=NoiseModel(...)`
+`hardness/loss_model_weight2.py`), never via the `noise=NoiseModel(...)`
 `Processor` constructor parameter. A reader unfamiliar with Perceval would
 reasonably expect the `NoiseModel` API to be the "obvious" way to add loss;
 it is not used here because it is confirmed (`18-RESEARCH.md` Pitfall 1) to
-**silently no-op** on this project's polarization-annotated circuits --
+**silently no-op** on this project's polarization-annotated circuits:
 `Processor.probs()` runs without error and returns a plausible-looking but
 loss-invariant result. Two further requirements, both proven avoided by
 dedicated regression tests rather than merely documented:
 
 - `proc.min_detected_photons_filter(0)` must be called **explicitly**
-  (Pitfall 2) -- the `Processor`'s automatic filter only inspects
+  (Pitfall 2). The `Processor`'s automatic filter only inspects
   `NoiseModel`, has no knowledge of `LC` components, and silently defaults
   to a filter that excludes every lossy branch, again producing a
   plausible-looking but loss-invariant "normalized" result.
@@ -50,8 +50,8 @@ dedicated regression tests rather than merely documented:
   arXiv:2510.24137 Sec. II.B).
 
 For weight-2 (mixed scope), `LC` is applied to **all `2n+2` modes**,
-including both `heralded_cz` ancilla modes (`2n`, `2n+1`) -- not just the
-`2n` data-carrying modes -- per `18-CONTEXT.md`'s locked HARD-07 decision:
+including both `heralded_cz` ancilla modes (`2n`, `2n+1`), not just the
+`2n` data-carrying modes, per `18-CONTEXT.md`'s locked HARD-07 decision:
 this is the only way to see whether loss degrades the herald mechanism
 itself, not just the post-herald data readout.
 
@@ -63,42 +63,42 @@ scopes so they remain directly comparable (`hardness/sweep.py::ETA_GRID`):
 ETA_GRID = [0.99, 0.95, 0.90, 0.80, 0.60, 0.35, 0.05]
 ```
 
-There is **no literal `eta=1.0` row** in either dataset -- `eta=0.99` is the
+There is **no literal `eta=1.0` row** in either dataset: `eta=0.99` is the
 closest available near-lossless anchor point, referred to as such below,
 never implied to be a lossless measurement itself. (The lossless reference
 distribution *is* computed internally, via the same loss-model function
 called with `eta=1.0`, as the fixed comparison point `tvd_to_lossless` is
-measured against for every eta -- it is simply not saved as its own CSV
+measured against for every eta; it is simply not saved as its own CSV
 row.)
 
 **n range actually reached, per scope (stated honestly, per this project's
 TRAIN-05/TRAIN-08 convention):**
 
 - **weight1: n = 2..6** (full 7-point eta grid, 35 rows,
-  `results/phase18_weight1_loss_sweep.csv`) -- matches Phase 17's own
+  `results/phase18_weight1_loss_sweep.csv`), matching Phase 17's own
   weight-1 ceiling.
 - **mixed: n = 2..4** (full 7-point eta grid, 21 rows,
   `results/phase18_mixed_loss_sweep.csv`). **Mixed n=5 is a confirmed hard
-  ceiling, not a pending/in-progress item** -- a reproducible
+  ceiling, not a pending/in-progress item.** A reproducible
   `MemoryError: bad allocation` inside `Simulator.probs_svd` (called via
-  `Processor.probs()`) on the very first circuit evaluation of a fresh
+  `Processor.probs()`) occurs on the very first circuit evaluation of a fresh
   process, independently reproduced 3 times (2 in Plan 18-05's timing
   probe, 1 in Plan 18-06's own stretch attempt) at different eta values and
-  different free-memory conditions. Draw-chunking does not help -- this is
+  different free-memory conditions. Draw-chunking does not help: this is
   a single-call memory ceiling, not a cross-call leak. Mixed scope's usable
   range for this document and for Plan 18-08 is n=2..4 only.
 
 **n_draws and seed.** `n_draws=5` independent random-theta draws per
 `(n, eta, scope)` cell, `seed_base=180814`, drawn via this project's
 existing deterministic, reorder-safe RNG substream utility
-(`trainability.rng.get_rng`, reused across packages) -- per this project's
+(`trainability.rng.get_rng`, reused across packages). Per this project's
 `WRITE-06` traceability requirement, every number in this document is
 reproducible from `results/phase18_weight1_loss_sweep.csv` /
 `results/phase18_mixed_loss_sweep.csv` plus this seed.
 
 **Theta-init convention.** All circuit parameters are drawn
-`theta ~ Uniform(0, 2*pi)` (`hardness/sweep.py::sample_thetas`) -- this
-phase's own single init convention, a **deliberate scope decision**
+`theta ~ Uniform(0, 2*pi)` (`hardness/sweep.py::sample_thetas`), this
+phase's own single init convention and a **deliberate scope decision**
 (`18-CONTEXT.md`, "Claude's Discretion"), not silently inherited from Phase
 17. Unlike Phase 17/17.1, this phase has no `init_scheme` axis at all: it
 reuses only the *shape* of Phase 17's "uniform" branch (the regime that
@@ -107,15 +107,15 @@ HARD-05/HARD-07 want generic/representative circuit instances, not a
 special-cased warm start.
 
 **Classically-easy baselines.** Two baselines are tracked, separately, at
-every `(n, eta, scope)` cell -- never collapsed into a single "classically
+every `(n, eta, scope)` cell, never collapsed into a single "classically
 easy?" verdict:
 
 - **`uniform`**: the maximally-anticoncentrated `2**-n`-per-outcome
   distribution.
 - **`product_of_marginals`**: the mean-field/independence baseline, derived
   from each draw's own per-qubit marginals. Computed **once per draw**,
-  from that draw's own lossless (`eta=1.0`) reference distribution -- not
-  recomputed at every eta -- per `18-CONTEXT.md`'s explicit lock. This
+  from that draw's own lossless (`eta=1.0`) reference distribution, not
+  recomputed at every eta, per `18-CONTEXT.md`'s explicit lock. This
   isolates "how far does loss alone move the true output toward
   independence" as a single fixed comparison point across the whole eta
   grid.
@@ -130,7 +130,7 @@ convention (Phase 7, Phase 17).
 ## HARD-01 / HARD-02: loss sweep mechanism and cross-check
 
 **HARD-01** (a real loss sweep exists) is satisfied by the two CSVs
-described above -- every cell computed via a real `Processor.probs()` call
+described above: every cell is computed via a real `Processor.probs()` call
 through the `LC`-loss pipeline, never an `Analyzer` call (which silently
 ignores loss entirely) and never `NoiseModel` (which silently no-ops on
 this project's polarization-annotated circuits, as above).
@@ -175,16 +175,16 @@ CSV's own `_std` columns (5-draw sample std). Full per-cell numbers are in
 
 Note: `tvd_to_product_marginals` is numerically **near-equal to
 `tvd_to_lossless`** at `eta=0.99` for every weight1 n (e.g. n=2: 0.0099 vs
-0.0100) -- `tvd_to_uniform` is not (0.5726 at n=2). This is a real
+0.0100); `tvd_to_uniform` is not (0.5726 at n=2). This is a real
 structural fact about the weight1 circuit family, not a coincidence of the
 baseline construction: weight1's generator layer has **no entangling
 (weight-2) gate**, so its true lossless output distribution already
-factors as a product over qubits -- `product_of_marginals_baseline`,
+factors as a product over qubits, and `product_of_marginals_baseline`,
 computed from that same lossless reference's own marginals, closely
 reproduces it. `tvd(lossy, product_marginals) ~= tvd(lossy, lossless)`
 follows directly from `product_marginals ~= lossless`, not from any
 special property of the loss channel. This coincidence narrows as eta
-decreases -- by eta=0.05, all three distances (`tvd_to_lossless`,
+decreases: by eta=0.05, all three distances (`tvd_to_lossless`,
 `tvd_to_uniform`, `tvd_to_product_marginals`) converge to the same ~0.50
 value at every n, since all three comparison distributions become
 indistinguishable once almost no signal survives.
@@ -201,7 +201,7 @@ indistinguishable once almost no signal survives.
 | 4 | 0.05 | 0.5000 | 0.5000 | 0.5000 | 6.37e-12 |
 
 (Mixed scope's `tvd_to_uniform` and `tvd_to_product_marginals` are equal at
-n=2 but diverge from n=3 onward -- with the weight-2 pair present, the
+n=2 but diverge from n=3 onward. With the weight-2 pair present, the
 lossless reference's marginals are no longer product-like even at low
 loss, unlike the pure-weight1 case above.)
 
@@ -211,7 +211,7 @@ made here (per `18-CONTEXT.md`'s lock):** for every n and both scopes,
 near-lossless anchor at eta=0.99 to ~0.50 at eta=0.05, i.e. the lossy
 output becomes maximally distinguishable from the true lossless target).
 Over that same range, `tvd_to_uniform` and `tvd_to_product_marginals`
-**fall** as eta decreases -- from their eta=0.99 values (well above zero,
+**fall** as eta decreases, from their eta=0.99 values (well above zero,
 i.e. the lossless-ish output is still far from either classically-easy
 baseline) down toward the same ~0.50 floor that `tvd_to_lossless` rises
 to. In other words: as loss increases, the measured output distribution
@@ -240,7 +240,7 @@ ranges from `alpha=1.00` (n=2, eta=0.99, i.e. already at the uniform
 reference value) up to `alpha=3.20` (n=4, eta=0.99), collapsing similarly
 by eta=0.05. In both scopes, `alpha(eta)` decreases monotonically as eta
 decreases, and crosses below the `alpha=1` uniform-reference line
-somewhere in the measured grid at every n -- the exact crossing eta is
+somewhere in the measured grid at every n. The exact crossing eta is
 readable directly from `results/phase18_weight1_loss_sweep.csv` /
 `results/phase18_mixed_loss_sweep.csv`, not restated as a single number
 here since it varies by n.
@@ -249,13 +249,13 @@ This is the exact quantity `docs/iqp-baseline.md`'s Bremner-Montanaro-Shepherd
 (arXiv:1610.01808) bullet identifies as the one BMS's Theorem 4 keys its
 depolarizing-noise hardness-vs-simulability threshold on. Reporting it here
 is a forward pointer to Plan 18-08's HARD-04 positioning work, not itself a
-positioning claim -- this document does not assert what alpha value or
+positioning claim: this document does not assert what alpha value or
 crossing eta constitutes "hardness lost."
 
 ## HARD-07 results: weight-2 herald compounding
 
 Photon loss is applied to **all `2n+2` modes** of the weight-2 pipeline,
-including both `heralded_cz` ancilla modes -- per the Methodology section
+including both `heralded_cz` ancilla modes, per the Methodology section
 above, the only mechanism that exposes whether loss degrades the herald
 mechanism itself. Herald failure and transmission loss are measured
 through **one** real `Processor.probs()` call per cell (never an
@@ -263,8 +263,8 @@ analytical product of a separately-computed lossless herald rate and a
 separately-computed loss-survival probability), so any interaction between
 the two failure modes is captured, not assumed away.
 
-**Herald-success-rate vs eta** (n-independent within measurement precision
--- verified directly against the CSV: at each eta, `herald_success_rate_mean`
+**Herald-success-rate vs eta** (n-independent within measurement precision,
+verified directly against the CSV: at each eta, `herald_success_rate_mean`
 agrees across n=2, 3, 4 to 5+ significant figures, since the ancilla loss
 mechanism does not depend on the number of data qubits):
 
@@ -281,7 +281,7 @@ mechanism does not depend on the number of data qubits):
 At the near-lossless anchor (eta=0.99), `herald_success_rate` (0.07407) is
 already close to the lossless `heralded_cz` baseline of `2/27 ≈ 0.07407`
 (Phase 10's independently-established value, `STATE.md`'s Accumulated
-Context) -- as expected, since eta=0.99 is near-lossless, not identically
+Context), as expected, since eta=0.99 is near-lossless, not identically
 lossless. It then falls monotonically to `0.00087` at eta=0.05, i.e. loss
 compounds with the gate's own intrinsic herald-failure rate rather than
 leaving it unchanged, confirming HARD-07's compounding requirement is
@@ -292,11 +292,11 @@ locked HARD-07 decision):** the `tvd_to_lossless` / `tvd_to_uniform` /
 `tvd_to_product_marginals` / `alpha` values reported above for the mixed
 scope are all computed on the distribution **conditioned on herald
 success** (i.e. `dist`/`residual` are renormalized by dividing by
-`herald_success_prob = 1 - herald_failure_prob`) -- matching this project's
+`herald_success_prob = 1 - herald_failure_prob`), matching this project's
 existing `heralded_cz` convention and answering the operationally
 meaningful question ("given the gate reports success, how does output
 quality degrade with loss"). `herald_failure_prob` (the un-renormalized
-number) is tracked and reported **separately** in the table above -- it is
+number) is tracked and reported **separately** in the table above. It is
 never folded into `residual`, per this project's standing convention that
 a gate's own postselection condition (herald mismatch, here) must be
 accounted in that gate's own failure-probability column, not a generic
@@ -441,14 +441,14 @@ this project's own established Plan-18-01 standard for primary-source
 citations.
 
 **Confirmed setup (structurally different from this project):** the paper's
-object is Gaussian boson sampling -- `M` single-mode squeezed vacuum states
+object is Gaussian boson sampling: `M` single-mode squeezed vacuum states
 sent through a Haar-random `M`-mode linear-optical unitary, output
 probabilities given by a hafnian of a covariance-derived matrix (Eq. 1), not
 this project's discrete-photon dual-rail/heralded-CZ IQP construction. Photon
 loss is modeled via a beamsplitter loss channel (Fig. 1b): each input mode
 interacts with an ancillary vacuum mode through a beamsplitter of
-transmittance `sqrt(eta)`, and the ancillary mode is traced out -- physically
-the same kind of per-mode transmittance channel this project's own
+transmittance `sqrt(eta)`, and the ancillary mode is traced out. This is
+physically the same kind of per-mode transmittance channel this project's own
 `pcvl.LC(1-eta)` implements, even though the sampled quantum object (Gaussian
 continuous-variable vs discrete Fock-state) is not the same.
 
@@ -465,7 +465,7 @@ photons is lost on average." This confirms the relayed claim's substance.
 **The caveat that must be carried forward, stated explicitly:** `O(log N)`
 is an asymptotic existence statement (there exists *some* threshold with this
 scaling, with an unspecified constant factor), not a literal formula that
-hands back one numeric threshold for a given `N` -- the same caveat this
+hands back one numeric threshold for a given `N`, the same caveat this
 document already applies to BMS's Theorem 4. Any comparison below is
 illustrative, not a claim that this project's small, fixed-`n` sweep
 demonstrates or refutes the asymptotic scaling itself.
@@ -474,8 +474,8 @@ demonstrates or refutes the asymptotic scaling itself.
 
 **The eta->(expected lost-photon count) translation used below is stated
 explicitly, per the plan's requirement, and it is deliberately the *simplest*
-possible one -- a direct expectation over this project's own per-mode-uniform
-loss model, not a fitted or derived quantity:** under `pcvl.LC(1-eta)`
+possible one: a direct expectation over this project's own per-mode-uniform
+loss model, not a fitted or derived quantity.** Under `pcvl.LC(1-eta)`
 applied uniformly to every mode carrying a photon, each of the pipeline's `N`
 photons survives independently with probability `eta`, so the expected number
 of lost photons is `N * (1 - eta)`. For this project's two scopes:
@@ -487,7 +487,7 @@ of lost photons is `N * (1 - eta)`. For this project's two scopes:
   per the Methodology section's HARD-07 lock).
 
 **Against Aaronson-Brod's fixed-count regime.** This project's loss model is
-a fractional *rate* (`eta`), never a fixed *count* -- AB's guarantee is
+a fractional *rate* (`eta`), never a fixed *count*. AB's guarantee is
 strongest for a `k` held constant as `n` grows, but this project's sweep
 design holds `eta` (not the expected count) fixed across the `n`-range at
 each scope. Since expected lost count `N*(1-eta)` scales linearly with `N`
@@ -495,12 +495,12 @@ each scope. Since expected lost count `N*(1-eta)` scales linearly with `N`
 sweep structurally sits in exactly the regime AB's own text (Plan 18-01's
 verbatim-quoted finding) calls too weak for "any strong complexity claims":
 a *fraction* of photons lost, not a fixed count. This holds for every `eta <
-1` tested here, not just the lowest ones -- it is a property of the sweep's
+1` tested here, not just the lowest ones; it is a property of the sweep's
 design (fixed `eta`, growing `n`), not of any single measured cell.
 
 **Against arXiv:2511.07853's logarithmic-fraction regime.** Both scopes'
 largest reached `n` happen to expose the same total photon budget, `N=6`
-(weight1 `n=6`: `N=n=6`; mixed `n=4`: `N=n+2=6`) -- `log(N) = log(6) approx
+(weight1 `n=6`: `N=n=6`; mixed `n=4`: `N=n+2=6`), where `log(N) = log(6) approx
 1.79`. Computing `N*(1-eta)` against that reference across this project's
 actual `ETA_GRID`:
 
@@ -521,7 +521,7 @@ four highest-loss eta points tested (`0.99, 0.95, 0.90, 0.80`) sit inside the
 "expected lost photons at most `log(N)`" illustrative regime this newer
 paper's Theorem 1 associates with preserved hardness (for its own,
 structurally different GBS model); the three lowest (`0.60, 0.35, 0.05`) do
-not. This is a genuine, computed crossover, not an assumed one -- but it says
+not. This is a genuine, computed crossover, not an assumed one, but it says
 nothing about this project's own circuit's hardness, since Theorem 1 is proved
 for lossy GBS specifically, not for this project's dual-rail heralded-gate
 IQP construction. The value of the observation is narrower: it shows that
@@ -530,7 +530,7 @@ loss-fraction threshold the most recent literature on photon-loss hardness
 uses, rather than sitting entirely on one side of it.
 
 **Against BMS's depolarizing regime.** No numeric comparison is made here, by
-the owner's explicit decision above -- BMS's Theorem 4 is stated in terms of
+the owner's explicit decision above. BMS's Theorem 4 is stated in terms of
 an effective depolarizing rate `epsilon` on a qubit-level noise channel, and
 this document does not compute or assume any `eta->epsilon` value. The
 qualitative distinction already on record in the Anticoncentration section
@@ -538,7 +538,7 @@ above stands: BMS's `alpha` normalization is the same quantity this project
 measures directly (`hardness/baselines.py::anticoncentration_alpha`), but
 using it inside Theorem 4's actual bound requires the `epsilon` this document
 declines to fabricate. BMS remains cited as a structurally different,
-not-directly-comparable noise model -- not merged with, or substituted for,
+not-directly-comparable noise model, not merged with, or substituted for,
 the two loss-native comparisons above.
 
 ### Literature comparison table (WRITE-02)
@@ -556,11 +556,11 @@ format.
 
 | # | Baseline | Verdict | One-line reason |
 |---|---|---|---|
-| 1 | Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5) | silent (regime mismatch, per the paper's own text) | This project's fixed-eta/growing-n sweep sits in the fractional-loss regime AB's own discussion calls insufficient for a strong complexity claim -- no falsifiable AB prediction to check HARD's numbers against |
+| 1 | Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5) | silent (regime mismatch, per the paper's own text) | This project's fixed-eta/growing-n sweep sits in the fractional-loss regime AB's own discussion calls insufficient for a strong complexity claim; no falsifiable AB prediction to check HARD's numbers against |
 | 2 | arXiv:2510.24137 (Park & Oh), Theorem 1 | silent (structural match, no hardness claim to test) | Closest physical match to this project's per-mode-transmittance channel, but Theorem 1 bounds one classical algorithm's (MPS) efficiency, not a hardness lower bound |
-| 3 | Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) | silent (by owner decision) | No eta-to-epsilon depolarizing-rate translation exists or was derived (HARD-04's on-record decision) -- no honest numeric comparison is possible |
+| 3 | Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) | silent (by owner decision) | No eta-to-epsilon depolarizing-rate translation exists or was derived (HARD-04's on-record decision); no honest numeric comparison is possible |
 | 4 | Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1) | silent (background context only) | Foundational noiseless-IQP hardness threshold BMS-2017 extends; makes no noise/loss claim of its own to compare against HARD's sweep |
-| 5 | Herbst et al. (arXiv:2512.24801) | inconsistent -- see Cross-reference note below | Measured alpha(eta) decreases (not increases) as loss increases, the reverse of `docs/iqp-baseline.md`'s original speculative direction |
+| 5 | Herbst et al. (arXiv:2512.24801) | inconsistent (see Cross-reference note below) | Measured alpha(eta) decreases (not increases) as loss increases, the reverse of `docs/iqp-baseline.md`'s original speculative direction |
 | 6 | McClean et al. (barren-plateau protocol) | silent (TRAIN-specific) | Gradient-variance-vs-system-size diagnostic; makes no hardness/loss claim |
 | 7 | arXiv:2405.01395 (two-photon gate construction) | silent (ARB-specific) | `heralded_cz`/`CP(alpha)` construction paper; not a trainability or hardness result |
 | 8 | `docs/iqp-baseline.md`'s own empirical rule | silent (TRAIN-specific) | Qubit-side plateau-prediction rule keyed on init_scheme/n; no loss axis |
@@ -568,25 +568,25 @@ format.
 | 10 | Mhiri et al. (arXiv:2502.07889) | silent (TRAIN-specific) | Warm-start/small-angle curvature guarantees; no loss/hardness claim |
 | 11 | Recio-Armengol et al. (arXiv:2503.02934) | silent (TRAIN-specific) | Data-dependent-initialization trainability result; no loss/hardness claim |
 
-**Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5) -- silent, by regime
+**Aaronson-Brod (arXiv:1510.05245, Theorem 1, p.5): silent, by regime
 mismatch stated in the paper's own text.** Already engaged at length in the
 "Dual/triple positioning" section above ("Against Aaronson-Brod's
 fixed-loss-count regime"). The verdict that section already reaches, restated
 here rather than re-derived: AB's strong hardness guarantee is for a fixed
 constant photon-loss count `k`; this project's loss model is a fractional
 rate `eta` held fixed while `n` (and thus the expected lost-photon count
-`N*(1-eta)`) grows -- exactly the "constant fraction lost" regime AB's own
+`N*(1-eta)`) grows, exactly the "constant fraction lost" regime AB's own
 discussion (p.9) calls insufficient for "any strong complexity claims." There
 is no AB-derived numeric threshold this project's measured TVD/alpha values
 could agree or disagree with in that regime, so the honest table entry is
 silent, not a forced consistent/inconsistent call.
 
-**arXiv:2510.24137 (Park & Oh), Theorem 1 -- silent, structural match without
+**arXiv:2510.24137 (Park & Oh), Theorem 1: silent, structural match without
 a testable hardness claim.** Already engaged in this doc's Methodology
 section and the "Dual/triple positioning" discussion. Theorem 1's
 per-mode-transmittance beamsplitter-loss model is the closest physical match
 in the literature to this project's own `pcvl.LC(1-eta)` channel (both use a
-uniform transmittance parameter across modes) -- but Theorem 1 is an upper
+uniform transmittance parameter across modes), but Theorem 1 is an upper
 bound on where **one specific classical simulation method (MPS)** is
 efficient, not a lower bound on sampling hardness; the paper states this
 asymmetry itself. It therefore gives no hardness threshold to compare HARD's
@@ -594,50 +594,50 @@ measured numbers against. This is distinct from the same paper's Section V
 "Noisy IQP Sampling" result (qubit-level dephasing/depolarizing noise), which
 is never the one cited here.
 
-**Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) -- silent by
+**Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4): silent by
 owner decision, not a forced verdict.** This document's own HARD-04 section
 (above, "Owner's attempt-first response") already records the owner's
 explicit choice not to fabricate an eta-to-epsilon depolarizing-rate
 translation between this project's photon-loss channel and BMS's
 qubit-level-depolarizing noise model. Without that translation, no honest
-numeric comparison against Theorem 4's threshold can be stated -- the
+numeric comparison against Theorem 4's threshold can be stated. The
 "Against BMS's depolarizing regime" subsection above already reaches this
 same conclusion; this row restates it rather than re-litigating the decision.
 
-**Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1) --
+**Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1):
 silent, background context only.** This is the foundational (noiseless) IQP
 sampling-hardness threshold (1/192 ell1-error, conditional on average-case
 hardness conjectures) that BMS-2017's noise extension builds on. It makes no
-noise or loss claim of its own -- nothing in Theorem 1 varies with a photon
-transmittance or depolarizing rate -- so there is no prediction to test
+noise or loss claim of its own: nothing in Theorem 1 varies with a photon
+transmittance or depolarizing rate, so there is no prediction to test
 HARD's loss sweep against. It is noted here as background/lineage for
 BMS-2017, not assigned a consistent/inconsistent verdict.
 
-**Herbst et al. (arXiv:2512.24801) -- see the Cross-reference note at the end
+**Herbst et al. (arXiv:2512.24801): see the Cross-reference note at the end
 of this document.** One-clause summary of the verdict reached there: HARD's
 measured alpha(eta) decreases (i.e. the output distribution becomes *more*
 anticoncentrated, not less) as loss increases, the reverse of
 `docs/iqp-baseline.md`'s original speculative guess about which direction
-Phase 18 would find -- so under Herbst et al.'s framework, this project's own
+Phase 18 would find. Under Herbst et al.'s framework, this project's own
 measured HARD result is **inconsistent** with that earlier speculative
 framing's predicted consequence for trainability, not consistent with it.
 
 **Silent rows (HARD-irrelevant by subject matter, one line each):**
 
 - **McClean et al.** (barren-plateau gradient-variance-vs-system-size
-  protocol) -- TRAIN-specific; no hardness or loss claim.
+  protocol): TRAIN-specific; no hardness or loss claim.
 - **arXiv:2405.01395** (two-photon gate construction paper underlying
-  `heralded_cz`/`CP(alpha)`) -- ARB-specific; a gate-construction reference,
+  `heralded_cz`/`CP(alpha)`): ARB-specific; a gate-construction reference,
   not a trainability or hardness result.
 - **`docs/iqp-baseline.md`'s own empirical rule** (qubit-side plateau
-  prediction keyed on init_scheme/n) -- TRAIN-specific; has no loss axis to
+  prediction keyed on init_scheme/n): TRAIN-specific; has no loss axis to
   compare against HARD's eta sweep.
-- **Rudolph et al.** (arXiv:2305.02881, MMD kernel-bandwidth trainability) --
+- **Rudolph et al.** (arXiv:2305.02881, MMD kernel-bandwidth trainability):
   TRAIN-specific; a bandwidth/variance result, not a loss/hardness claim.
-- **Mhiri et al.** (arXiv:2502.07889, warm-start curvature guarantees) --
+- **Mhiri et al.** (arXiv:2502.07889, warm-start curvature guarantees):
   TRAIN-specific; an initialization-scheme result, not a loss/hardness claim.
 - **Recio-Armengol et al.** (arXiv:2503.02934, data-dependent
-  initialization) -- TRAIN-specific; an initialization-scheme result, not a
+  initialization): TRAIN-specific; an initialization-scheme result, not a
   loss/hardness claim.
 
 ### HARD-06: What this phase does and does not establish
@@ -652,12 +652,12 @@ It does **not**:
 - Constitute a complexity-theoretic proof of a loss threshold for this
   project's circuit (already excluded from this milestone's scope, per
   `.planning/REQUIREMENTS.md`'s Out-of-Scope table).
-- Demonstrate an asymptotic transition -- this project's reachable `n` is too
+- Demonstrate an asymptotic transition: this project's reachable `n` is too
   small to exhibit scaling behavior on its own, the same honesty caveat
   already applied to Phase 17's own n-scaling claims (`docs/trainability-
   study.md`'s TRAIN-05/TRAIN-08 sections).
-- Establish, derive, or assume any eta->epsilon depolarizing-rate translation
-  -- the owner's explicit, on-record decision (above) was that no established
+- Establish, derive, or assume any eta->epsilon depolarizing-rate translation.
+  The owner's explicit, on-record decision (above) was that no established
   translation exists and none was fabricated for this document. Any future
   comparison to BMS's depolarizing-threshold literature specifically (as
   opposed to the loss-native comparisons above) would require that unresolved
@@ -665,7 +665,7 @@ It does **not**:
   phase.
 - Claim that the illustrative `eta->(expected lost-photon count)` crossover
   against arXiv:2511.07853's logarithmic-fraction threshold, above, says
-  anything about this project's own circuit's classical hardness -- that
+  anything about this project's own circuit's classical hardness. That
   paper's Theorem 1 is proved for a different photonic model (lossy Gaussian
   boson sampling), not this project's dual-rail heralded-gate IQP
   construction. The crossover is reported as a structural observation about
@@ -683,7 +683,7 @@ HARD-01 through HARD-07 for Phase 18.
 Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) for a formal result:
 circuits whose output distributions anticoncentrate are predicted to have
 *both* increased classical-simulability-under-noise (the hardness side) and
-increased MMD-type-loss concentration (the trainability side) -- the two
+increased MMD-type-loss concentration (the trainability side): the two
 effects are predicted to co-occur, not trade off against each other. This
 document's own Anticoncentration section (above) already reports the real,
 measured `alpha(eta)` values this prediction can be checked against.
@@ -698,8 +698,8 @@ loss makes the output distribution more anticoncentrated, not less.**
 That note (written 2026-08-12, before this phase's real sweep existed)
 guessed the opposite direction: "if Phase 18 finds photon loss erodes
 anticoncentration... trainability should correspondingly improve at higher
-loss." The real measured direction is the reverse of that guess -- loss
-*increases* anticoncentration here, it does not erode it -- so the
+loss." The real measured direction is the reverse of that guess: loss
+*increases* anticoncentration here, it does not erode it, so the
 speculative note's premise does not hold as originally phrased. This is
 stated here explicitly, rather than silently left uncorrected, matching this
 project's established pattern of catching and correcting its own earlier
@@ -713,13 +713,13 @@ classical-simulability *and* increased MMD-loss concentration together (not
 a trade-off), and this project's own measured `alpha(eta)` shows loss
 *increasing* anticoncentration, the framework's predicted consequence for
 trainability is that training should, if anything, get **worse** (not
-better) as loss increases -- the opposite of `docs/iqp-baseline.md`'s
+better) as loss increases, the opposite of `docs/iqp-baseline.md`'s
 original speculative guess ("trainability should correspondingly improve at
 higher loss").
 
 **The TRAIN-side half of this cross-reference is recorded separately in
 `docs/trainability-study.md`'s equivalent cross-reference note** (in that
-document's "What this does/doesn't establish" section) -- Phase 17/17.1's
+document's "What this does/doesn't establish" section). Phase 17/17.1's
 own gradient-variance findings are not restated here; see that document for
 the trainability-side measurement and verdict.
 
@@ -728,7 +728,7 @@ HARD do not share a common independent variable. TRAIN's sweep (Phase 17)
 varies `n` at `eta=1` (no loss at all); HARD's sweep (this phase) varies
 `eta` at small fixed `n`. Neither phase varies both `n` and `eta` together
 on a single dataset, so this project cannot directly test Herbst et al.'s
-co-occurrence prediction with one combined experiment -- this is a
+co-occurrence prediction with one combined experiment. This is a
 qualitative, hedged cross-reference between two separately-measured trends,
 each already reported honestly in its own document, not a joint experiment
 that jointly confirms or refutes the prediction. Per this project's

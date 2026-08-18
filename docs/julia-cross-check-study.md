@@ -15,12 +15,12 @@ Python functions directly (`exact_qubit_iqp_distribution`,
 `photonic_iqp_distribution`, `photonic_weight2_iqp_distribution`, and the
 loss-model equivalents from `hardness/loss_model*.py`) and writes their
 output to CSV under `results/julia_reference/`. No number in this document
-was computed by hand or re-derived — every Julia script reads a CSV Plan
+was computed by hand or re-derived: every Julia script reads a CSV Plan
 19-01 produced from a single, specific Python call.
 
 For the loss-model cross-check (VERIFY-04), a **single fixed theta draw
 per scope** was used (seed_base `190819`, deliberately distinct from Phase
-18's own `180814`), not a pooled multi-draw mean — per `19-RESEARCH.md`
+18's own `180814`), not a pooled multi-draw mean, per `19-RESEARCH.md`
 Pitfall 4, since the point is number-for-number agreement on one concrete
 case, not a statistical claim. The literal theta values are recorded as
 header comments in every loss-case reference CSV.
@@ -29,9 +29,9 @@ header comments in every loss-case reference CSV.
 
 The single most load-bearing decision in this phase
 (`19-CONTEXT.md`'s own framing): every Julia circuit was built from its
-own library's native API and idioms — Yao.jl's `H`/`Rz`/`put`/`chain` for
+own library's native API and idioms: Yao.jl's `H`/`Rz`/`put`/`chain` for
 the qubit-side circuit, BosonSampling.jl's `beam_splitter`/`phase_shift`/
-`UserDefinedInterferometer` for the photonic-level circuits — never by
+`UserDefinedInterferometer` for the photonic-level circuits; never by
 extracting a matrix or structure from Perceval's own circuit and replaying
 it in Julia. This is what makes agreement meaningful: if a bug existed in
 `iqp_photonic_encoding.py`'s math, a mechanical port would silently
@@ -44,7 +44,7 @@ languages' native conventions (Yao's `Rz` vs. this repo's `WP`;
 BosonSampling's mode-orientation convention vs. Perceval's) was derived
 algebraically first, then confirmed numerically against a known
 closed-form case (typically n=1) before being trusted for the full n=2/n=3
-comparison — never assumed from surface-level similarity.
+comparison, never assumed from surface-level similarity.
 
 ### Tolerance
 
@@ -52,7 +52,7 @@ A single locked bar applies throughout: **TVD ≤ 1e-6**, the same bar used
 for Phase 12's locked-gate cross-check. Both sides of every comparison in
 this phase are exact, non-sampling computations of the same underlying
 physics, so agreement at the level of floating-point noise (typically
-1e-14 to 1e-17) is the expected, achievable outcome — not an approximate
+1e-14 to 1e-17) is the expected, achievable outcome, not an approximate
 or statistical match.
 
 ## VERIFY-02: Yao.jl qubit-side cross-check
@@ -72,11 +72,11 @@ diagonal weight-1 phase layer → Hadamard conjugation, using Yao's own `H`/
 
 **Phase-convention finding:** this repo's `WP(theta,0) =
 diag(e^{i*theta}, e^{-i*theta})` equals Yao's `Rz(-2*theta)` entry-for-
-entry — derived algebraically, then confirmed numerically at n=1 against
+entry: derived algebraically, then confirmed numerically at n=1 against
 the closed-form marginal `cos(theta)^2`/`sin(theta)^2` (atol=1e-10).
 
 **Bit-ordering finding:** Yao's `probs()` vector uses qubit `m` = LSB of
-the 0-based index for this circuit — confirmed empirically (not assumed
+the 0-based index for this circuit: confirmed empirically (not assumed
 from a prior Phase-14 comment) via an asymmetric n=2 probe tested against
 two named candidate orderings, with a hard assertion that exactly one
 matches known per-qubit marginals.
@@ -86,7 +86,7 @@ matches known per-qubit marginals.
 ## VERIFY-03: BosonSampling.jl photonic-level cross-check
 
 Split into a weight-1 leg (Plan 19-03) and a weight-2 leg (Plan 19-04),
-per `19-CONTEXT.md`'s "independently gradeable" design — neither leg
+per `19-CONTEXT.md`'s "independently gradeable" design, neither leg
 blocks the other.
 
 ### Weight-1 leg (Plan 19-03)
@@ -105,7 +105,7 @@ a port of Perceval's HWP/WP/PBS polarization circuit) reproduces
 | 3 | `[0.3, 1.1, 0.75]` | `3.04e-16` | `1e-6` | PASS |
 
 The load-bearing derivation: `phase_shift(phi)` with `phi = pi - 2*theta`
-reproduces this repo's `WP(theta,0)`-derived marginal — derived
+reproduces this repo's `WP(theta,0)`-derived marginal: derived
 algebraically from the `H*D*H` sandwich, not assumed to be the more
 "obvious" `phi = 2*theta`, and confirmed both by hand against the n=2
 reference CSV and by the script's own n=1 assertion (atol=1e-10).
@@ -118,10 +118,10 @@ reference CSV and by the script's own n=1 assertion (atol=1e-10).
 `results/phase19_verify03_weight2_results.md`.
 
 This was the phase's single highest-stall-risk piece per
-`19-CONTEXT.md`'s own framing, and it reached a **real, full GO** — not a
+`19-CONTEXT.md`'s own framing, and it reached a **real, full GO**: not a
 partial-go or a documented stall. The Knill CZ gate's unitary was sourced
 directly from arXiv:quant-ph/0110144 (Knill, 2001), Eq. 11's closed-form
-4×4 matrix — fetched as both PDF and LaTeX e-print source, read directly,
+4×4 matrix: fetched as both PDF and LaTeX e-print source, read directly,
 never extracted from Perceval's own `heralded_cz` circuit. Built as a
 6-mode dual-rail circuit (Hadamard state prep, a π/4 weight-1 correction
 realizing the CZ-to-ZZ operator identity already derived in
@@ -139,8 +139,8 @@ post-selection).
 the paper's matrix, used exactly as printed, leaked ~0.033 probability
 into bunched outputs that Knill's own Eq. 6 proves must be exactly zero.
 Diagnosed via a standalone 4-mode zero-leak check (not trial-and-error
-against the full pipeline) as a row/column transpose convention mismatch
-— the paper defines its matrix via `V_rs = u_sr`, differing from
+against the full pipeline) as a row/column transpose convention mismatch:
+the paper defines its matrix via `V_rs = u_sr`, differing from
 `UserDefinedInterferometer`'s expected output-row/input-column
 orientation. Using the matrix transposed dropped all four leak terms to
 numerical zero (~1e-32); the fix and the zero-leak check are preserved as
@@ -151,7 +151,7 @@ to check, and it resolved within a single focused debugging pass, well
 inside the phase's time-box.
 
 Scope: covers only the n=2 locked-gate case (`i=0, j=1`, pair angle
-`pi/4`), matching `19-CONTEXT.md`'s VERIFY-03 weight-2 scope — does not
+`pi/4`), matching `19-CONTEXT.md`'s VERIFY-03 weight-2 scope: does not
 extend to other `(i,j)` pairs, n=3, or non-locked pair angles (the catalog
 gate `heralded_cz` only realizes the fixed `pi/4` angle in the first
 place).
@@ -162,11 +162,11 @@ real, separate concern: at `thetas=[0.0, 0.0]` the resulting distribution
 (`P(01)=P(10)=0`, `P(00)=P(11)≈0.5`) is degenerate enough that a hidden
 Julia/Python bit-to-rail convention error could in principle produce the
 same-looking passing result. A second case was added, `thetas=[0.3, 1.1]`
-(`weight2_asymmetric_n2.csv`), which also passes: TVD = `4.50e-15` — and
+(`weight2_asymmetric_n2.csv`), which also passes: TVD = `4.50e-15`, and
 does catch a single-qubit rail-convention error the locked case could not.
 
-The residual — a simultaneous both-qubits bit-flip or a qubit-order swap
-remaining undetectable regardless of theta — turned out to be provable, not
+The residual, a simultaneous both-qubits bit-flip or a qubit-order swap
+remaining undetectable regardless of theta, turned out to be provable, not
 just observed. Hein, Eisert & Briegel's graph-state paper
 (Phys. Rev. A 69, 062311 (2004), arXiv:quant-ph/0307130, verified directly
 against the primary source, not just an AI-provided citation) shows that
@@ -176,11 +176,11 @@ formula gives each qubit's single-qubit marginal as exactly maximally mixed
 (`I/2`) for *any* `theta_i`/`theta_j`, since local `Z` rotations can't
 change a maximally-mixed marginal. Both marginals being uniform
 simultaneously (not just one) forces `P(01)=P(10)` and `P(00)=P(11)`
-exactly via linear algebra on the normalization constraint — reproducing
+exactly via linear algebra on the normalization constraint: reproducing
 the closed form `P(00)=P(11)=(1+cos2θ_i·cos2θ_j)/4` checked to machine
 precision against 6 independent theta pairs. This is specific to the pair
 angle being locked at exactly `π/4` (the maximally-entangling `CZ` point,
-the only angle `heralded_cz` realizes) — not a generic IQP property. Full
+the only angle `heralded_cz` realizes), not a generic IQP property. Full
 derivation in `results/phase19_verify03_weight2_results.md`.
 
 **Verdict: GO (both cases).**
@@ -191,9 +191,9 @@ derivation in `results/phase19_verify03_weight2_results.md`.
 `results/phase19_verify04_results.md`.
 
 BosonSampling.jl's **native** `UniformLossInterferometer(eta, U)` loss API
-was used — confirmed against the actual installed v1.0.2 depot source
+was used: confirmed against the actual installed v1.0.2 depot source
 (`~/.julia/packages/BosonSampling/TEQXU/src/types/loss.jl`), not GitHub
-`main` — the strongly-preferred independence path per `19-RESEARCH.md`'s
+`main`, the strongly-preferred independence path per `19-RESEARCH.md`'s
 "Don't Hand-Roll" guidance. No fallback to hand-attenuation was needed.
 
 **Two real findings during the native-API investigation**, both auto-fixed
@@ -206,11 +206,11 @@ and documented rather than silently absorbed:
    check (`p(survive)=eta, p(lost)=1-eta`, atol=1e-10) before trusting the
    n=2 comparison.
 2. **Real bug in the installed package:** `Event()` cannot be constructed
-   directly against a `UniformLossInterferometer` — it never registered a
+   directly against a `UniformLossInterferometer`: it never registered a
    `LossParameters` dispatch method for its own type (confirmed live via a
    standalone repro). Worked around by wrapping the interferometer's own
    native-computed `.U` field in `UserDefinedInterferometer(li.U)` before
-   building `Event`s — numerically identical, since `compute_probability!`
+   building `Event`s: numerically identical, since `compute_probability!`
    only ever reads `.U`; the loss physics still comes entirely from
    BosonSampling's own native construction, not a hand-attenuation
    fallback.
@@ -219,7 +219,7 @@ Doubled-mode marginalization (the phase's flagged hardest open question)
 was done by exact enumeration: since the virtual 2m-mode interferometer is
 unitary, total photon count is exactly conserved, so every composition of
 N photons across 2m modes was enumerated and summed into physical-mode
-buckets — an exact marginal, not sampling or approximation.
+buckets: an exact marginal, not sampling or approximation.
 
 Circuits reused Plan 19-03's verified weight-1 dual-rail construction and
 Plan 19-04's verified Knill-CZ construction (generalized to two
@@ -242,7 +242,7 @@ independent per-qubit diagonal phases for the mixed case).
 | 0.05 | `1.17e-19` | `0.999128704` | `0.999128704` | `0.0` | PASS |
 
 Scope: n=2 only, 3 eta values spanning Phase 18's grid (matching
-`19-CONTEXT.md`'s locked scope for this leg) — both weight-1 and mixed
+`19-CONTEXT.md`'s locked scope for this leg): both weight-1 and mixed
 scope reached, at full parity with what Phase 18 reported (including
 herald-compounding behavior).
 
@@ -254,12 +254,12 @@ herald-compounding behavior).
 noise, between two independently-built simulators (Perceval/Python and
 Yao.jl or BosonSampling.jl/Julia) on this repo's exact and lossy IQP
 distributions, at small n (n=2/n=3, single fixed test cases), covering
-every math layer this project relies on — qubit-side IQP, photonic-level
+every math layer this project relies on: qubit-side IQP, photonic-level
 weight-1 and weight-2 encoding, and photon-loss under both scopes. Where
 loss is involved, agreement was reached using BosonSampling.jl's own
 structurally-different native loss mechanism (a beamsplitter-to-
-environment-mode model), not Perceval's `pcvl.LC` math replayed in Julia
-— the strongest form of independence this phase's design allows for.
+environment-mode model), not Perceval's `pcvl.LC` math replayed in Julia,
+the strongest form of independence this phase's design allows for.
 
 **Does not establish:** a formal proof of either implementation's
 correctness, agreement at any n beyond what was tested, agreement for
@@ -272,7 +272,7 @@ photonic quantum mechanics.
 **No leg stalled or produced an unresolved disagreement.** All three
 requirements' underlying plans (19-02 through 19-05) reached a real,
 measured TVD comparison and a full GO verdict, including the phase's own
-flagged highest-risk piece (the weight-2 Knill-CZ leg, Plan 19-04) — the
+flagged highest-risk piece (the weight-2 Knill-CZ leg, Plan 19-04): the
 one real bug found along the way (a matrix transpose-convention mismatch)
 was diagnosed and fixed within a single focused debugging pass, well
 inside `19-CONTEXT.md`'s time-box, not left as a documented, unresolved

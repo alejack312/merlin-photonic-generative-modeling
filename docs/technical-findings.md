@@ -7,12 +7,12 @@ correctness (ARB-01/ARB-02, Phases 15-16). It organizes and
 cross-references findings that are already published and already verified
 in [`docs/trainability-study.md`](trainability-study.md),
 [`docs/hardness-under-loss-study.md`](hardness-under-loss-study.md), and
-[`docs/iqp-photonic-encoding.md`](iqp-photonic-encoding.md) — it does not
+[`docs/iqp-photonic-encoding.md`](iqp-photonic-encoding.md): it does not
 introduce new numbers, re-run any analysis, or re-derive any of the
 reasoning those three documents already contain. Every table below is
 mirrored from its source document; every claim is traceable to the same
 script/CSV/test its source document already cites. Per `20-CONTEXT.md`'s
-locked scope, this is an internal/candid technical document — external-facing
+locked scope, this is an internal/candid technical document; external-facing
 reframing is Phase 21's separate job, not pulled forward here.
 
 ## Trainability (STUDY-01, TRAIN-01..10)
@@ -49,9 +49,9 @@ high sigma (3.0, 9.0) while `mixed/uniform` stays inconclusive through
 sigma=9.0. **TRAIN-10's data-dependent-init follow-up found that
 Recio-Armengol et al.'s literature-sourced alternative initialization did
 NOT resolve `small_angle`'s inconclusive verdict** in either generator
-scope — a genuine negative result, reported here exactly as measured.
+scope, a genuine negative result, reported here exactly as measured.
 
-**TRAIN-07 cross-reference verdict — owner's interpretation (transcribed,
+**TRAIN-07 cross-reference verdict: owner's interpretation (transcribed,
 not re-authored).** `docs/iqp-baseline.md`'s empirical plateau rule
 (`plateau if small_angle OR (uniform AND n>=6 AND not complete_graph_like)`)
 agrees with the measured data for `weight1/uniform` (rule predicts plateau
@@ -64,32 +64,32 @@ section](trainability-study.md#cross-reference-verdict-train-07): the
 owner first hypothesized a `complete_graph_like` explanation, ruled it out
 by re-reading the rule's own structure, reviewed the raw fitted parameters
 and per-n gradient-variance values, asked what the literature (as opposed
-to the sibling project's own fitted threshold) actually claims, and — after
-an initial overreaching framing was pushed back on — landed on the final
+to the sibling project's own fitted threshold) actually claims, and (after
+an initial overreaching framing was pushed back on) landed on the final
 interpretation: the sibling project's specific `n>=6` numeric threshold
 didn't hold for `mixed/uniform`, but this is not in tension with the general
 literature's asymptotic (non-threshold-specific) prediction that uniform
 init drives exponential concentration as n grows (Recio-Armengol et al.,
-arXiv:2503.02934, Sec. 9.3) — only with the sibling project's own
+arXiv:2503.02934, Sec. 9.3), only with the sibling project's own
 qubit-side-specific fitted cutoff. `weight1/uniform`'s agreement with that
 cutoff may be coincidental rather than evidence the threshold transfers
 mechanistically to this photonic circuit family.
 
 **Randomness / seed mechanism (WRITE-06).** TRAIN's randomness uses a
 deterministic, reorder-safe hashed-seed scheme
-(`trainability/rng.py::derive_seed`), not a single global seed constant —
+(`trainability/rng.py::derive_seed`), not a single global seed constant:
 each `(n, generator_scope, init_scheme, draw_index)` coordinate gets its
 own reproducible seed, so results are exactly reproducible without needing
 one literal number quoted here. This is architecturally different from
 HARD's single literal `seed_base` (below), and is stated as-is rather than
-forced into parity with HARD's style — see Part C of this synthesis
+forced into parity with HARD's style: see Part C of this synthesis
 document's own drafting process for why (a single fabricated seed number
 would misrepresent TRAIN's actual, more robust per-coordinate design).
 
-**Scope statement.** Full scope — what this measurement does and does not
+**Scope statement.** Full scope: what this measurement does and does not
 establish, including the honest caveat that a measured exponential-decay
 signature at n<=6 does not, by itself, establish this photonic realization
-inherits the qubit-side rule's behavior at hardware-relevant scale — is in
+inherits the qubit-side rule's behavior at hardware-relevant scale, is in
 [`docs/trainability-study.md#what-this-doesdoesnt-establish`](trainability-study.md#what-this-doesdoesnt-establish).
 
 ### Trainability literature comparison table (mirrored from `docs/trainability-study.md`)
@@ -114,7 +114,7 @@ are silent here, per that document's own scoping decision.
 
 **Methodology summary.** Photon loss is applied via `pcvl.LC(1-eta)`
 component insertion, front-loaded before the rest of the circuit, with an
-explicit `proc.min_detected_photons_filter(0)` call — never
+explicit `proc.min_detected_photons_filter(0)` call, never
 `noise=NoiseModel(...)`, which silently no-ops on this project's
 polarization-annotated circuits. A fixed 7-point eta grid
 (`[0.99, 0.95, 0.90, 0.80, 0.60, 0.35, 0.05]`) is swept for both generator
@@ -132,17 +132,17 @@ eta=0.99 to ~0.50 at eta=0.05), while `tvd_to_uniform` and
 `tvd_to_lossless` near ~0.50 by eta=0.05. Anticoncentration
 `alpha(eta) = 2^n * sum(p_x^2)` decreases monotonically as eta decreases for
 both scopes, crossing below the `alpha=1` uniform-reference line somewhere
-in the measured grid at every n — i.e., **photon loss makes this project's
+in the measured grid at every n, i.e., **photon loss makes this project's
 own circuits MORE anticoncentrated, not less.** For the weight-2 (mixed)
 scope, loss is applied to all `2n+2` modes including both `heralded_cz`
 ancilla modes, and herald-success rate is measured through one real
 `Processor.probs()` call per cell: `herald_failure_prob` rises
 monotonically from the near-lossless anchor value (~0.926, matching the
-lossless `2/27` baseline) to 0.999 at eta=0.05 — loss compounds with the
+lossless `2/27` baseline) to 0.999 at eta=0.05: loss compounds with the
 gate's own intrinsic herald-failure rate rather than leaving it unchanged.
 
 **HARD-04's positioning.** By the owner's explicit decision, no eta-to-epsilon
-(photon-loss-to-depolarizing-rate) translation was attempted — this was a
+(photon-loss-to-depolarizing-rate) translation was attempted: this was a
 deliberate scope call (computing one, e.g. via a diamond-norm-closest-
 depolarizing-channel calculation, would be original numerics work outside
 this project's stated scope), not a fallback after a failed attempt. The
@@ -154,18 +154,18 @@ Scope Statement" section](hardness-under-loss-study.md#hard-04hard-06-positionin
 restated here. Instead, this project's tested eta range is
 positioned against two loss-native regimes that avoid the translation
 question entirely: Aaronson-Brod's fixed-loss-count regime (structural
-regime mismatch — this project's fixed-eta/growing-n sweep sits in AB's own
+regime mismatch, this project's fixed-eta/growing-n sweep sits in AB's own
 "insufficient for strong complexity claims" fractional-loss regime) and
 arXiv:2511.07853's logarithmic-loss-fraction threshold (a computed,
 illustrative crossover: this project's four highest-eta points sit inside
 the "at most log(N) lost" regime at each scope's largest reached n; the
-three lowest do not — reported as a small-n-limited structural observation,
+three lowest do not, reported as a small-n-limited structural observation,
 not an asymptotic or hardness claim).
 
-**Scope statement.** Full scope — what HARD-01 through HARD-07 do and do
+**Scope statement.** Full scope: what HARD-01 through HARD-07 do and do
 not establish, including the explicit statement that this is not a
 complexity-theoretic proof and does not demonstrate an asymptotic
-transition — is in
+transition, is in
 [`docs/hardness-under-loss-study.md#hard-06-what-this-phase-does-and-does-not-establish`](hardness-under-loss-study.md#hard-06-what-this-phase-does-and-does-not-establish).
 
 ### Hardness literature comparison table (mirrored from `docs/hardness-under-loss-study.md`)
@@ -210,11 +210,11 @@ passed with TVD < 1e-6 (Phase 16, ARB-07). A Forge-based formal check
 confirmed the gate's ancilla mode-mapping dict is injective/non-aliasing
 for all valid `(n,i,j)`, `n<=8`, with no bug found (Phase 16, ARB-09).
 
-**Scope statement.** Full scope — what ARB-01/ARB-02 do and do not
+**Scope statement.** Full scope: what ARB-01/ARB-02 do and do not
 establish, including the explicit statement that this is not a hardness or
 trainability claim, and that ARB-01/ARB-02's `CP(alpha)` and HARD-01..07's
 `heralded_cz` are two different weight-2 gate families never cross-tested
-under loss together — is in
+under loss together, is in
 [`docs/iqp-photonic-encoding.md`'s "What ARB-01/ARB-02 does/doesn't
 establish" subsection](iqp-photonic-encoding.md#what-arb-01arb-02-doesdoesnt-establish).
 
@@ -239,18 +239,18 @@ the full list.
 Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) predict that circuits
 whose output distributions anticoncentrate should show BOTH increased
 classical-simulability-under-noise (the hardness side) AND increased
-MMD-type-loss concentration (the trainability side) — the two effects
+MMD-type-loss concentration (the trainability side): the two effects
 predicted to co-occur, not trade off. This project's own headline: **TRAIN's
 zero-loss data shows a genuine (if bandwidth-fragile) untrainability
 signature for `uniform` init; HARD's data shows anticoncentration
-INCREASING (not decreasing) as loss increases** — the reverse of
+INCREASING (not decreasing) as loss increases**: the reverse of
 `docs/iqp-baseline.md`'s original 2026-08-12 speculative guess about which
 direction Phase 18 would find. Under Herbst et al.'s framework, this means
-training should, if anything, get worse (not better) as loss increases —
+training should, if anything, get worse (not better) as loss increases,
 opposite the original speculative conclusion.
 
-TRAIN and HARD do not share a common independent variable — TRAIN sweeps
-`n` at fixed `eta=1`; HARD sweeps `eta` at small fixed `n` — so this project
+TRAIN and HARD do not share a common independent variable: TRAIN sweeps
+`n` at fixed `eta=1`; HARD sweeps `eta` at small fixed `n`, so this project
 cannot directly test the co-occurrence prediction with one combined
 experiment. The full reasoning for each half, including this hedge, is
 recorded in the two source docs' own cross-reference notes, not re-derived
@@ -266,12 +266,12 @@ independently cross-checked the underlying exact and lossy distributions
 this project's TRAIN/HARD/ARB findings are built on, via a separate
 toolchain (Yao.jl for the qubit-side circuit; BosonSampling.jl for the
 weight-1 and weight-2 photonic-level circuits; BosonSampling.jl's native
-loss API for the loss model) — never a mechanical port of this project's
+loss API for the loss model): never a mechanical port of this project's
 Python/Perceval code, but circuits built from each library's own native
 primitives and idioms. All four legs (VERIFY-02 qubit-side, VERIFY-03
 weight-1, VERIFY-03 weight-2, VERIFY-04 loss model) reached a genuine GO
 verdict. This is supplementary evidence only, per `20-CONTEXT.md`'s
-explicit lock — its own numbers are not restated here and it is not forced
+explicit lock: its own numbers are not restated here and it is not forced
 into the TRAIN/HARD/ARB structure above; see the document itself for the
 full per-leg results.
 
@@ -279,15 +279,15 @@ full per-leg results.
 
 - **No complexity-theoretic proof.** Neither the hardness-under-loss study
   nor the IQP-photonic mapping constitutes a formal reduction or
-  complexity-theoretic hardness proof — this is explicitly excluded from
+  complexity-theoretic hardness proof: this is explicitly excluded from
   this milestone's scope (`.planning/REQUIREMENTS.md`'s Out-of-Scope
   table), and both source documents state this limitation directly at the
   point where overclaiming risk is highest.
 - **No asymptotic-scale demonstration.** All three studies operate at
   small, compute-bound n (TRAIN: n<=6 CORE, n<=8 via the supplementary
   dual-rail/autograd cross-check; HARD: weight1 n<=6, mixed n<=4; ARB:
-  n=2-3). None of this demonstrates scaling behavior at hardware-relevant n
-  — see each source document's own honest max-n statement for the specific
+  n=2-3). None of this demonstrates scaling behavior at hardware-relevant n:
+  see each source document's own honest max-n statement for the specific
   compute-cost reasoning.
 - **Two different weight-2 gate families, never cross-tested under loss
   together.** ARB-01/ARB-02 (Phases 15-16) and HARD-01..07 (Phase 18) use
@@ -296,7 +296,7 @@ full per-leg results.
   photon-loss sweep was built and tested against; `CP(alpha)`
   (post-selection-based, continuously tunable) is what ARB-01/ARB-02
   validated for correctness. Neither study's result transfers to the
-  other's gate family without separate validation — this is stated
+  other's gate family without separate validation: this is stated
   explicitly here because it is easy to conflate the two constructions
   when reading this synthesis document in isolation from its three source
   documents.
@@ -306,7 +306,7 @@ full per-leg results.
 Every number stated above (R² values, TVD figures, success probabilities,
 alpha values, n-ranges) was re-read against this document's own three
 source documents and traces to the exact same script/CSV/test each source
-document already cites — `results/phase17_curve_fit_summary.csv` /
+document already cites: `results/phase17_curve_fit_summary.csv` /
 `results/phase171_train09_curve_fit_summary.csv` /
 `results/phase171_train10_curve_fit_summary.csv` (Trainability),
 `results/phase18_weight1_loss_sweep.csv` /
