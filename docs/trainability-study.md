@@ -171,7 +171,80 @@ or plateau if init_scheme == uniform and max(n) >= 6
 | mixed | small_angle | plateau | inconclusive (both R²≈0, no discernible trend) | inconclusive |
 | mixed | uniform | no_plateau (n_max=5 < 6) | plateau (exp wins, R²=0.910, decaying) | **disagree** |
 
-> Owner interpretation: [pending]
+> **Owner interpretation:** Went in without knowing the empirical rule and
+> asked for it directly, along with whether TRAIN-10's data-dependent init
+> resolved anything and whether this project ever varied circuit/graph
+> structure the way the sibling project did. (For the record: the rule is
+> `plateau if small_angle OR (uniform AND n>=6 AND not complete_graph_like)`;
+> data-dependent init did not resolve `small_angle`'s inconclusive verdict
+> in either scope; this project never varied circuit connectivity as a
+> design axis.)
+>
+> First hypothesis, which didn't hold up: "Since the mixed/uniform produced
+> a plateau at n=5, it may be complete_graph_like." This doesn't work, for
+> two reasons. First, `not complete_graph_like` only modifies the
+> `uniform AND n>=6` branch of the rule — at n=5 the rule already predicts
+> no-plateau on n alone, so complete_graph_like status can't be what's
+> driving a different outcome there. Second, this document itself states
+> that removing `not complete_graph_like` "reintroduces false positives on
+> complete-graph structures" — i.e., in the sibling project's data,
+> complete-graph-like circuits tended toward *no* plateau, not toward one.
+> So even if this circuit were complete-graph-like, that would point the
+> wrong direction to explain an observed plateau. Acknowledged at this
+> point: "I'm not sure why we got this result then."
+>
+> Asked to look at more data before concluding anything. Reviewed the raw
+> fitted exponential parameters: `weight1/uniform` has a real,
+> well-identified decay (`a=0.749, b=0.365, c=-0.055`), while
+> `mixed/uniform`'s fit is the numerically degenerate one already flagged
+> elsewhere in this document (`a=153.6, b=0.00008, c=-153.5`, near-zero
+> decay rate with `a`/`c` nearly cancelling). Also looked at the raw per-n
+> gradient-variance values directly: `weight1/uniform` decays smoothly and
+> monotonically at every step across all 5 points; `mixed/uniform` is
+> nearly flat from n=2→3 then drops from n=3→5, across only 4 points.
+>
+> Asked, mechanically, why the `c` parameters differ so much between the
+> two fits — answer: when the fitted decay rate `b` is near zero, `a` and
+> `c` become unidentifiable/interchangeable, and the optimizer picks an
+> arbitrary large cancelling pair rather than a data-pinned value — exactly
+> the degeneracy `curve_fit`'s "covariance could not be estimated" warning
+> already flags elsewhere in this document.
+>
+> Asked what the literature actually says about this. Recio-Armengol et
+> al. (arXiv:2503.02934, Sec. 9.3) analytically derive that uniform/random
+> init causes exponential concentration generically (`⟨Z_1⟩ = ∏cos(2θ_k)`
+> over n terms) — an asymptotic-in-n claim with no specific n threshold
+> attached, applying equally to weight1 and mixed circuits. Under that
+> framing, `mixed/uniform` plateauing isn't anomalous relative to the
+> general literature at all — the literature doesn't stake out a position
+> on any particular n cutoff. What's actually unmatched is the sibling
+> project's own fitted `n>=6` numeric threshold, which comes from a
+> different, qubit-side circuit family, not the general literature claim.
+>
+> First proposed framing: "The empirical rule derived from the sibling
+> project disagrees with the general rule established in literature. As a
+> result, this finding agrees with the general literature." This was
+> pushed back on as stated, since nothing actually shows the literature and
+> the sibling's empirical n>=6 cutoff are in conflict with each other — the
+> literature just doesn't commit to a threshold at all. The real, narrower
+> finding is: `mixed/uniform`'s plateau at n=5 didn't match the sibling's
+> specific fitted cutoff, which is a mismatch with a threshold, not
+> evidence the two sources disagree in general.
+>
+> Final interpretation, accepted after that correction: the sibling
+> project's specific `n>=6` numeric threshold didn't hold for
+> `mixed/uniform` (which plateaued at n=5, below that cutoff) — but this is
+> still consistent with the general literature's asymptotic (not
+> threshold-specific) prediction that uniform init drives exponential
+> concentration as n grows (Recio-Armengol et al., arXiv:2503.02934, Sec.
+> 9.3). The literature doesn't stake out a position on any specific n
+> cutoff, so `mixed/uniform` plateauing at n=5 isn't in tension with it —
+> only with the sibling project's own fitted, qubit-side-specific `n>=6`
+> heuristic. `weight1/uniform`'s agreement with that same `n>=6` cutoff may
+> simply be coincidental alignment between a fitted threshold from a
+> different circuit family and this project's own `n_max=6` reach, rather
+> than evidence the threshold itself transfers mechanistically to this
+> photonic circuit family.
 
 ## Bandwidth sensitivity follow-up (TRAIN-09)
 
@@ -546,3 +619,160 @@ alternative init did not resolve `small_angle`'s inconclusive verdict in
 either scope. Neither follow-up alters Phase 17's own reported numbers or
 verdicts above; both narrow what those original numbers can be read to
 establish.
+
+### Literature comparison table (WRITE-02)
+
+All 11 baselines from this project's fresh primary-source literature read
+(`docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section),
+checked against TRAIN's own results above. Six bear directly on
+trainability and get a substantive consistent/inconsistent/silent verdict
+with reasoning; five are HARD- or ARB-specific and are marked silent with a
+one-line reason, per this plan's own scoping decision (keeping this table
+TRAIN-focused rather than padded with baselines that make no trainability
+claim).
+
+**Substantive rows:**
+
+- **McClean, Boixo, Smelyanskiy, Babbush & Neven, "Barren plateaus in
+  quantum neural network training landscapes"** — before drafting this
+  row, the paper's actual arXiv ID and core claim were confirmed live
+  against the arXiv API (not trusted from this repo's own prior
+  WebSearch-sourced summaries, per `20-RESEARCH.md`'s flagged gap):
+  **arXiv:1803.11173**, *Nature Communications* 9, 4812 (2018). The
+  fetched abstract confirms the paper's core claim — for a wide class of
+  parameterized quantum circuits, gradient magnitude along any fixed
+  direction becomes exponentially small as a function of qubit count —
+  which is the same diagnostic shape (gradient-variance-vs-system-size)
+  Phase 17's own methodology uses. **Verdict: consistent with the
+  well-known protocol shape.** Confidence caveat, stated honestly rather
+  than silently upgraded: this confirmation is a direct primary-source
+  fetch of the paper's own abstract/metadata via the arXiv API, not a full
+  PDF read — unlike the other 10 baselines in this list, all of which have
+  a downloaded PDF in `docs/papers/`. It should be read as more reliable
+  than a WebSearch-level summary, but at a lower confidence tier than this
+  project's fully-read papers.
+- **`docs/iqp-baseline.md`'s own empirical rule** — see the Cross-reference
+  verdict (TRAIN-07) table above rather than re-deriving it here.
+  **Verdict: split.** `weight1/uniform` **agrees** with the rule (predicts
+  plateau at n_max=6>=6, measured shows decay); `mixed/uniform`
+  **disagrees** (rule predicts no-plateau since n_max=5<6, but measured
+  data shows exponential decay anyway) — see the owner's interpretation of
+  this split immediately above. Both `small_angle` rows are inconclusive
+  on both sides, with no verdict to compare.
+- **Rudolph et al. (arXiv:2305.02881, Theorem 2)** — **verdict:
+  directionally consistent with TRAIN-09's bandwidth-sensitivity finding,
+  mechanistically non-transferable.** The original fixed-`SIGMA=0.1`
+  "exp" verdict for both `uniform` rows is exactly the regime Theorem 2
+  identifies as independently sufficient to cause exponential MMD
+  concentration (a constant, n-independent bandwidth), and TRAIN-09 found
+  that verdict is indeed not robust once bandwidth is varied — directional
+  agreement on the *risk*. The paper's own bodyness decomposition assumes
+  a bitstring-Hamming-distance kernel, which does not mechanically
+  transfer to this project's Euclidean-distance kernel over grid bin
+  centers (already stated in the TRAIN-09 section and in
+  `docs/iqp-baseline.md`) — so the *mechanism* the paper proves does not
+  directly apply here, even though the qualitative risk it flags does.
+  Both halves are reported, not collapsed to one word.
+- **Mhiri et al. (arXiv:2502.07889, p.5-6, Appendix H)** — **verdict:
+  consistent.** Their proof that small-angle/warm-start guarantees are not
+  general — with structured/commuting circuits flagged as the specific
+  risk case ("an extreme example... is one that completely commutes with
+  the observable or state... its variance trivially becomes zero," p.5-6)
+  — is a citable theoretical reason both `small_angle` rows (weight1 and
+  mixed) came out inconclusive rather than a clean plateau either way,
+  matching this project's IQP-style commuting-diagonal-gate structure.
+- **Recio-Armengol et al. (arXiv:2503.02934, Sec. 9.3 and Sec. 8.1.2)** —
+  **verdict: consistent for the uniform-init exponential-concentration
+  finding.** Their Sec. 9.3 analytical derivation (`⟨Z_1⟩ = ∏cos(2θ_k)`
+  over n terms causing generic exponential concentration under uniform
+  init) matches this project's own empirical `uniform`-init signature.
+  Their Sec. 8.1.2 proposed fix (data-dependent init) was directly
+  implemented and tested as TRAIN-10 and found **not** to resolve
+  `small_angle`'s inconclusive verdict in either generator scope — a
+  genuine negative result for the literature-sourced alternative-init
+  hypothesis, reported here exactly as measured, not softened.
+- **Herbst et al. (arXiv:2512.24801)** — this baseline's substantive
+  content is the cross-reference note below. **Verdict: see
+  Cross-reference note below** — TRAIN's own zero-loss data shows a
+  genuine (if bandwidth-fragile) untrainability signature for `uniform`
+  init, which is not in tension with Herbst et al.'s framework, but TRAIN
+  never varies loss and so cannot itself confirm or refute the paper's
+  eta-dependent co-occurrence prediction.
+
+**Silent rows** (one line each — these baselines don't bear on TRAIN
+specifically):
+
+- **Aaronson-Brod (arXiv:1510.05245)** — lost-photon hardness result;
+  HARD-specific, not a trainability claim.
+- **arXiv:2510.24137 (Park & Oh)** — MPS-simulability/noisy-IQP hardness
+  result; HARD-specific.
+- **arXiv:2405.01395** — two-photon gate construction paper; ARB-specific,
+  makes no trainability or hardness claim of its own.
+- **Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999)** — foundational
+  noiseless-IQP hardness threshold; no trainability claim.
+- **Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808)** — depolarizing-noise
+  hardness threshold; HARD-specific, no direct trainability claim of its
+  own.
+
+### Cross-reference: Herbst et al.'s anticoncentration-tradeoff prediction
+
+`docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section cites
+Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) for a formal result:
+circuits whose output distributions anticoncentrate are predicted to have
+*both* increased classical-simulability-under-noise (the hardness side)
+and increased MMD-type-loss concentration (the trainability side) — the
+two effects are predicted to co-occur, not trade off against each other.
+
+**TRAIN's own measured facts, stated plainly:** at Phase 17's original
+fixed bandwidth (`SIGMA=0.1`), both `uniform`-init cells (`weight1` and
+`mixed`) show an exponential gradient-decay signature (R²=0.999 and
+R²=0.910 respectively) — exactly the concentrated-loss-landscape signature
+Herbst et al.'s framework predicts should accompany anticoncentration.
+TRAIN-09's bandwidth-sensitivity follow-up found this signature is **not**
+robust across a wider sigma grid: both cells' "exp" verdict survives only
+near the original bandwidth (sigma in {0.03, 0.1}) and flips to
+"inconclusive" at intermediate sigma (0.3, 1.0), with `weight1/uniform`
+non-monotonically re-emerging as "exp" at high sigma while `mixed/uniform`
+does not. This caveat must be stated alongside the headline exponential-decay
+result, not in its place.
+
+**What TRAIN's own dataset cannot do:** TRAIN never varies loss (`eta`) at
+all — Phase 17/17.1's entire sweep is run at `eta=1` (no photon loss),
+varying only `n` and the bandwidth/init hyperparameters. Herbst et al.'s
+prediction is specifically about how anticoncentration (and its knock-on
+effects on both hardness and MMD-loss concentration) changes as loss
+increases — a claim about the `eta` axis. TRAIN's data alone cannot
+confirm or refute that axis; it can only establish that a genuine (if
+bandwidth-fragile) concentration signature exists for `uniform` init at
+zero loss, which is a necessary precondition for the co-occurrence
+prediction to be interesting here, not a test of the prediction itself.
+
+**Pointer to the HARD-side half:** `docs/hardness-under-loss-study.md`'s
+own equivalent cross-reference note (added by a parallel plan in this
+phase) reports the measured `eta`-side trend directly: `alpha(eta)`
+decreases (the output becomes *more* anticoncentrated) as loss increases,
+for both weight-1 and mixed scope — the reverse of `docs/iqp-baseline.md`'s
+original speculative guess, and, under Herbst et al.'s framework, implying
+trainability should get worse (not better) as loss increases. See that
+document for the measured HARD-side trend and verdict; it is not restated
+here.
+
+**Combined statement, hedged appropriately:** TRAIN and HARD do not share
+a common independent variable — TRAIN sweeps `n` at fixed `eta=1`; HARD
+sweeps `eta` at small fixed `n`. Neither phase varies both together on one
+dataset, so this project cannot directly test Herbst et al.'s co-occurrence
+prediction with a single combined experiment. What can be said,
+qualitatively: TRAIN's zero-loss data shows a genuine (if
+bandwidth-sensitive) untrainability signature for `uniform` init, and
+HARD's data shows anticoncentration increasing (not decreasing) with loss —
+under Herbst et al.'s framework taken together, these two separately-measured
+facts are not in tension with each other (nothing in either dataset
+contradicts the other), but this is a weak, interpretive alignment between
+two independently-measured trends across two different axes, not a joint
+confirmation of the prediction. Per this project's `CLAUDE.md` convention
+(Claude organizes and computes; the owner reviews and owns interpretive
+conclusions), this combined reading is offered as an organized statement of
+the measured facts, not asserted as a settled conclusion — distinguishing
+what's actually consistent (no contradiction found) from what remains
+untested (the actual eta-dependence of TRAIN's own gradient variance, never
+measured in this project).
