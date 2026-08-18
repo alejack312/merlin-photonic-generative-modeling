@@ -77,6 +77,24 @@ Claude Code assisted with implementation and verification throughout this projec
 
 The paper trail is left candid rather than cleaned up for presentation. [`NOTES.md`](NOTES.md) includes a case where my first attempt at explaining the training loop's batch-averaging step was wrong, and the correction is recorded instead of quietly fixed. [`DESIGN_DECISIONS.md`](DESIGN_DECISIONS.md) documents the investigation into why the generated ring structure was fragmenting (a mismatch between the circuit's raw output indices and the spatial bins). It includes the point where a proposed fix, just making the circuit bigger, was flagged as counterproductive before anyone touched the code, and it states the honest limits of the fix that was used instead. That trail is what shows the understanding behind this project is mine, not just the code.
 
+## v3.0: IQP Circuit Study
+
+After the v1.0 generator above, this project extended into a v3.0 milestone that studies the same circuit family (an IQP-style photonic ansatz) from two angles: trainability (does it show barren-plateau-style gradient behavior as it scales?) and hardness-under-loss (does the sampling-hardness argument survive realistic photon loss?) — plus a continuously-tunable weight-2 gate and an independent Julia-based numeric verification path.
+
+**Trainability.** An exponential gradient-variance-decay signature looked real at one kernel bandwidth (weight1/uniform-init R²=0.999, mixed/uniform-init R²=0.910), but a follow-up sweep across six bandwidths showed the signature is not robust to that choice. That's a genuine negative result, reported as measured rather than smoothed into a clean story.
+
+**Hardness under loss.** TVD-to-lossless rises and TVD-to-classical-baselines fall as photon loss increases, as expected. The anticoncentration measurement went the other way: photon loss makes these circuits *more* anticoncentrated, not less — the reverse of an earlier internal guess, corrected once real data came in. No photon-loss-to-depolarizing-rate translation was attempted, by deliberate scope decision, not because one was tried and failed.
+
+Supporting this pair of findings: a continuously-tunable weight-2 gate (ARB-01/ARB-02), verified to ~1e-7 against measurement, and four independently-built Julia cross-checks against the Python results, all four GO.
+
+**Links out**
+
+- [Full case study](https://alejandrojackson.dev/case-studies/merlin-quantum) — the complete external-facing story
+- [`docs/technical-findings.md`](docs/technical-findings.md) — the full internal write-up, every number traceable to its source script/CSV/test
+- Source docs: [`docs/trainability-study.md`](docs/trainability-study.md), [`docs/hardness-under-loss-study.md`](docs/hardness-under-loss-study.md), [`docs/iqp-photonic-encoding.md`](docs/iqp-photonic-encoding.md), [`docs/julia-cross-check-study.md`](docs/julia-cross-check-study.md)
+
+The same self-explanation rule from [Process & AI Use](#process--ai-use) applied throughout v3.0 — see the case study for a concrete example: the trainability write-up's literature cross-reference is a transcript of my own reasoning, not Claude's summary of it.
+
 ## License
 
 [MIT](LICENSE)
