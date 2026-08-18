@@ -51,12 +51,12 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 
 ### Technical Write-Up (WRITE)
 
-- [ ] **WRITE-01**: Methodology-stated-before-results structure for each of the trainability, hardness-under-loss, and ARB-01 sections
-- [ ] **WRITE-02**: Explicit comparison table against each named literature baseline (McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule, **plus 6 papers added 2026-08-12 via fresh literature read: arXiv:1504.07999, arXiv:1610.01808, arXiv:2305.02881, arXiv:2502.07889, arXiv:2503.02934, arXiv:2512.24801** — listed individually in `ROADMAP.md`'s Phase 20 success criterion 2) — consistent with / inconsistent with / silent relative to, stated per baseline
-- [ ] **WRITE-03**: Honest negative/inconclusive framing wherever the data warrants it, in the same direct language this project already used for GEN-07/LIT-04/Phase 7's neighbor-locality verdict
-- [ ] **WRITE-04**: Explicit "what this does/doesn't establish" scope paragraph for each of the trainability, hardness-under-loss, and ARB-01 sections
-- [ ] **WRITE-05**: Self-explanation checkpoint transcripts recorded in the write-up itself (owner's own interpretation transcribed first, per CLAUDE.md's standing rule)
-- [ ] **WRITE-06**: Every reported number traceable to a specific script/test/notebook cell, with a fixed seed where randomness is involved
+- [x] **WRITE-01**: Methodology-stated-before-results structure for each of the trainability, hardness-under-loss, and ARB-01 sections
+- [x] **WRITE-02**: Explicit comparison table against each named literature baseline (McClean et al., Aaronson-Brod, arXiv:2510.24137, arXiv:2405.01395, `docs/iqp-baseline.md`'s own empirical rule, **plus 6 papers added 2026-08-12 via fresh literature read: arXiv:1504.07999, arXiv:1610.01808, arXiv:2305.02881, arXiv:2502.07889, arXiv:2503.02934, arXiv:2512.24801** — listed individually in `ROADMAP.md`'s Phase 20 success criterion 2) — consistent with / inconsistent with / silent relative to, stated per baseline
+- [x] **WRITE-03**: Honest negative/inconclusive framing wherever the data warrants it, in the same direct language this project already used for GEN-07/LIT-04/Phase 7's neighbor-locality verdict
+- [x] **WRITE-04**: Explicit "what this does/doesn't establish" scope paragraph for each of the trainability, hardness-under-loss, and ARB-01 sections
+- [x] **WRITE-05**: Self-explanation checkpoint transcripts recorded in the write-up itself (owner's own interpretation transcribed first, per CLAUDE.md's standing rule)
+- [x] **WRITE-06**: Every reported number traceable to a specific script/test/notebook cell, with a fixed seed where randomness is involved
 - [ ] **WRITE-07**: External-facing framing pass (README/case-study level), following this project's established "mechanism-not-magic, ownership-forward" convention — separate from the candid internal write-up
 
 ## v2 Requirements
@@ -124,12 +124,12 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | VERIFY-02 | 19 - Independent Julia Cross-Checks | Complete |
 | VERIFY-03 | 19 - Independent Julia Cross-Checks | Complete |
 | VERIFY-04 | 19 - Independent Julia Cross-Checks | Complete |
-| WRITE-01 | 20 - Technical Write-Up | Pending |
-| WRITE-02 | 20 - Technical Write-Up | Pending |
-| WRITE-03 | 20 - Technical Write-Up | Pending |
-| WRITE-04 | 20 - Technical Write-Up | Pending |
-| WRITE-05 | 20 - Technical Write-Up | Pending |
-| WRITE-06 | 20 - Technical Write-Up | Pending |
+| WRITE-01 | 20 - Technical Write-Up | Complete |
+| WRITE-02 | 20 - Technical Write-Up | Complete |
+| WRITE-03 | 20 - Technical Write-Up | Complete |
+| WRITE-04 | 20 - Technical Write-Up | Complete |
+| WRITE-05 | 20 - Technical Write-Up | Complete |
+| WRITE-06 | 20 - Technical Write-Up | Complete |
 | WRITE-07 | 21 - External-Facing Framing Pass | Pending |
 
 **Coverage:**
