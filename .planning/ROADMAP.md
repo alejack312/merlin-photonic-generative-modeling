@@ -278,7 +278,7 @@ Plans:
 
 Plans:
 - [ ] 20-01-PLAN.md — TRAIN-07 self-explanation checkpoint + TRAIN literature table + Herbst cross-reference note (docs/trainability-study.md)
-- [ ] 20-02-PLAN.md — HARD literature table + Herbst cross-reference note + stale header fix (docs/hardness-under-loss-study.md)
+- [x] 20-02-PLAN.md — HARD literature table + Herbst cross-reference note + stale header fix (docs/hardness-under-loss-study.md)
 - [x] 20-03-PLAN.md — ARB-01/ARB-02 scope subsection + literature table (docs/iqp-photonic-encoding.md)
 - [ ] 20-04-PLAN.md — docs/technical-findings.md synthesis doc (mirrors all three tables, links to source docs)
 
