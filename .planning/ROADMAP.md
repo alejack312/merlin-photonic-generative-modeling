@@ -277,10 +277,12 @@ Plans:
 **Plans:** 4 plans (2 waves — 20-01/20-02/20-03 parallel in wave 1, three independent files (20-01 additionally carries TRAIN-07's mandatory self-explanation checkpoint as its Task 1); 20-04 depends on all three (wave 2, docs/technical-findings.md synthesis))
 
 Plans:
-- [ ] 20-01-PLAN.md — TRAIN-07 self-explanation checkpoint + TRAIN literature table + Herbst cross-reference note (docs/trainability-study.md)
+- [x] 20-01-PLAN.md — TRAIN-07 self-explanation checkpoint + TRAIN literature table + Herbst cross-reference note (docs/trainability-study.md)
 - [x] 20-02-PLAN.md — HARD literature table + Herbst cross-reference note + stale header fix (docs/hardness-under-loss-study.md)
 - [x] 20-03-PLAN.md — ARB-01/ARB-02 scope subsection + literature table (docs/iqp-photonic-encoding.md)
-- [ ] 20-04-PLAN.md — docs/technical-findings.md synthesis doc (mirrors all three tables, links to source docs)
+- [x] 20-04-PLAN.md — docs/technical-findings.md synthesis doc (mirrors all three tables, links to source docs)
+
+**Result: Complete — 4/4 plans shipped.** TRAIN-07's genuinely-open self-explanation gap was closed with the owner's own transcribed reasoning (Plan 20-01); all three source docs (`docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/iqp-photonic-encoding.md`) gained their own WRITE-02 literature comparison tables and, for TRAIN/HARD, a Herbst et al. cross-reference note satisfying success criterion 6; `docs/technical-findings.md` (Plan 20-04) mirrors all three tables and points at (without re-deriving) each source doc's scope statement, the Herbst cross-thread, and `docs/julia-cross-check-study.md`'s supplementary independent verification. WRITE-01 through WRITE-06 are all satisfiable from this phase's shipped artifacts.
 
 **Success criteria:**
 1. Methodology-stated-before-results structure exists for each of the trainability, hardness-under-loss, and ARB-01 sections.
