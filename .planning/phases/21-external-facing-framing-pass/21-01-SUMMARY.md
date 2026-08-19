@@ -177,5 +177,15 @@ This round was not triggered by a rejected checkpoint review — it's a new cont
 **Status:** returning to checkpoint again for final owner approval. Not yet marked "approved."
 
 ---
+
+## Checkpoint Approved (2026-08-19, same day)
+
+Owner reviewed round 4's final state and responded "approved." The checkpoint is closed. `alejandro-jackson`'s `main` remains 5 commits ahead of `origin/main` (`40889a1` → `efc3bf1` → `971c0f0` → `2f5ec70` → `28ad9dc`), all local, none pushed — push stays a separate, explicit owner action outside this plan's scope, per the plan's original lock (the repo already had one unrelated commit ahead of origin before this plan started).
+
+The pre-existing uncommitted hero-subtitle edit, the modified `public/resume/quantum.pdf`, and the untracked `image.png` remain uncommitted in `alejandro-jackson`'s working tree as of approval — none are this plan's concern and none were touched across any round.
+
+**Plan 21-01 is complete.** All 5 must-haves from `21-01-PLAN.md` are satisfied by the final page state: v3.0 content reads as one continuous story with v1.0 (TL;DR, v2.0-2.1 bridge, TRAIN/HARD findings, supporting evidence, Bigger Picture, all inserted with consistent dark alternation); TRAIN-09/TRAIN-10/HARD-04's negative/inconclusive verdicts are stated as plainly as `docs/technical-findings.md` states them, including the corrected small-angle bandwidth-grid nuance found during round 3's fact-check; the counter-intuitive HARD alpha(eta) finding is presented as a genuine, verified, direction-correcting result; the Role section names the TRAIN-07 transcribed-reasoning mechanism concretely; `npm run lint`/`npm run build` both pass clean as of the final commit.
+
+---
 *Phase: 21-external-facing-framing-pass*
 *Completed: 2026-08-19*
