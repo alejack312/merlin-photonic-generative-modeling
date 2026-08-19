@@ -57,7 +57,7 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 - [x] **WRITE-04**: Explicit "what this does/doesn't establish" scope paragraph for each of the trainability, hardness-under-loss, and ARB-01 sections
 - [x] **WRITE-05**: Self-explanation checkpoint transcripts recorded in the write-up itself (owner's own interpretation transcribed first, per CLAUDE.md's standing rule)
 - [x] **WRITE-06**: Every reported number traceable to a specific script/test/notebook cell, with a fixed seed where randomness is involved
-- [ ] **WRITE-07**: External-facing framing pass (README/case-study level), following this project's established "mechanism-not-magic, ownership-forward" convention — separate from the candid internal write-up
+- [x] **WRITE-07**: External-facing framing pass (README/case-study level), following this project's established "mechanism-not-magic, ownership-forward" convention — separate from the candid internal write-up
 
 ## v2 Requirements
 
@@ -130,7 +130,7 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | WRITE-04 | 20 - Technical Write-Up | Complete |
 | WRITE-05 | 20 - Technical Write-Up | Complete |
 | WRITE-06 | 20 - Technical Write-Up | Complete |
-| WRITE-07 | 21 - External-Facing Framing Pass | Pending |
+| WRITE-07 | 21 - External-Facing Framing Pass | Complete |
 
 **Coverage:**
 - v1 requirements: **37 total** (TRAIN: 10, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7). Note: this file's summary line previously stated "34 total" then corrected to "35 total" (8+7+9+4+7=35, arithmetic-error fix during roadmap creation); now 37 following the 2026-08-12 addition of TRAIN-09/TRAIN-10 (see below) — a real scope addition, not an arithmetic correction.
@@ -139,4 +139,5 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-12 (later same day) — added TRAIN-09 and TRAIN-10, owner-authorized follow-up experiments to Phase 17's trainability study, discovered via a fresh direct read of 8 literature papers (owner's explicit instruction not to rely on the sibling project's secondhand vault notes). TRAIN-09 tests whether Phase 17's fixed MMD bandwidth (not just circuit/init) is itself sufficient to produce the measured exponential-decay signature (Rudolph et al., arXiv:2305.02881). TRAIN-10 tests a literature-sourced data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) as a real alternative to the inconclusive `small_angle` scheme. Both mapped to a new inserted phase, 17.1 (see ROADMAP.md), rather than reopening the already-shipped, already-verified Phase 17 itself. Earlier same-day update: traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; flagged by gsd-verifier during Phase 17's own verification pass, fixed same day). Dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) remains explicitly supplementary and separate from TRAIN-09/10.*
+*Last updated: 2026-08-19 — WRITE-07 (Phase 21, External-Facing Framing Pass) marked Complete. All 37 v1 requirements across the v3.0 milestone are now Complete — 37/37, 0 Pending.*
+*Prior update: 2026-08-12 (later same day) — added TRAIN-09 and TRAIN-10, owner-authorized follow-up experiments to Phase 17's trainability study, discovered via a fresh direct read of 8 literature papers (owner's explicit instruction not to rely on the sibling project's secondhand vault notes). TRAIN-09 tests whether Phase 17's fixed MMD bandwidth (not just circuit/init) is itself sufficient to produce the measured exponential-decay signature (Rudolph et al., arXiv:2305.02881). TRAIN-10 tests a literature-sourced data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) as a real alternative to the inconclusive `small_angle` scheme. Both mapped to a new inserted phase, 17.1 (see ROADMAP.md), rather than reopening the already-shipped, already-verified Phase 17 itself. Earlier same-day update: traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; flagged by gsd-verifier during Phase 17's own verification pass, fixed same day). Dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) remains explicitly supplementary and separate from TRAIN-09/10.*
