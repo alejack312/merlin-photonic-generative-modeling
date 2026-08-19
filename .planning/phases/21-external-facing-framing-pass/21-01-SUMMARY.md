@@ -96,5 +96,37 @@ None - no external service configuration required.
 - No blockers. Once the owner approves the rendered page, Phase 21 and the v3.0 milestone (WRITE-07, the project's last v1 requirement) are ready to be declared complete.
 
 ---
+
+## Checkpoint-Feedback Continuation (2026-08-19)
+
+The original checkpoint review above was not an approval — the owner reviewed the rendered page and identified six real content gaps, not tone/accuracy nits. This section documents the continuation that closed them. This is an append to the existing SUMMARY above, not a new plan or a rewrite of it; the original Tasks 1+2 content (the two v3.0 Section blocks, the extended Role QuoteBlock) is untouched except for the one Fact-set-E sentence noted below.
+
+**Owner feedback (verbatim, 6 items):**
+1. The merlin case study is not featured on the home page.
+2. The hero description wasn't updated for v2.0/2.1/3.0.
+3. The tools/badges list didn't include Julia, Forge, etc.
+4. "What I'd Do Next" didn't include anything about v2.0/2.1/3.0.
+5. No TL;DR for v2.0/2.1/3.0.
+6. Why is exp R²=0.000 for mixed/small_angle? (answered directly in chat, required no code change — but the existing "Key insight" callout was extended with one clarifying sentence so the page itself doesn't leave the number unexplained.)
+
+**Fixes applied, in `alejandro-jackson` (two files):**
+
+- **`src/pages/index.tsx`:** Added a `blue` entry to `accentClasses` (matching `merlin-quantum.tsx`'s own `AccentColor = "blue"`) and a new first entry in `featuredCaseStudies` for MerLin Photonic Generative Modeling — title, 3 keywords (MerLin, Perceval, Julia), one-sentence outcome naming both the v1.0 generator and the v3.0 "construction that didn't exist in the literature before" claim, link, `accent: "blue"`, and 3 metrics (`ring_mass=0.691`, `Trainability=R²=0.999*`, `Julia checks=4/4 GO`). Placed first in the array as the most recent/significant project. Kept the `R²=0.999*` asterisk (rather than dropping it) since the case-study page itself explains the bandwidth-fragility caveat in its own "Key insight" callout — the asterisk is a legitimate forward-pointer, not an unexplained hedge at card scale. Also fixed a now-stale line ("Five engineering projects...") to "Six engineering projects..." since the section subtitle would otherwise contradict the 6 cards now rendered (Rule 1 — bug, not in original scope but directly caused by this change).
+- **`src/pages/case-studies/merlin-quantum.tsx` hero (Fact sets B/C):** Extended the `CaseStudyHero` `subtitle` to keep the existing v1.0 MMD²/no-discriminator sentence and add a second sentence naming the v3.0 trainability + hardness-under-loss study and its "didn't exist in the literature before" claim. Added `"Julia"` and `"Forge"` to the `badges` array (8 badges total now), grouped near their thematically closest existing badges (Julia next to Perceval; Forge at the end).
+- **Two new `Section` blocks (Fact set D)**, inserted between the existing "Technical Depth" section and the (already-shipped) "v3.0: Trainability & Hardness Under Loss" section — preserving `dark` alternation exactly as specified (Technical Depth `dark` → new TL;DR *not* `dark` → new bridge `dark` → existing TRAIN/HARD *not* `dark`, unchanged → existing Supporting Evidence `dark`, unchanged → Role, unchanged):
+  - **"TL;DR: v2.0 → v3.0"** — a single `CalloutBox`, matching the existing v1.0 TL;DR section's exact pattern, framing v2.0 (IQP→photonic mapping), v2.1 (weight-2 gate), and v3.0 (trainability + hardness questions) as one continuous story, and stating the literature-search finding that this discrete Fock-space IQP construction did not previously exist (the one existing "IQP + photonics" paper builds hardness in a different, continuous-quadrature formalism).
+  - **"v2.0-2.1: IQP → Photonic Encoding & Weight-2 Gate"** — prose covering what IQP circuits are, the v2.0 encoding (TVD ~1e-16 vs. exact reference), the v2.1 weight-2 heralded-CZ gate (2/27 herald rate, TVD=2.6e-15, 118/118 tests green), and the "genuinely new, not previously published" claim — plus a new 3-row `DataTable` (`v2BridgeData` const) summarizing the milestone/what-it-built/result table specified in Fact set D. Confirmed the later Supporting Evidence section's "extending the fixed-angle heralded-CZ gate already used elsewhere on this page" sentence now correctly resolves to this new section (that sentence was left unedited, per instructions).
+- **"Key insight" callout extension (Fact set E):** added one sentence after the existing TRAIN-09 sigma-grid text, explaining that the mixed/small_angle R²≈0.000 cell isn't a data error — with only 4 points and a near-zero-magnitude init, the exponential fit explained essentially none of the variance, which is itself the evidence behind that cell's "inconclusive" label. No other part of that callout, or the section around it, was touched.
+- **"What I'd Do Next" (Fact set F):** restructured the single flat bulleted list into two labeled groups ("v1.0 Follow-Ups" / "v3.0 Follow-Ups", styled with the same font-mono uppercase-tracking label pattern used elsewhere on the page) since the list was growing to 12 items and a flat list would have buried the new v3.0-relevant items among unrelated v1.0 ones. The original 7 v1.0 items are unchanged, unreordered, and un-reworded. Appended the 5 specified v3.0 items verbatim (trainability sweep past n=6/7; cross-testing the tunable gate under loss; pushing the mixed-generator sweep past n=4; distinguishability/g² noise as a second axis; the deliberately-not-attempted eta-to-depolarizing-rate translation).
+
+**Verification:**
+- `npm run lint` in `alejandro-jackson`: clean — zero warnings or errors in either modified file (`merlin-quantum.tsx`, `index.tsx`); the only warnings reported repo-wide are pre-existing, in unrelated files (`InfiniteCarousel.tsx`, `about.tsx`, `iqp-mmd.tsx`, `contact.tsx`), untouched by this change.
+- `npm run build` in `alejandro-jackson`: clean — `next build` exited 0, "Compiled successfully in 34.1s," all 42/42 static pages generated with zero build-time errors. `/case-studies/merlin-quantum` grew from 9.91 kB/187 kB First Load JS (original checkpoint) to 11.5 kB/189 kB; the home page `/` (now rendering 6 featured cards instead of 5) is 5.97 kB/196 kB. No regression to any other route.
+
+**Commit:** one combined commit for all of the above (home page + case-study page), continuing this plan's original override of GSD's default one-commit-per-task convention — both files are one continuous "close the checkpoint feedback gaps" content addition. `alejandro-jackson`'s `main` is now 3 commits ahead of `origin/main`: pre-existing `40889a1`, this plan's original `efc3bf1`, plus this continuation's new commit. Still not pushed — push remains a separate, explicit owner action outside this plan's scope.
+
+**Status:** returning to checkpoint again for final owner approval. Not yet marked "approved" — this continuation addresses the identified gaps but has not itself been re-reviewed by the owner.
+
+---
 *Phase: 21-external-facing-framing-pass*
 *Completed: 2026-08-19*
