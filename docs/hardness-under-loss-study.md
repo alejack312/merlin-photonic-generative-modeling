@@ -21,6 +21,28 @@ comparison table`) and a cross-reference note against Herbst et al.'s
 anticoncentration-tradeoff prediction (`### Cross-reference: Herbst et al.'s
 anticoncentration-tradeoff prediction`, at the end of this document).
 
+## Scope precondition: only the mixed scope is a hardness candidate
+
+**Read this before interpreting any number below.** IQP's conjectured
+sampling hardness comes from the correlations that the `ZZ` (weight-2)
+terms create between qubits. Strip those out and nothing hard remains —
+not "hard but degraded," just **absent by construction**.
+
+The `weight1` scope has no entangling gate, so its output distribution is
+**exactly a product distribution**: `P(x) = prod_k cos^2(theta_k)` or
+`sin^2(theta_k)` per bit, verified against the analytic form to `2.2e-16`
+at every swept size `n=2..6`. A product distribution over `n` bits is
+sampled classically in `O(n)` time by flipping `n` independent biased
+coins. There is no hardness there to preserve, erode, or measure.
+
+Concretely, of this phase's 56 measured rows, **only the 21 `mixed`-scope
+rows bear on the hardness question at all**; the 35 `weight1` rows are a
+control. They are a genuinely useful control — the known closed form is
+what makes the loss channel independently checkable (it is how
+`survival = eta^n` was confirmed exactly) — but a `weight1` TVD or
+anticoncentration value is not evidence about sampling hardness, in either
+direction, and is not presented as such anywhere in this document.
+
 ## Methodology
 
 **Loss mechanism.** Photon loss is applied via `pcvl.LC(1 - eta)` component

@@ -112,6 +112,18 @@ are silent here, per that document's own scoping decision.
 
 ## Hardness under loss (STUDY-02, HARD-01..07)
 
+**Scope precondition — only the mixed scope is a hardness candidate.**
+IQP's conjectured sampling hardness comes from the correlations the `ZZ`
+(weight-2) terms create between qubits. Strip those out and nothing hard
+remains — not "hard but degraded," just **absent by construction**. The
+`weight1` scope has no entangling gate, so its output is *exactly* a
+product distribution (`P(x) = prod_k cos^2/sin^2(theta_k)`, verified
+analytically to `2.2e-16` at every swept `n=2..6`), samplable classically
+in `O(n)`. Of the 56 measured rows, only the 21 `mixed` rows bear on
+hardness; the 35 `weight1` rows are a control that makes the loss channel
+independently checkable. Full statement:
+[`docs/hardness-under-loss-study.md`](hardness-under-loss-study.md#scope-precondition-only-the-mixed-scope-is-a-hardness-candidate).
+
 **Methodology summary.** Photon loss is applied via `pcvl.LC(1-eta)`
 component insertion, front-loaded before the rest of the circuit, with an
 explicit `proc.min_detected_photons_filter(0)` call, never
