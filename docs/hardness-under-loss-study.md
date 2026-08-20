@@ -429,14 +429,41 @@ numeric theta draws. Maximum mean differences are `0.1434` for TVD to
 uniform, `0.05382` for TVD to the product-of-marginals baseline, and
 `6.5179` for anticoncentration alpha (this last figure regenerated
 2026-08-20 with the corrected, renormalized alpha; it was `5.7774` under
-the withdrawn un-renormalized computation). This is expected from the scope of the
-existing MerLin implementation: it is a separately validated dual-rail
-parallel circuit family, not the literal polarization circuit or an asserted
-pointwise theta-to-distribution identity. The result therefore supports a
-narrow, useful conclusion: MerLin reproduces Phase 18's **uniform-loss
-response and ancilla-loss/herald compounding** to numerical precision, while
-encoding-dependent lossless distribution shape remains genuinely different
-and must not be presented as backend-identical.
+the withdrawn un-renormalized computation).
+
+**Sharpened 2026-08-20 — the reason for that disagreement is now
+characterized, not just attributed to "a different encoding."** The two
+backends implement the *same* distribution family; they differ by an
+affine reparametrization of the angle. Measured directly:
+
+- `P_dual-rail(bit_k = 1) = cos^2(theta_k / 2)`, against
+  `P_polarization(bit_k = 1) = sin^2(theta_k)`. Verified over 9 random
+  draws spanning `n=2,3,4`, max error `1.2e-7` (float32 backend
+  precision).
+- Equivalently `theta_eff = pi/2 - theta/2`: a half-angle plus a
+  bit-label complement.
+- Reparametrizing accordingly (`theta_dr = 2*arccos|sin theta_pol|`) makes
+  the two backends' full output distributions **identical** — max error
+  `5.5e-8` over 6 draws spanning `n=2,3,4`.
+
+A plausible mechanism, consistent with the components each uses but not
+separately verified here: `WP(theta,0) = diag(e^{i theta}, e^{-i theta})`
+imposes a *relative* phase of `2*theta` between the polarization modes,
+while `PS(theta)` on one rail of a dual-rail pair imposes a relative phase
+of `theta` — a factor of two — with the residual `pi/2` offset amounting
+to a `0`/`1` label swap.
+
+This **strengthens** the cross-check rather than weakening it. The earlier
+framing ("encoding-dependent shape remains genuinely different") is true
+but understates the result: the backends are not merely two loosely
+related circuit families that happen to agree on loss response, they are
+the same physics under two angle conventions. Their agreement on
+uniform-loss response and ancilla-loss/herald compounding is therefore a
+stronger check than previously claimed, and their pointwise output-shape
+disagreement is fully accounted for rather than left as an unexplained
+residual. What remains true and unchanged: the two must not be presented
+as backend-identical *at matched numeric theta values*, because at matched
+numeric theta they are evaluating different physical states.
 
 ## HARD-04/HARD-06: Positioning and Scope Statement (Plan 18-08)
 
