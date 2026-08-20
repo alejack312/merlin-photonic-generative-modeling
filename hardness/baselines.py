@@ -90,5 +90,31 @@ def anticoncentration_alpha(dist, n):
     Known closed-form extremes: alpha=1.0 for the uniform distribution
     (maximally anticoncentrated); alpha=2**n for a delta/point-mass
     distribution (maximally concentrated).
+
+    `dist` is RENORMALIZED to sum to 1.0 before the computation. This is
+    load-bearing, not defensive tidying: alpha is a shape statistic, and
+    the extremes above (the alpha>=1 floor in particular) hold only for a
+    normalized distribution. Passing a sub-normalized distribution -- e.g.
+    a lossy distribution whose mass has leaked to undetected/out-of-subspace
+    outcomes -- makes alpha scale with the SQUARE of the surviving mass and
+    produces values below 1.0, which are not interpretable as BMS's
+    parameter at all (their alpha has a hard floor of 1.0).
+
+    Correction (2026-08-20): Phase 18's loss sweep originally called this
+    on the raw, un-renormalized lossy distribution, so the reported
+    alpha(eta) decayed as exactly eta**(2n) -- a pure survival-probability
+    artifact that was misread as "photon loss makes these circuits more
+    anticoncentrated." 33 of 56 shipped rows reported alpha < 1.0, below
+    the theoretical floor. Conditioned on detection (i.e. renormalized, as
+    here), this circuit family's anticoncentration is EXACTLY INVARIANT
+    under uniform photon loss, because uniform per-mode loss preserves the
+    surviving distribution's shape exactly. See
+    docs/hardness-under-loss-study.md's HARD-05 section.
     """
-    return (2.0**n) * math.fsum(p**2 for p in dist.values())
+    total = math.fsum(dist.values())
+    if total <= 0.0:
+        raise ValueError(
+            f"anticoncentration_alpha requires a distribution with positive "
+            f"total mass; got sum(dist.values())={total!r}"
+        )
+    return (2.0**n) * math.fsum((p / total) ** 2 for p in dist.values())
