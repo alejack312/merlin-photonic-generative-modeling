@@ -11,7 +11,7 @@ in [`docs/trainability-study.md`](trainability-study.md),
 introduce new numbers, re-run any analysis, or re-derive any of the
 reasoning those three documents already contain. Every table below is
 mirrored from its source document; every claim is traceable to the same
-script/CSV/test its source document already cites. Per `20-CONTEXT.md`'s
+script/CSV/test its source document already cites. Per [`20-CONTEXT.md`](../.planning/phases/20-technical-write-up/20-CONTEXT.md)'s
 locked scope, this is an internal/candid technical document; external-facing
 reframing is Phase 21's separate job, not pulled forward here.
 
@@ -121,19 +121,42 @@ polarization-annotated circuits. A fixed 7-point eta grid
 scopes (weight1: n=2-6; mixed weight-1+weight-2: n=2-4), 5 draws/cell,
 `theta ~ Uniform(0,2*pi)`. Two classically-easy baselines
 (`uniform`, `product_of_marginals`) are tracked separately, never collapsed
-into a single crossover threshold, per `18-CONTEXT.md`'s explicit lock.
+into a single crossover threshold, per [`18-CONTEXT.md`](../.planning/phases/18-hardness-under-loss-assessment/18-CONTEXT.md)'s explicit lock.
 Full methodology:
 [`docs/hardness-under-loss-study.md#methodology`](hardness-under-loss-study.md#methodology).
 
 **Headline results.** For every n and both scopes, `tvd_to_lossless` rises
 monotonically as eta decreases (from ~0.01-0.03 at the near-lossless anchor
-eta=0.99 to ~0.50 at eta=0.05), while `tvd_to_uniform` and
-`tvd_to_product_marginals` fall over the same range, converging with
-`tvd_to_lossless` near ~0.50 by eta=0.05. Anticoncentration
-`alpha(eta) = 2^n * sum(p_x^2)` decreases monotonically as eta decreases for
-both scopes, crossing below the `alpha=1` uniform-reference line somewhere
-in the measured grid at every n, i.e., **photon loss makes this project's
-own circuits MORE anticoncentrated, not less.** For the weight-2 (mixed)
+eta=0.99 to ~0.50 at eta=0.05), and `tvd_to_product_marginals` also rises,
+essentially monotonically, in every cell -- `tvd_to_uniform`'s direction
+is cell-dependent (falls toward the floor, with a dip below 0.50, when the
+lossless target starts far above 0.50; rises when it starts below), but
+all three converge near ~0.50 by eta=0.05 for the same reason: TVD between
+a raw distribution whose surviving mass is shrinking under loss and any
+fixed, fully-normalized reference converges to 0.50 regardless of which
+reference is used. This is substantially a property of the metric under
+shrinking survival probability, not evidence the surviving signal is
+becoming classically simulable -- among successfully-detected shots, the
+distribution's shape is exactly preserved under loss (verified to
+floating-point precision). Full mechanism, including the "Why every curve converges to ~0.50"
+explanation:
+[`docs/hardness-under-loss-study.md`'s "HARD-05 results" section](hardness-under-loss-study.md#hard-05-results-tvd-vs-eta-weight-1-and-mixed).
+Anticoncentration
+`alpha(eta) = 2^n * sum(p_x^2)`, measured conditioned on detection, is
+**exactly invariant** under loss: constant across the full eta grid, to
+floating-point precision, in every measured cell and both scopes, always
+above the `alpha=1` floor. **Photon loss does not move this project's
+circuits toward or away from anticoncentration at all** -- the same
+shape-preservation fact above, seen through a second statistic.
+*Corrected 2026-08-20:* this section previously reported the opposite
+(alpha decreasing, "photon loss makes these circuits MORE anticoncentrated"),
+which was an artifact of computing alpha on the un-renormalized lossy
+distribution -- it decayed as exactly `eta^(2n)`, and 33 of 56 shipped rows
+reported `alpha < 1.0`, below BMS's hard theoretical floor. Code fixed
+(`hardness/baselines.py`, plus regression tests), all affected CSVs
+regenerated, full account in
+[`docs/hardness-under-loss-study.md`](hardness-under-loss-study.md#hard-05-results-tvd-vs-eta-weight-1-and-mixed).
+For the weight-2 (mixed)
 scope, loss is applied to all `2n+2` modes including both `heralded_cz`
 ancilla modes, and herald-success rate is measured through one real
 `Processor.probs()` call per cell: `herald_failure_prob` rises
@@ -222,7 +245,7 @@ establish" subsection](iqp-photonic-encoding.md#what-arb-01arb-02-doesdoesnt-est
 
 Full reasoning and citations: see
 [`docs/iqp-photonic-encoding.md`'s "Literature comparison table
-(WRITE-02)"](iqp-photonic-encoding.md#what-arb-01arb-02-doesdoesnt-establish).
+(WRITE-02)"](iqp-photonic-encoding.md#literature-comparison-table-write-02).
 Only one of the 11 named WRITE-02 baselines bears directly on ARB-01/ARB-02's
 actual subject (gate construction, success probability, postselection
 mechanics); the other 10 are trainability and/or hardness-under-noise
@@ -240,19 +263,26 @@ Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) predict that circuits
 whose output distributions anticoncentrate should show BOTH increased
 classical-simulability-under-noise (the hardness side) AND increased
 MMD-type-loss concentration (the trainability side): the two effects
-predicted to co-occur, not trade off. This project's own headline: **TRAIN's
+predicted to co-occur, not trade off. This project's own position: **TRAIN's
 zero-loss data shows a genuine (if bandwidth-fragile) untrainability
-signature for `uniform` init; HARD's data shows anticoncentration
-INCREASING (not decreasing) as loss increases**: the reverse of
-`docs/iqp-baseline.md`'s original 2026-08-12 speculative guess about which
-direction Phase 18 would find. Under Herbst et al.'s framework, this means
-training should, if anything, get worse (not better) as loss increases,
-opposite the original speculative conclusion.
+signature for `uniform` init; HARD's data shows anticoncentration is
+exactly INVARIANT under loss.** Since Herbst et al.'s prediction is keyed
+on anticoncentration actually varying, and the one axis this project sweeps
+(`eta`) does not move it at all, **this project's data is silent on their
+prediction** -- it neither supports nor contradicts it.
 
-TRAIN and HARD do not share a common independent variable: TRAIN sweeps
+*Corrected 2026-08-20:* this section previously reported that HARD's data
+showed anticoncentration INCREASING with loss, and concluded from that
+(via Herbst et al.'s framework) that training should get worse at higher
+loss. Both the premise and that downstream conclusion are withdrawn: the
+apparent increase was an un-renormalized-alpha artifact. See
+[`docs/hardness-under-loss-study.md`](hardness-under-loss-study.md#hard-05-results-tvd-vs-eta-weight-1-and-mixed).
+
+TRAIN and HARD also do not share a common independent variable: TRAIN sweeps
 `n` at fixed `eta=1`; HARD sweeps `eta` at small fixed `n`, so this project
 cannot directly test the co-occurrence prediction with one combined
-experiment. The full reasoning for each half, including this hedge, is
+experiment. That structural gap stands independently of the correction
+above. The full reasoning for each half, including this hedge, is
 recorded in the two source docs' own cross-reference notes, not re-derived
 here:
 [`docs/trainability-study.md`'s Herbst cross-reference note](trainability-study.md#cross-reference-herbst-et-als-anticoncentration-tradeoff-prediction)
@@ -270,7 +300,7 @@ loss API for the loss model): never a mechanical port of this project's
 Python/Perceval code, but circuits built from each library's own native
 primitives and idioms. All four legs (VERIFY-02 qubit-side, VERIFY-03
 weight-1, VERIFY-03 weight-2, VERIFY-04 loss model) reached a genuine GO
-verdict. This is supplementary evidence only, per `20-CONTEXT.md`'s
+verdict. This is supplementary evidence only, per [`20-CONTEXT.md`](../.planning/phases/20-technical-write-up/20-CONTEXT.md)'s
 explicit lock: its own numbers are not restated here and it is not forced
 into the TRAIN/HARD/ARB structure above; see the document itself for the
 full per-leg results.
@@ -317,5 +347,5 @@ document. This document's TRAIN-09/TRAIN-10 negative-result language,
 HARD-04's "no translation attempted" framing, and every honest
 negative/inconclusive verdict carried over from the three source documents
 were checked against those documents' own wording and read with the same
-unsoftened framing here, per `20-CONTEXT.md`'s explicit instruction not to
+unsoftened framing here, per [`20-CONTEXT.md`](../.planning/phases/20-technical-write-up/20-CONTEXT.md)'s explicit instruction not to
 re-narrate or soften Phase 17/17.1/18's honest findings.

@@ -749,14 +749,18 @@ zero loss, which is a necessary precondition for the co-occurrence
 prediction to be interesting here, not a test of the prediction itself.
 
 **Pointer to the HARD-side half:** `docs/hardness-under-loss-study.md`'s
-own equivalent cross-reference note (added by a parallel plan in this
-phase) reports the measured `eta`-side trend directly: `alpha(eta)`
-decreases (the output becomes *more* anticoncentrated) as loss increases,
-for both weight-1 and mixed scope; the reverse of `docs/iqp-baseline.md`'s
-original speculative guess, and, under Herbst et al.'s framework, implying
-trainability should get worse (not better) as loss increases. See that
-document for the measured HARD-side trend and verdict; it is not restated
-here.
+own equivalent cross-reference note reports the measured `eta`-side result
+directly: `alpha(eta)` is **exactly invariant** under loss, for both
+weight-1 and mixed scope, because uniform per-mode photon loss preserves
+the surviving distribution's shape exactly. Since Herbst et al.'s
+prediction is keyed on anticoncentration varying, and the `eta` axis does
+not move it, the HARD-side data is **silent** on that prediction rather
+than supporting or contradicting it. *Corrected 2026-08-20:* this pointer
+previously reported `alpha(eta)` decreasing with loss (and, via Herbst et
+al., implied trainability should worsen with loss) — that was an
+un-renormalized-alpha artifact, now fixed in code and regenerated across
+every affected dataset. See that document for the corrected result; it is
+not restated here.
 
 **Combined statement, hedged appropriately:** TRAIN and HARD do not share
 a common independent variable: TRAIN sweeps `n` at fixed `eta=1`; HARD
@@ -764,12 +768,14 @@ sweeps `eta` at small fixed `n`. Neither phase varies both together on one
 dataset, so this project cannot directly test Herbst et al.'s co-occurrence
 prediction with a single combined experiment. What can be said,
 qualitatively: TRAIN's zero-loss data shows a genuine (if
-bandwidth-sensitive) untrainability signature for `uniform` init, and
-HARD's data shows anticoncentration increasing (not decreasing) with loss;
-under Herbst et al.'s framework taken together, these two separately-measured
-facts are not in tension with each other (nothing in either dataset
-contradicts the other), but this is a weak, interpretive alignment between
-two independently-measured trends across two different axes, not a joint
+bandwidth-sensitive) untrainability signature for `uniform` init, while
+HARD's data shows anticoncentration is exactly invariant along the `eta`
+axis (corrected 2026-08-20; the previously-reported increase was an
+artifact). Taken together under Herbst et al.'s framework, these two facts
+are not in tension — but neither do they combine into support for the
+prediction: one axis shows a concentration signature at fixed zero loss,
+the other shows the keyed quantity not moving at all. This is a statement
+about what the two datasets do and don't jointly cover, not a joint
 confirmation of the prediction. Per this project's `CLAUDE.md` convention
 (Claude organizes and computes; the owner reviews and owns interpretive
 conclusions), this combined reading is offered as an organized statement of

@@ -208,17 +208,51 @@ loss, unlike the pure-weight1 case above.)
 **Stated plainly, both curves reported, no crossover-threshold judgment
 made here (per `18-CONTEXT.md`'s lock):** for every n and both scopes,
 `tvd_to_lossless` rises monotonically as eta decreases (from the
-near-lossless anchor at eta=0.99 to ~0.50 at eta=0.05, i.e. the lossy
-output becomes maximally distinguishable from the true lossless target).
-Over that same range, `tvd_to_uniform` and `tvd_to_product_marginals`
-**fall** as eta decreases, from their eta=0.99 values (well above zero,
-i.e. the lossless-ish output is still far from either classically-easy
-baseline) down toward the same ~0.50 floor that `tvd_to_lossless` rises
-to. In other words: as loss increases, the measured output distribution
-moves away from the true lossless target and simultaneously moves toward
-(and at the lowest measured eta, converges numerically with) both
-classically-easy baselines. Whether/where this constitutes "classically
-easy" is not asserted in this document.
+near-lossless anchor at eta=0.99 to ~0.50 at eta=0.05). `tvd_to_product_marginals`
+**also rises**, essentially monotonically, in every measured cell (e.g.
+weight1 n=6: 0.029 -> 0.500; mixed n=2: 0.109 -> 0.500) -- it starts near
+the near-lossless value (since `product_marginals` is built to approximate
+the true lossless target) and is diluted by the same mechanism that drives
+`tvd_to_lossless` upward. `tvd_to_uniform` does **not** follow one consistent
+direction: its trajectory depends on how far the true lossless target
+already sits from uniform. When the target is highly structured/peaked
+(`tvd_to_uniform` starts well above 0.50 -- weight1 n=6: 0.799; mixed n=4:
+0.560), the curve initially **falls** as loss dilutes that structure,
+typically dipping slightly *below* 0.50 before creeping back up to meet the
+floor (weight1 n=6: 0.799 -> 0.708 -> 0.623 -> 0.528 -> 0.482 -> 0.499 ->
+0.500; mixed n=4: 0.560 -> 0.484 -> 0.426 -> 0.403 -> 0.469 -> 0.498 ->
+0.500). When the target already sits close to uniform (starts below 0.50 --
+mixed n=2: 0.109), the curve simply **rises** toward the floor with no dip.
+Both patterns are the same underlying convergence, differing only in which
+side of 0.50 the starting point happens to be on.
+
+**Why every curve converges to ~0.50, and what it does and doesn't mean.**
+`total_variation_distance` (`iqp_photonic_encoding.py:1016`) is computed
+between the raw, un-renormalized lossy distribution and each comparison
+distribution, each independently normalized to sum to 1. The lossy
+distribution's own total mass -- the probability of the photon(s) landing in
+exactly the expected detected pattern -- shrinks as eta decreases (for
+weight1, exactly `eta^n`, verified against a closed form matching the CSV
+to 5 decimal places; for mixed, a messier function compounding ordinary
+photon loss with `heralded_cz`'s own herald-failure probability, verified
+directly against the sweep code). As that surviving mass shrinks toward
+zero, TVD to *any* fixed, normalized reference distribution converges to
+exactly 0.50 -- a property of the metric itself (`TVD(near-zero,
+normalized-anything) -> 0.5`), not something specific to the lossless
+target or either classically-easy baseline. This is why all three curves
+converge to the same floor.
+
+Separately, and independently verified (not assumed): among shots that
+*are* successfully detected, the relative shape of the distribution is
+**exactly preserved** under loss, to floating-point precision (`1.67e-16`
+at n=3, mixed scope; an exact closed form at n=6, weight1). Loss does not
+reshape or degrade the underlying correlational structure -- it only makes
+successful full-pattern detections rarer. Consequently, this project's
+measured TVD-to-baseline convergence toward 0.50 is substantially a
+property of shrinking survival probability under a raw, un-renormalized
+comparison, not direct evidence that the surviving signal itself is
+becoming classically simulable. Whether/where this constitutes
+"classically easy" is not asserted in this document.
 
 ## Anticoncentration results: alpha(eta)
 
@@ -228,22 +262,33 @@ easy" is not asserted in this document.
 normalization, arXiv:1610.01808: `Sigma p_x^2 <= alpha * 2^-n`), computed
 directly/exactly from the full materialized distribution at each
 `(n, eta)` cell (`hardness/baselines.py::anticoncentration_alpha`), never
-sampled or estimated. `alpha=1.0` is the uniform/maximally-anticoncentrated
-reference value (marked with a horizontal line in the plot above);
-`alpha=2**n` is the maximally-concentrated (delta-distribution) extreme.
+sampled or estimated. The distribution is renormalized to sum to 1.0 before
+the computation (i.e. `alpha` is measured **conditioned on detection**) --
+see that function's own docstring, and the 2026-08-20 correction note
+below, for why this is load-bearing rather than incidental. `alpha=1.0` is
+the uniform/maximally-anticoncentrated reference value (marked with a
+horizontal line in the plot above) and is a hard floor -- no normalized
+distribution can go below it; `alpha=2**n` is the maximally-concentrated
+(delta-distribution) extreme.
 
-Alpha values at the same representative eta points (from the tables
-above): **weight1** ranges from `alpha=2.78` (n=2, eta=0.99) up to
-`alpha=16.20` (n=6, eta=0.99) at low loss, collapsing to `alpha<1e-4` (well
-below the `alpha=1` uniform reference) at every n by eta=0.05. **mixed**
-ranges from `alpha=1.00` (n=2, eta=0.99, i.e. already at the uniform
-reference value) up to `alpha=3.20` (n=4, eta=0.99), collapsing similarly
-by eta=0.05. In both scopes, `alpha(eta)` decreases monotonically as eta
-decreases, and crosses below the `alpha=1` uniform-reference line
-somewhere in the measured grid at every n. The exact crossing eta is
-readable directly from `results/phase18_weight1_loss_sweep.csv` /
-`results/phase18_mixed_loss_sweep.csv`, not restated as a single number
-here since it varies by n.
+**The headline result is a null one: `alpha` does not move with `eta`.**
+For every measured cell, `alpha(eta)` is constant across the entire
+7-point eta grid to floating-point precision. **weight1**: `alpha=2.892345`
+(n=2), `2.599546` (n=3), `5.954770` (n=4), `7.954365` (n=5), `18.281873`
+(n=6). **mixed**: `alpha=1.0850` (n=2), `2.2634` (n=3), `3.6085` (n=4).
+Each is held constant across all 7 eta values, with a spread of `~1e-15`
+(at most `4.9e-7`, at weight1 n=6, reflecting accumulated floating-point in
+the larger Fock space). Every value sits above the `alpha=1` floor, and no
+curve crosses it at any eta. Exact per-cell values are in
+`results/phase18_weight1_loss_sweep.csv` /
+`results/phase18_mixed_loss_sweep.csv`.
+
+This invariance is not a coincidence of this circuit family's parameters:
+it follows directly from the shape-preservation result established in the
+HARD-05 section above. Uniform per-mode photon loss rescales the surviving
+distribution's total mass without altering the relative probabilities
+within it, and `alpha` is a pure shape statistic, so a channel that only
+rescales mass cannot move it.
 
 This is the exact quantity `docs/iqp-baseline.md`'s Bremner-Montanaro-Shepherd
 (arXiv:1610.01808) bullet identifies as the one BMS's Theorem 4 keys its
@@ -360,7 +405,9 @@ collapse to about `0.00087` at `eta=0.05`.
 The absolute output-shape metrics do **not** agree pointwise for identical
 numeric theta draws. Maximum mean differences are `0.1434` for TVD to
 uniform, `0.05382` for TVD to the product-of-marginals baseline, and
-`5.7774` for anticoncentration alpha. This is expected from the scope of the
+`6.5179` for anticoncentration alpha (this last figure regenerated
+2026-08-20 with the corrected, renormalized alpha; it was `5.7774` under
+the withdrawn un-renormalized computation). This is expected from the scope of the
 existing MerLin implementation: it is a separately validated dual-rail
 parallel circuit family, not the literal polarization circuit or an asserted
 pointwise theta-to-distribution identity. The result therefore supports a
@@ -560,7 +607,7 @@ format.
 | 2 | arXiv:2510.24137 (Park & Oh), Theorem 1 | silent (structural match, no hardness claim to test) | Closest physical match to this project's per-mode-transmittance channel, but Theorem 1 bounds one classical algorithm's (MPS) efficiency, not a hardness lower bound |
 | 3 | Bremner-Montanaro-Shepherd 2017 (arXiv:1610.01808, Theorem 4) | silent (by owner decision) | No eta-to-epsilon depolarizing-rate translation exists or was derived (HARD-04's on-record decision); no honest numeric comparison is possible |
 | 4 | Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999, Theorem 1, p.1) | silent (background context only) | Foundational noiseless-IQP hardness threshold BMS-2017 extends; makes no noise/loss claim of its own to compare against HARD's sweep |
-| 5 | Herbst et al. (arXiv:2512.24801) | inconsistent (see Cross-reference note below) | Measured alpha(eta) decreases (not increases) as loss increases, the reverse of `docs/iqp-baseline.md`'s original speculative direction |
+| 5 | Herbst et al. (arXiv:2512.24801) | silent (see Cross-reference note below) | Corrected 2026-08-20: measured alpha(eta) is exactly INVARIANT under loss, so this phase's sweep does not vary the quantity Herbst et al.'s prediction is keyed on and cannot test it either way. The previous "inconsistent" verdict rested on an artifact (alpha computed un-renormalized, decaying as eta^(2n)) |
 | 6 | McClean et al. (barren-plateau protocol) | silent (TRAIN-specific) | Gradient-variance-vs-system-size diagnostic; makes no hardness/loss claim |
 | 7 | arXiv:2405.01395 (two-photon gate construction) | silent (ARB-specific) | `heralded_cz`/`CP(alpha)` construction paper; not a trainability or hardness result |
 | 8 | `docs/iqp-baseline.md`'s own empirical rule | silent (TRAIN-specific) | Qubit-side plateau-prediction rule keyed on init_scheme/n; no loss axis |
@@ -615,12 +662,13 @@ BMS-2017, not assigned a consistent/inconsistent verdict.
 
 **Herbst et al. (arXiv:2512.24801): see the Cross-reference note at the end
 of this document.** One-clause summary of the verdict reached there: HARD's
-measured alpha(eta) decreases (i.e. the output distribution becomes *more*
-anticoncentrated, not less) as loss increases, the reverse of
-`docs/iqp-baseline.md`'s original speculative guess about which direction
-Phase 18 would find. Under Herbst et al.'s framework, this project's own
-measured HARD result is **inconsistent** with that earlier speculative
-framing's predicted consequence for trainability, not consistent with it.
+measured alpha(eta) is **exactly invariant** under loss (uniform per-mode
+loss preserves the surviving distribution's shape exactly), so this phase's
+sweep does not vary the quantity Herbst et al.'s prediction is keyed on and
+is therefore **silent** on it — neither consistent nor inconsistent.
+*Corrected 2026-08-20:* this row previously recorded an "inconsistent"
+verdict on the basis of alpha(eta) decreasing with loss; that decrease was
+an un-renormalized-alpha artifact, not a measurement.
 
 **Silent rows (HARD-irrelevant by subject matter, one line each):**
 
@@ -646,8 +694,26 @@ This phase measures TVD-to-lossless, TVD-to-two-classically-easy-baselines,
 and anticoncentration degradation under a specific, fractional, uniform
 per-mode photon-loss model, at small, fixed `n` (weight1 `n=2..6`, mixed
 `n=2..4`), for this project's own dual-rail/heralded-gate IQP circuit family.
+It also establishes, independently verified rather than assumed, that among
+shots which *are* successfully detected, the output distribution's shape is
+exactly preserved under loss (to floating-point precision -- see "HARD-05
+results" above): uniform per-mode loss does not reshape or degrade this
+circuit family's correlational structure, it only makes successful
+full-pattern detections rarer.
 
 It does **not**:
+
+- Establish that the measured TVD-to-baseline convergence toward ~0.50
+  reflects the true output *becoming structurally closer* to either
+  classically-easy baseline. That convergence is substantially a property
+  of the TVD metric itself under a shrinking, un-renormalized surviving
+  signal compared against fixed, fully-normalized references -- any such
+  reference converges to the same ~0.50 floor as survival probability
+  drops, essentially independent of whether the surviving signal is
+  classically simulable in origin. The positive finding above (shape
+  exactly preserved among successful detections) is the more direct
+  evidence on this question, and it points the other way: loss dilutes
+  the signal's *frequency*, not its *shape*.
 
 - Constitute a complexity-theoretic proof of a loss threshold for this
   project's circuit (already excluded from this milestone's scope, per
@@ -688,34 +754,51 @@ effects are predicted to co-occur, not trade off against each other. This
 document's own Anticoncentration section (above) already reports the real,
 measured `alpha(eta)` values this prediction can be checked against.
 
-**The measured direction, stated plainly:** `alpha(eta)` decreases
-monotonically as `eta` decreases (i.e. as photon loss increases), for both
-weight-1 and mixed scope, crossing below the `alpha=1` uniform-reference
-line at every measured `n`. In this project's own measured data, **more
-loss makes the output distribution more anticoncentrated, not less.**
+**The measured direction, stated plainly:** `alpha(eta)` is **exactly
+invariant** under photon loss, for both weight-1 and mixed scope, at every
+measured `n`. Conditioned on detection, more loss does **not** make the
+output distribution more anticoncentrated, nor less: it does not move
+anticoncentration at all. Uniform per-mode loss preserves the surviving
+distribution's shape exactly (see the HARD-05 section above), and `alpha`
+is a pure shape statistic, so it cannot move under a channel that only
+rescales total surviving mass.
 
-**This corrects `docs/iqp-baseline.md`'s earlier speculative framing.**
-That note (written 2026-08-12, before this phase's real sweep existed)
-guessed the opposite direction: "if Phase 18 finds photon loss erodes
+**Correction (2026-08-20).** This section previously reported the opposite
+— that `alpha(eta)` decreases monotonically as loss increases, "crossing
+below the `alpha=1` uniform-reference line at every measured `n`," and
+framed that as a real finding overturning `docs/iqp-baseline.md`'s earlier
+speculative guess. That reported decrease was an artifact, not a
+measurement: `alpha` was computed on the raw, un-renormalized lossy
+distribution, so it decayed as exactly `eta^(2n)` — the square of the
+surviving mass — with zero residual signal. The tell was visible in the
+shipped data and went unread: 33 of 56 rows reported `alpha < 1.0`, and
+BMS's `alpha` has a hard theoretical floor of `1.0` (equality iff uniform),
+so those values were not interpretable as BMS's parameter at all. The
+computation is corrected in `hardness/baselines.py::anticoncentration_alpha`
+(which now renormalizes, with two dedicated regression tests), and every
+affected CSV was regenerated. This is recorded rather than silently
+rewritten, matching this project's established pattern of catching and
+correcting its own earlier statements once checked (e.g. the Van den Nest
+attribution correction, the Aaronson-Brod/Park-Oh misattribution
+correction).
+
+**What this means for `docs/iqp-baseline.md`'s speculative framing:**
+neither confirmed nor reversed. That note (written 2026-08-12, before this
+phase's sweep existed) guessed that "if Phase 18 finds photon loss erodes
 anticoncentration... trainability should correspondingly improve at higher
-loss." The real measured direction is the reverse of that guess: loss
-*increases* anticoncentration here, it does not erode it, so the
-speculative note's premise does not hold as originally phrased. This is
-stated here explicitly, rather than silently left uncorrected, matching this
-project's established pattern of catching and correcting its own earlier
-statements once real data exists (e.g. the Van den Nest attribution
-correction, the Aaronson-Brod/Park-Oh misattribution correction).
+loss." Since the corrected measurement shows loss neither erodes nor
+increases anticoncentration, that conditional's premise is simply never
+triggered by this project's data. A 2026-08-19 note in `iqp-baseline.md`
+claiming the guess had been *reversed* was itself based on the artifact and
+has been withdrawn there.
 
-**Under Herbst et al.'s own framework, this measured direction points the
-other way from the original speculative guess's practical conclusion.**
-Since anticoncentration is predicted to drive BOTH increased
-classical-simulability *and* increased MMD-loss concentration together (not
-a trade-off), and this project's own measured `alpha(eta)` shows loss
-*increasing* anticoncentration, the framework's predicted consequence for
-trainability is that training should, if anything, get **worse** (not
-better) as loss increases, the opposite of `docs/iqp-baseline.md`'s
-original speculative guess ("trainability should correspondingly improve at
-higher loss").
+**Under Herbst et al.'s own framework, this project's data does not
+discriminate.** The framework predicts anticoncentration drives BOTH
+increased classical-simulability *and* increased MMD-loss concentration
+together (not a trade-off). Testing that prediction requires
+anticoncentration to actually vary; here it is constant under the one axis
+this phase sweeps (`eta`). This project's HARD data is therefore **silent**
+on Herbst et al.'s prediction, not evidence for or against it.
 
 **The TRAIN-side half of this cross-reference is recorded separately in
 `docs/trainability-study.md`'s equivalent cross-reference note** (in that
