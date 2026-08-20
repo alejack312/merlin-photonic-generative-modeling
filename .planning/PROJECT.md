@@ -12,9 +12,19 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 
 ## Current State
 
-**v2.1 Weight-2 Implementation shipped 2026-08-06**, same-day (all 4 phases in one sprint, 2026-08-06 09:04 → 21:42). All 4 phases (10: Heralded-CZ Primitive De-Risking; 11: CZ Insertion Unit & Weight-2 Circuit Composition; 12: Exact Reference Extension & TVD Validation; 13: Weight-1 + Weight-2 Composability Validation) complete, 8/8 requirements satisfied, full test suite green (118/118), every phase independently re-verified live by `gsd-verifier` (not trusted from SUMMARYs). Full detail: [`.planning/milestones/v2.1-ROADMAP.md`](milestones/v2.1-ROADMAP.md), [`.planning/milestones/v2.1-REQUIREMENTS.md`](milestones/v2.1-REQUIREMENTS.md), [`.planning/milestones/v2.1-MILESTONE-AUDIT.md`](milestones/v2.1-MILESTONE-AUDIT.md).
+**v3.0 IQP Circuit Study & Write-Up shipped 2026-08-19** (Phases 14-21 plus inserted Phase 17.1; started 2026-08-07). 9 phases, 37/37 v1 requirements satisfied, every phase independently re-verified live by `gsd-verifier` rather than trusted from SUMMARYs. Full test suite currently 296 passing. Full detail: [`ROADMAP.md`](ROADMAP.md), [`REQUIREMENTS.md`](REQUIREMENTS.md), [`v3.0-MILESTONE-AUDIT.md`](v3.0-MILESTONE-AUDIT.md).
 
-## Current Milestone: v3.0 IQP Circuit Study & Write-Up
+What was measured (stated as measured; interpretation belongs in the study docs and the owner's own checkpoints, not here):
+
+- **Trainability (TRAIN-01..10, Phases 17/17.1).** Gradient-variance-vs-`n` swept by exact parameter-shift for weight-1 (`n=2..6`) and mixed (`n=2..5`), two init schemes. At the original fixed bandwidth `SIGMA=0.1`, both `uniform`-init cells fit exponential decay (R²=0.999 weight1, 0.910 mixed); both `small_angle` cells were inconclusive (R²=0.543, 0.000). Re-run across a 6-point sigma grid `{0.03,0.1,0.3,1.0,3.0,9.0}`, the exponential verdict holds only near `sigma in {0.03,0.1}`, becomes inconclusive at `{0.3,1.0}`, and re-emerges for `weight1/uniform` only at `{3.0,9.0}`. A literature-sourced data-dependent initialization (Recio-Armengol et al.) did not change either `small_angle` verdict. Detail: [`docs/trainability-study.md`](../docs/trainability-study.md).
+- **Hardness under loss (HARD-01..07, Phase 18).** TVD-vs-`eta` and anticoncentration swept over a 7-point `eta` grid for weight-1 (`n=2..6`) and mixed (`n=2..4`), loss applied via `pcvl.LC` with explicit `min_detected_photons_filter(0)`. Herald failure compounds with loss (0.926 → 0.999 at `eta=0.05`). Anticoncentration `alpha`, measured conditioned on detection, is exactly invariant under loss. Only the mixed scope is a sampling-hardness candidate: weight-1 has no entangling gate and its output is exactly a product distribution. No `eta`-to-depolarizing-rate translation was attempted (owner's explicit scope decision). Detail: [`docs/hardness-under-loss-study.md`](../docs/hardness-under-loss-study.md).
+- **Arbitrary-θ weight-2 gate (ARB-01..09, Phases 15/16).** `PostProcessedControlledRotationsItem` validated to the `heralded_cz` rigor bar: TVD at floating-point-noise level against the exact reference at `n=2,3`, a 16-point `α` sweep matching the closed-form success probability to `3.3e-16`, `n=3` mixed composability, and a Forge model confirming the ancilla mode-mapping is non-aliasing for `n<=8`.
+- **Independent verification (VERIFY-01..04, Phases 14/19).** Four Julia cross-checks (Yao.jl qubit-side; BosonSampling.jl weight-1, weight-2/Knill-CZ, and native loss model) all reached GO at TVDs of `1e-14` to `1e-17`. One real transpose-convention bug was found and fixed during the weight-2 leg.
+
+**Post-milestone verification (2026-08-20).** A systematic pass re-read every interpretive claim in the study docs against its source data and found two defects, both corrected in code, data, and docs: a TVD-to-baseline direction stated backwards, and anticoncentration `alpha` computed on un-renormalized distributions (33 of 56 shipped rows had reported values below BMS's theoretical floor of 1.0). All four Phase-18 sweeps were regenerated; `hardness/baselines.py` gained a renormalization fix plus four regression tests verified to fail against the previous implementation. A follow-on pipeline-vs-physics check (25 invariants, including weight-1/weight-2 closed forms verified against independently-derived analytic expressions at every swept `n`, and the parameter-shift gradient against the exact analytic derivative) found no further defects.
+
+<details>
+<summary>Archived: v3.0 IQP Circuit Study & Write-Up milestone scope (shipped 2026-08-19)</summary>
 
 **Goal:** Turn the validated weight-1/weight-2 IQP-photonic encoding into the project's actual research payoff — measure whether the circuit shows barren-plateau behavior and whether sampling stays hard once photon loss is accounted for, validate a continuously-tunable generalization of the fixed-π/4 weight-2 gate, and write up the findings. Add an independent Julia-based numeric verification path alongside the existing Python/Perceval pipeline, rather than trusting a single toolchain for the study's core claims.
 
@@ -27,6 +37,8 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 - Forge (Brown's SAT-based relational model finder): a narrow, bounded addition to ARB-01's validation — checks the new gate's local→global ancilla mode-index translation for aliasing bugs. Not a numeric verifier; scoped only to this one discrete bookkeeping question.
 - All of STUDY-01, STUDY-02, ARB-01, and WRITE-01 are Must-have for this milestone — owner's explicit call, no fallback/deferral ordering. Pitfalls research explicitly flagged that STUDY-01/02/WRITE-01 have no real dependency on ARB-01 and should be built decoupled from it, to avoid a false hard-dependency chain becoming a stall risk.
 - ket.jl/SDP stays parked as informal personal summer study (per the owner's professor's suggestion) — explicitly separate from this milestone's deliverables, no artifact expected, not blocking or blocked by anything here.
+
+</details>
 
 ## Next Milestone Goals
 
