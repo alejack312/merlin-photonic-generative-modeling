@@ -446,12 +446,32 @@ affine reparametrization of the angle. Measured directly:
   the two backends' full output distributions **identical** — max error
   `5.5e-8` over 6 draws spanning `n=2,3,4`.
 
-A plausible mechanism, consistent with the components each uses but not
-separately verified here: `WP(theta,0) = diag(e^{i theta}, e^{-i theta})`
-imposes a *relative* phase of `2*theta` between the polarization modes,
-while `PS(theta)` on one rail of a dual-rail pair imposes a relative phase
-of `theta` — a factor of two — with the residual `pi/2` offset amounting
-to a `0`/`1` label swap.
+**Mechanism — verified 2026-08-20 from the component unitaries themselves,
+not inferred from the docstrings.** Two independent contributions compose
+to give the observed `theta_eff = pi/2 - theta/2`:
+
+1. **The factor of two is the diagonal layer's phase convention.**
+   `pcvl.WP(theta, 0)` returns `diag(e^{i theta}, e^{-i theta})`, a
+   *relative* phase of `2*theta` between the two polarization components —
+   confirmed by reading the returned matrix (`theta=0.4` -> relative phase
+   `0.800000`; `theta=1.1` -> `2.200000`, exact). `pcvl.PS(theta)` applied
+   to one rail of a dual-rail pair returns `diag(e^{i theta}, 1)`, a
+   relative phase of exactly `theta` (`theta=0.7` -> `0.700000`). Same
+   nominal parameter, half the physical phase.
+
+2. **The label complement is the mixing element's convention.** Perceval's
+   `pcvl.BS()` is `[[1, i], [i, 1]]/sqrt(2)` (imaginary off-diagonals),
+   where the polarization path's `HWP(pi/8)` realizes a real Hadamard.
+   Composing the dual-rail single-qubit chain from those actual matrices,
+   `BS . PS(theta) . BS` acting on `|1,0>` puts
+   `|amp|^2 = (1/4)|e^{i theta} + 1|^2 = cos^2(theta/2)` on the `'1'` rail
+   and `sin^2(theta/2)` on the `'0'` rail — reproducing the measured
+   marginal exactly at every angle tested (`theta = 0.4, 1.1, 2.3, 5.0`,
+   machine precision).
+
+Together these account for the full reparametrization: the half-angle from
+(1), the `0`/`1` complement from (2). Nothing about the observed backend
+difference is unexplained.
 
 This **strengthens** the cross-check rather than weakening it. The earlier
 framing ("encoding-dependent shape remains genuinely different") is true
