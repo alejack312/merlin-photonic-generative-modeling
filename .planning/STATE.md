@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: planning
-stopped_at: "**Phase 22 added 2026-08-20 as additive v3.0 scope — not yet planned.** Multi-Pair Ancilla Allocation (Forge): symbolically verify a k-pair ancilla allocation scheme for multi-ZZ weight-2 circuits before implementing it (MPAIR-01..06). Verification only — no Python k-pair implementation, no multi-ZZ hardness re-run. Next step: `/gsd-discuss-phase 22` or `/gsd-plan-phase 22`. Phases 14-21 remain shipped and unreopened, with no open items — Phase 21's case-study page was confirmed pushed on 2026-08-20 (0/0 with `origin/main`), correcting an earlier stale note in this file that called it an open loose end."
-last_updated: "2026-08-20T19:30:00.000Z"
+status: Phase 22 scoped and roadmapped; MPAIR-01..06 defined in REQUIREMENTS.md (43 v1 requirements total, up from 37).
+stopped_at: Phase 22 context gathered
+last_updated: "2026-08-20T18:13:14.450Z"
 progress:
   total_phases: 10
   completed_phases: 9
@@ -238,8 +238,8 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 
 ## Session Continuity
 
-Last session: 2026-08-20
-Stopped at: **Phase 22 (Multi-Pair Ancilla Allocation — Formal Verification) added to the v3.0 roadmap as additive scope — scoped and roadmapped, not yet planned.** Invoked as `/gsd-new-milestone v3.0.1`, but redirected mid-flight on the owner's call: `/gsd-new-milestone` would have reset STATE.md and cleared all 21 phase directories while Phase 21's cross-repo checkpoint was still an open loose end, so the work was added to the still-open v3.0 milestone instead — the same mid-milestone insertion pattern already used for Phase 17.1. Six new requirements (MPAIR-01..06) written into `REQUIREMENTS.md` (43 v1 total, up from 37, 6 Pending), a Phase 22 entry into `ROADMAP.md`, and Active scope into `PROJECT.md`. Scope is deliberately verification-only: the Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope (the latter judged v4.0-sized). MPAIR-01 is an attempt-first gate — the owner selects the allocation scheme from 2-3 unranked candidates before any Forge code is written, per CLAUDE.md's conceptual-design rule. MPAIR-05 exists because ARB-09's 2026-08-20 audit found Forge's exhaustive-search advantage did *not* engage at the single-pair scale; it requires a timed brute-force baseline so the "2^28 subsets beats brute force" claim is checked rather than assumed, with either verdict acceptable. Next step: `/gsd-discuss-phase 22` or `/gsd-plan-phase 22`. **Correction (2026-08-20, same session):** this entry originally carried Phase 21's unpushed case-study page as an open loose end. That was stale — the page is pushed (`origin/main` at 0/0), and six further commits landed after `28ad9dc`, two of them real accuracy fixes (`4c5d9f8` anticoncentration, `631101c` backend output-shape). Phase 21 has no open items.
+Last session: 2026-08-20T18:13:14.396Z
+Stopped at: Phase 22 context gathered
 
 Same session, earlier: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
 
