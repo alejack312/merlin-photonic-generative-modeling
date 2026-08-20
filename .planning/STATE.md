@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
 status: planning
-stopped_at: "**Plan 21-01 executed, round 4 of checkpoint feedback — case-study page's v3.0 extension shipped locally, checkpoint open again.** Round 1 (`efc3bf1`) shipped the original two `Section` blocks + Role `QuoteBlock` extension; round-1 feedback (`971c0f0`) closed 6 content gaps (home-page feature card, hero, badges, TL;DR, What's Next, one under-explained number); round-2 feedback (`2f5ec70`) added the supplementary MerLin dual-rail cross-check evidence the page had omitted (a polarization-free reimplementation that runs natively through `QuantumLayer`'s own autograd, used to independently rerun both the TRAIN and HARD sweeps — one new intro-sentence clause + one new Supporting Evidence subsection with a comparison `DataTable`); round-3 (`28ad9dc`) added a new "Bigger Picture" `Section` comparing this project's v3.0 findings against the sibling `iqp-mmd-barren-plateau` project's own findings, closing with the owner's own transcribed verdict ("Not promising, on my own read of it...") — one requested table-row claim about `small_angle`'s bandwidth-grid results was found inaccurate against `docs/trainability-study.md`'s own raw data and corrected before shipping, documented inline in the commit message and the SUMMARY. `npm run lint`/`npm run build` both clean after every round. Not pushed — awaiting the owner's fourth review and explicit approval at the plan's `checkpoint:human-verify` gate."
-last_updated: "2026-08-20T16:18:40.039Z"
+stopped_at: "**Phase 22 added 2026-08-20 as additive v3.0 scope — not yet planned.** Multi-Pair Ancilla Allocation (Forge): symbolically verify a k-pair ancilla allocation scheme for multi-ZZ weight-2 circuits before implementing it (MPAIR-01..06). Verification only — no Python k-pair implementation, no multi-ZZ hardness re-run. Next step: `/gsd-discuss-phase 22` or `/gsd-plan-phase 22`. Phases 14-21 remain shipped and unreopened. Carried-over loose end from Phase 21 plan 21-01: the `alejandro-jackson` case-study page is owner-approved and committed locally after four review rounds but **not pushed** — a separate, explicit owner action outside this repo, tracked so it is not lost."
+last_updated: "2026-08-20T19:30:00.000Z"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 9
   total_plans: 41
   completed_plans: 41
-  percent: 100
+  percent: 90
 ---
 
 # Project State
@@ -23,6 +23,18 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 **Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. v2.1 (Weight-2 Implementation) shipped 2026-08-06. **v3.0 (IQP Circuit Study & Write-Up) roadmap created 2026-08-07** — 8 phases (14-21), 35 v1 requirements mapped, 100% coverage. Four decoupled/lightly-coupled tracks: Julia toolchain spike (14, earliest, stall-risk checkpoint), ARB-01 arbitrary-θ weight-2 gate (15-16), trainability/barren-plateau study (17), hardness-under-loss study (18, **complete 2026-08-17**), Julia cross-checks (19, **complete 2026-08-17**), write-up (20, **complete 2026-08-18**; 21 remaining). All four Must-have deliverables, no fallback ordering (owner's explicit call) — but STUDY-01/STUDY-02 explicitly do not block on ARB-01's open-research risk, per pitfalls research's highest-leverage finding.
 
 ## Current Position
+
+Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **added 2026-08-20 as additive v3.0 scope, not yet planned**
+Plan: none yet. Next step: `/gsd-discuss-phase 22` (gather context) or `/gsd-plan-phase 22` (plan directly).
+Status: Phase 22 scoped and roadmapped; MPAIR-01..06 defined in REQUIREMENTS.md (43 v1 requirements total, up from 37).
+Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
+Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written.
+
+Phases 14-21 remain shipped and unreopened. The prior Phase 21 position is preserved verbatim below for continuity.
+
+---
+
+### Prior position (Phase 21, retained)
 
 Phase: 21 (External-Facing Framing Pass) — **both plans executed; 21-01's checkpoint APPROVED by the owner 2026-08-19; proceeding to phase-level verification/close-out**
 Plan: 2/2 executed and complete (21-01, 21-02). Plan 21-01's `checkpoint:human-verify` went through four review rounds before approval — the first three were real, owner-identified gaps/requests (not rubber-stamped): round 1 found 6 content gaps (case study missing from the home page's featured section; stale v1.0-only hero description; tools/badges list missing Julia/Forge; "What I'd Do Next" missing any v2.0/2.1/3.0 items; no TL;DR bridging v2.0→v3.0; one under-explained number in an existing callout); round 2 found a real accuracy gap (the page implied MerLin `QuantumLayer` autograd was never used at all, when a supplementary polarization-free dual-rail reimplementation was also built and does run through it — added as evidence); round 3 was a new content request (a "Bigger Picture" section comparing this project against the sibling `iqp-mmd-barren-plateau` project, closing with the owner's own transcribed verdict) during which a drafting error of Claude's own (a table row misstating the small_angle bandwidth-grid results) was caught against source data and corrected before shipping, not shipped as specified. Round 4 was approved as-is. `alejandro-jackson`'s `main` ended 5 commits ahead of `origin/main`, all local, none pushed — push remains a separate, explicit owner action outside this plan's scope. See `.planning/phases/21-external-facing-framing-pass/21-01-SUMMARY.md` (all four rounds plus the final "Checkpoint Approved" close-out note) and `21-02-SUMMARY.md`.
@@ -227,7 +239,9 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 ## Session Continuity
 
 Last session: 2026-08-20
-Stopped at: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
+Stopped at: **Phase 22 (Multi-Pair Ancilla Allocation — Formal Verification) added to the v3.0 roadmap as additive scope — scoped and roadmapped, not yet planned.** Invoked as `/gsd-new-milestone v3.0.1`, but redirected mid-flight on the owner's call: `/gsd-new-milestone` would have reset STATE.md and cleared all 21 phase directories while Phase 21's cross-repo checkpoint was still an open loose end, so the work was added to the still-open v3.0 milestone instead — the same mid-milestone insertion pattern already used for Phase 17.1. Six new requirements (MPAIR-01..06) written into `REQUIREMENTS.md` (43 v1 total, up from 37, 6 Pending), a Phase 22 entry into `ROADMAP.md`, and Active scope into `PROJECT.md`. Scope is deliberately verification-only: the Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope (the latter judged v4.0-sized). MPAIR-01 is an attempt-first gate — the owner selects the allocation scheme from 2-3 unranked candidates before any Forge code is written, per CLAUDE.md's conceptual-design rule. MPAIR-05 exists because ARB-09's 2026-08-20 audit found Forge's exhaustive-search advantage did *not* engage at the single-pair scale; it requires a timed brute-force baseline so the "2^28 subsets beats brute force" claim is checked rather than assumed, with either verdict acceptable. Next step: `/gsd-discuss-phase 22` or `/gsd-plan-phase 22`. **Carried-over loose end:** Phase 21 plan 21-01's `alejandro-jackson` case-study page is owner-approved and committed locally but not pushed — separate owner action, outside this repo.
+
+Same session, earlier: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
 
 Same session, earlier: the v2.1 and v3.0 milestone audits, and a systematic verification pass that found and corrected two real defects — a TVD-to-baseline direction stated backwards, and anticoncentration `alpha` computed on un-renormalized distributions (33 of 56 shipped rows below BMS's theoretical floor of 1.0). Both fixed in code, data, and docs; all four Phase-18 sweeps regenerated; `hardness/baselines.py::anticoncentration_alpha` now renormalizes, with four regression tests verified to fail against the previous implementation. A follow-on pipeline-vs-physics check (25 invariants; weight-1/weight-2 closed forms and the parameter-shift gradient verified against independently-derived analytic expressions) found no further defects. GSD itself was updated 1.8.0 → 1.42.3 (commands renamed `/gsd:<cmd>` → `/gsd-<cmd>`; `gsd-phase-runner` and `execute-milestone` no longer exist; backup at `~/.claude/gsd-backup-20260820-151315`).
 

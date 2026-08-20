@@ -100,7 +100,18 @@ What was measured (stated as measured; interpretation belongs in the study docs 
 
 ### Active
 
-(None — no milestone currently in progress. See PROJECT.md's "Next Milestone Goals" for candidates.)
+**Phase 22 — Multi-Pair Ancilla Allocation, Formal Verification (added 2026-08-20, additive v3.0 scope).** Symbolically verify a k-pair ancilla allocation scheme for multi-ZZ weight-2 circuits before implementing it. Not a new milestone — same mid-milestone insertion pattern as Phase 17.1; Phases 14-21 are not reopened.
+
+- MPAIR-01: owner selects one allocation scheme from 2–3 unranked candidates (attempt-first gate — Claude does not pick)
+- MPAIR-02: non-collision invariant written down in prose before any Forge code
+- MPAIR-03: Forge model over all subsets of pairs, all k and n up to a justified bound, bitwidth justified against the largest computed value
+- MPAIR-04: non-vacuity guard, per `forge/ancilla_mapping.frg`'s two-part `test expect` discipline
+- MPAIR-05: brute-force baseline run and timed; honest verdict on whether Forge's exhaustive search actually engages at this scale
+- MPAIR-06: scheme recorded in `docs/iqp-photonic-encoding.md` as a spec for future implementation, not a restatement of shipped code
+
+Explicitly **not** in scope: Python k-pair implementation, and re-running the hardness study with multiple ZZ terms (v4.0-sized).
+
+**Open loose end (outside this repo):** Phase 21's plan 21-01 checkpoint — the `alejandro-jackson` case-study page is approved and committed locally but not pushed. Separate owner action.
 
 ### Out of Scope
 

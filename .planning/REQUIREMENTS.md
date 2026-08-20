@@ -59,6 +59,17 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 - [x] **WRITE-06**: Every reported number traceable to a specific script/test/notebook cell, with a fixed seed where randomness is involved
 - [x] **WRITE-07**: External-facing framing pass (README/case-study level), following this project's established "mechanism-not-magic, ownership-forward" convention — separate from the candid internal write-up
 
+### Multi-Pair Ancilla Allocation — Formal Verification (MPAIR)
+
+*Added 2026-08-20, owner-authorized as additive v3.0 scope (Phase 22). Not a new milestone — same insertion pattern as Phase 17.1. Scope is the symbolic verification only: no Python k-pair implementation, no multi-ZZ hardness re-run (both explicitly Out of Scope below).*
+
+- [ ] **MPAIR-01**: 2–3 candidate k-pair ancilla allocation schemes presented with tradeoffs stated and **no implied ranking**; the owner selects one, and both the selection and the reason the other candidates were rejected are recorded in the phase's own artifacts. Claude does not pick — per CLAUDE.md's "no silent unilateral design decisions" and attempt-first gating on conceptual components.
+- [ ] **MPAIR-02**: The non-collision invariant written down precisely in prose **before** any Forge code — stating what the property quantifies over (which `n`, which `k`, which subsets of pairs, which port ranges) and what a counterexample would look like *as a structure*, not as a number.
+- [ ] **MPAIR-03**: Forge model of the selected scheme checking the MPAIR-02 invariant holds for every subset of pairs at every `k` up to a stated bound, over all `n` up to a stated bound — with the bound and Forge's `Int` bitwidth each justified against the largest value the model computes, so no silent overflow/wraparound is possible. Follows `forge/ancilla_mapping.frg`'s existing bitwidth-note discipline.
+- [ ] **MPAIR-04**: Non-vacuity guard in the same two-part `test expect` form as `forge/ancilla_mapping.frg` — a `sat` check that the constraint set admits some valid instance, guarding against a vacuously-true, over-constrained model (the classic Forge pitfall).
+- [ ] **MPAIR-05**: Honest verdict on whether Forge's exhaustive search **actually engages at this scale** — a brute-force baseline over the same bounded domain run and timed alongside the Forge model, with the conclusion stated either way. Direct successor to ARB-09's own audit finding (2026-08-20) that Forge's advantage did *not* engage at the single-pair scale; this requirement exists so the claim is checked a second time rather than assumed. A "Forge did not earn its place here either" verdict satisfies this requirement.
+- [ ] **MPAIR-06**: The verified scheme recorded as a **specification for future implementation** in `docs/iqp-photonic-encoding.md`, explicitly stating that no Python implements it yet — so unlike `forge/ancilla_mapping.frg` (which re-states an already-shipped formula with nothing linking the two, and carries a standing drift warning because of it), this model is the source of truth any eventual implementation must be checked against.
+
 ## v2 Requirements
 
 Deferred to a future release, per FEATURES.md's explicit "Future Consideration" list.
@@ -87,6 +98,9 @@ Explicitly excluded this milestone. Documented to prevent scope creep.
 | Patching/re-deriving `heralded_cz`'s internals to expose an angle parameter | Already confirmed a dead end (hardcoded class constants, no exposed kwarg) — `PostProcessedControlledRotationsItem` is a separate, parallel gate family instead |
 | Peer-review-submission-ready manuscript for WRITE-01 | This is a defensible personal technical write-up for a specific reader (Vincent Espitalier) and deadline, not a paper submission |
 | Generic QML/photonics textbook background padding in WRITE-01 | Contradicts this project's established terse, load-bearing-only documentation style |
+| Python implementation of the k-pair (multi-ZZ) weight-2 circuit | Phase 22 is verification-before-implementation by design — the whole argument for using Forge here is that the scheme can be proven for all `k` up to a large bound even though simulation cost (4 extra modes per pair) means only `k=2` or `3` would ever actually run. Implementation is a separate, later decision. |
+| Re-running the hardness-under-loss study with multiple ZZ terms | The genuine research-gap close, and the reason multi-pair support is interesting at all — but it is v4.0-sized (new sweeps, new exact references, new Julia cross-checks), not one additive phase. Owner-confirmed 2026-08-20. |
+| Deciding the allocation scheme on the owner's behalf | MPAIR-01 exists specifically to prevent this. Claude presents candidates without ranking; the design call is the owner's. |
 
 ## Traceability
 
@@ -131,13 +145,20 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | WRITE-05 | 20 - Technical Write-Up | Complete |
 | WRITE-06 | 20 - Technical Write-Up | Complete |
 | WRITE-07 | 21 - External-Facing Framing Pass | Complete |
+| MPAIR-01 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
+| MPAIR-02 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
+| MPAIR-03 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
+| MPAIR-04 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
+| MPAIR-05 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
+| MPAIR-06 | 22 - Multi-Pair Ancilla Allocation (Forge) | Pending |
 
 **Coverage:**
-- v1 requirements: **37 total** (TRAIN: 10, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7). Note: this file's summary line previously stated "34 total" then corrected to "35 total" (8+7+9+4+7=35, arithmetic-error fix during roadmap creation); now 37 following the 2026-08-12 addition of TRAIN-09/TRAIN-10 (see below) — a real scope addition, not an arithmetic correction.
-- Mapped to phases: 37/37 ✓
+- v1 requirements: **43 total** (TRAIN: 10, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7, MPAIR: 6). Note: this file's summary line previously stated "34 total" then corrected to "35 total" (8+7+9+4+7=35, arithmetic-error fix during roadmap creation); now 37 following the 2026-08-12 addition of TRAIN-09/TRAIN-10 (see below) — a real scope addition, not an arithmetic correction.
+- Mapped to phases: 43/43 ✓
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-19 — WRITE-07 (Phase 21, External-Facing Framing Pass) marked Complete. All 37 v1 requirements across the v3.0 milestone are now Complete — 37/37, 0 Pending.*
+*Last updated: 2026-08-20 — added MPAIR-01..06 (Phase 22, Multi-Pair Ancilla Allocation — Formal Verification), owner-authorized as additive v3.0 scope rather than a new milestone. 43 v1 requirements total, up from 37; 37 Complete, 6 Pending. Phases 14-21 remain shipped and unreopened.*
+*Prior update: 2026-08-19 — WRITE-07 (Phase 21, External-Facing Framing Pass) marked Complete. All 37 v1 requirements defined at that point were Complete — 37/37, 0 Pending.*
 *Prior update: 2026-08-12 (later same day) — added TRAIN-09 and TRAIN-10, owner-authorized follow-up experiments to Phase 17's trainability study, discovered via a fresh direct read of 8 literature papers (owner's explicit instruction not to rely on the sibling project's secondhand vault notes). TRAIN-09 tests whether Phase 17's fixed MMD bandwidth (not just circuit/init) is itself sufficient to produce the measured exponential-decay signature (Rudolph et al., arXiv:2305.02881). TRAIN-10 tests a literature-sourced data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) as a real alternative to the inconclusive `small_angle` scheme. Both mapped to a new inserted phase, 17.1 (see ROADMAP.md), rather than reopening the already-shipped, already-verified Phase 17 itself. Earlier same-day update: traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; flagged by gsd-verifier during Phase 17's own verification pass, fixed same day). Dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) remains explicitly supplementary and separate from TRAIN-09/10.*
