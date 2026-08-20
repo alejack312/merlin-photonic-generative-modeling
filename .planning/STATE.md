@@ -1,3 +1,18 @@
+---
+gsd_state_version: 1.0
+milestone: v3.0
+milestone_name: IQP Circuit Study & Write-Up
+status: planning
+stopped_at: "**Plan 21-01 executed, round 4 of checkpoint feedback — case-study page's v3.0 extension shipped locally, checkpoint open again.** Round 1 (`efc3bf1`) shipped the original two `Section` blocks + Role `QuoteBlock` extension; round-1 feedback (`971c0f0`) closed 6 content gaps (home-page feature card, hero, badges, TL;DR, What's Next, one under-explained number); round-2 feedback (`2f5ec70`) added the supplementary MerLin dual-rail cross-check evidence the page had omitted (a polarization-free reimplementation that runs natively through `QuantumLayer`'s own autograd, used to independently rerun both the TRAIN and HARD sweeps — one new intro-sentence clause + one new Supporting Evidence subsection with a comparison `DataTable`); round-3 (`28ad9dc`) added a new "Bigger Picture" `Section` comparing this project's v3.0 findings against the sibling `iqp-mmd-barren-plateau` project's own findings, closing with the owner's own transcribed verdict ("Not promising, on my own read of it...") — one requested table-row claim about `small_angle`'s bandwidth-grid results was found inaccurate against `docs/trainability-study.md`'s own raw data and corrected before shipping, documented inline in the commit message and the SUMMARY. `npm run lint`/`npm run build` both clean after every round. Not pushed — awaiting the owner's fourth review and explicit approval at the plan's `checkpoint:human-verify` gate."
+last_updated: "2026-08-20T16:18:40.039Z"
+progress:
+  total_phases: 9
+  completed_phases: 9
+  total_plans: 41
+  completed_plans: 41
+  percent: 100
+---
+
 # Project State
 
 ## Project Reference
@@ -117,6 +132,7 @@ Progress: [██████████████████----] 8/9 phase
 ## Performance Metrics
 
 **v1.0 milestone:**
+
 - Phases: 6
 - Plans: 11
 - Commits: 51
@@ -125,6 +141,7 @@ Progress: [██████████████████----] 8/9 phase
 - Timeline: 10 days (2026-07-19 → 2026-07-29)
 
 **v2.0 milestone:**
+
 - Phases: 2
 - Plans: 8
 - Commits: 33
@@ -132,6 +149,7 @@ Progress: [██████████████████----] 8/9 phase
 - Timeline: 6 days (2026-07-30 → 2026-08-05)
 
 **v2.1 milestone:**
+
 - Phases: 4
 - Plans: 6
 - Commits: 38
@@ -201,11 +219,24 @@ for full detail. Phase 19's VERIFY-02/03/04 can proceed as originally scoped
 **This machine has materially constrained free memory during heavy background compute** (confirmed as low as ~1GB free out of 16GB total, with zero of this project's own processes running, driven by concurrent unrelated sessions/apps — multiple Claude/Cursor/Opera instances, WSL, Docker, NordVPN, Windows Defender). Any future long-running/compute-heavy sweep in this repo should assume this constraint: prefer chunked/resumable execution (small per-cell or per-draw-range processes, not one long-running process) over anything that accumulates memory across hundreds of repeated heavy calls, and avoid launching two independent heavy compute jobs concurrently against the same machine (confirmed live to double memory pressure and reproduce the exact `MemoryError` a single job alone did not hit).
 
 None open yet for v3.0 execution otherwise. Watch items carried into execution:
+
 - v3.0 was scoped with STUDY-01 (TRAIN), STUDY-02 (HARD), ARB-01, and WRITE-01 all as Must-have with no fallback ordering — owner's explicit call after being shown the risk that ARB-01 is genuinely open research and the Julia toolchain is brand-new. This is the first milestone since the PennyLane stall (May 2026) to combine open research with a hard deadline.
 - Mitigation now built into the roadmap: Phase 14 (Julia spike) is sequenced earliest and fully decoupled as an explicit stall-risk checkpoint; Phases 17 (TRAIN) and 18 (HARD) are structurally independent of Phases 15-16 (ARB-01) so ARB-01 slippage cannot block them; a named mid-milestone checkpoint (~2026-08-20) with four per-item progress questions is recorded in `ROADMAP.md`.
 - HARD-03 (full read of arXiv:2510.24137) is a near-zero-code but load-bearing, non-deferrable first step inside Phase 18 — flagged explicitly in the roadmap so it isn't left implicit or done last.
 
 ## Session Continuity
+
+Last session: 2026-08-20
+Stopped at: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
+
+Same session, earlier: the v2.1 and v3.0 milestone audits, and a systematic verification pass that found and corrected two real defects — a TVD-to-baseline direction stated backwards, and anticoncentration `alpha` computed on un-renormalized distributions (33 of 56 shipped rows below BMS's theoretical floor of 1.0). Both fixed in code, data, and docs; all four Phase-18 sweeps regenerated; `hardness/baselines.py::anticoncentration_alpha` now renormalizes, with four regression tests verified to fail against the previous implementation. A follow-on pipeline-vs-physics check (25 invariants; weight-1/weight-2 closed forms and the parameter-shift gradient verified against independently-derived analytic expressions) found no further defects. GSD itself was updated 1.8.0 → 1.42.3 (commands renamed `/gsd:<cmd>` → `/gsd-<cmd>`; `gsd-phase-runner` and `execute-milestone` no longer exist; backup at `~/.claude/gsd-backup-20260820-151315`).
+
+**Verification caveat on the LEARNINGS set:** all 21 files were validated *structurally* (frontmatter, `counts` block, four sections, source-attribution count ≥ claimed item count) — **not** fact-checked item-by-item against the source artifacts. The 361 items are subagent-generated and have not been read end-to-end by either the owner or the orchestrating session. Three separate briefing errors were caught by agents mid-run (Phases 11, 17.1, 21 — each a case of project-level doc content being passed down as phase-artifact content); errors in the opposite direction, i.e. agent-introduced inaccuracies, would not have been caught by the structural check. Treat the set as a strong first pass, not a verified record.
+
+Resume by: nothing is blocked. Optional follow-ups — spot-check a sample of LEARNINGS items against their cited sources; decide whether `results/Figure_{1,2,3}.png` (deliberately untracked) and `docs/papers/*.txt` (untracked since before this session) should be committed. The one genuine open owner action remains sending the drafted technical note to Vincent Espitalier.
+
+---
+*Prior session (2026-08-19) entry, preserved for continuity below:*
 
 Last session: 2026-08-19
 Stopped at: **Plan 21-01 executed, round 4 of checkpoint feedback — case-study page's v3.0 extension shipped locally, checkpoint open again.** Round 1 (`efc3bf1`) shipped the original two `Section` blocks + Role `QuoteBlock` extension; round-1 feedback (`971c0f0`) closed 6 content gaps (home-page feature card, hero, badges, TL;DR, What's Next, one under-explained number); round-2 feedback (`2f5ec70`) added the supplementary MerLin dual-rail cross-check evidence the page had omitted (a polarization-free reimplementation that runs natively through `QuantumLayer`'s own autograd, used to independently rerun both the TRAIN and HARD sweeps — one new intro-sentence clause + one new Supporting Evidence subsection with a comparison `DataTable`); round-3 (`28ad9dc`) added a new "Bigger Picture" `Section` comparing this project's v3.0 findings against the sibling `iqp-mmd-barren-plateau` project's own findings, closing with the owner's own transcribed verdict ("Not promising, on my own read of it...") — one requested table-row claim about `small_angle`'s bandwidth-grid results was found inaccurate against `docs/trainability-study.md`'s own raw data and corrected before shipping, documented inline in the commit message and the SUMMARY. `npm run lint`/`npm run build` both clean after every round. Not pushed — awaiting the owner's fourth review and explicit approval at the plan's `checkpoint:human-verify` gate.
