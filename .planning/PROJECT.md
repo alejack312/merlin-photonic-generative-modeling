@@ -111,7 +111,7 @@ What was measured (stated as measured; interpretation belongs in the study docs 
 
 Explicitly **not** in scope: Python k-pair implementation, and re-running the hardness study with multiple ZZ terms (v4.0-sized).
 
-**Open loose end (outside this repo):** Phase 21's plan 21-01 checkpoint — the `alejandro-jackson` case-study page is approved and committed locally but not pushed. Separate owner action.
+**Phase 21 is fully closed (verified 2026-08-20).** Plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds, and the `alejandro-jackson` case-study page is pushed — `origin/main` and local `main` are 0/0. An earlier note here recorded it as "committed locally but not pushed"; that was stale. Six further commits landed after the round-3 commit `28ad9dc`, including two real accuracy corrections (`4c5d9f8` anticoncentration claim, `631101c` backend output-shape) and `14299cd`, the honest note on the Forge check's actual contribution — the cross-repo sibling of this repo's `273e9dd`.
 
 ### Out of Scope
 
