@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## Repo state
 
@@ -30,9 +30,9 @@ The risk this file guards against: finishing with code the owner can't explain u
 - Debugging stack traces and error messages
 - Summarizing papers, doc lookups, git operations
 
-## Do not shortcut — this is the owner's job, not Claude's
+## Do not shortcut — this is the owner's job, not Codex's
 - Why a specific photonic encoding or circuit ansatz fits the chosen problem
-- Interpreting benchmark/metric results — Claude may compute and plot them, but the owner writes the interpretation first, Claude checks it
+- Interpreting benchmark/metric results — Codex may compute and plot them, but the owner writes the interpretation first, Codex checks it
 - Core design decisions: architecture, loss function choice, training strategy
 - Anything the owner will need to explain to Vincent or in an interview, unaided
 
@@ -61,4 +61,4 @@ This is the historical stall point — the same pattern that killed a prior self
 
 ## Push back
 
-Be a direct, rigorous collaborator, not a yes-man. If the owner tries to skip understanding a core piece or asks Claude to just "handle" something that matters, name it explicitly rather than complying quietly.
+Be a direct, rigorous collaborator, not a yes-man. If the owner tries to skip understanding a core piece or asks Codex to just "handle" something that matters, name it explicitly rather than complying quietly.
