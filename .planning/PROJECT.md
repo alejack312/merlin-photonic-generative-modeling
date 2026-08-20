@@ -31,7 +31,7 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 ## Next Milestone Goals
 
 - BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
-- Sending the drafted v1.0 technical note to Vincent Espitalier and flipping the repo public (both still open, independent of any future milestone)
+- Sending the drafted v1.0 technical note to Vincent Espitalier (still open, independent of any future milestone)
 
 <details>
 <summary>Archived: v2.1 Weight-2 Implementation milestone scope (shipped 2026-08-06)</summary>
@@ -116,7 +116,8 @@ A working, end-to-end, honestly-benchmarked MMD-trained photonic generative mode
 - **Milestone audit + UAT gap-closure (v2.0):** `/gsd:audit-milestone` found Phase 9 shipped without a standalone `gsd-verifier` report (tech debt, not a functional gap — 11/11 requirements satisfied, integration checks clean). Closed via an independent `/gsd:verify-work 9` UAT pass: 6 of 8 tests verified by directly re-running code against the doc's claimed numbers (all matched exactly), and the self-explanation checkpoint (test 8) was independently re-tested rather than cited from the prior pass, surfacing a real (if minor) gap on the basis-correspondence sub-question that needed two follow-up rounds to resolve correctly. Full record: `.planning/milestones/v2.0-MILESTONE-AUDIT.md`, `.planning/phases/09-encoding-design/09-UAT.md`.
 - **Weight-2 implementation (v2.1, all 4 phases same-day 2026-08-06):** `heralded_cz` de-risked standalone first (Phase 10: herald-success 2/27 confirmed, CZ phase sign confirmed), then the full circuit built via `Processor`-level composition reusing weight-1 builders unmodified (Phase 11), then validated to weight-1's rigor bar (Phase 12: TVD=2.58e-15 at the locked n=2 gate, herald-failure/residual reported as two separate numbers), then confirmed to compose correctly alongside weight-1 in a shared circuit (Phase 13). A genuine Perceval library limitation was found and worked around (`Processor.add_herald()` + `PBS` crashes `Processor.probs()`), filed upstream as [Quandela/Perceval#783](https://github.com/Quandela/Perceval/issues/783).
 - **Milestone audit (v2.1):** `/gsd:audit-milestone` found all 8/8 requirements satisfied, cross-phase call chain genuinely wired end-to-end (no bypassed/mocked seams between Phase 11's circuit builder, Phase 12's TVD measurement, and Phase 13's composability test), and 118/118 tests independently re-run green. One gap found and fixed within the audit itself: `docs/iqp-photonic-encoding.md` had gone stale after Phase 11's own last edit, still describing weight-2 as unimplemented in three places — corrected before archiving. Full record: `.planning/milestones/v2.1-MILESTONE-AUDIT.md`.
-- **Known open items (owner's manual steps):** flip the GitHub repo to public (`gh repo edit alejack312/merlin-photonic-generative-modeling --visibility public`); send the drafted technical note to Vincent Espitalier.
+- **Repo visibility (resolved):** the GitHub repo is **public** — confirmed 2026-08-20 via `gh repo view alejack312/merlin-photonic-generative-modeling --json visibility`. This had been carried as an open owner action since v1.0 while already being public, so the item was stale rather than pending. As of 2026-08-20 the full local history (v2.0, v2.1, v3.0 — 284 commits) is pushed to `origin/master`; before that push the public repo stopped at v1.0, meaning the published `PROJECT.md`/`ROADMAP.md` were themselves stale at v1.0.
+- **Known open items (owner's manual steps):** send the drafted technical note to Vincent Espitalier.
 
 ## Constraints
 
