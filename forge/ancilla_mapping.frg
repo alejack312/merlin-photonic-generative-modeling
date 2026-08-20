@@ -3,8 +3,27 @@ option run_sterling off
 
 -- Structural correctness check of the CP(alpha) insertion's local->global
 -- ancilla mode-index mapping dict (iqp_photonic_encoding.py,
--- _build_weight2_cp_processor_no_postselect, lines 622-627):
+-- _build_weight2_cp_processor_no_postselect, lines 632-640 as of
+-- 2026-08-20; the reference previously read 622-627, which had gone stale):
 --   mapping = {2i:0, 2i+1:1, 2j:2, 2j+1:3, 2n:4, 2n+1:5, 2n+2:6, 2n+3:7}
+--
+-- DRIFT WARNING: this model RE-STATES the mapping formula rather than
+-- deriving it from the Python source. Nothing links the two. If the dict in
+-- iqp_photonic_encoding.py changes, this model will keep passing while
+-- verifying the OLD formula. Re-check the formula against source whenever
+-- the mapping is touched. Last verified matching source: 2026-08-20.
+--
+-- SCOPE NOTE (audit, 2026-08-20): the bounded domain here is 168 triples
+-- (sum of n(n-1) for n=2..8). An exhaustive Python loop over the same
+-- property runs in <1 ms, reaches the same verdict, and extends past this
+-- model's n<=8 bound (brute-forced to n=2000, zero violations). The
+-- property is additionally true by construction, since ancilla ports start
+-- at 2n and the largest data port is 2n-1. Forge's exhaustive-search
+-- advantage therefore does not engage at this scale. What this model does
+-- contribute is a declarative, machine-checked statement of the invariant
+-- plus the non-vacuity discipline below. See
+-- docs/iqp-photonic-encoding.md's "Forge Verification of the Ancilla
+-- Mode-Mapping (Phase 16)" section for the full assessment.
 -- ARB-09 (Phase 16): confirms the mapping's 8 KEYS are pairwise distinct
 -- (injective) for every valid (n,i,j), checked against ALL n qubits' own
 -- data ports (0..2n-1), not just qubit i/j's -- the fully general property

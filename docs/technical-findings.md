@@ -243,7 +243,14 @@ confirmation against `heralded_cz`'s own full pipeline at `alpha=pi`
 (Phase 15). `n=3` mixed weight-1 + arbitrary-theta weight-2 composability
 passed with TVD < 1e-6 (Phase 16, ARB-07). A Forge-based formal check
 confirmed the gate's ancilla mode-mapping dict is injective/non-aliasing
-for all valid `(n,i,j)`, `n<=8`, with no bug found (Phase 16, ARB-09).
+for all valid `(n,i,j)`, `n<=8`, with no bug found (Phase 16, ARB-09) —
+though an audit (2026-08-20) found that check adds little over brute force
+at this scale: the bounded domain is 168 triples, an exhaustive Python loop
+settles the same property in under 1 ms and extends past `n<=8`, and the
+property is true by construction. Its durable contribution is a declarative
+statement of the invariant plus the non-vacuity discipline, not additional
+coverage. Full assessment:
+[`docs/iqp-photonic-encoding.md`'s Forge section](iqp-photonic-encoding.md#forge-verification-of-the-ancilla-mode-mapping-phase-16).
 
 **Scope statement.** Full scope: what ARB-01/ARB-02 do and do not
 establish, including the explicit statement that this is not a hardness or

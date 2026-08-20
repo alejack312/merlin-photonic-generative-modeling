@@ -39,3 +39,42 @@ guarding against a vacuously-true, over-constrained model) and `noCounterexample
 property is provably true by construction (ancilla ports start at `2n`, which is always `>=` the
 largest qubit data port `2n-1`), and formally confirms it rather than leaving it as an informal
 observation.
+
+---
+
+## Audit addendum (2026-08-20)
+
+Re-run and audited during the post-milestone verification pass. Both tests still pass
+(`racket forge/ancilla_mapping.frg`, ~34 s wall). Findings:
+
+**Model matches source.** The mapping formula in `ancilla_mapping.frg` was re-checked against
+`iqp_photonic_encoding.py` and matches exactly. The model's source line reference was stale
+(read `622-627`; actual is `632-640`) and has been corrected.
+
+**Drift risk, now documented in the model.** The `.frg` *re-states* the mapping rather than
+deriving it from the Python source — nothing links the two. An edit to the dict would leave
+Forge passing against the old formula. This is a manual re-check obligation, not an automated
+guarantee, and is now flagged in the model's header.
+
+**What Forge alone contributed — measured, not assumed.** The bounded domain is 168 triples
+(`Σ n(n−1)`, `n=2..8`). An exhaustive Python loop over the identical property:
+
+| | Forge (`n ≤ 8`) | Python brute force |
+|---|---|---|
+| Verdict | no counterexample | 0 violations |
+| Coverage | 168 triples, bounded at `n ≤ 8` | 168 triples; extends to `n=2000`, still 0 |
+| Runtime | ~34 s | < 1 ms |
+
+The property is additionally true *by construction* (ancilla ports begin at `2n`; the largest
+data port is `2n−1`), as `16-CONTEXT.md` anticipated. Roughly two-thirds of the model's 28
+pairwise constraints hold by parity alone (`2i` vs `2j+1` is even-vs-odd); only ~10 depend
+substantively on `i ≠ j` or `i,j < n`.
+
+**Conclusion.** The *class* of question was well matched to Forge — discrete, structural, and
+silent-if-wrong, the same failure family as this project's `Analyzer`/`NoiseModel`/`alpha`
+incidents. The specific *instance* was not: small enough to brute-force, and true by
+construction, so Forge's exhaustive-search advantage never engaged. The durable value is the
+declarative statement of the invariant and the non-vacuity discipline (proving the constraint
+set is satisfiable before trusting an `unsat`), which guards against the vacuous-truth trap and
+transfers to future models. Recorded plainly rather than presenting the check as stronger
+evidence than it is.
