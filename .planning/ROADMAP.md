@@ -341,6 +341,31 @@ Plans:
 6. **MPAIR-07's physics gate resolved before any `.frg` exists**, with an explicit verdict on whether deferred-post-selection permits ancilla reuse. A "no" verdict that stops the phase and reports the finding satisfies this criterion — modelling an unbuildable scheme does not.
 5. `docs/iqp-photonic-encoding.md` gains a section recording the scheme as a specification for future implementation, stating explicitly that no Python implements it yet and that the model is therefore the source of truth rather than a restatement of one.
 
+---
+
+### Phase 23: Ancilla Lifecycle Safety — Formal Verification
+
+**Goal:** Model the ancilla-mode lifecycle (free -> allocated -> in-use -> releasable) across a *sequence* of CP(alpha) gate applications, and verify that no mode is ever reallocated while still live. Where Phase 22 asks **how few** ancilla blocks are needed, this asks **whether reuse is structurally safe at all** — and its counterexamples are *traces*, not numbers.
+
+**Depends on:** Phase 22 (MPAIR-07's numerical reuse verdict is what LIFE-05 cross-checks against; Phase 22's minimum-K result is what LIFE-06 asks whether lifetime constraints change). Does not require Phase 22's Forge model to have succeeded — a Phase 22 NO-GO makes this phase *more* interesting, not moot, since it would explain structurally why reuse fails.
+
+**Requirements:** LIFE-01, LIFE-02, LIFE-03, LIFE-04, LIFE-05, LIFE-06, LIFE-07
+**Plans:** TBD — created by `/gsd-plan-phase 23`.
+
+**Why this phase exists (2026-08-21).** A review of the owner's own CS1710 (Logic for Systems) coursework — the course this Forge toolchain comes from — corrected a standing mis-grading in this project. Both ARB-09's audit and MPAIR-05 as originally written judged Forge on *"does it beat brute force on an intractable domain."* None of CS1710's own models meet that bar either: hotel locking runs at 3 rooms / 3 guests / 8 time steps, and goats-and-wolves is a river-crossing puzzle a BFS solves in milliseconds. What those models actually buy is finding the scenario you would not think to enumerate, properties over traces and reachability, the model as precise specification, and verifying a design before building it.
+
+Under the corrected criterion, the strongest available framing was already sitting in the owner's own homework: `stop_and_copy.frg` and `mark_and_sweep.frg` are allocation-and-reuse models with liveness (`reachFromRoot[m, s]`, semispaces, collection). **Ancilla pooling is a memory-management problem.** Modes are cells; a gate allocates; and the open question — is a mode free after its gate, when post-selection is deferred to the very end? — is exactly a "can you collect this yet?" question, under a constraint (no mid-circuit collection) that a textbook allocator does not have. The silent-clobber failure mode this model hunts is the same class as this project's own `Analyzer`/`NoiseModel`/`alpha` incidents.
+
+**Scope note:** the owner was offered colouring-only, lifecycle-only, or both, was told explicitly that "both" would likely push past one phase, and chose both. Phase 22 keeps the colouring/count question and the numerical physics gate; this phase takes the lifecycle/safety question. Neither subsumes the other.
+
+**Success criteria:**
+1. A Forge model exists representing ancilla modes as cells with an explicit allocate/use/release lifecycle across at least two sequential CP(alpha) gate applications.
+2. The safety property (no live mode reallocated) is stated and checked, with any counterexample surfaced as a trace rather than a scalar.
+3. The deferred-post-selection constraint (no mid-circuit collection) is encoded explicitly, not assumed away.
+4. Non-vacuity holds in the strengthened form: an instance with >= 2 gates and >= 1 genuine reuse, conjoined with safety.
+5. The structural verdict is cross-checked against Phase 22's MPAIR-07 numerical verdict, with agreement or disagreement reported plainly and never reconciled by assumption.
+6. `docs/iqp-photonic-encoding.md` states what the lifecycle model does and does not establish, and whether lifetime constraints change Phase 22's minimum-block-count result.
+
 ## Progress
 
 **Execution Order (v1.0-v2.1, shipped):**
@@ -352,6 +377,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 - Wave 3: Phase 20 (depends on 16, 17, 17.1, 18)
 - Wave 4: Phase 21 (depends on 20)
 - Wave 5: Phase 22 (added 2026-08-20 — no dependencies on Phases 14-21; sequenced last only because it was scoped last)
+- Wave 6: Phase 23 (added 2026-08-21 — depends on Phase 22 for the MPAIR-07 verdict it cross-checks and the minimum-K result it re-examines)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|-----------------|--------|-----------|
@@ -378,6 +404,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 20. Technical Write-Up | v3.0 | 4/4 | Complete — verified 6/6, HARD's alpha(eta) direction corrects an earlier speculative guess | 2026-08-18 |
 | 21. External-Facing Framing Pass | v3.0 | 2/2 | Complete — verified 5/5, owner verdict: "not promising, worth exploring further" | 2026-08-19 |
 | 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 0/6 | Planned — 6 plans, waves 0-5, plan-checker PASSED | — |
+| 23. Ancilla Lifecycle Safety — Formal Verification | v3.0 | 0/? | Not started — added 2026-08-21 | — |
 
 **Phases 14-21 + 17.1 are complete — all 8 shipped and verified, all 37 requirements defined at that point satisfied. Phase 22 was added 2026-08-20 as additive v3.0 scope, so the milestone is no longer closed.** Phase 21 itself is fully closed: plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds and the `alejandro-jackson` case-study page is **pushed** (`origin/main` and local `main` at 0/0, verified 2026-08-20). A note added earlier that day calling the push an open loose end was stale and has been corrected.
 
