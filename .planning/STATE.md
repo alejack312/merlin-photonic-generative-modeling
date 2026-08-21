@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: Phase 22 in progress — Plan 22-02 shipped (owner ruled GO on MPAIR-07; MPAIR-02's prose invariant written); Plan 22-03 next.
-stopped_at: Phase 22 Plan 22-02 executed (owner GO ruling + MPAIR-02 prose invariant); Plan 22-03 (owner review of compatibility rule) next
-last_updated: "2026-08-21T02:20:00.000Z"
+status: planning
+stopped_at: Phase 22 Plan 03 executed (owner review checkpoint recorded)
+last_updated: "2026-08-21T02:35:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 53
+  total_plans: 47
   completed_plans: 44
-  percent: 83
+  percent: 94
 ---
 
 # Project State
@@ -24,9 +24,11 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **in progress, Plan 22-02 executed 2026-08-21**
-Plan: 2/6 executed (22-01, 22-02). Next step: Plan 22-03 (owner review of the vertex-disjointness compatibility rule, per `22-CONTEXT.md`'s deferred item; then Forge model construction).
-Status: Plan 22-02 recorded the owner's ruling on MPAIR-07 verbatim in `results/phase22_reuse_gate.md`'s new `## Owner ruling` section: **GO** (2026-08-21) — "Codex is unavailable until 8:00pm CEST, August 21st. Let's GO." Claude's drafted verdict above it was left unedited. Task 2 (the NO-GO terminal branch) was correctly skipped per the plan's own guard clause — no changes to `docs/iqp-photonic-encoding.md` or `.planning/REQUIREMENTS.md`. Task 3 shipped `results/phase22_allocation_invariant.md`, MPAIR-02's precise prose invariant (compatibility rule flagged Claude's Discretion and owed to the owner at Plan 22-03; round-robin edge-colouring formula for `K_n`; mode-index formula generalizing `_build_weight2_cp_processor_no_postselect`'s single-pair dict; bitwidth justification, `for 7 Int`/`[-64,63]`, largest index 43 at n=8; the two-conjunct invariant; the pairwise-reduction argument collapsing subset quantification to 406 pairwise cases at n=8; the Forge-model-as-search-not-verify framing per D-05; and the scope boundary against MPAIR-07's physics claim) — written before any Forge code exists, per MPAIR-02's requirement. `MPAIR-01`, `MPAIR-07`, and `MPAIR-02` are all now satisfied. `ls forge/` still lists only `ancilla_mapping.frg`; `venv/Scripts/python.exe -m pytest -q` reports 296 passed. Plans 22-03 through 22-06 are cleared to proceed. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-02-SUMMARY.md`.
+Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **in progress, Plan 22-03 executed 2026-08-21**
+Plan: 3/6 executed (22-01, 22-02, 22-03). Next step: Plan 22-04 (Forge model construction).
+Status: Plan 22-03 recorded the owner's ruling on the two mechanism premises the Forge model is about to encode — the vertex-disjoint compatibility rule and the fixed round-robin allocation formula — verbatim in `results/phase22_allocation_invariant.md`'s new `## Owner review (Plan 22-03)` section: **`confirm-both`** (2026-08-21), selected via structured option choice with no additional free-text reasoning supplied. Since the ruling was `confirm-both`, no revision was needed to any of the invariant file's existing sections (`## Compatibility rule`, `## Allocation concretization`, `## Mode-index formula`, `## Bitwidth justification`, `## Pairwise-reduction argument`) — they already state the confirmed premises exactly as written in Plan 22-02. This discharges `22-CONTEXT.md`'s flag-back obligation on the compatibility rule and `22-RESEARCH.md` Open Question 1 on the fixed-vs-dynamic concretization. `ls forge/` still lists only `ancilla_mapping.frg` — no Forge code was written by this plan; `venv/Scripts/python.exe -m pytest -q` reports 296 passed. Plans 22-04 through 22-06 are cleared to proceed. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-03-SUMMARY.md`.
+
+**Prior (Plan 22-02):** recorded the owner's ruling on MPAIR-07 verbatim in `results/phase22_reuse_gate.md`'s new `## Owner ruling` section: **GO** (2026-08-21) — "Codex is unavailable until 8:00pm CEST, August 21st. Let's GO." Claude's drafted verdict above it was left unedited. Task 2 (the NO-GO terminal branch) was correctly skipped per the plan's own guard clause — no changes to `docs/iqp-photonic-encoding.md` or `.planning/REQUIREMENTS.md`. Task 3 shipped `results/phase22_allocation_invariant.md`, MPAIR-02's precise prose invariant (compatibility rule flagged Claude's Discretion and owed to the owner at Plan 22-03; round-robin edge-colouring formula for `K_n`; mode-index formula generalizing `_build_weight2_cp_processor_no_postselect`'s single-pair dict; bitwidth justification, `for 7 Int`/`[-64,63]`, largest index 43 at n=8; the two-conjunct invariant; the pairwise-reduction argument collapsing subset quantification to 406 pairwise cases at n=8; the Forge-model-as-search-not-verify framing per D-05; and the scope boundary against MPAIR-07's physics claim) — written before any Forge code exists, per MPAIR-02's requirement. `MPAIR-01`, `MPAIR-07`, and `MPAIR-02` are all now satisfied. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-02-SUMMARY.md`.
 Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
 Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
 
@@ -138,7 +140,7 @@ Plan 17-03 shipped `trainability/target_grid.py` (`make_target_grid(n, lo, hi)` 
 Prior: Phase 16 (ARB-01 Extended Validation & Postselection Bookkeeping) — complete. Plan 16-01 shipped `test_cp_composability_mixed_generators_n3` (ARB-07). Plan 16-02 shipped `cp_alpha_sweep.py` (16-point α sweep, ARB-08, all points matched the closed form to 1e-6). Plan 16-03 shipped last: `forge/ancilla_mapping.frg` (ARB-09) — a relational Forge model confirming the CP(alpha) insertion's local→global ancilla mode-mapping dict (`iqp_photonic_encoding.py:622-627`) is injective/non-aliasing for every valid `(n,i,j)`, `n<=8`, checked against ALL n qubits' data ports (the fully general property, not just i/j's). Both required checks passed: `nonVacuous` (sat, non-vacuity) and `noCounterexample` (unsat, no injectivity violation found) — `racket forge/ancilla_mapping.frg` exits 0. Bitwidth `for 6 Int` chosen and verified sufficient (largest computed value `2n+3=19` at n=8, vs. Forge's default 4-bit range `[-8,7]` which the owner's initial recollection had conflated with a universal language limit). `results/phase16_forge_summary.md` records the pass/fail result; `docs/iqp-photonic-encoding.md` gained a new "Forge Verification of the Ancilla Mode-Mapping (Phase 16)" subsection and its Conclusion section now marks all of Phase 16 (ARB-07/08/09) complete. 145/145 full repo suite still passes, zero regressions. **Phase 16 is now fully complete** — independently verified 3/3 must-haves (`16-VERIFICATION.md`) and staff-engineer-reviewed (one informational finding auto-fixed: `cp_alpha_sweep.py`'s 16-point distinctness assertion checked list length rather than actual value distinctness; corrected to a real dedup check). `.planning/REQUIREMENTS.md` updated: ARB-07/08/09 marked Complete.
 
 ```
-Progress: [██████████████████----] 8/9 phases complete (v3.0, Phases 14, 15, 16, 17, 17.1, 18, 19, 20); Phase 21 in progress (21-02/2 shipped)
+Progress: [█████████░] 94%
 ```
 
 ## Performance Metrics
