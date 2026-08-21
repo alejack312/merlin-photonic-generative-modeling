@@ -319,13 +319,13 @@ Plans:
 
 **Depends on:** Nothing in v3.0 — additive and fully independent of Phases 14-21, none of which are reopened. Builds on Phase 16's ARB-09 Forge precedent (`forge/ancilla_mapping.frg`) for its non-vacuity and bitwidth-justification discipline, and on that model's 2026-08-20 audit for MPAIR-05's honesty requirement.
 **Requirements:** MPAIR-01, MPAIR-02, MPAIR-03, MPAIR-04, MPAIR-05, MPAIR-06, MPAIR-07
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 - [x] 22-01-PLAN.md — MPAIR-07 evidence: numerical pooled-vs-dedicated ancilla-reuse probe + drafted verdict (wave 0)
 - [x] 22-02-PLAN.md — MPAIR-07 owner ruling + NO-GO terminal branch; on GO, MPAIR-02's prose invariant (wave 1)
 - [x] 22-03-PLAN.md — MPAIR-02: owner confirms the compatibility rule and allocation concretization (wave 2)
-- [ ] 22-04-PLAN.md — MPAIR-03/04: search-formulated Forge model, minimum-K over K_n, bitwidth + non-vacuity (wave 3)
+- [x] 22-04-PLAN.md — MPAIR-03/04: search-formulated Forge model, minimum-K over K_n, bitwidth + non-vacuity (wave 3)
 - [ ] 22-05-PLAN.md — MPAIR-05: timed colouring-search baseline and the honest Forge-vs-brute-force verdict (wave 4)
 - [ ] 22-06-PLAN.md — MPAIR-06: specification section in docs/iqp-photonic-encoding.md + self-explanation checkpoint (wave 5)
 
@@ -405,7 +405,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 19. Independent Julia Cross-Checks | v3.0 | 6/6 | Complete — verified 5/5, all 4 legs GO (1 real transpose bug found+fixed) | 2026-08-17 |
 | 20. Technical Write-Up | v3.0 | 4/4 | Complete — verified 6/6, HARD's alpha(eta) direction corrects an earlier speculative guess | 2026-08-18 |
 | 21. External-Facing Framing Pass | v3.0 | 2/2 | Complete — verified 5/5, owner verdict: "not promising, worth exploring further" | 2026-08-19 |
-| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 3/6 | In Progress|  |
+| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 4/6 | In Progress|  |
 | 23. Ancilla Lifecycle Safety — Formal Verification | v3.0 | 0/? | Not started — added 2026-08-21 | — |
 
 **Phases 14-21 + 17.1 are complete — all 8 shipped and verified, all 37 requirements defined at that point satisfied. Phase 22 was added 2026-08-20 as additive v3.0 scope, so the milestone is no longer closed.** Phase 21 itself is fully closed: plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds and the `alejandro-jackson` case-study page is **pushed** (`origin/main` and local `main` at 0/0, verified 2026-08-20). A note added earlier that day calling the push an open loose end was stale and has been corrected.
