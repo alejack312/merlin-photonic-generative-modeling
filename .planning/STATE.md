@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
 status: Phase 22 scoped and roadmapped; MPAIR-01..06 defined in REQUIREMENTS.md (43 v1 requirements total, up from 37).
-stopped_at: Phase 22 planned — 6 plans, verification passed
-last_updated: "2026-08-21T01:05:56.437Z"
+stopped_at: Phase 22 planned (6 plans, verified); Phase 23 added
+last_updated: "2026-08-21T01:22:00.992Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 9
   total_plans: 47
   completed_plans: 41
-  percent: 87
+  percent: 82
 ---
 
 # Project State
@@ -238,8 +238,8 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 
 ## Session Continuity
 
-Last session: 2026-08-21T01:05:56.348Z
-Stopped at: Phase 22 planned — 6 plans, verification passed
+Last session: 2026-08-21T01:22:00.921Z
+Stopped at: Phase 22 planned (6 plans, verified); Phase 23 added
 
 Same session, earlier: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
 
