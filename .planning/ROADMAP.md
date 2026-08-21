@@ -319,7 +319,7 @@ Plans:
 
 **Depends on:** Nothing in v3.0 — additive and fully independent of Phases 14-21, none of which are reopened. Builds on Phase 16's ARB-09 Forge precedent (`forge/ancilla_mapping.frg`) for its non-vacuity and bitwidth-justification discipline, and on that model's 2026-08-20 audit for MPAIR-05's honesty requirement.
 **Requirements:** MPAIR-01, MPAIR-02, MPAIR-03, MPAIR-04, MPAIR-05, MPAIR-06, MPAIR-07
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 22-01-PLAN.md — MPAIR-07 evidence: numerical pooled-vs-dedicated ancilla-reuse probe + drafted verdict (wave 0)
@@ -327,9 +327,11 @@ Plans:
 - [x] 22-03-PLAN.md — MPAIR-02: owner confirms the compatibility rule and allocation concretization (wave 2)
 - [x] 22-04-PLAN.md — MPAIR-03/04: search-formulated Forge model, minimum-K over K_n, bitwidth + non-vacuity (wave 3)
 - [x] 22-05-PLAN.md — MPAIR-05: timed colouring-search baseline and the honest Forge-vs-brute-force verdict (wave 4)
-- [ ] 22-06-PLAN.md — MPAIR-06: specification section in docs/iqp-photonic-encoding.md + self-explanation checkpoint (wave 5)
+- [x] 22-06-PLAN.md — MPAIR-06: specification section in docs/iqp-photonic-encoding.md + self-explanation checkpoint (wave 5)
 
-**Progress: 1/6 plans complete.** Plan 22-01 shipped `mpair07_reuse_check.py` and `results/phase22_reuse_gate.md` with a DRAFTED GO verdict on MPAIR-07 (n=4 vertex-disjoint pooled-vs-dedicated TVD ~1e-14), plus a separately-documented, cross-validated (confirmed not-a-bug) finding that same-pair double-insertion breaks additive-theta composition independent of ancilla mode — flagged for the owner's attention at Plan 22-02's checkpoint. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-01-SUMMARY.md`.
+**Progress: 6/6 plans complete — Phase 22 is fully closed (2026-08-21).** Plan 22-06 recorded the verified pooled allocation scheme as a specification in `docs/iqp-photonic-encoding.md` (inverted source-of-truth direction, known-theorem honesty caveat, unsoftened Forge verdict) and transcribed the owner's live self-explanation checkpoint verbatim, including the Q1/Q2 first-pass conflation (MPAIR-07's physics comparison vs. MPAIR-02's combinatorial argument) and its correction. All seven MPAIR requirements (MPAIR-01..07) are Complete. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-06-SUMMARY.md`.
+
+Plan 22-01 shipped `mpair07_reuse_check.py` and `results/phase22_reuse_gate.md` with a DRAFTED GO verdict on MPAIR-07 (n=4 vertex-disjoint pooled-vs-dedicated TVD ~1e-14), plus a separately-documented, cross-validated (confirmed not-a-bug) finding that same-pair double-insertion breaks additive-theta composition independent of ancilla mode — flagged for the owner's attention at Plan 22-02's checkpoint. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-01-SUMMARY.md`.
 
 **Why this phase exists (context, 2026-08-20):** A survey of v3.0's actual discrete structures found no other real Forge candidate — most of v3.0 is continuous math (distributions, TVDs, gradients, curve fits), which Forge is categorically the wrong tool for, and the genuinely discrete parts (three ~168-case mode-mapping dicts, bit conventions at small `n`, a three-branch herald classifier) are all small enough that an exhaustive loop beats a solver. Multi-pair allocation looked like the single structure that outruns comfortable brute force. **Research (2026-08-20) partly overturned that premise and the phase was reshaped accordingly:** collision is an inherently *binary* predicate, so under any allocation that is a fixed function of a pair's own `(i,j)`, "no collision over every subset" is *exactly equivalent* (not weaker) to checking all `C(28,2)+28 = 406` pairwise cases at n=8 — well inside brute force, and the 2^28 framing above overstates what a fixed scheme actually requires. That finding is why the model was redirected to a **search** question (find the minimum ancilla-block count) rather than a verification one: verifying a given colouring is easy, but *finding* a minimum one is constraint satisfaction, which is what a SAT-backed model finder is genuinely for. MPAIR-05 still requires an honest timed verdict either way. It is also the exact gap the hardness study has: weight-1 has no entangling terms and therefore no hardness, and a single hardcoded `weight2_pair=(0, 1)` is barely better than none. The Forge-sized question and the research-gap-closing question turn out to be the same question — this phase takes the verification half only.
 
@@ -405,7 +407,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 19. Independent Julia Cross-Checks | v3.0 | 6/6 | Complete — verified 5/5, all 4 legs GO (1 real transpose bug found+fixed) | 2026-08-17 |
 | 20. Technical Write-Up | v3.0 | 4/4 | Complete — verified 6/6, HARD's alpha(eta) direction corrects an earlier speculative guess | 2026-08-18 |
 | 21. External-Facing Framing Pass | v3.0 | 2/2 | Complete — verified 5/5, owner verdict: "not promising, worth exploring further" | 2026-08-19 |
-| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 5/6 | In Progress|  |
+| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 6/6 | Complete   | 2026-08-21 |
 | 23. Ancilla Lifecycle Safety — Formal Verification | v3.0 | 0/? | Not started — added 2026-08-21 | — |
 
 **Phases 14-21 + 17.1 are complete — all 8 shipped and verified, all 37 requirements defined at that point satisfied. Phase 22 was added 2026-08-20 as additive v3.0 scope, so the milestone is no longer closed.** Phase 21 itself is fully closed: plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds and the `alejandro-jackson` case-study page is **pushed** (`origin/main` and local `main` at 0/0, verified 2026-08-20). A note added earlier that day calling the push an open loose end was stale and has been corrected.
