@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: Phase 22 scoped and roadmapped; MPAIR-01..06 defined in REQUIREMENTS.md (43 v1 requirements total, up from 37).
-stopped_at: Phase 22 planned (6 plans, verified); Phase 23 added
-last_updated: "2026-08-21T01:22:00.992Z"
+status: Phase 22 in progress — Plan 22-01 (MPAIR-07 evidence) shipped with a DRAFTED GO verdict; owner ruling pending at Plan 22-02.
+stopped_at: Phase 22 Plan 22-01 executed (MPAIR-07 evidence + drafted verdict); Plan 22-02 (owner ruling) next
+last_updated: "2026-08-21T02:00:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
-  total_plans: 47
-  completed_plans: 41
-  percent: 82
+  total_plans: 53
+  completed_plans: 43
+  percent: 81
 ---
 
 # Project State
@@ -24,11 +24,11 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **added 2026-08-20 as additive v3.0 scope, not yet planned**
-Plan: none yet. Next step: `/gsd-discuss-phase 22` (gather context) or `/gsd-plan-phase 22` (plan directly).
-Status: Phase 22 scoped and roadmapped; MPAIR-01..06 defined in REQUIREMENTS.md (43 v1 requirements total, up from 37).
+Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **in progress, Plan 22-01 executed 2026-08-21**
+Plan: 1/6 executed (22-01). Next step: Plan 22-02 (owner ruling on MPAIR-07's drafted verdict + NO-GO terminal branch check; on GO, MPAIR-02's prose invariant).
+Status: Plan 22-01 shipped `mpair07_reuse_check.py` and `results/phase22_reuse_gate.md`. Drafted verdict: **GO**, driven by the n=4 vertex-disjoint pooled-vs-dedicated TVD (`1.305e-14`/`2.899e-14`, both far inside the pre-committed `1e-9` threshold) — the configuration D-02's confirmed pooling scheme actually uses. A separate, real finding was also cross-validated and documented (not silently dropped): the plan's originally-designed n=2 same-pair "primary decisive probe" fails its own harness anchor (TVD 0.073/0.313) for reasons unrelated to ancilla reuse — confirmed not a coding bug via the same code cleanly anchoring at n=4 disjoint-pairs (~1e-15) — and is instead a data-port (not ancilla-port) composability limit specific to two sequential CP(alpha) insertions sharing a qubit pair, which D-02's vertex-disjointness rule never proposes pooling for anyway. **`MPAIR-07` left Pending in `REQUIREMENTS.md`, deliberately not marked Complete** — this plan produced the evidence half only; the requirement's actual gate resolution (the owner's ruling, per the requirement's own "must be a real branch with a stated stop condition" text) happens at Plan 22-02.
 Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
-Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written.
+Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
 
 Phases 14-21 remain shipped and unreopened. **Phase 21 is fully closed** — plan 21-01's checkpoint was approved after four owner-review rounds and the `alejandro-jackson` case-study page is pushed (0/0 with `origin/main`, verified 2026-08-20). The prior Phase 21 position is preserved verbatim below for continuity, but note it predates six further commits (`4fe7b71`..`14299cd`) and its "not pushed" statements are superseded.
 
