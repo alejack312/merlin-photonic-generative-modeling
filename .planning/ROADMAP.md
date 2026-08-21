@@ -319,11 +319,11 @@ Plans:
 
 **Depends on:** Nothing in v3.0 — additive and fully independent of Phases 14-21, none of which are reopened. Builds on Phase 16's ARB-09 Forge precedent (`forge/ancilla_mapping.frg`) for its non-vacuity and bitwidth-justification discipline, and on that model's 2026-08-20 audit for MPAIR-05's honesty requirement.
 **Requirements:** MPAIR-01, MPAIR-02, MPAIR-03, MPAIR-04, MPAIR-05, MPAIR-06, MPAIR-07
-**Plans:** 6 plans, waves 0-5 — created by `/gsd-plan-phase 22` on 2026-08-21. Sequential, not parallel (every plan depends on its predecessor). **Post-research reshape (2026-08-20):** MPAIR-01's owner-selection gate is now CLOSED (pooled/recycled, see `22-CONTEXT.md` D-02). A new **MPAIR-07 go/no-go physics gate runs first** and can invalidate the whole scheme — if deferred post-selection makes ancilla reuse physically invalid, pooling is moot and the honest outcome is to report that and stop. Only past that gate: MPAIR-02's invariant prose (which must state the pairwise-reduction argument), then the MPAIR-03/04 model — now posing a **search** question (minimum ancilla-block count / K_n edge-colouring) rather than verifying a fixed formula (D-05) — then MPAIR-05's baseline and MPAIR-06's write-up.
+**Plans:** 6 plans, waves 0-5 — created by `/gsd-plan-phase 22` on 2026-08-21. Sequential, not parallel (every plan depends on its predecessor). **Post-research reshape (2026-08-20):** MPAIR-01's owner-selection gate is now CLOSED (pooled/recycled, see `22-CONTEXT.md` D-02). A new **MPAIR-07 go/no-go physics gate runs first** and can invalidate the whole scheme — if deferred post-selection makes ancilla reuse physically invalid, pooling is moot and the honest outcome is to report that and stop. Only past that gate: MPAIR-02's invariant prose (which must state the pairwise-reduction argument), then the MPAIR-03/04 model — now posing a **search** question (minimum ancilla-block count / K_n edge-colouring) rather than verifying a fixed formula (D-05) — then MPAIR-05's baseline and MPAIR-06's write-up. **Plan 22-02 shipped 2026-08-21: owner ruled GO on MPAIR-07; MPAIR-02's prose invariant written.**
 
 Plans:
 - [x] 22-01-PLAN.md — MPAIR-07 evidence: numerical pooled-vs-dedicated ancilla-reuse probe + drafted verdict (wave 0)
-- [ ] 22-02-PLAN.md — MPAIR-07 owner ruling + NO-GO terminal branch; on GO, MPAIR-02's prose invariant (wave 1)
+- [x] 22-02-PLAN.md — MPAIR-07 owner ruling + NO-GO terminal branch; on GO, MPAIR-02's prose invariant (wave 1)
 - [ ] 22-03-PLAN.md — MPAIR-02: owner confirms the compatibility rule and allocation concretization (wave 2)
 - [ ] 22-04-PLAN.md — MPAIR-03/04: search-formulated Forge model, minimum-K over K_n, bitwidth + non-vacuity (wave 3)
 - [ ] 22-05-PLAN.md — MPAIR-05: timed colouring-search baseline and the honest Forge-vs-brute-force verdict (wave 4)
@@ -405,7 +405,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 19. Independent Julia Cross-Checks | v3.0 | 6/6 | Complete — verified 5/5, all 4 legs GO (1 real transpose bug found+fixed) | 2026-08-17 |
 | 20. Technical Write-Up | v3.0 | 4/4 | Complete — verified 6/6, HARD's alpha(eta) direction corrects an earlier speculative guess | 2026-08-18 |
 | 21. External-Facing Framing Pass | v3.0 | 2/2 | Complete — verified 5/5, owner verdict: "not promising, worth exploring further" | 2026-08-19 |
-| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 0/6 | Planned — 6 plans, waves 0-5, plan-checker PASSED | — |
+| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 2/6 | In Progress — owner ruled GO on MPAIR-07; MPAIR-02 invariant written | — |
 | 23. Ancilla Lifecycle Safety — Formal Verification | v3.0 | 0/? | Not started — added 2026-08-21 | — |
 
 **Phases 14-21 + 17.1 are complete — all 8 shipped and verified, all 37 requirements defined at that point satisfied. Phase 22 was added 2026-08-20 as additive v3.0 scope, so the milestone is no longer closed.** Phase 21 itself is fully closed: plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds and the `alejandro-jackson` case-study page is **pushed** (`origin/main` and local `main` at 0/0, verified 2026-08-20). A note added earlier that day calling the push an open loose end was stale and has been corrected.

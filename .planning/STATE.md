@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: Phase 22 in progress — Plan 22-01 (MPAIR-07 evidence) shipped with a DRAFTED GO verdict; owner ruling pending at Plan 22-02.
-stopped_at: Phase 22 Plan 22-01 executed (MPAIR-07 evidence + drafted verdict); Plan 22-02 (owner ruling) next
-last_updated: "2026-08-21T02:00:00.000Z"
+status: Phase 22 in progress — Plan 22-02 shipped (owner ruled GO on MPAIR-07; MPAIR-02's prose invariant written); Plan 22-03 next.
+stopped_at: Phase 22 Plan 22-02 executed (owner GO ruling + MPAIR-02 prose invariant); Plan 22-03 (owner review of compatibility rule) next
+last_updated: "2026-08-21T02:20:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 53
-  completed_plans: 43
-  percent: 81
+  completed_plans: 44
+  percent: 83
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 ## Current Position
 
-Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **in progress, Plan 22-01 executed 2026-08-21**
-Plan: 1/6 executed (22-01). Next step: Plan 22-02 (owner ruling on MPAIR-07's drafted verdict + NO-GO terminal branch check; on GO, MPAIR-02's prose invariant).
-Status: Plan 22-01 shipped `mpair07_reuse_check.py` and `results/phase22_reuse_gate.md`. Drafted verdict: **GO**, driven by the n=4 vertex-disjoint pooled-vs-dedicated TVD (`1.305e-14`/`2.899e-14`, both far inside the pre-committed `1e-9` threshold) — the configuration D-02's confirmed pooling scheme actually uses. A separate, real finding was also cross-validated and documented (not silently dropped): the plan's originally-designed n=2 same-pair "primary decisive probe" fails its own harness anchor (TVD 0.073/0.313) for reasons unrelated to ancilla reuse — confirmed not a coding bug via the same code cleanly anchoring at n=4 disjoint-pairs (~1e-15) — and is instead a data-port (not ancilla-port) composability limit specific to two sequential CP(alpha) insertions sharing a qubit pair, which D-02's vertex-disjointness rule never proposes pooling for anyway. **`MPAIR-07` left Pending in `REQUIREMENTS.md`, deliberately not marked Complete** — this plan produced the evidence half only; the requirement's actual gate resolution (the owner's ruling, per the requirement's own "must be a real branch with a stated stop condition" text) happens at Plan 22-02.
+Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **in progress, Plan 22-02 executed 2026-08-21**
+Plan: 2/6 executed (22-01, 22-02). Next step: Plan 22-03 (owner review of the vertex-disjointness compatibility rule, per `22-CONTEXT.md`'s deferred item; then Forge model construction).
+Status: Plan 22-02 recorded the owner's ruling on MPAIR-07 verbatim in `results/phase22_reuse_gate.md`'s new `## Owner ruling` section: **GO** (2026-08-21) — "Codex is unavailable until 8:00pm CEST, August 21st. Let's GO." Claude's drafted verdict above it was left unedited. Task 2 (the NO-GO terminal branch) was correctly skipped per the plan's own guard clause — no changes to `docs/iqp-photonic-encoding.md` or `.planning/REQUIREMENTS.md`. Task 3 shipped `results/phase22_allocation_invariant.md`, MPAIR-02's precise prose invariant (compatibility rule flagged Claude's Discretion and owed to the owner at Plan 22-03; round-robin edge-colouring formula for `K_n`; mode-index formula generalizing `_build_weight2_cp_processor_no_postselect`'s single-pair dict; bitwidth justification, `for 7 Int`/`[-64,63]`, largest index 43 at n=8; the two-conjunct invariant; the pairwise-reduction argument collapsing subset quantification to 406 pairwise cases at n=8; the Forge-model-as-search-not-verify framing per D-05; and the scope boundary against MPAIR-07's physics claim) — written before any Forge code exists, per MPAIR-02's requirement. `MPAIR-01`, `MPAIR-07`, and `MPAIR-02` are all now satisfied. `ls forge/` still lists only `ancilla_mapping.frg`; `venv/Scripts/python.exe -m pytest -q` reports 296 passed. Plans 22-03 through 22-06 are cleared to proceed. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-02-SUMMARY.md`.
 Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
 Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
 
