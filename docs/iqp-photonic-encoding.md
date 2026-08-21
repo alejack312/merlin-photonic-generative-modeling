@@ -570,6 +570,29 @@ This is the **second** time this project has reached a "Forge did not earn its p
 
 Also explicitly out of scope for this phase: no k-pair Python implementation exists, and no multi-ZZ hardness-under-loss re-run was performed — both are deliberately excluded (`.planning/REQUIREMENTS.md`'s "Out of Scope" table).
 
+### Self-Explanation Checkpoint (Phase 22)
+
+Four questions were put to the owner unaided, one round, with no answers or hints supplied in advance:
+
+1. Why does "no ancilla collision for every subset of simultaneously-active pairs" collapse to checking pairs of pairs, and what property of the allocation would have to be true for that collapse to be invalid?
+2. What did the MPAIR-07 gate actually test, mechanically — what differed between the two circuits that were compared, and why would a difference in their outputs have killed the whole pooling idea?
+3. Why is `for 6 Int` insufficient for this model when it was sufficient for `ancilla_mapping.frg`? What number drives that, and what would have happened if it had been copied forward?
+4. What does this phase NOT establish? Name at least two things.
+
+> **Owner's final answers, verbatim:**
+>
+> **Q1.** "By checking every possible pair of pairs with no collisions, then no group of any size can have a collision either. This is because we've checked the minimum case for possible collisions and there wasn't any. The allocation would have to be a greedy allocation for that collapse to be invalid."
+>
+> **Q2.** "MPAIR-07 is checking if the pooling scheme is physically invalid by comparing it to the dedicated scheme and seeing if results differ."
+>
+> **Q3.** "We need to use for 7 Int so that the highest ancilla mode index actually fits into the N-bit signed box."
+>
+> **Q4.** "We do not establish that reusing ancilla modes across sequential gates reproduces the same physics as dedicated ancilla." A second item was confirmed via a follow-up exchange: the owner acknowledged that checking at `n<=8` does not constitute a general proof for all `n`, and then asked, "But could we perform a proof by induction to prove it works for all n?" — a question demonstrating genuine grasp of the bounded-vs-general distinction. The answer given: yes, and this is exactly how the underlying König/Vizing theorem *is* proven in the literature, via a constructive/inductive argument, but Forge structurally cannot perform unbounded "for all n" reasoning since it is a bounded model finder over finite instances — which is why this phase's own contribution is the bounded constructive check, not a fresh proof.
+
+Q1 and Q2 required correction on the first pass. The owner's initial answers conflated MPAIR-07's physics/Perceval comparison (numerically checking whether pooled and dedicated ancilla wiring produce the same distribution) with MPAIR-02's combinatorial/Forge pairwise-reduction argument (why checking all pairs of pairs suffices to rule out collisions in any subset). This conflation was resolved through direct explanation of the distinction between the two before the corrected answers above were given. Recorded here as it happened, per this project's standing candor convention for self-explanation checkpoints.
+
+After this process, the owner confirmed they could explain the material to Vincent unaided.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
