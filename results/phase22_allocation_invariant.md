@@ -204,3 +204,17 @@ Any write-up language implying the Forge check "proves pooling is safe" rather t
 the chosen index-allocation scheme does not collide" is wrong. The two questions — does the
 index scheme collide, and does the physical reuse reproduce the intended physics — are
 independent, and this document addresses only the first.
+
+## Owner review (Plan 22-03)
+
+Date: 2026-08-21. Attributed to: the owner.
+
+> Option: confirm-both
+> Selected: "Confirm both (Recommended)" — confirms the vertex-disjoint compatibility rule (a) and the fixed round-robin allocation formula (b) as presented, via structured selection. No additional reasoning text was provided beyond the option selection.
+
+Since the ruling is `confirm-both`, no revision to `## Compatibility rule`,
+`## Allocation concretization: round-robin edge-colouring of K_n`, `## Mode-index formula`,
+`## Bitwidth justification`, or `## Pairwise-reduction argument` is needed — they already
+state (a) and (b) exactly as confirmed (written in Plan 22-02). This discharges
+`22-CONTEXT.md`'s flag-back obligation on the compatibility rule and `22-RESEARCH.md` Open
+Question 1 on the fixed-vs-dynamic concretization.
