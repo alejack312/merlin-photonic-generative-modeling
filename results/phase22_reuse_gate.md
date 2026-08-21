@@ -168,3 +168,12 @@ Plan 22-02 owns the stop decision.
   exhaustively root-caused at the amplitude level (e.g. no Kraus-operator decomposition was
   derived); it is reported as a measured, cross-validated (not-a-bug) numerical fact and a
   literature-consistent interpretation, not a formal proof.
+
+## Owner ruling
+
+**Date:** 2026-08-21
+**Ruled by:** the owner
+
+> Codex is unavailable until 8:00pm CEST, August 21st. Let's GO.
+
+**Ruling: GO.** The phase proceeds to MPAIR-02/03/04/05/06.
