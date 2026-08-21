@@ -407,7 +407,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 19. Independent Julia Cross-Checks | v3.0 | 6/6 | Complete — verified 5/5, all 4 legs GO (1 real transpose bug found+fixed) | 2026-08-17 |
 | 20. Technical Write-Up | v3.0 | 4/4 | Complete — verified 6/6, HARD's alpha(eta) direction corrects an earlier speculative guess | 2026-08-18 |
 | 21. External-Facing Framing Pass | v3.0 | 2/2 | Complete — verified 5/5, owner verdict: "not promising, worth exploring further" | 2026-08-19 |
-| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 6/6 | Complete   | 2026-08-21 |
+| 22. Multi-Pair Ancilla Allocation — Formal Verification | v3.0 | 6/6 | Complete    | 2026-08-21 |
 | 23. Ancilla Lifecycle Safety — Formal Verification | v3.0 | 0/? | Not started — added 2026-08-21 | — |
 
 **Phases 14-21 + 17.1 are complete — all 8 shipped and verified, all 37 requirements defined at that point satisfied. Phase 22 was added 2026-08-20 as additive v3.0 scope, so the milestone is no longer closed.** Phase 21 itself is fully closed: plan 21-01's `checkpoint:human-verify` was approved after four owner-review rounds and the `alejandro-jackson` case-study page is **pushed** (`origin/main` and local `main` at 0/0, verified 2026-08-20). A note added earlier that day calling the push an open loose end was stale and has been corrected.

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: planning
-stopped_at: "Phase 22 complete (Plan 22-06 executed: MPAIR specification + self-explanation checkpoint transcribed); next: Phase 23 (Ancilla Lifecycle Safety — Formal Verification, not yet planned)"
-last_updated: "2026-08-21T10:44:21.146Z"
+status: ready_to_plan
+stopped_at: Phase 22 complete (6/6) — ready to discuss Phase 23
+last_updated: 2026-08-21T11:27:16.112Z
 progress:
   total_phases: 11
   completed_phases: 10
   total_plans: 47
-  completed_plans: 47
+  completed_plans: 74
   percent: 91
 ---
 
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v1.0 shipped 2026-07-29. v2.0 (IQP → Photonic Encoding) shipped 2026-08-05. v2.1 (Weight-2 Implementation) shipped 2026-08-06. **v3.0 (IQP Circuit Study & Write-Up) roadmap created 2026-08-07** — 8 phases (14-21), 35 v1 requirements mapped, 100% coverage. Four decoupled/lightly-coupled tracks: Julia toolchain spike (14, earliest, stall-risk checkpoint), ARB-01 arbitrary-θ weight-2 gate (15-16), trainability/barren-plateau study (17), hardness-under-loss study (18, **complete 2026-08-17**), Julia cross-checks (19, **complete 2026-08-17**), write-up (20, **complete 2026-08-18**; 21 remaining). All four Must-have deliverables, no fallback ordering (owner's explicit call) — but STUDY-01/STUDY-02 explicitly do not block on ARB-01's open-research risk, per pitfalls research's highest-leverage finding.
+**Current focus:** Phase 23 — ancilla lifecycle safety — formal verification
 
 ## Current Position
 
-Phase: 22 (Multi-Pair Ancilla Allocation — Formal Verification) — **Complete, 2026-08-21**
-Plan: 6/6 executed (22-01, 22-02, 22-03, 22-04, 22-05, 22-06). Phase 22 is fully closed: all 7 MPAIR requirements (MPAIR-01..07) marked Complete in `.planning/REQUIREMENTS.md`. Next step: Phase 23 (Ancilla Lifecycle Safety — Formal Verification, LIFE-01..07) — not yet planned.
-Status: Plan 22-06 recorded the verified pooled allocation scheme as a specification for future implementation in `docs/iqp-photonic-encoding.md`'s new `## MPAIR: Pooled Multi-Pair Ancilla Allocation (Phase 22)` section (Task 1, commit `366a5bf`: inverted source-of-truth direction stated, known-theorem honesty caveat, unsoftened Forge verdict reproduced verbatim, scope boundary against MPAIR-07's physics ruling). Task 2 (commit `af92d7f`) transcribed the owner's live self-explanation checkpoint verbatim into a `### Self-Explanation Checkpoint (Phase 22)` subsection: four questions on the pairwise-reduction argument, MPAIR-07's mechanics, the `for 7 Int` bitwidth, and the phase's scope boundary. The transcription records honestly that Q1 and Q2 required correction on the first pass — the owner's initial answers conflated MPAIR-07's numerical physics comparison (pooled vs. dedicated ancilla wiring, TVD against an exact reference) with MPAIR-02's combinatorial pairwise-reduction argument (why checking all pairs of pairs suffices for collision-freedom) — resolved through direct explanation before the corrected answers were given. Q4's second item was confirmed via a follow-up exchange in which the owner recognized bounded checking (`n<=8`) does not constitute a general proof and asked about an inductive argument, demonstrating genuine grasp of the bounded-vs-general distinction. The owner confirmed they could explain the material to Vincent unaided. `venv/Scripts/python.exe -m pytest -q` reports 296 passed. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-06-SUMMARY.md`.
+Phase: 23
+Plan: Not started
+Status: Ready to plan
 
 **Prior (Plan 22-05):** shipped `pooled_allocation_baseline.py` (a hand-rolled greedy + backtracking-DFS minimum-colouring SEARCH, not a verification loop, per D-05's correction) and `results/phase22_forge_summary.md` (the honest Forge-vs-brute-force comparison and verdict, MPAIR-05). The backtracking search agrees with Forge's minimum K exactly at every n Forge reached (K=3 at n=4, K=5 at n=5, K=5 at n=6) — no disagreement. It additionally solves n=7 (K=7, 2.284s) and n=8 (K=7, 0.006s), both beyond Forge's converging bound, where Forge's own isolated n=7 probe was killed at ~610s with zero blocks resolved. **Verdict, quoted verbatim for Plan 22-06 to reproduce without softening:** *"A few hundred lines of backtracking Python reached the same minimum faster, and reached further, than Forge's SAT-backed exhaustive search."* At the domain both converge on (n=4..6), Forge is measured ~123,000x slower than the Python search (~369s vs ~0.003s). The round-robin closed-form formula from `results/phase22_allocation_invariant.md` was independently reimplemented and checked proper (`round_robin_proper=True`) at every n from 2 to 8, matching the `n-1`/`n` König/Vizing chromatic-index formula throughout. Graded on the corrected MPAIR-05 axis (criteria (a)-(d), not brute-force timing — `REQUIREMENTS.md`'s 2026-08-21 correction note, applied here as a mid-phase correction stated plainly rather than silently backdated): (a) no scenario found that wasn't already enumerated in prose; (b) no, this is a static property, not trace/reachability (that's Phase 23's LIFE-01..07); (c) yes, modestly; (d) yes — no Python implements pooled allocation yet, so this verifies a design before it's built. A SECONDARY naive subset-enumeration scan (explicitly labelled, not the primary comparison) confirms the original `2^28`-subset framing genuinely would be intractable at n=8 (only 6.7% covered in the 600s ceiling), which is what licenses the pairwise reduction both tools actually use. One self-caught, pre-commit deviation ([Rule 1 - Bug]): the first `naive_subset_scan` implementation was too slow to measure what it claimed to measure (70% of n=7's subsets checked in 60s); rewritten to bitmask iteration with a 20000-iteration time-poll interval before any commit. `venv/Scripts/python.exe -m pytest -q` reports 296 passed (unchanged); `grep -rn "pooled_allocation_baseline" tests/` is empty. Commits: `c1d2c71` (baseline script), `fde0178` (comparison doc). See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-05-SUMMARY.md`.
 
