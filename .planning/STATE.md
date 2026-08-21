@@ -38,6 +38,12 @@ Status: Ready to plan
 Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
 Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
 
+**Phase 22 close-out gates (2026-08-21):** `gsd-code-review` ran against the phase's 7 changed source files (`22-REVIEW.md`, commit `d9a97ed`) — status `issues_found`, 0 critical, 2 warning, 4 info, non-blocking. Open, unresolved as of phase close:
+- **WR-01:** `mpair07_reuse_check.py`'s bystander/residual code path (`postselected_distribution` lines 209-225) is never exercised by either probe actually run (`run_probe_n2`, `run_probe_n4`) — every qubit is gate-touched in both, so `residual` is structurally always `0.0`. Half of the pre-committed harness anchor (`residual_dedicated <= 1e-9`) provides no real signal, and this path is untested for any future k>=3-pair or bystander-qubit extension.
+- **WR-02:** The `--alpha` CLI flag in `mpair07_reuse_check.py` is accepted but silently discarded by both probe functions — misleading if a future user tries to override it.
+
+Neither blocks Phase 22's completion (both probes' actual claims — the harness anchor's TVD component and the pooled-vs-dedicated comparison — are unaffected). Worth fixing before this script is reused or extended, e.g. if Phase 23 or a future k>=3 study builds on it. `gsd-verifier` independently confirmed all 6 ROADMAP success criteria pass regardless (`22-VERIFICATION.md`, commit `23742d7`).
+
 Phases 14-21 remain shipped and unreopened. **Phase 21 is fully closed** — plan 21-01's checkpoint was approved after four owner-review rounds and the `alejandro-jackson` case-study page is pushed (0/0 with `origin/main`, verified 2026-08-20). The prior Phase 21 position is preserved verbatim below for continuity, but note it predates six further commits (`4fe7b71`..`14299cd`) and its "not pushed" statements are superseded.
 
 ---
