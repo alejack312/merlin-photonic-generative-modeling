@@ -518,6 +518,58 @@ Of the 11 baselines named in `.planning/REQUIREMENTS.md`'s WRITE-02, only one be
 
 The other 10 named WRITE-02 baselines — McClean et al., Aaronson-Brod (arXiv:1510.05245), arXiv:2510.24137 (Park & Oh), `docs/iqp-baseline.md`'s own empirical rule, Bremner-Montanaro-Shepherd 2015 (arXiv:1504.07999) and 2017 (arXiv:1610.01808), Rudolph et al. (arXiv:2305.02881), Mhiri et al. (arXiv:2502.07889), Recio-Armengol et al. (arXiv:2503.02934), and Herbst et al. (arXiv:2512.24801) — are trainability and/or hardness-under-noise papers. None of them make a claim about gate construction, success probability, or postselection mechanics, which is what ARB-01/ARB-02 actually establishes. None are silently omitted here: all 10 are named explicitly and marked not applicable to this section's claim, rather than left out of the table. Readers looking for where these 10 baselines DO apply should consult `docs/trainability-study.md`'s and `docs/hardness-under-loss-study.md`'s own literature comparison tables, which cover this same list of baselines against those documents' trainability and hardness-under-loss claims respectively.
 
+## MPAIR: Pooled Multi-Pair Ancilla Allocation (Phase 22)
+
+### What this specifies
+
+This section records the pooled/recycled multi-pair ancilla allocation scheme: rather than every pair `(i,j)` receiving its own disjoint 4-mode ancilla block, ancilla modes are **shared (pooled) across pairs that do not share a qubit index**, and only allocated per-block, not per-pair.
+
+**Compatibility rule.** Two pairs `(i,j)` and `(i',j')` may share the same ancilla block if and only if `{i,j} ∩ {i',j'} = ∅` — i.e. they are vertex-disjoint. Pairs that share a qubit index are always simultaneously active whenever both are selected (this codebase's diagonal ZZ terms commute and both legitimately apply), so they can never be treated as mutually-exclusive users of one physical block.
+
+**Round-robin edge-colouring formula.** For odd `n`: `colour(i,j) = (i + j) mod n`, using `K = n` blocks. For even `n`: let `m = n - 1` (odd); for `i, j < m`, `colour(i,j) = (i + j) mod m`; for the last vertex, `colour(i, n-1) = (2i) mod m`; using `K = m = n - 1` blocks. This is a fixed, pure function of a pair's own `(i,j)` — it does not depend on which other pairs are active.
+
+**Mode-index formula.** A pair assigned block `c` occupies ancilla modes `2n+4c`, `2n+4c+1`, `2n+4c+2`, `2n+4c+3`. This **generalizes** `_build_weight2_cp_processor_no_postselect`'s existing single-pair tail-ancilla mapping dict (`{2n:4, 2n+1:5, 2n+2:6, 2n+3:7}`, `iqp_photonic_encoding.py` lines 632-637) — that dict is exactly the `c = 0` case of this formula, a `K = 1` degenerate instance, not something this scheme replaces.
+
+**Concrete payoff at `n=8`:** pooled allocation costs `2*8 + 4*7 = 44` modes (`K = n - 1 = 7` at even `n = 8`) versus `2*8 + 4*28 = 128` modes under contiguous per-pair allocation (`C(8,2) = 28` pairs). Mode count grows with the number of colour blocks (`K = O(n)`) rather than with the number of pairs (`C(n,2) = O(n²)`).
+
+Full derivation, the vertex-sharing argument, and the even-`n` construction proof: `results/phase22_allocation_invariant.md`.
+
+### No Python implements this — the direction of truth is inverted
+
+**No Python implements this scheme.** No code in `iqp_photonic_encoding.py` implements a k-pair pooled circuit. This scheme is a specification, not a description of shipped behaviour. `forge/pooled_ancilla_allocation.frg`, together with `results/phase22_allocation_invariant.md`'s prose invariant, is therefore the **source of truth** any future implementation must be checked against — the model was written and verified before any Python exists to drift from it.
+
+This is the direct opposite of the Phase 16 Forge section above (`### Forge Verification of the Ancilla Mode-Mapping (Phase 16)`). That model **re-states** an already-shipped Python formula, with nothing linking the two, and carries a standing manual drift warning as a result ("Treat that as a manual re-check to repeat if the mapping ever changes, not as an automated guarantee"). Here the risk runs the other direction: there is no shipped Python to drift *from* yet, so there is nothing to re-check for drift. The drift-warning language from the Phase 16 section does not apply here and is deliberately not copied forward — the correct framing for this section is "implement against the model," not "keep the model in sync with the code."
+
+### What was checked, and how
+
+Per `22-CONTEXT.md` D-05, the Forge model poses a **search** question, not a verification one: *does an assignment of at most `K` ancilla blocks to all `C(n,2)` pairs of `K_n` exist such that no two vertex-sharing pairs collide, and what is the minimum such `K`?* `Alloc.block` is a free relation the solver searches over; the round-robin formula above is the independently-constructed witness whose colour count the search's minimum must agree with, not an input constraint on the search.
+
+The search converged at `n=4,5,6` (minimum `K` found: 3, 5, 5 — matching the round-robin formula exactly at every converged `n`), and timed out at `n=7` (killed at ~610s against a 10-minute ceiling, zero blocks resolved); `n=8` was not separately attempted. Each converged `n` ran a two-part `test expect` suite inherited from Phase 16's discipline (`nonVacuous<N>`, `colouringExists<N>`, `minimality<N>`, `dataPortDisjoint<N>`), with the non-vacuity guard **strengthened** for this set-valued model to require two mutually-compatible pairs that actually share a block — the weaker `some active`-style guard used elsewhere in this codebase would pass vacuously on a single-pair instance and never exercise the pooling behaviour this phase exists to test. Forge bitwidth: `for 7 Int` (signed range `[-64, 63]`), justified against the largest ancilla mode index the model computes — `2*8 + 4*6 + 3 = 43` at `n=8` — with `43` at `n=8` the concrete number driving that choice.
+
+**Pairwise-reduction argument.** Collision is a binary predicate: whether the allocation collides is entirely determined pairwise, two pairs at a time, with no three-or-more-way interaction (unlike a *capacity* constraint, where three simultaneously-active items could jointly violate a bound none of them violates alone). Provided the block assignment is a pure function of each pair's own identity — which the round-robin formula satisfies — "no collision over every subset of simultaneously-active pairs" is **exactly equivalent, not weaker,** to "no collision over every pair of pairs." This is what licenses not literally enumerating the `2^28` subsets the original framing worried about at `n=8`; it collapses to `C(28,2) + 28 = 406` pairwise cases instead.
+
+Full timing tables, per-`n` breakdowns, and the verbatim Forge output are in `results/phase22_forge_summary.md` and `results/phase22_forge_run_log.md`.
+
+### This confirms known combinatorics — stated plainly
+
+The chromatic index of a complete graph `K_n` is a **known theorem**: `n-1` for even `n`, `n` for odd `n` (König/Vizing). What this phase produced is a machine-checked, constructive confirmation of that theorem at bounded `n` (Forge's independent search agreeing with the round-robin witness at every `n` it reached), plus a concrete colouring an implementation can use directly — **not** a new mathematical result, and **not** a settled open problem. This is stated here as a plain fact, not a hedge buried in a clause.
+
+### What Forge alone added — stated honestly
+
+Verbatim from `results/phase22_forge_summary.md`: **"A few hundred lines of backtracking Python reached the same minimum faster, and reached further, than Forge's SAT-backed exhaustive search."**
+
+At the domain both tools solved (`n=4..6`), Forge took ~369s total wall time against the Python backtracking search's ~0.003s — Forge is roughly 123,000x slower, not faster. At `n=7`, Forge's exhaustive SAT-backed search hit the 10-minute ceiling with zero blocks resolved, while the Python backtracking search solved `n=7` in 2.28s and `n=8` in 0.006s. Agreement between the two tools is exact at every `n` Forge reached — no disagreement to report — but the Python search additionally reaches `n=7` and `n=8`, both beyond Forge's converging bound.
+
+This is the **second** time this project has reached a "Forge did not earn its place at this scale" verdict — the first being `forge/ancilla_mapping.frg`'s own 2026-08-20 audit for the single-pair model (see `### Forge Verification of the Ancilla Mode-Mapping (Phase 16)` above). Per `.planning/REQUIREMENTS.md`'s MPAIR-05 wording, *"A 'Forge did not earn its place here either' verdict satisfies this requirement"* — this is recorded here as a passing outcome, not a failure, and the comparison is not softened or reframed to flatter the tool.
+
+### What this does and does not establish
+
+**Does establish:** the minimum ancilla-block count (`K`) and a concrete, collision-free colouring assigning each pair a block, at bounded `n` (verified `n=4,5,6`; round-robin formula stated for all `n`), for ancilla mode-**index** bookkeeping purposes only.
+
+**Does NOT establish:** that reusing those physical ancilla modes across sequentially-composed `CP(α)` unitaries reproduces the same physics as dedicated per-pair ancilla. That is a separate, independently necessary condition — a unitarity/physics claim categorically outside what a bounded model finder can check, the same tool-category boundary `16-CONTEXT.md` already drew around Forge for the single-pair case. It was settled separately, by **MPAIR-07**: see `results/phase22_reuse_gate.md` and its `## Owner ruling` section (owner ruled **GO**, 2026-08-21, based on the `n=4` vertex-disjoint probe's numerical evidence — `tvd_pooled_vs_dedicated` of `1.305e-14`/`2.899e-14`, both far inside the `1e-9` GO threshold). Any language implying this section, or `forge/pooled_ancilla_allocation.frg`, "proves pooling is safe" rather than "proves the chosen index-allocation scheme does not collide" is wrong — the two questions are independent.
+
+Also explicitly out of scope for this phase: no k-pair Python implementation exists, and no multi-ZZ hardness-under-loss re-run was performed — both are deliberately excluded (`.planning/REQUIREMENTS.md`'s "Out of Scope" table).
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
