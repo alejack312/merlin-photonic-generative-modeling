@@ -40,3 +40,26 @@ Date: 2026-08-22 · Scope: project · Recurs when: a formal model evaluates pool
 - `.planning/phases/23-ancilla-lifecycle-safety-formal-verification/23-CONTEXT.md` — captured locked Phase 23 decisions.
 - `.planning/phases/23-ancilla-lifecycle-safety-formal-verification/23-DISCUSSION-LOG.md` — preserved alternatives and selections.
 - `.planning/STATE.md` — recorded the completed context session.
+
+## Addendum — 2026-08-22 Phase 23 planning
+
+### Approach
+1. Treat `23-CONTEXT.md` as the locked design contract after the owner chose explicit relational `State.next` traces, strict deferred post-selection, and separate safe/unsafe witnesses.
+2. Use three waves: model (`LIFE-01..04`), real Forge evidence and traces (`LIFE-02..05`), then synthesis/documentation/owner review (`LIFE-05..07`).
+3. Require raw solver output plus a readable trace table; never accept a scalar Forge verdict where the requirement asks for a trace.
+
+### Decision rules that generalize
+- IF a phase has both structural and numerical evidence, THEN make the cross-check a separate artifact and name each method's claim boundary.
+- IF a plan requires an owner interpretation, THEN place the blocking checkpoint before requirement status and canonical docs are closed.
+- IF automated plan checking times out, THEN report that gate as unavailable and run deterministic local checks; do not label the checker as passed.
+
+### Verification
+- `23-RESEARCH.md` was produced from the Phase 22 and CS1710 local precedents; it verified the intended Forge 5.2/Racket 8.15 approach.
+- Three plan frontmatters and required sections were checked locally; all LIFE-01..07 claims are present.
+- `gsd-tools gap-analysis --phase-dir .planning/phases/23-ancilla-lifecycle-safety-formal-verification` marked all seven LIFE requirements covered (the tool also listed unrelated requirements because it is not phase-filtered).
+- `git diff --check` passed. Planning commit: `09c9d17`.
+
+### Next time (for a weaker model)
+- Do: load the phase context and prior-phase evidence before choosing waves; preserve the owner’s semantics exactly.
+- Do: keep research, plan-checker, and local deterministic fallback outcomes distinct in the handoff.
+- Don't: claim a timed-out subagent or checker completed successfully.
