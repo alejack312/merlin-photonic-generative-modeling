@@ -1,7 +1,7 @@
 # Phase 23: Ancilla Lifecycle Safety - Formal Verification - Research
 
-**Researched:** 2026-08-22  
-**Domain:** Relational Forge bounded trace modeling for CP(alpha) ancilla lifecycle safety  
+**Researched:** 2026-08-22
+**Domain:** Relational Forge bounded trace modeling for CP(alpha) ancilla lifecycle safety
 **Confidence:** HIGH for local Forge syntax and project constraints; MEDIUM for expected Phase 23 solver bounds until the lifecycle model is measured.
 
 <user_constraints>
@@ -534,5 +534,5 @@ This phase is local formal-methods work with no network service, no authenticati
 - Architecture: HIGH - locked by Phase 23 context and local Forge trace examples.
 - Pitfalls: HIGH for scope/bitwidth/invocation pitfalls already observed in Phase 16/22; MEDIUM for expected Phase 23 runtime until measured.
 
-**Research date:** 2026-08-22  
+**Research date:** 2026-08-22
 **Valid until:** 2026-09-21 for local syntax/tooling; re-check immediately if Forge/Racket versions or Phase 23 locked decisions change.
