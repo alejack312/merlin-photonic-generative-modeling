@@ -354,7 +354,22 @@ Plan 22-01 shipped `mpair07_reuse_check.py` and `results/phase22_reuse_gate.md` 
 **Depends on:** Phase 22 (MPAIR-07's numerical reuse verdict is what LIFE-05 cross-checks against; Phase 22's minimum-K result is what LIFE-06 asks whether lifetime constraints change). Does not require Phase 22's Forge model to have succeeded — a Phase 22 NO-GO makes this phase *more* interesting, not moot, since it would explain structurally why reuse fails.
 
 **Requirements:** LIFE-01, LIFE-02, LIFE-03, LIFE-04, LIFE-05, LIFE-06, LIFE-07
-**Plans:** TBD — created by `/gsd-plan-phase 23`.
+**Plans:** 3 plans (3 waves — 23-02 depends on 23-01; 23-03 depends on 23-02)
+
+Plans:
+
+- [ ] 23-01-PLAN.md — Explicit relational State/next lifecycle model, strict deferred-postselection transitions, and safe/unsafe witness predicates (LIFE-01..04)
+- [ ] 23-02-PLAN.md — Bounded Forge execution, raw run log, readable traces, and Phase 22 numerical cross-check record (LIFE-02..05)
+- [ ] 23-03-PLAN.md — Static-vs-temporal synthesis, owner interpretation checkpoint, canonical documentation, and requirement closeout (LIFE-05..07)
+
+**Wave 1:** 23-01 — lifecycle model
+**Wave 2** *(blocked on Wave 1 completion)*: 23-02 — execution evidence and traces
+**Wave 3** *(blocked on Wave 2 completion)*: 23-03 — synthesis, owner review, and documentation
+
+**Cross-cutting constraints:**
+- Explicit relational `State.next` traces, not Temporal Forge
+- Strict deferred post-selection; no mid-circuit collection
+- Keep Phase 22 static allocation and numerical physics claims separate from Phase 23 temporal lifecycle claims
 
 **Why this phase exists (2026-08-21).** A review of the owner's own CS1710 (Logic for Systems) coursework — the course this Forge toolchain comes from — corrected a standing mis-grading in this project. Both ARB-09's audit and MPAIR-05 as originally written judged Forge on *"does it beat brute force on an intractable domain."* None of CS1710's own models meet that bar either: hotel locking runs at 3 rooms / 3 guests / 8 time steps, and goats-and-wolves is a river-crossing puzzle a BFS solves in milliseconds. What those models actually buy is finding the scenario you would not think to enumerate, properties over traces and reachability, the model as precise specification, and verifying a design before building it.
 
