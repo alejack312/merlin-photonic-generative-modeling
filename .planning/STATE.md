@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: ready_to_plan
-stopped_at: Phase 22 complete (6/6) — ready to discuss Phase 23
-last_updated: 2026-08-21T11:27:16.112Z
+status: planning
+stopped_at: Phase 23 context gathered
+last_updated: "2026-08-22T14:44:46.037Z"
 progress:
   total_phases: 11
   completed_phases: 10
   total_plans: 47
-  completed_plans: 74
+  completed_plans: 47
   percent: 91
 ---
 
@@ -39,6 +39,7 @@ Scope boundary: verification only — Python k-pair implementation and the multi
 Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
 
 **Phase 22 close-out gates (2026-08-21):** `gsd-code-review` ran against the phase's 7 changed source files (`22-REVIEW.md`, commit `d9a97ed`) — status `issues_found`, 0 critical, 2 warning, 4 info, non-blocking. Open, unresolved as of phase close:
+
 - **WR-01:** `mpair07_reuse_check.py`'s bystander/residual code path (`postselected_distribution` lines 209-225) is never exercised by either probe actually run (`run_probe_n2`, `run_probe_n4`) — every qubit is gate-touched in both, so `residual` is structurally always `0.0`. Half of the pre-committed harness anchor (`residual_dedicated <= 1e-9`) provides no real signal, and this path is untested for any future k>=3-pair or bystander-qubit extension.
 - **WR-02:** The `--alpha` CLI flag in `mpair07_reuse_check.py` is accepted but silently discarded by both probe functions — misleading if a future user tries to override it.
 
@@ -256,8 +257,8 @@ None open yet for v3.0 execution otherwise. Watch items carried into execution:
 
 ## Session Continuity
 
-Last session: 2026-08-21T03:47:14.024Z
-Stopped at: Plan 22-04 executed (Forge model + run log shipped, n=6 converged, n=7 hit D-04 ceiling); next: Plan 22-05
+Last session: 2026-08-22T14:44:45.839Z
+Stopped at: Phase 23 context gathered
 
 Same session, earlier: **`/gsd-extract-learnings` run across all 21 phases.** One `{NN}-LEARNINGS.md` written per phase directory (v1.0 through v3.0, including the decimal-inserted 17.1) — 361 items total: 117 decisions, 83 lessons, 88 patterns, 73 surprises, each carrying source attribution back to a specific PLAN/SUMMARY/VERIFICATION/UAT file. Extraction was delegated per-phase to subagents because the full artifact set is ~1.5 MB / ~394k tokens, larger than a single context. Committed and pushed (`3999980`).
 
