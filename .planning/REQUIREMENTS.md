@@ -78,13 +78,13 @@ All requirements below are Must-have for this milestone — owner's explicit, tw
 
 *Idiom source: the owner's own CS1710 memory-management work (`cs1710/hw/cs1710-memory-management-alejack312/stop_and_copy.frg` and `mark_and_sweep.frg`) — ancilla pooling is a memory-allocation-and-reuse problem, and "is this mode free yet?" is a liveness/collection question.*
 
-- [ ] **LIFE-01**: Ancilla modes modeled as allocatable cells with an explicit lifecycle (free -> allocated -> in-use -> releasable) across a *sequence* of CP(alpha) gate applications, following the `stop_and_copy.frg` / `mark_and_sweep.frg` idiom (explicit `State` sig in relational Forge, or `#lang forge/temporal` — the choice is a discuss-phase decision, not pre-locked here).
-- [ ] **LIFE-02**: Safety property — no ancilla mode is reallocated to a later gate while still live from an earlier one. **A counterexample must be a trace** (a sequence of gate applications that silently clobbers an in-use ancilla), not a number — this is the "scenario you wouldn't think to enumerate" case that MPAIR-05's corrected criterion identifies as Forge's actual contribution.
-- [ ] **LIFE-03**: The deferred-post-selection constraint encoded explicitly — collection cannot occur mid-circuit (`Processor.set_postselection()` rejects conditions on modes a later component touches), so a mode becomes releasable only at the final post-selection. This is the constraint that distinguishes this from a textbook allocator, and is the structural counterpart of Phase 22's MPAIR-07 numerical probe.
-- [ ] **LIFE-04**: Non-vacuity — an instance exists with at least 2 sequential gates and at least one genuine mode reuse, conjoined with the safety property holding (a witness that reuses but is unsafe proves nothing).
-- [ ] **LIFE-05**: Cross-check the model's structural verdict against Phase 22's MPAIR-07 *numerical* verdict. These are independent methods answering the same question (one measures amplitudes, one reasons about lifecycle structure) — agreement strengthens both; disagreement is a finding to report and investigate, never to reconcile by assumption. Follows this project's established independent-cross-check precedent (VERIFY-01..04, Julia vs Python).
-- [ ] **LIFE-06**: State whether the safe-reuse constraint *changes* Phase 22's minimum-block-count result — if lifetime constraints make the conflict structure something other than K_n's line graph, the minimum colouring may differ from the Koenig/Vizing value and the combinatorics genuinely harden (minimum edge colouring is NP-hard for general graphs, Holyer 1981). Report either way.
-- [ ] **LIFE-07**: Findings folded into `docs/iqp-photonic-encoding.md` alongside Phase 22's section, stating plainly what the lifecycle model does and does not establish.
+- [x] **LIFE-01**: Ancilla modes modeled as allocatable cells with an explicit lifecycle (free -> allocated -> in-use -> releasable) across a *sequence* of CP(alpha) gate applications, following the `stop_and_copy.frg` / `mark_and_sweep.frg` idiom (explicit `State` sig in relational Forge, or `#lang forge/temporal` — the choice is a discuss-phase decision, not pre-locked here).
+- [x] **LIFE-02**: Safety property — no ancilla mode is reallocated to a later gate while still live from an earlier one. **A counterexample must be a trace** (a sequence of gate applications that silently clobbers an in-use ancilla), not a number — this is the "scenario you wouldn't think to enumerate" case that MPAIR-05's corrected criterion identifies as Forge's actual contribution.
+- [x] **LIFE-03**: The deferred-post-selection constraint encoded explicitly — collection cannot occur mid-circuit (`Processor.set_postselection()` rejects conditions on modes a later component touches), so a mode becomes releasable only at the final post-selection. This is the constraint that distinguishes this from a textbook allocator, and is the structural counterpart of Phase 22's MPAIR-07 numerical probe.
+- [x] **LIFE-04**: Non-vacuity — an instance exists with at least 2 sequential gates and at least one genuine mode reuse, conjoined with the safety property holding (a witness that reuses but is unsafe proves nothing).
+- [x] **LIFE-05**: Cross-check the model's structural verdict against Phase 22's MPAIR-07 *numerical* verdict. These are independent methods answering the same question (one measures amplitudes, one reasons about lifecycle structure) — agreement strengthens both; disagreement is a finding to report and investigate, never to reconcile by assumption. Follows this project's established independent-cross-check precedent (VERIFY-01..04, Julia vs Python).
+- [x] **LIFE-06**: State whether the safe-reuse constraint *changes* Phase 22's minimum-block-count result — if lifetime constraints make the conflict structure something other than K_n's line graph, the minimum colouring may differ from the Koenig/Vizing value and the combinatorics genuinely harden (minimum edge colouring is NP-hard for general graphs, Holyer 1981). Report either way.
+- [x] **LIFE-07**: Findings folded into `docs/iqp-photonic-encoding.md` alongside Phase 22's section, stating plainly what the lifecycle model does and does not establish.
 
 ## v2 Requirements
 
@@ -168,13 +168,13 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 | MPAIR-05 | 22 - Multi-Pair Ancilla Allocation (Forge) | Complete |
 | MPAIR-06 | 22 - Multi-Pair Ancilla Allocation (Forge) | Complete |
 | MPAIR-07 | 22 - Multi-Pair Ancilla Allocation (Forge) | Complete |
-| LIFE-01 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-02 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-03 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-04 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-05 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-06 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
-| LIFE-07 | 23 - Ancilla Lifecycle Safety (Forge) | Pending |
+| LIFE-01 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-02 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-03 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-04 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-05 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-06 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
+| LIFE-07 | 23 - Ancilla Lifecycle Safety (Forge) | Complete |
 
 **Coverage:**
 - v1 requirements: **51 total** (TRAIN: 10, HARD: 7, ARB: 9, VERIFY: 4, WRITE: 7, MPAIR: 7, LIFE: 7). Note: this file's summary line previously stated "34 total" then corrected to "35 total" (8+7+9+4+7=35, arithmetic-error fix during roadmap creation); now 37 following the 2026-08-12 addition of TRAIN-09/TRAIN-10 (see below) — a real scope addition, not an arithmetic correction.
@@ -183,7 +183,7 @@ Which phases cover which requirements. Populated during roadmap creation (2026-0
 
 ---
 *Requirements defined: 2026-08-07*
-*Last updated: 2026-08-21 — MPAIR-06 marked Complete (Phase 22 Plan 06, Task 1): the verified pooled multi-pair ancilla allocation scheme recorded as a specification in `docs/iqp-photonic-encoding.md`. MPAIR-01 through MPAIR-07 are now all Complete. 51 v1 requirements total (TRAIN 10, HARD 7, ARB 9, VERIFY 4, WRITE 7, MPAIR 7, LIFE 7); 44 Complete, 7 Pending (all LIFE-01..07, Phase 23, not yet started).*
+*Last updated: 2026-08-22 — LIFE-01 through LIFE-07 marked Complete after the bounded Forge lifecycle evidence, Phase 22 numerical cross-check, canonical documentation, and owner interpretation review. 51 v1 requirements total (TRAIN 10, HARD 7, ARB 9, VERIFY 4, WRITE 7, MPAIR 7, LIFE 7); 51 Complete, 0 Pending.*
 *Prior update: 2026-08-20 — added MPAIR-01..07 (Phase 22, Multi-Pair Ancilla Allocation — Formal Verification), owner-authorized as additive v3.0 scope rather than a new milestone. 44 v1 requirements total, up from 37; 37 Complete, 7 Pending. Phases 14-21 remain shipped and unreopened.*
 *Prior update: 2026-08-19 — WRITE-07 (Phase 21, External-Facing Framing Pass) marked Complete. All 37 v1 requirements defined at that point were Complete — 37/37, 0 Pending.*
 *Prior update: 2026-08-12 (later same day) — added TRAIN-09 and TRAIN-10, owner-authorized follow-up experiments to Phase 17's trainability study, discovered via a fresh direct read of 8 literature papers (owner's explicit instruction not to rely on the sibling project's secondhand vault notes). TRAIN-09 tests whether Phase 17's fixed MMD bandwidth (not just circuit/init) is itself sufficient to produce the measured exponential-decay signature (Rudolph et al., arXiv:2305.02881). TRAIN-10 tests a literature-sourced data-dependent initialization (Recio-Armengol et al., arXiv:2503.02934) as a real alternative to the inconclusive `small_angle` scheme. Both mapped to a new inserted phase, 17.1 (see ROADMAP.md), rather than reopening the already-shipped, already-verified Phase 17 itself. Earlier same-day update: traceability table's TRAIN-01..08 rows corrected from "Pending" to "Complete" (Phase 17 finished and verified 2026-08-11; flagged by gsd-verifier during Phase 17's own verification pass, fixed same day). Dual-rail/MerLin exploration work done after Phase 17 closed (see docs/trainability-study.md's "Independent cross-check" section, .planning/STATE.md) remains explicitly supplementary and separate from TRAIN-09/10.*

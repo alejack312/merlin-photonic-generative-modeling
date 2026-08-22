@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: planning
-stopped_at: Phase 23 planned
-last_updated: "2026-08-22T18:30:00.000Z"
+status: milestone_complete
+stopped_at: Milestone complete (Phase 23 was final phase)
+last_updated: 2026-08-22T19:44:53.106Z
 progress:
   total_phases: 11
-  completed_phases: 10
+  completed_phases: 11
   total_plans: 50
-  completed_plans: 47
-  percent: 94
+  completed_plans: 50
+  percent: 100
 ---
 
 # Project State
@@ -20,13 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Phase 23 — ancilla lifecycle safety — formal verification
+**Current focus:** Milestone complete
 
 ## Current Position
 
 Phase: 23
-Plan: 3 plans across 3 waves
-Status: Ready to execute
+Plan: 3/3 plans complete
+Status: Milestone complete
+
+**Phase 23 close-out (2026-08-22):** the bounded explicit-State Forge model,
+run evidence, unsafe/safe lifecycle traces, owner-reviewed static-vs-temporal
+interpretation, canonical documentation, and LIFE-01..07 requirement closure
+are complete. Final verification passed: Forge's three named checks and the
+full project suite (`296 passed`). The bounded result leaves Phase 22's static
+minimum-K conclusion unchanged while adding a separate temporal-capacity
+constraint; no joint temporal-K search was performed.
 
 **Prior (Plan 22-05):** shipped `pooled_allocation_baseline.py` (a hand-rolled greedy + backtracking-DFS minimum-colouring SEARCH, not a verification loop, per D-05's correction) and `results/phase22_forge_summary.md` (the honest Forge-vs-brute-force comparison and verdict, MPAIR-05). The backtracking search agrees with Forge's minimum K exactly at every n Forge reached (K=3 at n=4, K=5 at n=5, K=5 at n=6) — no disagreement. It additionally solves n=7 (K=7, 2.284s) and n=8 (K=7, 0.006s), both beyond Forge's converging bound, where Forge's own isolated n=7 probe was killed at ~610s with zero blocks resolved. **Verdict, quoted verbatim for Plan 22-06 to reproduce without softening:** *"A few hundred lines of backtracking Python reached the same minimum faster, and reached further, than Forge's SAT-backed exhaustive search."* At the domain both converge on (n=4..6), Forge is measured ~123,000x slower than the Python search (~369s vs ~0.003s). The round-robin closed-form formula from `results/phase22_allocation_invariant.md` was independently reimplemented and checked proper (`round_robin_proper=True`) at every n from 2 to 8, matching the `n-1`/`n` König/Vizing chromatic-index formula throughout. Graded on the corrected MPAIR-05 axis (criteria (a)-(d), not brute-force timing — `REQUIREMENTS.md`'s 2026-08-21 correction note, applied here as a mid-phase correction stated plainly rather than silently backdated): (a) no scenario found that wasn't already enumerated in prose; (b) no, this is a static property, not trace/reachability (that's Phase 23's LIFE-01..07); (c) yes, modestly; (d) yes — no Python implements pooled allocation yet, so this verifies a design before it's built. A SECONDARY naive subset-enumeration scan (explicitly labelled, not the primary comparison) confirms the original `2^28`-subset framing genuinely would be intractable at n=8 (only 6.7% covered in the 600s ceiling), which is what licenses the pairwise reduction both tools actually use. One self-caught, pre-commit deviation ([Rule 1 - Bug]): the first `naive_subset_scan` implementation was too slow to measure what it claimed to measure (70% of n=7's subsets checked in 60s); rewritten to bitmask iteration with a 20000-iteration time-poll interval before any commit. `venv/Scripts/python.exe -m pytest -q` reports 296 passed (unchanged); `grep -rn "pooled_allocation_baseline" tests/` is empty. Commits: `c1d2c71` (baseline script), `fde0178` (comparison doc). See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-05-SUMMARY.md`.
 

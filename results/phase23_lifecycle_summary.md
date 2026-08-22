@@ -75,19 +75,36 @@ hardness-under-loss result.
 | LIFE-02 | Forge unsafe SAT witness and safe-protocol UNSAT check; trace table | evidence present; unsafe trace is explicit |
 | LIFE-03 | `FinishGate` preserves liveness; `FinalPostselect` then `Release` transitions | evidence present in bounded model |
 | LIFE-04 | SAT safe cross-epoch witness with two gates and genuine block reuse | evidence present; reuse occurs after release |
-| LIFE-05 | [`phase23_lifecycle_run_log.md`](phase23_lifecycle_run_log.md); [`phase23_lifecycle_traces.md`](phase23_lifecycle_traces.md); Phase 22 numerical source | evidence present; owner interpretation review pending |
-| LIFE-06 | This static-vs-temporal section; Phase 22 invariant and summary | provisional conclusion present; no joint temporal-K search performed |
-| LIFE-07 | This summary is the source for the planned canonical-doc section | pending owner review and documentation close-out |
+| LIFE-05 | [`phase23_lifecycle_run_log.md`](phase23_lifecycle_run_log.md); [`phase23_lifecycle_traces.md`](phase23_lifecycle_traces.md); Phase 22 numerical source | complete after owner interpretation review |
+| LIFE-06 | This static-vs-temporal section; Phase 22 invariant and summary | complete; no joint temporal-K search performed |
+| LIFE-07 | This summary and the canonical encoding section | complete after owner review |
 
 ## Owner review
 
-**Status:** pending. The required owner checkpoint must review, in the owner's
-own words:
+**Date:** 2026-08-22
+**Status:** approved with wording preserved verbatim.
+
+> Same-trace reuse is unsafe under deferred post-selection because the unsafe trace reaches a second allocation before terminal post-selection.
+>
+> Cross-epoch reuse is safe because of  terminal post-selection and explicit release/free in a later epoch.
+>
+> LIFE-05 compares the same-trace and cross-epoch methods under strict deferred post-selection. It does not try to prove one method wrong.
+>
+> Temporal safety does not changes Phase 22's static minimum-K conclusion
+
+Interpretation applied: the static minimum-K result remains unchanged as a
+static graph-colouring result; the lifecycle model adds a separate temporal
+capacity constraint and does not compute a replacement joint minimum-K search.
+The extra space in “because of  terminal” and the grammatical phrasing in the
+last sentence are preserved because this section records the owner's words,
+not an edited paraphrase.
+
+The owner reviewed, in their own words:
 
 1. why same-trace reuse is unsafe under strict deferred post-selection;
 2. why cross-epoch reuse is a separate safe witness;
 3. what LIFE-05 does and does not compare; and
 4. whether the temporal finding changes Phase 22's static minimum-K conclusion.
 
-No requirement metadata is marked complete until this review is recorded and
-any correction is applied.
+The review is now recorded. Requirement metadata may be closed because the
+actual model, run log, trace evidence, and owner interpretation are present.

@@ -593,6 +593,66 @@ Q1 and Q2 required correction on the first pass. The owner's initial answers con
 
 After this process, the owner confirmed they could explain the material to Vincent unaided.
 
+## Ancilla Lifecycle Safety (Phase 23)
+
+Phase 23 adds the lifecycle question that Phase 22 deliberately left separate:
+whether a pooled four-mode ancilla block can be allocated again while it is
+still live under deferred post-selection. The model is an explicit relational
+`State.next` trace in [`forge/ancilla_lifecycle_safety.frg`](../forge/ancilla_lifecycle_safety.frg),
+not `#lang forge/temporal`. It tracks both individual modes and their grouped
+four-mode block through `free -> allocated -> in-use -> releasable -> free`,
+with explicit `allocate`, `begin/use`, `finish`, terminal `post-selection`,
+and `release` events.
+
+### What the bounded model found
+
+The live n=4 run used the six K4 pairs, two gates, one four-mode block, nine
+ordered states, and `for 7 Int`. The exact command, bound, solver output, and
+timings are preserved in [`results/phase23_lifecycle_run_log.md`](../results/phase23_lifecycle_run_log.md);
+the readable state-by-state projections are in
+[`results/phase23_lifecycle_traces.md`](../results/phase23_lifecycle_traces.md).
+
+- The unsafe same-trace witness is SAT: after pair `(0,1)` finishes, pair
+  `(2,3)` reaches a second allocation of the same block before terminal
+  post-selection. Under strict deferred liveness, this is a live
+  reallocation/clobber point, not a safe reuse.
+- The valid lifecycle safety query is UNSAT for that live-reallocation shape.
+- The safe cross-epoch witness is SAT: pair `(0,1)` reaches terminal
+  post-selection and explicit release/free before pair `(2,3)` reuses the
+  block in a later epoch.
+
+The full evidence summary, including the owner-reviewed interpretation, is
+[`results/phase23_lifecycle_summary.md`](../results/phase23_lifecycle_summary.md).
+
+### Phase 22 cross-check and static minimum-K boundary
+
+Phase 22's MPAIR-07 Perceval probe measured pooled-versus-dedicated output
+distributions for the n=4 vertex-disjoint configuration and recorded
+`tvd_pooled_vs_dedicated` values of approximately `1.305e-14` and `2.899e-14`,
+inside the pre-committed `1e-9` tolerance (`results/phase22_reuse_gate.md`).
+Phase 23 measures structural lifecycle liveness under the same strict
+deferred-post-selection interpretation. The same-trace numerical GO and
+structural unsafe witness are retained as an unresolved abstraction-level
+disagreement; LIFE-05 does not try to prove one method wrong. Cross-epoch reuse
+is a separate safe-witness sanity check.
+
+Temporal safety does not change Phase 22's static minimum-K conclusion:
+`K=n-1` for even n and `K=n` for odd n remains the static graph-colouring
+result (Forge converged through n=6; the Python baseline checked through n=8).
+It does add a separate temporal-capacity constraint: within one deferred
+post-selection epoch, a block remains live after `finish` and cannot be reused
+until terminal release. Phase 23 does not perform a joint scheduling or
+temporal minimum-K search, so it does not claim a replacement minimum for an
+arbitrary same-epoch schedule.
+
+### What this does not establish
+
+This is bounded structural evidence. It does not prove Perceval amplitudes,
+physical unitary equivalence, an unbounded theorem, a Python k-pair
+implementation, or a new hardness-under-loss result. Phase 22's numerical
+result and Phase 23's lifecycle result answer related but distinct questions
+and remain independently scoped.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
