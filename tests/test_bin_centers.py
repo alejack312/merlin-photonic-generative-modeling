@@ -1,7 +1,7 @@
 import torch
 import pytest
 import numpy as np
-from generator.bin_centers import make_bin_centers
+from merlin_iqp.generator.bin_centers import make_bin_centers
 
 def test_make_bin_centers():
     centers = make_bin_centers()

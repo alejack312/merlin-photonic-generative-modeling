@@ -1,12 +1,7 @@
-import sys
-import os
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from cp_gate_derisking import (
+from scripts.cp_gate_derisking import (
     NON_TRIVIAL_ALPHAS,
     BOUNDARY_ALPHA,
     EXPECTED_BOUNDARY_MAGNITUDE_SQ,

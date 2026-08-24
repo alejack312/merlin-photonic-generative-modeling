@@ -14,14 +14,14 @@ import numpy as np
 import pytest
 import torch
 
-from dual_rail_merlin_encoding import make_weight1_quantum_layer, make_weight2_quantum_layer
-from trainability import mmd_exact, target_grid
-from trainability.dual_rail_autograd_sweep import (
+from merlin_iqp.encoding.dual_rail import make_weight1_quantum_layer, make_weight2_quantum_layer
+from merlin_iqp.trainability import mmd_exact, target_grid
+from merlin_iqp.trainability.dual_rail_autograd_sweep import (
     _build_bin_mapping,
     pooled_native_gradients_for_cell,
 )
-from trainability.rng import get_rng
-from trainability.sweep import SIGMA, sample_thetas
+from merlin_iqp.trainability.rng import get_rng
+from merlin_iqp.trainability.sweep import SIGMA, sample_thetas
 
 
 def _same_path_finite_diff_weight1(n, thetas, eps=1e-3):

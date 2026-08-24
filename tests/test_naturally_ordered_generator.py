@@ -2,10 +2,10 @@ import pytest
 import torch
 import merlin as ML
 
-from generator.mmd import gaussian_kernel_matrix, mmd2
-from generator.data import load_circles_data, compute_p_real
-from generator.noise import sample_latent
-from generator.naturally_ordered_generator import (
+from merlin_iqp.generator.mmd import gaussian_kernel_matrix, mmd2
+from merlin_iqp.generator.data import load_circles_data, compute_p_real
+from merlin_iqp.generator.noise import sample_latent
+from merlin_iqp.generator.naturally_ordered_generator import (
     NaturallyOrderedGenerator,
     build_naturally_ordered_generator,
     natural_sorted_centers,

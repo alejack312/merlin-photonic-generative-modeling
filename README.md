@@ -1,5 +1,7 @@
 # MerLin Photonic Generative Modeling
 
+[GitHub repo](https://github.com/alejack312/merlin-photonic-generative-modeling)
+
 An MMD-trained photonic generative model, built on Quandela's MerLin framework, that learns the two-ring `circles` dataset from a single quantum circuit. No discriminator, no adversarial loss.
 
 **How this was built:** implemented with Claude Code assistance under a rule I hold myself to: I verify every AI-assisted component against my own unaided explanation before it ships. Full framing in [Process & AI Use](#process--ai-use) below.
@@ -40,10 +42,19 @@ This design was chosen over two alternatives: collapsing `q` to a single weighte
 
 Source: [`results/phase5_summary.md`](results/phase5_summary.md).
 
+## Package layout
+
+`src/merlin_iqp/` is the reusable library: the shared IQP-to-photonic encodings (`encoding/`), the v1.0 MMD generator (`generator/`), and the v3.0 trainability/hardness studies (`trainability/`, `hardness/`). It has no dependency on anything outside itself and is what this project could publish as its own package later.
+
+`scripts/` holds the phase-tagged, provenance-documented experiment CLIs that produced this project's actual results (sweeps, analysis, de-risking probes) — one-off runnable scripts, not library code, each importing from the installed `merlin_iqp` package.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup and conventions.
+
 ## How to run
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt   # pinned, reproducible environment
+pip install -e .                  # editable-installs the merlin_iqp package
 ```
 
 Requires Python 3.12 (MerLin caps at 3.10–3.12) in a venv, `torch<2.13`, `perceval-quandela>=1.2.1`.
@@ -51,16 +62,20 @@ Requires Python 3.12 (MerLin caps at 3.10–3.12) in a venv, `torch<2.13`, `perc
 Train the generator (the GEN-07 checkpoint variant, K=462, radius-sorted bins):
 
 ```bash
-python natural_order_train.py
+python scripts/natural_order_train.py
 ```
 
-`train.py` (root) reproduces the K=400 baseline used for comparison. `generator/train.py` is the library module it imports from (`build_generator`, `train_step`), not an independently runnable script. Run the test suite as the runnable-code check:
+`scripts/train.py` reproduces the K=400 baseline used for comparison. `merlin_iqp.generator.train` is the library module it imports from (`build_generator`, `train_step`), not an independently runnable script. Run the test suite as the runnable-code check:
 
 ```bash
 python -m pytest -q
 ```
 
-`quickstart.py` is MerLin's own bundled classifier example, not part of this project's deliverable. Don't run it expecting the generator.
+`scripts/quickstart.py` is MerLin's own bundled classifier example, not part of this project's deliverable. Don't run it expecting the generator.
+
+## Errors/Bugs
+
+No open bugs: `python -m pytest -q` is green (296 tests) as of the last packaging pass. Known, deliberately-scoped limitations are reported as findings, not bugs — see the [Headline result](#headline-result) above (GEN-07's `ring_mass` shortfall) and the [v3.0 IQP Circuit Study](#v30-iqp-circuit-study) section below (the trainability signature's bandwidth-sensitivity, and the scope boundary on which circuits are hardness candidates at all). [`NOTES.md`](NOTES.md) and [`DESIGN_DECISIONS.md`](DESIGN_DECISIONS.md) record the investigation dead-ends encountered along the way, including ones where an initial explanation was wrong and corrected in place rather than quietly fixed.
 
 ## Links out
 

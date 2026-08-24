@@ -1,11 +1,6 @@
-import sys
-import os
-
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from weight2_measurement_crossvalidation import compare, TOLERANCE
+from scripts.weight2_measurement_crossvalidation import compare, TOLERANCE
 
 
 @pytest.mark.parametrize(

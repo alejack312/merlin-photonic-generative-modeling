@@ -2,10 +2,10 @@ import math
 
 import torch
 
-from generator.bin_centers import make_bin_centers
-from generator.data import load_circles_data, compute_p_real
-from generator.mmd import gaussian_kernel_matrix
-from generator.train import build_generator, train_step, decreasing_trend_check
+from merlin_iqp.generator.bin_centers import make_bin_centers
+from merlin_iqp.generator.data import load_circles_data, compute_p_real
+from merlin_iqp.generator.mmd import gaussian_kernel_matrix
+from merlin_iqp.generator.train import build_generator, train_step, decreasing_trend_check
 
 
 def test_train_step_smoke_runs_without_error_and_losses_finite():

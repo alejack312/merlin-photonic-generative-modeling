@@ -15,7 +15,7 @@ import pytest
 from perceval.utils import allstate_iterator
 
 import merlin as ML
-from dual_rail_merlin_encoding import (
+from merlin_iqp.encoding.dual_rail import (
     build_dual_rail_full_circuit,
     build_dual_rail_weight2_processor,
     dual_rail_all_zero_input,
@@ -26,7 +26,7 @@ from dual_rail_merlin_encoding import (
     make_weight2_cp_quantum_layer,
     make_weight2_quantum_layer,
 )
-from iqp_photonic_encoding import fock_to_bitstring
+from merlin_iqp.encoding.iqp_photonic import fock_to_bitstring
 
 
 def _bare_perceval_weight1_dist(n, thetas):
@@ -123,7 +123,7 @@ def test_weight2_requires_fock_computation_space_not_unbunched():
     herald_failure_prob ~0.194 instead of the correct ~0.9259. This test
     locks that finding in so a future edit can't silently regress back to
     the wrong default."""
-    from dual_rail_merlin_encoding import make_weight2_circuit_and_input
+    from merlin_iqp.encoding.dual_rail import make_weight2_circuit_and_input
     import torch
 
     circuit, input_state, herald_spec = make_weight2_circuit_and_input(2, 0, 1)
@@ -238,7 +238,7 @@ def test_weight2_cp_requires_fock_not_unbunched():
     interference that can populate bunched ancilla configurations. Confirmed
     live during development that FOCK is required for the closed-form match
     above; this locks that in."""
-    from dual_rail_merlin_encoding import make_weight2_cp_circuit_and_input
+    from merlin_iqp.encoding.dual_rail import make_weight2_cp_circuit_and_input
     import torch
 
     alpha = np.pi / 3

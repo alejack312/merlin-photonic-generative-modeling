@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 import torch
 
-from generator.mmd import gaussian_kernel_matrix, mmd2, SIGMA_GRID
-from trainability.mmd_exact import gaussian_kernel_matrix_np, mmd2_np, mmd2_grad
+from merlin_iqp.generator.mmd import gaussian_kernel_matrix, mmd2, SIGMA_GRID
+from merlin_iqp.trainability.mmd_exact import gaussian_kernel_matrix_np, mmd2_np, mmd2_grad
 
 
 def _make_centers(n=10, seed=0):

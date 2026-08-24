@@ -1,4 +1,4 @@
-"""TDD tests for hardness/loss_model.py (Phase 18 Plan 02).
+"""TDD tests for merlin_iqp/hardness/loss_model.py (Phase 18 Plan 02).
 
 Proves both load-bearing gotchas from 18-RESEARCH.md are actually avoided,
 not merely assumed avoided:
@@ -23,8 +23,8 @@ import numpy as np
 import perceval as pcvl
 import pytest
 
-from iqp_photonic_encoding import photonic_iqp_distribution, total_variation_distance
-from hardness.loss_model import photonic_iqp_distribution_lossy
+from merlin_iqp.encoding.iqp_photonic import photonic_iqp_distribution, total_variation_distance
+from merlin_iqp.hardness.loss_model import photonic_iqp_distribution_lossy
 
 
 def _all_keys_close(dist_a, dist_b, atol):
@@ -79,9 +79,9 @@ def _broken_lossy_distribution_no_filter(n, thetas, eta):
     """Deliberately-broken reference reproducing photonic_iqp_distribution_lossy's
     exact wiring but OMITTING proc.min_detected_photons_filter(0) -- the
     Pitfall-2 regression this test file must prove is real, not just avoided.
-    Local to this test file only, never exported from hardness/loss_model.py:
+    Local to this test file only, never exported from merlin_iqp/hardness/loss_model.py:
     this is a broken code path, not a supported one."""
-    from iqp_photonic_encoding import build_full_circuit, all_h_input, fock_to_bitstring
+    from merlin_iqp.encoding.iqp_photonic import build_full_circuit, all_h_input, fock_to_bitstring
 
     loss = 1.0 - eta
     total_modes = 2 * n

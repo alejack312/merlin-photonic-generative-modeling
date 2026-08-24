@@ -13,7 +13,7 @@ plan's <behavior> section), not derived by running the implementation.
 import numpy as np
 import pytest
 
-from trainability.data_dependent_init import (
+from merlin_iqp.trainability.data_dependent_init import (
     bit_k,
     empirical_mean_bit,
     empirical_pm1_covariance,

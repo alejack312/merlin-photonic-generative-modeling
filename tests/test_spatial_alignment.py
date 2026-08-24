@@ -1,8 +1,8 @@
 import torch
 import merlin as ML
 
-from generator.natural_grid import make_natural_bin_centers
-from generator.spatial_alignment import fock_state_sort_order, radius_sort_order
+from merlin_iqp.generator.natural_grid import make_natural_bin_centers
+from merlin_iqp.generator.spatial_alignment import fock_state_sort_order, radius_sort_order
 
 CENTERS = make_natural_bin_centers()
 OUTPUT_KEYS = ML.QuantumLayer.simple(input_size=10, output_size=None).quantum_layer.output_keys

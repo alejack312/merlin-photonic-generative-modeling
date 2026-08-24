@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merlin-iqp"
+version = "3.0.0"
+description = "IQP-style photonic-circuit toolkit built on Quandela's MerLin: an MMD-trained generative model, a trainability (barren-plateau) study, and a sampling-hardness-under-loss study, all on a shared IQP-to-photonic encoding."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Alejandro Jackson", email = "alejack312@gmail.com" }]
+requires-python = ">=3.10,<3.13"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "merlinquantum>=0.4.0",
+    "perceval-quandela>=1.2.4",
+    "torch>=2.12.1,<2.13",
+    "numpy>=2.5.1",
+    "scipy>=1.18.0",
+    "scikit-learn>=1.9.0",
+    "matplotlib>=3.11.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.1.1"]
+
+[project.urls]
+Homepage = "https://github.com/alejack312/merlin-photonic-generative-modeling"
+
+[tool.setuptools.packages.find]
+where = ["src"]

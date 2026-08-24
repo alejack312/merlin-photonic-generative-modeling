@@ -1,9 +1,9 @@
 import pytest
 import torch
 
-from generator.bin_centers import make_bin_centers
-from generator.data import load_circles_data, compute_p_real
-from generator.visualize import sample_points, ring_band_metrics
+from merlin_iqp.generator.bin_centers import make_bin_centers
+from merlin_iqp.generator.data import load_circles_data, compute_p_real
+from merlin_iqp.generator.visualize import sample_points, ring_band_metrics
 
 
 def test_ring_band_metrics_recovers_real_geometry():

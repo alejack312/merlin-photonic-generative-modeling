@@ -1,4 +1,4 @@
-"""TDD tests for hardness/loss_model_weight2.py (Phase 18 Plan 03).
+"""TDD tests for merlin_iqp/hardness/loss_model_weight2.py (Phase 18 Plan 03).
 
 Proves HARD-07's locked decision is actually implemented, not merely
 asserted: photon loss is applied via pcvl.LC insertion (never NoiseModel)
@@ -24,7 +24,7 @@ import numpy as np
 import perceval as pcvl
 import pytest
 
-from iqp_photonic_encoding import (
+from merlin_iqp.encoding.iqp_photonic import (
     build_cz_insertion,
     build_state_prep_circuit,
     build_diagonal_layer_circuit,
@@ -35,7 +35,7 @@ from iqp_photonic_encoding import (
     photonic_weight2_iqp_distribution,
     total_variation_distance,
 )
-from hardness.loss_model_weight2 import (
+from merlin_iqp.hardness.loss_model_weight2 import (
     photonic_weight2_iqp_distribution_lossy,
     _build_weight2_processor_lossy,
 )
@@ -169,7 +169,7 @@ def _broken_weight2_lossy_no_filter(n, i, j, thetas, eta):
     photonic_weight2_iqp_distribution_lossy's exact wiring but OMITTING
     proc.min_detected_photons_filter(0) -- the Pitfall-2 regression this
     test file must prove is real, not just avoided. Local to this test file
-    only, never exported from hardness/loss_model_weight2.py: this is a
+    only, never exported from merlin_iqp/hardness/loss_model_weight2.py: this is a
     broken code path, not a supported one."""
     thetas_folded = list(thetas)
     thetas_folded[i] += np.pi / 4
@@ -276,7 +276,7 @@ def _broken_weight2_with_add_herald(n, i, j, thetas, eta):
     auto-fill them from a reduced (2n-mode) input state -- the Pitfall-3
     regression this test file must prove is real, not just avoided by never
     calling add_herald(). Local to this test file only, never exported from
-    hardness/loss_model_weight2.py: this is a broken code path, not a
+    merlin_iqp/hardness/loss_model_weight2.py: this is a broken code path, not a
     supported one."""
     thetas_folded = list(thetas)
     thetas_folded[i] += np.pi / 4

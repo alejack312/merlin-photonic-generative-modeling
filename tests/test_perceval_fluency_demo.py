@@ -1,12 +1,7 @@
-import sys
-import os
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from perceval_fluency_demo import (
+from scripts.perceval_fluency_demo import (
     run_analyzer,
     check_single_photon,
     check_hom_dip,

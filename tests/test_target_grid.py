@@ -3,9 +3,9 @@ import itertools
 import numpy as np
 import pytest
 
-from generator.data import compute_p_real, load_circles_data
-from generator.natural_grid import make_natural_bin_centers
-from trainability.target_grid import (
+from merlin_iqp.generator.data import compute_p_real, load_circles_data
+from merlin_iqp.generator.natural_grid import make_natural_bin_centers
+from merlin_iqp.trainability.target_grid import (
     _nearest_bin_p_real,
     bitstring_dict_to_vector,
     make_target_grid,

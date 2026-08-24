@@ -1,9 +1,9 @@
 import math
 import torch
 
-from generator.naturally_ordered_generator import build_naturally_ordered_generator
-from generator.noise import sample_latent
-from generator.neighbor_locality import (
+from merlin_iqp.generator.naturally_ordered_generator import build_naturally_ordered_generator
+from merlin_iqp.generator.noise import sample_latent
+from merlin_iqp.generator.neighbor_locality import (
     compute_jacobian,
     adjacent_and_random_cosines,
     neighbor_locality_check,

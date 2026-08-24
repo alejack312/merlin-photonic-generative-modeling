@@ -7,12 +7,12 @@ import itertools
 
 import pytest
 
-from hardness.baselines import (
+from merlin_iqp.hardness.baselines import (
     anticoncentration_alpha,
     product_of_marginals_baseline,
     uniform_baseline,
 )
-from iqp_photonic_encoding import total_variation_distance
+from merlin_iqp.encoding.iqp_photonic import total_variation_distance
 
 
 @pytest.mark.parametrize("n", [1, 2, 3, 4])

@@ -3,6 +3,8 @@ __pycache__/
 *.pyc
 .pytest_cache/
 *.egg-info/
+build/
+dist/
 .ipynb_checkpoints/
 julia/Manifest.toml
 julia/.install_log_*.txt

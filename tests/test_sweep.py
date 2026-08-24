@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from trainability import data_dependent_init, target_grid
-from trainability.sweep import (
+from merlin_iqp.trainability import data_dependent_init, target_grid
+from merlin_iqp.trainability.sweep import (
     pick_tracked_indices,
     pooled_gradients_for_cell,
     run_gradient_variance_sweep,
@@ -118,8 +118,8 @@ def test_pooled_gradients_mixed_data_dependent_overrides_pair_indices():
     weight1_data_dependent_theta's per-qubit arcsin(sqrt(mean)) value --
     proves the documented mixed-scope override actually happens, not just
     that SOME data-dependent scheme runs."""
-    from iqp_photonic_encoding import photonic_weight2_iqp_distribution
-    from trainability import mmd_exact, param_shift
+    from merlin_iqp.encoding.iqp_photonic import photonic_weight2_iqp_distribution
+    from merlin_iqp.trainability import mmd_exact, param_shift
 
     n = 3
     weight2_pair = (0, 1)

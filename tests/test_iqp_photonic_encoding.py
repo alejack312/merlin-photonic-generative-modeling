@@ -1,5 +1,3 @@
-import sys
-import os
 import hashlib
 
 import numpy as np
@@ -9,9 +7,7 @@ from perceval.components.core_catalog.heralded_cz import HeraldedCzItem
 from perceval.simulators import Simulator
 from perceval.backends import SLOSBackend
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from iqp_photonic_encoding import (
+from merlin_iqp.encoding.iqp_photonic import (
     build_state_prep_circuit,
     build_diagonal_layer_circuit,
     build_conjugation_circuit,

@@ -2,7 +2,7 @@ import pytest
 import torch
 import merlin as ML
 
-from generator.noise import sample_latent
+from merlin_iqp.generator.noise import sample_latent
 
 def test_sample_latent():
     # Shape/dtype test: sample_latent(32).shape == (32, 10), dtype is floating.

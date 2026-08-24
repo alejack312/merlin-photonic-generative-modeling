@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from generator.natural_grid import make_natural_bin_centers
+from merlin_iqp.generator.natural_grid import make_natural_bin_centers
 
 
 def test_natural_grid_shape_and_bounds():

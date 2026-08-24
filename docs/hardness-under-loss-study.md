@@ -249,7 +249,7 @@ Both patterns are the same underlying convergence, differing only in which
 side of 0.50 the starting point happens to be on.
 
 **Why every curve converges to ~0.50, and what it does and doesn't mean.**
-`total_variation_distance` (`iqp_photonic_encoding.py:1016`) is computed
+`total_variation_distance` (`merlin_iqp/encoding/iqp_photonic.py:1029`) is computed
 between the raw, un-renormalized lossy distribution and each comparison
 distribution, each independently normalized to sum to 1. The lossy
 distribution's own total mass -- the probability of the photon(s) landing in
@@ -375,7 +375,7 @@ leakage bucket (`STATE.md`'s Accumulated Context, established during Phase
 The Phase 18 experiment was also rerun through MerLin 0.4.0 without
 polarization encoding. This is an **encoding parallel**, not a claim that
 MerLin accepts the original `PBS`/polarization-annotated `Processor`: the
-existing `dual_rail_merlin_encoding.py` circuits represent each qubit as two
+existing `merlin_iqp/encoding/dual_rail.py` circuits represent each qubit as two
 ordinary spatial modes, flatten the heralded-CZ network to a unitary
 `pcvl.Circuit`, execute it through `QuantumLayer`, and apply the same manual
 herald filtering afterward.

@@ -1,12 +1,7 @@
-import sys
-import os
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from heralded_cz_derisking import (
+from scripts.heralded_cz_derisking import (
     COMPUTATIONAL_BASIS,
     EXPECTED_HERALD_SUCCESS,
     measure_herald_success,

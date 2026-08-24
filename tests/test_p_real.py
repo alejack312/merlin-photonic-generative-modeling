@@ -1,7 +1,7 @@
 import pytest
 import torch
-from generator.data import load_circles_data, compute_p_real
-from generator.bin_centers import make_bin_centers
+from merlin_iqp.generator.data import load_circles_data, compute_p_real
+from merlin_iqp.generator.bin_centers import make_bin_centers
 
 
 def test_p_real_shape_and_validity():

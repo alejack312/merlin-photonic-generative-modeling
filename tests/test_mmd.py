@@ -2,10 +2,10 @@ import pytest
 import torch
 import merlin as ML
 
-from generator.mmd import gaussian_kernel_matrix, mmd2, SIGMA_GRID
-from generator.bin_centers import make_bin_centers
-from generator.data import load_circles_data, compute_p_real
-from generator.noise import sample_latent
+from merlin_iqp.generator.mmd import gaussian_kernel_matrix, mmd2, SIGMA_GRID
+from merlin_iqp.generator.bin_centers import make_bin_centers
+from merlin_iqp.generator.data import load_circles_data, compute_p_real
+from merlin_iqp.generator.noise import sample_latent
 
 CENTERS = make_bin_centers()
 _X_TRAIN, _ = load_circles_data()

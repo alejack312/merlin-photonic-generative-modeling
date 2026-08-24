@@ -9,7 +9,7 @@ real gradient-variance-vs-n data Plan 17-06/17-07 produce.
 import numpy as np
 import pytest
 
-from trainability.curve_fit import exp_model, poly_model, aic, fit_and_compare
+from merlin_iqp.trainability.curve_fit import exp_model, poly_model, aic, fit_and_compare
 
 # Fixed seed for all synthetic-noise generation -- deterministic tests.
 SEED = 1710

@@ -10,7 +10,7 @@ document rather than re-deriving any of it.
 
 Gradients are computed by **exact parameter-shift** (`shift = pi/4`, no
 division) directly on `photonic_iqp_distribution` /
-`photonic_weight2_iqp_distribution` (`iqp_photonic_encoding.py`), **not**
+`photonic_weight2_iqp_distribution` (`merlin_iqp/encoding/iqp_photonic.py`), **not**
 MerLin `QuantumLayer` autograd. `QuantumLayer` categorically rejects this
 project's polarization-annotated `BasicState`s
 (`ValueError: BasicState with annotations is not supported`, confirmed
@@ -426,7 +426,7 @@ directly on TRAIN-05/TRAIN-08's max-n question.
 
 The Methodology section above states plainly that MerLin `QuantumLayer`
 autograd is unavailable for this project's polarization-annotated circuits.
-That remains true. What changed: `dual_rail_merlin_encoding.py` (added
+That remains true. What changed: `merlin_iqp/encoding/dual_rail.py` (added
 after Phase 17 closed) re-implements the same abstract weight-1/weight-2
 IQP generator family in a **polarization-free spatial dual-rail basis**:
 `BS()` in place of `HWP(pi/8)`, `PS(theta)` in place of `WP(theta,0)`, no

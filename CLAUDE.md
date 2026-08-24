@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repo state
 
-As of 2026-08-19 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up). Real commands:
+As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up), and was repackaged into an installable `merlin_iqp` library (src-layout) with phase scripts moved to `scripts/`. Real commands:
 
 - **Python env:** `venv/Scripts/python.exe` (Python 3.12; MerLin caps `python>=3.10,<=3.12`, `torch<2.13`).
-- **Tests:** `venv/Scripts/python.exe -m pytest -q` — 274 tests (`testpaths = tests` per `pytest.ini`).
-- **Trainability study:** `gradient_variance_sweep.py` (raw sweep) → `trainability_analysis.py` / `trainability_analysis_1701.py` (curve-fit analysis).
-- **Hardness-under-loss study:** `loss_sweep.py` (raw sweep) → `hardness_analysis.py` (TVD-vs-η/anticoncentration analysis).
-- **ARB-01 (arbitrary-θ weight-2 gate):** `cp_alpha_sweep.py`.
+- **Install (editable):** `venv/Scripts/python.exe -m pip install -e . --no-deps` — required once per venv for `import merlin_iqp` to resolve; `pytest.ini`'s `pythonpath = src` is a fallback for test runs without it.
+- **Tests:** `venv/Scripts/python.exe -m pytest -q` — 296 tests (`testpaths = tests` per `pytest.ini`).
+- **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0). No dependency on anything outside itself.
+- **Study scripts:** `scripts/` — phase-tagged sweep/analysis/de-risking CLIs, not library code. Run from repo root, e.g. `python scripts/natural_order_train.py`.
+- **Trainability study:** `scripts/gradient_variance_sweep.py` (raw sweep) → `scripts/trainability_analysis.py` / `scripts/trainability_analysis_1701.py` (curve-fit analysis).
+- **Hardness-under-loss study:** `scripts/loss_sweep.py` (raw sweep) → `scripts/hardness_analysis.py` (TVD-vs-η/anticoncentration analysis).
+- **ARB-01 (arbitrary-θ weight-2 gate):** `scripts/cp_alpha_sweep.py`.
 - **Julia independent verifier:** `julia --project=julia julia/verify_qubit_iqp.jl` (and the other `julia/verify_*.jl` scripts) — Julia 1.10 LTS, Yao.jl, BosonSampling.jl.
 - **Forge (ancilla mode-mapping bookkeeping check):** `forge/ancilla_mapping.frg`.
 - **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) is the canonical write-up; it links out to `docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/iqp-photonic-encoding.md`, and `docs/julia-cross-check-study.md` for full detail.

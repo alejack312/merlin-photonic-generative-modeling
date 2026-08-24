@@ -34,7 +34,7 @@ the qubit-side circuit, BosonSampling.jl's `beam_splitter`/`phase_shift`/
 `UserDefinedInterferometer` for the photonic-level circuits; never by
 extracting a matrix or structure from Perceval's own circuit and replaying
 it in Julia. This is what makes agreement meaningful: if a bug existed in
-`iqp_photonic_encoding.py`'s math, a mechanical port would silently
+`merlin_iqp/encoding/iqp_photonic.py`'s math, a mechanical port would silently
 reproduce it in both languages, while an independent build sourced from
 first principles (phase-convention algebra, literature-sourced gate
 matrices) would not.
@@ -63,7 +63,7 @@ or statistical match.
 An independently-built Yao.jl circuit (state prep → Hadamard layer →
 diagonal weight-1 phase layer → Hadamard conjugation, using Yao's own `H`/
 `Rz`/`chain`/`probs` primitives) reproduces
-`iqp_photonic_encoding.py::exact_qubit_iqp_distribution`:
+`merlin_iqp/encoding/iqp_photonic.py::exact_qubit_iqp_distribution`:
 
 | n | thetas | TVD (Julia vs. Python) | Tolerance | Result |
 |---|--------|------------------------:|-----------|--------|

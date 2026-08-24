@@ -156,3 +156,31 @@ Metrics are stable across latent draws, so the gap is not a single-sample artifa
 **Artifacts:** `results/phase4_natural_checkpoint.pt`, `results/phase4_natural_metrics.csv`, `results/phase4_natural_loss_history.csv`, `results/phase4_natural_comparison.png` (3-panel: real | prior best | natural order), `results/phase4_natural_rank_profile.png` (rank-domain `p_real` vs `q`).
 
 **Decided by:** Alejandro Jackson. The "improvement, still not two rings" verdict is the owner's visual judgment. The mechanism explanation above is Claude's, written after the owner's read and grounded in post-hoc measurements (run-count, total-variation, rank correlation, cross-draw stability) rather than in a plausible-sounding story; the confounds and the weak 0.38 correlation are stated because the owner has to be able to defend this unaided.
+
+---
+
+## 2026-08-24 — Repository packaging: installable `src/merlin_iqp` library, phase scripts moved to `scripts/`
+
+**Context:** Requested repackaging per Brown CS0320's Documentation and Style Guide (README/docstring/naming/package conventions), with the explicit goal of eventually spinning this out as its own open-source library. Before this, the repo mixed reusable physics/ML code (`generator/`, `hardness/`, `trainability/`, plus two root-level encoding modules) with 22 phase-tagged experiment scripts and the encoding modules themselves, all at repo root with no installable package boundary — importable only because pytest's rootdir insertion happened to put the repo root on `sys.path`.
+
+**Options considered (put to the owner, since this is an architecture call with real rework risk 8 days before the Sept 1 deadline and docs/technical-findings.md + 6 study docs cite specific `.py` filenames as provenance):**
+1. **Minimal — package only, scripts stay at root.** Lowest risk, but scripts and library code stay mixed; less of an actual library boundary.
+2. **Hybrid — package the reusable code, relocate scripts (chosen).** `pyproject.toml` + `src/merlin_iqp/` (encoding, generator, trainability, hardness); phase-tagged sweep/analysis/de-risking scripts moved to `scripts/`; living docs (README, AGENTS.md, CLAUDE.md, `docs/*.md`) updated to match.
+3. **Full src-layout, PyPI-idiomatic.** Everything under `src/`, tests reorganized to mirror it. Most correct for eventual publication, highest blast radius, rejected for now given deadline proximity.
+
+**Why the hybrid:** sets up a real, importable library boundary (the actual open-source-later goal) without the maximum-blast-radius file gymnastics of option 3 this close to the deadline. Package name `merlin_iqp` (PyPI distribution name `merlin-iqp`) — names the actual reusable contribution (an IQP-style photonic encoding + trainability/hardness toolkit for MerLin), not this specific case study.
+
+**What changed:**
+- `generator/`, `hardness/`, `trainability/` → `src/merlin_iqp/{generator,hardness,trainability}/` (git-mv, history preserved).
+- `iqp_photonic_encoding.py` → `src/merlin_iqp/encoding/iqp_photonic.py`; `dual_rail_merlin_encoding.py` → `src/merlin_iqp/encoding/dual_rail.py`.
+- The other 22 root scripts (sweeps, analysis, de-risking probes, demos) → `scripts/`, unchanged in behavior, importing from the installed `merlin_iqp` package instead of bare root-level modules.
+- New `pyproject.toml` (setuptools, src-layout, `requires-python = ">=3.10,<3.13"` — note `<3.13`, not the historically-quoted `<=3.12`, since PEP 440's `<=3.12` excludes patch releases like the installed 3.12.1; `<3.13` is the correct way to mean "any 3.12.x"). Editable-installed via `pip install -e . --no-deps` (deps already pinned/installed via `requirements.txt`, which stays as the reproducible-environment lockfile alongside `pyproject.toml`'s looser library-dependency bounds).
+- `pytest.ini` gained `pythonpath = src` as a fallback so tests resolve even without the editable install.
+- Every now-stale `sys.path.insert(...)` hack across tests/scripts/library code removed (10 occurrences) — no longer needed once the package is properly installed.
+- 10 missing module docstrings and a handful of missing function docstrings added across `src/merlin_iqp/` (0 missing after; nested trivial helpers whose contract is already documented on the enclosing function were deliberately left undocumented rather than padded).
+- `CONTRIBUTING.md` added; `.gitignore` gained `build/`/`dist/`.
+- Living docs (README "How to run"/package-layout/errors-bugs sections, AGENTS.md and CLAUDE.md "Real commands", and the 4 of `docs/*.md` that cited exact filenames or line numbers as provenance) updated to the new paths — including three stale line-number citations that shifted by +13 after a module docstring was added to `iqp_photonic.py`. `.planning/` (98 historical planning-phase references) and `results/*.md` (dated run summaries) were deliberately left untouched: rewriting those would be revisionist history against this project's own "candid paper trail" convention, not a correctness fix.
+
+**Verification:** full test suite green before and after (296 passed, up from a stale 274 recorded in AGENTS.md/CLAUDE.md — unrelated prior growth, not from this change). Spot-ran several relocated scripts end-to-end from their new location (`cp_alpha_sweep.py`'s measured values matched its own closed-form check; `julia/generate_reference.py` reproduced its reference CSVs bit-for-bit) to confirm real functionality, not just import resolution.
+
+**Decided by:** Claude, executing an explicit repackaging request. The scope choice (hybrid vs. minimal vs. full src-layout) and the package name were put to Alejandro as a scoped decision before any files moved, given the rework cost of guessing wrong this close to the deadline; both were his call. Everything else in this entry (exact module boundaries, docstring content, doc-path updates) is mechanical execution of that scope, not a physics or ML design decision — no self-explanation checkpoint applies.

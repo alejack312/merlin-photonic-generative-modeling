@@ -13,22 +13,16 @@ files every run with the same deterministic inputs).
 
 import csv
 import os
-import sys
 
-# Allow running as `python julia/generate_reference.py` directly (repo root
-# is not automatically on sys.path in that invocation form, unlike
-# `python -m julia.generate_reference`).
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-
-from iqp_photonic_encoding import (
+from merlin_iqp.encoding.iqp_photonic import (
     exact_qubit_iqp_distribution,
     photonic_iqp_distribution,
     photonic_weight2_iqp_distribution,
 )
-from hardness.loss_model import photonic_iqp_distribution_lossy
-from hardness.loss_model_weight2 import photonic_weight2_iqp_distribution_lossy
-from hardness.sweep import sample_thetas, ETA_GRID
-from trainability.rng import get_rng
+from merlin_iqp.hardness.loss_model import photonic_iqp_distribution_lossy
+from merlin_iqp.hardness.loss_model_weight2 import photonic_weight2_iqp_distribution_lossy
+from merlin_iqp.hardness.sweep import sample_thetas, ETA_GRID
+from merlin_iqp.trainability.rng import get_rng
 
 OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "results", "julia_reference")
 

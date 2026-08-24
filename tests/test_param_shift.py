@@ -1,18 +1,14 @@
 import itertools
-import sys
-import os
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from iqp_photonic_encoding import (
+from merlin_iqp.encoding.iqp_photonic import (
     photonic_iqp_distribution,
     photonic_weight2_iqp_distribution,
     expected_single_qubit_probs,
 )
-from trainability.param_shift import (
+from merlin_iqp.trainability.param_shift import (
     weight1_param_shift_delta,
     weight2_param_shift_delta,
 )

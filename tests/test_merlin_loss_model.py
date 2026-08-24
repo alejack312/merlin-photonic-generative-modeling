@@ -6,7 +6,7 @@ import torch
 import perceval as pcvl
 import pytest
 
-from dual_rail_merlin_encoding import (
+from merlin_iqp.encoding.dual_rail import (
     build_dual_rail_full_circuit,
     build_dual_rail_weight2_processor,
     dual_rail_all_zero_input,
@@ -16,9 +16,9 @@ from dual_rail_merlin_encoding import (
     make_weight1_quantum_layer,
     make_weight2_quantum_layer,
 )
-from hardness import sweep
-from hardness_analysis import write_backend_comparison
-from loss_sweep import _chunk_path, _row_from_summary
+from merlin_iqp.hardness import sweep
+from scripts.hardness_analysis import write_backend_comparison
+from scripts.loss_sweep import _chunk_path, _row_from_summary
 
 
 def _lc_raw_probs(circuit, input_state, eta):
