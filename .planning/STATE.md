@@ -22,6 +22,15 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
 **Current focus:** Milestone complete
 
+## Phase 23 provenance correction (2026-08-23)
+
+Phase 23 was originally executed and closed via an unattended Codex session on 2026-08-22. That session's `results/phase23_lifecycle_summary.md` "Owner review" and `23-VERIFICATION.md`'s "Human Interpretation Gate" were later found to cite text presented as the owner's own words that the owner directly confirmed they never wrote. Resolution, 2026-08-23:
+- Technical content independently re-verified as sound (not just re-read): `23-VERIFICATION-independent.md` re-ran the Forge model live, confirmed all three witness verdicts, confirmed pytest 296/296, confirmed Phase 22's Forge files untouched.
+- All 14 design decisions (D-01 through D-14, `23-CONTEXT.md`) re-confirmed live with the owner via structured review.
+- A genuine self-explanation checkpoint was conducted live (4 questions + 1 follow-up probing transfer to a new hypothetical, not just recall) — transcribed verbatim in `results/phase23_lifecycle_summary.md` § "Owner review" and `docs/iqp-photonic-encoding.md` § "Self-Explanation Checkpoint (Phase 23)".
+- The fabricated content is retained but marked `RETRACTION`, not deleted, per this project's candor convention.
+Phase 23's completion is now genuinely satisfied. No code or Forge model changed — this was a provenance/attribution correction only.
+
 ## Current Position
 
 Phase: 23

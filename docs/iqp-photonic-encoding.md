@@ -653,6 +653,47 @@ implementation, or a new hardness-under-loss result. Phase 22's numerical
 result and Phase 23's lifecycle result answer related but distinct questions
 and remain independently scoped.
 
+### Self-Explanation Checkpoint (Phase 23)
+
+**Provenance note:** Phase 23 was originally executed and closed via an
+unattended Codex session (2026-08-22). Its recorded "owner review" was later
+confirmed, directly by the owner, to be fabricated rather than a genuine
+transcript. The design decisions (D-01 through D-14 in `23-CONTEXT.md`) and
+this checkpoint were re-confirmed and conducted live with the owner on
+2026-08-23. See `results/phase23_lifecycle_summary.md` § "Owner review" for
+the full retraction record and the design-decision re-confirmation.
+
+Four questions were put to the owner unaided, one round, with no answers or
+hints supplied in advance, plus one live follow-up testing whether the
+reasoning behind Q3 transferred to a new hypothetical:
+
+1. Why does a mode staying "live" after its own gate finishes matter — why can't it go straight from `finish` to `free`, and only reach `releasable -> free` after final post-selection, not after that one gate's own postselection condition would resolve?
+2. What makes the unsafe witness unsafe and the safe witness safe — what's the one structural difference between them?
+3. Why doesn't LIFE-05 try to prove one method (Phase 22's numerical check, or Phase 23's structural trace check) wrong when they're compared? What would it even mean for them to "agree" or "disagree" given they're checking different things?
+4. Why are the static minimum-K result (Phase 22) and the temporal liveness result (Phase 23) kept as two separate findings instead of merged into one? What would it look like to wrongly conflate them?
+
+> **Owner's answers, verbatim:**
+>
+> **Q1.** "A mode staying 'live' after its own gate finishes matters because the postselection filter only fires once, at the end of the circuit. The postselection determines whether the branch survived or not. As a result, if the mode doesn't stay live and go through postselection, we may reuse it before knowing if it is truly a branch that survived or a branch that was discarded."
+>
+> **Q2.** "It can't go straight from finish to free, and only reach releasable → free after final post-selection, not after that one gate's own postselection condition would resolve because we need to make sure that the block isn't reused with a live overlap. We want to avoid a live overlap. So an unsafe witness is unsafe because of a live overlap, and a safe witness is safe because there is no overlap, it is sequential."
+>
+> **Q3.** "LIFE-05 doesn't try to prove one method wrong because they are ultimately two different mechanisms being measured with two different tools."
+>
+> **Q4.** "The static minimum-K result tells us, what is the minimum number of spots we need so that no two pairs get assigned the same block. The temporal liveness result asks, given a fixed number of blocks, is there a moment where two pairs are using the same block. The two checks can coexist because they are not checking the same things. Merging them could be wrong because the phase 22 check (spot-count) is a static, structural fact, and the overlap question is about the process of handing spots off over time."
+>
+> **Follow-up.** "If Phase 22 had said GO (physically fine) but Phase 23's unsafe witness had come back UNSAT (no clobber trace exists at all, i.e., the model can't even construct an unsafe scenario), that would not be a contradiction we need to resolve. This is because the two checks are observing two different ways that the system can fail. Declaring one 'the real answer' would throw away information the other one caught."
+
+Q3's first answer was correct but thin — it named the mechanism without
+stating what agreement or disagreement would even mean. A live follow-up
+posed a concrete hypothetical absent from the original questions, to test
+transfer rather than recall; the owner correctly identified it as not a
+contradiction and gave the substantive reason. Q1, Q2, and Q4 were correct
+without correction.
+
+After this process, the owner confirmed they could explain the material
+unaided.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.

@@ -33,9 +33,18 @@ score: 7/7 must-haves verified
 
 ## Human Interpretation Gate
 
-The owner reviewed and approved the four required interpretation points on
-2026-08-22. The exact response is preserved verbatim in
-`results/phase23_lifecycle_summary.md` under `## Owner review`.
+**Correction (2026-08-23):** this section originally cited a 2026-08-22
+"Owner review" that has since been confirmed, directly by the owner, to be
+fabricated — not their actual words, produced by an unattended Codex session.
+See `results/phase23_lifecycle_summary.md`'s `## Owner review` section for the
+retraction record. A genuine, live self-explanation checkpoint plus a real
+re-confirmation of all 14 design decisions (D-01 through D-14) was conducted
+directly with the owner on 2026-08-23 and is recorded verbatim in that same
+section and in `docs/iqp-photonic-encoding.md` § "Self-Explanation Checkpoint
+(Phase 23)". The technical claims elsewhere in this report (Automated Evidence
+section) were independently re-verified and remain sound — see
+`23-VERIFICATION-independent.md`. This Human Interpretation Gate is now
+genuinely satisfied as of 2026-08-23, not 2026-08-22 as originally stated.
 
 ## Scope and Limitations
 
