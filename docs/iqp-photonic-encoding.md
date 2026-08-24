@@ -694,6 +694,59 @@ without correction.
 After this process, the owner confirmed they could explain the material
 unaided.
 
+## What Forge Actually Added (Phases 16, 22, 23)
+
+Phase 22 was added mid-milestone because the owner asked directly what Forge
+was actually contributing to this project — Phase 16's own 2026-08-20 audit
+had already found its exhaustive-search advantage never engaged at the
+single-pair scale. That question, and the honest answer to it, is recorded
+here across all three Forge phases rather than left implicit in a single
+phase's write-up.
+
+**The corrected success criterion.** `ROADMAP.md`'s Phase 23 entry documents
+the standing mis-grading this project corrected: both `ARB-09`'s audit and
+`MPAIR-05` as originally written judged Forge on "does it beat brute force on
+an intractable domain." A review of the owner's own CS1710 (Logic for
+Systems) coursework — the course this toolchain comes from — showed none of
+its own models meet that bar either (hotel locking runs at 3 rooms / 3
+guests / 8 time steps; goats-and-wolves is BFS-solvable in milliseconds).
+What those models actually buy: (a) finding a scenario you wouldn't think to
+enumerate, (b) trace/reachability properties, where brute force is itself a
+model checker rather than a competitor, (c) the model as a precise
+specification, and (d) verifying a design before building it.
+
+**Graded against all four, honestly, per phase:**
+
+| Criterion | Phase 16 | Phase 22 | Phase 23 |
+|---|---|---|---|
+| (a) Unanticipated scenario found | No — true-by-construction, nothing surfaced | No — found minimum matched the pre-derived formula exactly every time, no counterexample ever appeared | No — the unsafe witness's shape was pre-specified in `22-CONTEXT.md`/`23-CONTEXT.md` design decisions before any Forge code was written |
+| (b) Trace/reachability property | No — static bookkeeping | No — static graph colouring | **Yes** — `State.next` sequences, `allocate -> in-use -> releasable -> free`, an actual reachability question |
+| (c) Model as precise spec | No — restates already-shipped code, carries a standing drift warning | **Yes** — no Python k-pair implementation exists; the model is what a future one gets checked against | **Yes** — same inversion, for the lifecycle scheme |
+| (d) Verifies a design before building it | No — audits code already shipped | **Yes** — verification precedes any implementation | **Yes** — same |
+
+**The owner's verdict, stated plainly:** Forge earned its place in this
+project — not on the axis it was originally graded on (Phase 16 and Phase
+22's own minimum-K search both lost decisively to brute-force/backtracking
+Python on that axis; see `results/phase22_forge_summary.md`'s unsoftened
+verdict), but on two of the four criteria CS1710's own models are actually
+optimized for. Phase 22 and Phase 23 both function as a precise
+specification for a k-pair circuit that does not exist in Python yet (c),
+and both verify that design before any implementation is attempted (d).
+Phase 23 additionally does something neither Phase 16 nor Phase 22 could:
+check a genuine trace/reachability property (b) — whether an ancilla block
+can ever be reallocated while still live under this pipeline's deferred
+post-selection — which is not a "does it beat brute force" question at all,
+since no brute-force baseline for this property was ever built or needed for
+comparison.
+
+**What this does not claim.** Criterion (a) — the solver surfacing a
+scenario nobody anticipated — was not met in any of the three phases. Every
+property Forge checked here was one a human had already fully specified in
+advance; Forge confirmed or refuted a pre-stated claim, it never discovered
+the claim itself. This project's honest use of Forge is real but modest: a
+precise, pre-implementation specification with reachability-checking
+capability, not a source of surprising results.
+
 ## Conclusion and Open Questions
 
 **What this document establishes.** A concrete, equation-derived, Perceval-native mapping from IQP's three structural ingredients onto polarization-encoded photonic primitives (`ENC-01`), positioned honestly against the one existing adjacent literature result (`ENC-02`), with a falsifiable, bidirectional basis correspondence (`ENC-03`), empirically confirmed at `n=2,3` to reproduce the exact qubit-side IQP distribution to floating-point precision for weight-1 generator sets (`ENC-04`). Every piece was owner-attempted first and self-explained back before being marked complete, per this repo's attempt-first and self-explanation standards.
