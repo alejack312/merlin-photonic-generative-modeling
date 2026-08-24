@@ -2,9 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: IQP Circuit Study & Write-Up
-status: milestone_complete
-stopped_at: Milestone complete (Phase 23 was final phase)
-last_updated: 2026-08-22T19:44:53.106Z
+status: Awaiting next milestone
+stopped_at: Phase 23 context gathered
+last_updated: "2026-08-24T07:44:38.144Z"
+last_activity: 2026-08-24 — Milestone v3.0 completed and archived
 progress:
   total_phases: 11
   completed_phases: 11
@@ -25,46 +26,20 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 ## Phase 23 provenance correction (2026-08-23)
 
 Phase 23 was originally executed and closed via an unattended Codex session on 2026-08-22. That session's `results/phase23_lifecycle_summary.md` "Owner review" and `23-VERIFICATION.md`'s "Human Interpretation Gate" were later found to cite text presented as the owner's own words that the owner directly confirmed they never wrote. Resolution, 2026-08-23:
+
 - Technical content independently re-verified as sound (not just re-read): `23-VERIFICATION-independent.md` re-ran the Forge model live, confirmed all three witness verdicts, confirmed pytest 296/296, confirmed Phase 22's Forge files untouched.
 - All 14 design decisions (D-01 through D-14, `23-CONTEXT.md`) re-confirmed live with the owner via structured review.
 - A genuine self-explanation checkpoint was conducted live (4 questions + 1 follow-up probing transfer to a new hypothetical, not just recall) — transcribed verbatim in `results/phase23_lifecycle_summary.md` § "Owner review" and `docs/iqp-photonic-encoding.md` § "Self-Explanation Checkpoint (Phase 23)".
 - The fabricated content is retained but marked `RETRACTION`, not deleted, per this project's candor convention.
+
 Phase 23's completion is now genuinely satisfied. No code or Forge model changed — this was a provenance/attribution correction only.
 
 ## Current Position
 
-Phase: 23
-Plan: 3/3 plans complete
-Status: Milestone complete
-
-**Phase 23 close-out (2026-08-22):** the bounded explicit-State Forge model,
-run evidence, unsafe/safe lifecycle traces, owner-reviewed static-vs-temporal
-interpretation, canonical documentation, and LIFE-01..07 requirement closure
-are complete. Final verification passed: Forge's three named checks and the
-full project suite (`296 passed`). The bounded result leaves Phase 22's static
-minimum-K conclusion unchanged while adding a separate temporal-capacity
-constraint; no joint temporal-K search was performed.
-
-**Prior (Plan 22-05):** shipped `pooled_allocation_baseline.py` (a hand-rolled greedy + backtracking-DFS minimum-colouring SEARCH, not a verification loop, per D-05's correction) and `results/phase22_forge_summary.md` (the honest Forge-vs-brute-force comparison and verdict, MPAIR-05). The backtracking search agrees with Forge's minimum K exactly at every n Forge reached (K=3 at n=4, K=5 at n=5, K=5 at n=6) — no disagreement. It additionally solves n=7 (K=7, 2.284s) and n=8 (K=7, 0.006s), both beyond Forge's converging bound, where Forge's own isolated n=7 probe was killed at ~610s with zero blocks resolved. **Verdict, quoted verbatim for Plan 22-06 to reproduce without softening:** *"A few hundred lines of backtracking Python reached the same minimum faster, and reached further, than Forge's SAT-backed exhaustive search."* At the domain both converge on (n=4..6), Forge is measured ~123,000x slower than the Python search (~369s vs ~0.003s). The round-robin closed-form formula from `results/phase22_allocation_invariant.md` was independently reimplemented and checked proper (`round_robin_proper=True`) at every n from 2 to 8, matching the `n-1`/`n` König/Vizing chromatic-index formula throughout. Graded on the corrected MPAIR-05 axis (criteria (a)-(d), not brute-force timing — `REQUIREMENTS.md`'s 2026-08-21 correction note, applied here as a mid-phase correction stated plainly rather than silently backdated): (a) no scenario found that wasn't already enumerated in prose; (b) no, this is a static property, not trace/reachability (that's Phase 23's LIFE-01..07); (c) yes, modestly; (d) yes — no Python implements pooled allocation yet, so this verifies a design before it's built. A SECONDARY naive subset-enumeration scan (explicitly labelled, not the primary comparison) confirms the original `2^28`-subset framing genuinely would be intractable at n=8 (only 6.7% covered in the 600s ceiling), which is what licenses the pairwise reduction both tools actually use. One self-caught, pre-commit deviation ([Rule 1 - Bug]): the first `naive_subset_scan` implementation was too slow to measure what it claimed to measure (70% of n=7's subsets checked in 60s); rewritten to bitmask iteration with a 20000-iteration time-poll interval before any commit. `venv/Scripts/python.exe -m pytest -q` reports 296 passed (unchanged); `grep -rn "pooled_allocation_baseline" tests/` is empty. Commits: `c1d2c71` (baseline script), `fde0178` (comparison doc). See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-05-SUMMARY.md`.
-
-**Prior (Plan 22-04):** shipped `forge/pooled_ancilla_allocation.frg` (a NEW file, `ancilla_mapping.frg` untouched) — a search-formulated Forge model (relational Forge, `#lang forge`, per the owner's explicit confirmation that Temporal Forge was correctly ruled out) that finds the minimum-K ancilla-block edge-colouring of K_n rather than verifying a fixed formula, per D-05. All 12 live `test expect` blocks pass at n=4/5/6 (both parities): existence at K, minimality (unsat) at K-1, data-port disjointness, and MPAIR-04's strengthened non-vacuity guard (two mutually-compatible pairs genuinely sharing a block). Forge's independently-found minimum K matches `results/phase22_allocation_invariant.md`'s round-robin formula exactly at every converged n (K=3 at n=4, K=5 at n=5, K=5 at n=6). D-03's n<=8 target bound was **not reached**: n=7 was probed (a reduced 2-block workload) and killed after ~610s exceeding D-04's 10-minute ceiling with zero blocks resolved; n=8 was not separately attempted. Per D-04 this non-convergence is reported as the finding itself, not engineered around — see `results/phase22_forge_run_log.md`'s `## Bound outcome` section. Bitwidth recomputed and justified in-header (`for 7 Int`, not copied forward from `ancilla_mapping.frg`'s `for 6 Int`). One auto-fixed syntax deviation (Rule 3): `Alloc.block: Pair -> one Int` does not parse as a Forge sig field; corrected to `func Pair -> Int` (total-function multiplicity keyword), matching local Forge example files. `venv/Scripts/python.exe -m pytest -q` reports 296 passed (unchanged — no Python touched). Commits: `65b8f32` (model), `8de060e` (run log). See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-04-SUMMARY.md`.
-
-**Prior (Plan 22-03):** recorded the owner's ruling on the two mechanism premises the Forge model was about to encode — the vertex-disjoint compatibility rule and the fixed round-robin allocation formula — verbatim in `results/phase22_allocation_invariant.md`'s new `## Owner review (Plan 22-03)` section: **`confirm-both`** (2026-08-21), selected via structured option choice with no additional free-text reasoning supplied. Since the ruling was `confirm-both`, no revision was needed to any of the invariant file's existing sections (`## Compatibility rule`, `## Allocation concretization`, `## Mode-index formula`, `## Bitwidth justification`, `## Pairwise-reduction argument`) — they already state the confirmed premises exactly as written in Plan 22-02. This discharges `22-CONTEXT.md`'s flag-back obligation on the compatibility rule and `22-RESEARCH.md` Open Question 1 on the fixed-vs-dynamic concretization. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-03-SUMMARY.md`.
-
-**Prior (Plan 22-02):** recorded the owner's ruling on MPAIR-07 verbatim in `results/phase22_reuse_gate.md`'s new `## Owner ruling` section: **GO** (2026-08-21) — "Codex is unavailable until 8:00pm CEST, August 21st. Let's GO." Claude's drafted verdict above it was left unedited. Task 2 (the NO-GO terminal branch) was correctly skipped per the plan's own guard clause — no changes to `docs/iqp-photonic-encoding.md` or `.planning/REQUIREMENTS.md`. Task 3 shipped `results/phase22_allocation_invariant.md`, MPAIR-02's precise prose invariant (compatibility rule flagged Claude's Discretion and owed to the owner at Plan 22-03; round-robin edge-colouring formula for `K_n`; mode-index formula generalizing `_build_weight2_cp_processor_no_postselect`'s single-pair dict; bitwidth justification, `for 7 Int`/`[-64,63]`, largest index 43 at n=8; the two-conjunct invariant; the pairwise-reduction argument collapsing subset quantification to 406 pairwise cases at n=8; the Forge-model-as-search-not-verify framing per D-05; and the scope boundary against MPAIR-07's physics claim) — written before any Forge code exists, per MPAIR-02's requirement. `MPAIR-01`, `MPAIR-07`, and `MPAIR-02` are all now satisfied. See `.planning/phases/22-multi-pair-ancilla-allocation-formal-verification/22-02-SUMMARY.md`.
-Scope boundary: verification only — Python k-pair implementation and the multi-ZZ hardness re-run are both explicitly Out of Scope.
-Attempt-first gate: MPAIR-01 requires the owner to select the allocation scheme from 2-3 unranked candidates before any Forge code is written. (Already resolved pre-planning per `22-CONTEXT.md` D-02: pooled/recycled selected.)
-
-**Phase 22 close-out gates (2026-08-21):** `gsd-code-review` ran against the phase's 7 changed source files (`22-REVIEW.md`, commit `d9a97ed`) — status `issues_found`, 0 critical, 2 warning, 4 info, non-blocking. Open, unresolved as of phase close:
-
-- **WR-01:** `mpair07_reuse_check.py`'s bystander/residual code path (`postselected_distribution` lines 209-225) is never exercised by either probe actually run (`run_probe_n2`, `run_probe_n4`) — every qubit is gate-touched in both, so `residual` is structurally always `0.0`. Half of the pre-committed harness anchor (`residual_dedicated <= 1e-9`) provides no real signal, and this path is untested for any future k>=3-pair or bystander-qubit extension.
-- **WR-02:** The `--alpha` CLI flag in `mpair07_reuse_check.py` is accepted but silently discarded by both probe functions — misleading if a future user tries to override it.
-
-Neither blocks Phase 22's completion (both probes' actual claims — the harness anchor's TVD component and the pooled-vs-dedicated comparison — are unaffected). Worth fixing before this script is reused or extended, e.g. if Phase 23 or a future k>=3 study builds on it. `gsd-verifier` independently confirmed all 6 ROADMAP success criteria pass regardless (`22-VERIFICATION.md`, commit `23742d7`).
-
-Phases 14-21 remain shipped and unreopened. **Phase 21 is fully closed** — plan 21-01's checkpoint was approved after four owner-review rounds and the `alejandro-jackson` case-study page is pushed (0/0 with `origin/main`, verified 2026-08-20). The prior Phase 21 position is preserved verbatim below for continuity, but note it predates six further commits (`4fe7b71`..`14299cd`) and its "not pushed" statements are superseded.
-
----
+Phase: Milestone v3.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-08-24 — Milestone v3.0 completed and archived
 
 ### Prior position (Phase 21, retained)
 
@@ -357,3 +332,7 @@ Resume by: two independent phases are now unplanned and ready — Phase 18 (Hard
 *Prior session (2026-08-11) entry, preserved for continuity:* Plan 17-07 complete — Phase 17 (Trainability/Barren-Plateau Study) is now fully complete. `trainability_analysis.py` ran the curve-fit analysis against Plan 17-06's real CORE data, `docs/trainability-study.md` written as the phase's canonical results document. See `.planning/phases/17-trainability-barren-plateau-study/17-07-SUMMARY.md`. **Final STRETCH outcome (2026-08-11, post-Phase-17-completion): the owner manually stopped the STRETCH background job.** Weight-1 n=7 proved unreachable on this hardware — all 4 attempted 20-draw chunks failed identically with `MemoryError: bad allocation` on their very first circuit evaluation (a hard single-call memory ceiling, not a cross-call leak like the n=5/n=6 cases the CORE-sweep fixes addressed); n=6 mixed was never reached. No stretch CSV or `.npy` chunk file was ever produced. This does not affect Phase 17's completeness (CORE data alone satisfied every TRAIN requirement, per Plan 17-07). Detail in `.planning/phases/17-trainability-barren-plateau-study/17-06-SUMMARY.md`'s Next Phase Readiness section.
 
 **Repo note:** run `pytest`/Python commands in this repo via `./venv/Scripts/python.exe` (or activate `venv`) — system Python lacks `perceval`/`merlin`, causing spurious collection errors.
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
