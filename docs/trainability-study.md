@@ -41,7 +41,7 @@ weight-1 curve fitmixed curve fit
 | mixed           | uniform     | 2–5 (4 pts) | exp           | 0.910  | -37.56  | 0.823   | -34.85   |
 
 
-Full per-cell numbers (including fitted parameters) are in `results/phase17_curve_fit_summary.csv`.
+Full per-cell numbers (including fitted parameters) are in `results/v3_trainability/phase17_curve_fit_summary.csv`.
 
 **A fit-quality caveat, reported honestly:** two of the "exp"-winning fits (`weight1/uniform`'s R²=0.999 fit and, more severely, `mixed/uniform`'s R²=0.910 fit) show a large-magnitude, near-cancelling `a`/`c` pair (e.g. `mixed/uniform`: `a=153.6, c=-153.5`). `scipy.optimize.curve_fit` reported `Covariance of the parameters could not be estimated` for at least one cell during this run, a symptom of a poorly-identified (not just poorly-fit) parameterization at only 4-5 data points. The AIC-based verdict still holds (delta-AIC exceeds the 2.0 threshold in both "exp"-winning cells), but the specific fitted decay rate `b` in these near-degenerate cases should be read as "an exponential shape fits the data better than a power law," not as a precisely determined decay constant.
 
@@ -166,7 +166,7 @@ An earlier candidate design — a per-n sigma *schedule*, scaling sigma with `n`
 | 9.0   | uniform     | inconclusive  | 0.325  | -92.96  | 0.325   | -92.96   | **disappears**                             |
 
 
-Full per-cell numbers (all 24 rows, both scopes): `results/phase171_train09_curve_fit_summary.csv`.
+Full per-cell numbers (all 24 rows, both scopes): `results/v3_trainability/phase171_train09_curve_fit_summary.csv`.
 
 **Sigma=0.1 consistency-check footnote:** the `sigma=0.1` row of this grid is a built-in sanity check: it should reproduce Phase 17's original CORE result exactly, since it re-runs the identical sweep at the identical bandwidth through the new sigma-threaded code path. `weight1` matched bit-for-bit on every compared row. `mixed` matched exactly on 2 of 8 rows and showed a ~1e-13 to 1e-16 relative-magnitude difference on the other 6 (`small_angle` at n=2,3,4), diagnosed (Plan 17.1-04) as a deterministic environment/floating-point-ordering difference rather than a logic bug (re-running the affected cell reproduced this pipeline's own value bit-for-bit, and `weight1`'s identical sigma-threading code shows zero drift), and noted here as an open, non-blocking item.
 
@@ -191,7 +191,7 @@ Recio-Armengol et al.'s (arXiv:2503.02934, Sec. 8.1.2) data-dependent initializa
 | mixed           | data_dependent | 2–5 (4 pts) | inconclusive  | 0.253  | -46.63  | 0.253   | -46.63   |
 
 
-Full numbers: `results/phase171_train10_curve_fit_summary.csv`.
+Full numbers: `results/v3_trainability/phase171_train10_curve_fit_summary.csv`.
 
 **Comparison against the original `small_angle` verdict, stated plainly:**
 
@@ -243,7 +243,7 @@ Net effect on wall-clock time: the full dual-rail sweep (weight1 n=2..8 + mixed 
 | mixed           | uniform     | 2–7 (6 pts) | inconclusive  | 0.840  | -69.16  | 0.814   | -68.26   |
 
 
-Full numbers: `results/phase17_dual_rail_curve_fit_summary.csv`.
+Full numbers: `results/v3_trainability/phase17_dual_rail_curve_fit_summary.csv`.
 
 **Comparison against this phase's own CORE verdict, stated plainly (agreements and disagreements both):**
 

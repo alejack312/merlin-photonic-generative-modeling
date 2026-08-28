@@ -12,7 +12,7 @@ A two-milestone project built on Quandela's MerLin photonic framework: an MMD-tr
 
 Held-out MMD² for the trained generator is 0.0125 ± 0.0003, close to the 0.0114 floor you'd get from comparing real data against itself (untrained baseline: 0.0360 ± 0.0048). With that being said, `ring_mass`, the fraction of generated probability mass that actually lands on the two target rings instead of the gap between them, sits at 0.68 to 0.69, not near 1.0. **GEN-07 ("generator's samples recognizably form two rings") is not met.** The generated distribution is better than earlier checkpoints, but it still doesn't look like two distinct rings.
 
-`ring_mass` moved from 0.609 to 0.691 after fixing how the circuit's raw output indices map onto the 2D spatial bins (K=462, radius-sorted bins — see [docs/raster-order.md](docs/raster-order.md) for the mechanism). A low MMD² number doesn't by itself mean the shape is right. That's the main lesson of this project, and it's why both numbers are reported together instead of leading with the one that looks better. See [results/phase4_summary.md](results/phase4_summary.md) and [results/phase5_summary.md](results/phase5_summary.md) for the full evidence trail.
+`ring_mass` moved from 0.609 to 0.691 after fixing how the circuit's raw output indices map onto the 2D spatial bins (K=462, radius-sorted bins — see [docs/raster-order.md](docs/raster-order.md) for the mechanism). A low MMD² number doesn't by itself mean the shape is right. That's the main lesson of this project, and it's why both numbers are reported together instead of leading with the one that looks better. See [results/v1_generator/phase4_summary.md](results/v1_generator/phase4_summary.md) and [results/v1_generator/phase5_summary.md](results/v1_generator/phase5_summary.md) for the full evidence trail.
 
 #### Problem & approach
 
@@ -36,11 +36,11 @@ Supporting this pair of findings: a continuously-tunable weight-2 gate (ARB-01/A
 
 **Training loss** (Phase 3, 300 epochs, MMD² against real data):
 
-![Training loss curve](results/phase3_loss_curve.png)
+![Training loss curve](results/v1_generator/phase3_loss_curve.png)
 
 **Generated vs. real** (Phase 4, final GEN-07 checkpoint, natural-order correspondence, K=462):
 
-![Real vs. generator comparison](results/phase4_natural_comparison.png)
+![Real vs. generator comparison](results/v1_generator/phase4_natural_comparison.png)
 
 **Benchmark numbers** (Phase 5, held-out data, σ=0.1, N=20 latent draws):
 
@@ -56,7 +56,7 @@ Supporting this pair of findings: a continuously-tunable weight-2 gate (ARB-01/A
 | Parameter count                             | 220                                                      |
 
 
-Source: [results/phase5_summary.md](results/phase5_summary.md).
+Source: [results/v1_generator/phase5_summary.md](results/v1_generator/phase5_summary.md).
 
 ### v3.0: IQP Circuit Study
 
@@ -66,7 +66,7 @@ Full result tables, plots, and per-study methodology live in the linked docs rat
 
 `src/merlin_iqp/` is the reusable library: the shared IQP-to-photonic encodings (`encoding/`), the v1.0 MMD generator (`generator/`), and the v3.0 trainability/hardness studies (`trainability/`, `hardness/`). It has no dependency on anything outside itself and is what this project could publish as its own package later.
 
-`scripts/` holds the phase-tagged, provenance-documented experiment CLIs that produced this project's actual results (sweeps, analysis, de-risking probes) — one-off runnable scripts, not library code, each importing from the installed `merlin_iqp` package.
+`scripts/` holds the phase-tagged, provenance-documented experiment CLIs that produced this project's actual results (sweeps, analysis, de-risking probes) — one-off runnable scripts, not library code, each importing from the installed `merlin_iqp` package. Both `scripts/` and `results/` are grouped into per-milestone subfolders (`v1_generator/`, `v2_encoding/`, `v3_trainability/`, `v3_hardness/`, `v3_arb_gate/`, `v3_forge_formal/`, plus `v3_julia_verify/` under `results/`), matching the same milestone breakdown these docs use.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.
 
@@ -82,16 +82,16 @@ Requires Python 3.12 (MerLin caps at 3.10–3.12) in a venv, `torch<2.13`, `perc
 Train the generator (the GEN-07 checkpoint variant, K=462, radius-sorted bins):
 
 ```bash
-python scripts/natural_order_train.py
+python scripts/v1_generator/natural_order_train.py
 ```
 
-`scripts/train.py` reproduces the K=400 baseline used for comparison. `merlin_iqp.generator.train` is the library module it imports from (`build_generator`, `train_step`), not an independently runnable script. Run the test suite as the runnable-code check:
+`scripts/v1_generator/train.py` reproduces the K=400 baseline used for comparison. `merlin_iqp.generator.train` is the library module it imports from (`build_generator`, `train_step`), not an independently runnable script. Run the test suite as the runnable-code check:
 
 ```bash
 python -m pytest -q
 ```
 
-`scripts/quickstart.py` is MerLin's own bundled classifier example, not part of this project's deliverable. Don't run it expecting the generator.
+`scripts/v1_generator/quickstart.py` is MerLin's own bundled classifier example, not part of this project's deliverable. Don't run it expecting the generator.
 
 ## Errors/Bugs
 
@@ -102,8 +102,8 @@ No open bugs. `python -m pytest -q` is green (296 tests) as of the last packagin
 - [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md): full architecture and tuning rationale, including the three-entry log of the natural-order-correspondence fix
 - [docs/mmd-loss.md](docs/mmd-loss.md): how this project's MMD² implementation compares to a prior IQP (gate-model) project's Hamming-distance version
 - [docs/raster-order.md](docs/raster-order.md): why radius-sorting the spatial bins fixes ring fragmentation, mechanism and measurements
-- [results/phase4_summary.md](results/phase4_summary.md): full Phase 4 (Generative Quality) evidence and the GEN-07 verdict
-- [results/phase5_summary.md](results/phase5_summary.md): full Phase 5 (Benchmarking) evidence
+- [results/v1_generator/phase4_summary.md](results/v1_generator/phase4_summary.md): full Phase 4 (Generative Quality) evidence and the GEN-07 verdict
+- [results/v1_generator/phase5_summary.md](results/v1_generator/phase5_summary.md): full Phase 5 (Benchmarking) evidence
 - [.planning/phases/](.planning/phases/): phase-by-phase execution summaries
 - [Full case study](https://alejandrojackson.dev/case-studies/merlin-quantum) — the complete external-facing story
 - [docs/technical-findings.md](docs/technical-findings.md) — the full internal write-up, every number traceable to its source script/CSV/test

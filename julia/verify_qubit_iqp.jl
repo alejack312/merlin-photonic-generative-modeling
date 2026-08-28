@@ -1,6 +1,6 @@
 # Phase 19 Plan 02 (VERIFY-02): independent Yao.jl build of this repo's
 # qubit-side IQP circuit, diffed against Python's exact_qubit_iqp_distribution
-# reference (results/julia_reference/qubit_n2.csv, qubit_n3.csv).
+# reference (results/v3_julia_verify/julia_reference/qubit_n2.csv, qubit_n3.csv).
 #
 # Circuit (matches iqp_photonic_encoding.py::exact_qubit_iqp_distribution):
 #   |+>^n = H^n |0>^n -> per-qubit diagonal Z-phase layer (weight-1 thetas)
@@ -155,7 +155,7 @@ println("n=2 bitstring dict (sanity, keyed by this repo's own convention): ", d2
 # ---------------------------------------------------------------------------
 #
 # Same shared theta values Plan 19-01's generate_reference.py used to
-# produce results/julia_reference/qubit_n2.csv / qubit_n3.csv (CONTEXT.md's
+# produce results/v3_julia_verify/julia_reference/qubit_n2.csv / qubit_n3.csv (CONTEXT.md's
 # "same test inputs" lock) -- hardcoded here to match the Python side
 # exactly.
 THETAS_N2 = [0.3, 1.1]
@@ -164,7 +164,7 @@ THETAS_N3 = [0.3, 1.1, 0.75]
 """
     read_reference_csv(path)
 
-Read a `results/julia_reference/*.csv` file (bitstring,probability, with
+Read a `results/v3_julia_verify/julia_reference/*.csv` file (bitstring,probability, with
 optional leading `# key=value` comment lines and a header row) into a
 Dict{String,Float64}. Uses DelimitedFiles with an explicit String element
 type so bitstring keys like "00"/"01" are preserved as strings rather than
@@ -194,7 +194,7 @@ function total_variation_distance(dist_a::Dict{String,Float64}, dist_b::Dict{Str
 end
 
 REPO_ROOT = joinpath(@__DIR__, "..")
-REF_DIR = joinpath(REPO_ROOT, "results", "julia_reference")
+REF_DIR = joinpath(REPO_ROOT, "results", "v3_julia_verify", "julia_reference")
 
 # --- n=2 ---
 reg_n2 = build_qubit_iqp_circuit(2, THETAS_N2)

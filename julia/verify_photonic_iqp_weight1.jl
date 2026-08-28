@@ -6,7 +6,7 @@
 # Julia-side equivalent of Perceval's polarization encoding (iqp_photonic_
 # encoding.py's HWP/WP/PBS pipeline), NOT a mechanical port of it. Then diffs
 # the resulting distribution against Python's `photonic_iqp_distribution`
-# reference (results/julia_reference/weight1_n2.csv, weight1_n3.csv).
+# reference (results/v3_julia_verify/julia_reference/weight1_n2.csv, weight1_n3.csv).
 #
 # Run with:
 #   julia --project=julia julia/verify_photonic_iqp_weight1.jl
@@ -53,7 +53,7 @@
 # (mod 2*pi; any solution of sin(phi/2)=+-cos(theta) works, this is the
 # simplest one). Confirmed numerically in Task 1 below at theta=0.3, and
 # by hand-computing the resulting n=2 product-form probabilities against
-# results/julia_reference/weight1_n2.csv before writing this script (e.g.
+# results/v3_julia_verify/julia_reference/weight1_n2.csv before writing this script (e.g.
 # P("00") = cos(0.3)^2 * cos(1.1)^2 ~= 0.187691, matching the CSV's
 # 0.1877808915423398 to 4 significant figures by hand).
 #
@@ -204,8 +204,8 @@ end
 TVD_TOLERANCE = 1e-6
 
 cases = [
-    (n=2, thetas=[0.3, 1.1], ref_path="results/julia_reference/weight1_n2.csv"),
-    (n=3, thetas=[0.3, 1.1, 0.75], ref_path="results/julia_reference/weight1_n3.csv"),
+    (n=2, thetas=[0.3, 1.1], ref_path="results/v3_julia_verify/julia_reference/weight1_n2.csv"),
+    (n=3, thetas=[0.3, 1.1, 0.75], ref_path="results/v3_julia_verify/julia_reference/weight1_n3.csv"),
 ]
 
 results = []
@@ -228,14 +228,14 @@ if all_pass
     end
     println("\nPASS: VERIFY-03 weight-1 leg -- BosonSampling.jl independently reproduces the Python reference within TVD <= $TVD_TOLERANCE at n=2 and n=3")
 else
-    println("\nDISAGREEMENT: one or more TVDs exceed $TVD_TOLERANCE -- see results/phase19_verify03_weight1_results.md for details")
+    println("\nDISAGREEMENT: one or more TVDs exceed $TVD_TOLERANCE -- see results/v3_julia_verify/phase19_verify03_weight1_results.md for details")
 end
 
-# --- Write results/phase19_verify03_weight1_results.md ----------------------
+# --- Write results/v3_julia_verify/phase19_verify03_weight1_results.md ----------------------
 
 verdict = all_pass ? "GO" : "PARTIAL-GO (documented disagreement, see below)"
 
-open("results/phase19_verify03_weight1_results.md", "w") do io
+open("results/v3_julia_verify/phase19_verify03_weight1_results.md", "w") do io
     println(io, "# Phase 19 Plan 03: VERIFY-03 Weight-1 Leg Results")
     println(io)
     println(io, "## Methodology")
@@ -260,7 +260,7 @@ open("results/phase19_verify03_weight1_results.md", "w") do io
     println(io, "The n=2/n=3 distributions are computed by enumerating all `2^n` valid")
     println(io, "computational-basis outcomes (each qubit pair carries exactly 1 photon) via")
     println(io, "`compute_probability!` per outcome, and diffed by total variation distance against")
-    println(io, "Python's `photonic_iqp_distribution` reference (`results/julia_reference/weight1_n2.csv`,")
+    println(io, "Python's `photonic_iqp_distribution` reference (`results/v3_julia_verify/julia_reference/weight1_n2.csv`,")
     println(io, "`weight1_n3.csv`, generated in Plan 19-01), using the identical theta values")
     println(io, "(`n=2: thetas=[0.3, 1.1]`, `n=3: thetas=[0.3, 1.1, 0.75]`).")
     println(io)
@@ -294,4 +294,4 @@ open("results/phase19_verify03_weight1_results.md", "w") do io
     end
 end
 
-println("\nWrote results/phase19_verify03_weight1_results.md")
+println("\nWrote results/v3_julia_verify/phase19_verify03_weight1_results.md")

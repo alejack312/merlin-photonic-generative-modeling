@@ -29,8 +29,9 @@ All tests must pass. There is no separate lint/type-check step configured yet (s
 - `src/merlin_iqp/generator/` — the MMD-trained generative model (v1.0).
 - `src/merlin_iqp/trainability/` — gradient-variance / barren-plateau study utilities (v3.0).
 - `src/merlin_iqp/hardness/` — sampling-hardness-under-photon-loss study utilities (v3.0).
-- `scripts/` — one-off, phase-tagged CLIs (sweeps, analysis, de-risking probes) that consume the library above. New reusable logic belongs in `src/merlin_iqp/`, not here.
-- `tests/` — mirrors both `src/merlin_iqp/` and `scripts/`; a change to either needs a matching test.
+- `scripts/` — one-off, phase-tagged CLIs (sweeps, analysis, de-risking probes) that consume the library above, grouped into per-milestone subpackages (`v1_generator/`, `v2_encoding/`, `v3_trainability/`, `v3_hardness/`, `v3_arb_gate/`, `v3_forge_formal/`). New reusable logic belongs in `src/merlin_iqp/`, not here.
+- `results/` — the raw output (CSVs, plots, checkpoints, summary docs) each script above produced, in the same per-milestone subfolders as `scripts/` plus `v3_julia_verify/` for the Julia cross-check outputs.
+- `tests/` — mirrors `src/merlin_iqp/`'s subpackages (`generator/`, `encoding/`, `trainability/`, `hardness/`) for library tests, and `scripts/`'s own milestone subfolders (under `tests/scripts/`) for tests that exercise a script directly; a change to either needs a matching test in the corresponding subfolder.
 
 Avoid adding a catch-all `utils` module — put a new helper in the subpackage that owns the concept it serves, or give it its own module if it doesn't fit any existing one.
 

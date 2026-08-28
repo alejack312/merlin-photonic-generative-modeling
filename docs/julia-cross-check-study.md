@@ -6,7 +6,7 @@ The phase's canonical reference document: methodology, per-requirement results, 
 
 ### Python-reference generation (Plan 19-01)
 
-Every number Julia is diffed against in this phase comes from `julia/generate_reference.py`, which calls this repo's already-tested Python functions directly (`exact_qubit_iqp_distribution`, `photonic_iqp_distribution`, `photonic_weight2_iqp_distribution`, and the loss-model equivalents from `hardness/loss_model*.py`) and writes their output to CSV under `results/julia_reference/`. No number in this document was computed by hand or re-derived. Every Julia script reads a CSV Plan 19-01 produced from a single, specific Python call.
+Every number Julia is diffed against in this phase comes from `julia/generate_reference.py`, which calls this repo's already-tested Python functions directly (`exact_qubit_iqp_distribution`, `photonic_iqp_distribution`, `photonic_weight2_iqp_distribution`, and the loss-model equivalents from `hardness/loss_model*.py`) and writes their output to CSV under `results/v3_julia_verify/julia_reference/`. No number in this document was computed by hand or re-derived. Every Julia script reads a CSV Plan 19-01 produced from a single, specific Python call.
 
 For the loss-model cross-check (VERIFY-04), a **single fixed theta draw per scope** was used (seed_base `190819`, deliberately distinct from Phase 18's own `180814`), not a pooled multi-draw mean, per `19-RESEARCH.md` Pitfall 4, since the point is number-for-number agreement on one concrete case, not a statistical claim. The literal theta values are recorded as header comments in every loss-case reference CSV.
 
@@ -22,7 +22,7 @@ A single locked bar applies throughout: **TVD ≤ 1e-6**, the same bar used for 
 
 ## VERIFY-02: Yao.jl qubit-side cross-check
 
-**Plan:** 19-02. **Script:** `julia/verify_qubit_iqp.jl`. **Results:** `results/phase19_verify02_results.md`.
+**Plan:** 19-02. **Script:** `julia/verify_qubit_iqp.jl`. **Results:** `results/v3_julia_verify/phase19_verify02_results.md`.
 
 An independently-built Yao.jl circuit (state prep → Hadamard layer → diagonal weight-1 phase layer → Hadamard conjugation, using Yao's own `H`/ `Rz`/`chain`/`probs` primitives) reproduces `merlin_iqp/encoding/iqp_photonic.py::exact_qubit_iqp_distribution`:
 
@@ -43,7 +43,7 @@ Split into a weight-1 leg (Plan 19-03) and a weight-2 leg (Plan 19-04), per `19-
 
 ### Weight-1 leg (Plan 19-03)
 
-**Script:** `julia/verify_photonic_iqp_weight1.jl`. **Results:** `results/phase19_verify03_weight1_results.md`.
+**Script:** `julia/verify_photonic_iqp_weight1.jl`. **Results:** `results/v3_julia_verify/phase19_verify03_weight1_results.md`.
 
 An independent BosonSampling.jl dual-rail (2-modes-per-qubit) circuit (built from `beam_splitter`/`phase_shift`/`UserDefinedInterferometer`, not a port of Perceval's HWP/WP/PBS polarization circuit) reproduces `photonic_iqp_distribution`:
 
@@ -58,7 +58,7 @@ The load-bearing derivation: `phase_shift(phi)` with `phi = pi - 2*theta` reprod
 
 ### Weight-2 leg (Plan 19-04)
 
-**Script:** `julia/verify_photonic_iqp_weight2.jl`. **Results:** `results/phase19_verify03_weight2_results.md`.
+**Script:** `julia/verify_photonic_iqp_weight2.jl`. **Results:** `results/v3_julia_verify/phase19_verify03_weight2_results.md`.
 
 This was the phase's single highest-stall-risk piece per `19-CONTEXT.md`'s own framing. It reached a **real, full GO** — not a partial-go or a documented stall.
 
@@ -88,13 +88,13 @@ Hein, Eisert & Briegel's graph-state paper (Phys. Rev. A 69, 062311 (2004), arXi
 
 Both marginals being uniform simultaneously, not just one, forces `P(01)=P(10)` and `P(00)=P(11)` exactly via linear algebra on the normalization constraint — reproducing the closed form `P(00)=P(11)=(1+cos2θ_i·cos2θ_j)/4` checked to machine precision against 6 independent theta pairs.
 
-This is specific to the pair angle being locked at exactly `π/4` (the maximally-entangling `CZ` point, the only angle `heralded_cz` realizes), not a generic IQP property. Full derivation in `results/phase19_verify03_weight2_results.md`.
+This is specific to the pair angle being locked at exactly `π/4` (the maximally-entangling `CZ` point, the only angle `heralded_cz` realizes), not a generic IQP property. Full derivation in `results/v3_julia_verify/phase19_verify03_weight2_results.md`.
 
 **Verdict: GO (both cases).**
 
 ## VERIFY-04: BosonSampling.jl loss-model cross-check
 
-**Plan:** 19-05. **Script:** `julia/verify_loss_model.jl`. **Results:** `results/phase19_verify04_results.md`.
+**Plan:** 19-05. **Script:** `julia/verify_loss_model.jl`. **Results:** `results/v3_julia_verify/phase19_verify04_results.md`.
 
 BosonSampling.jl's **native** `UniformLossInterferometer(eta, U)` loss API was used: confirmed against the actual installed v1.0.2 depot source (`~/.julia/packages/BosonSampling/TEQXU/src/types/loss.jl`), not GitHub `main`, the strongly-preferred independence path per `19-RESEARCH.md`'s "Don't Hand-Roll" guidance. No fallback to hand-attenuation was needed.
 

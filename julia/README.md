@@ -41,5 +41,5 @@ julia --project=julia julia/hello_bosonsampling.jl
 Each script prints a Julia/package version banner, runs a small circuit, and
 `@assert`s the result against its analytically-known value.
 
-See `results/phase14_julia_toolchain_summary.md` for this spike's recorded
+See `results/v3_julia_verify/phase14_julia_toolchain_summary.md` for this spike's recorded
 go/no-go verdict.

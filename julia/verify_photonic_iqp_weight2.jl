@@ -64,7 +64,7 @@
 #       global phase), where Zi|bit=0> = +1, Zi|bit=0> = -1.
 #   exp(i*pi/4*Zi) is realized as a per-mode phase: A0 (bit 0) gets
 #   e^{+i*pi/4}, A1 (bit 1) gets e^{-i*pi/4}; same for B0/B1. thetas=[0,0]
-#   externally (matching results/julia_reference/weight2_locked_n2.csv's
+#   externally (matching results/v3_julia_verify/julia_reference/weight2_locked_n2.csv's
 #   header), so this pi/4 correction is the ONLY diagonal-layer phase
 #   present -- a pure weight-2 pair term at the locked angle pi/4.
 #
@@ -361,7 +361,7 @@ function run_case(theta_i, theta_j, ref_csv_name, case_label)
     println("[$case_label]   residual => $julia_residual")
     println("[$case_label]   sum(dist)+residual = ", sum(values(julia_dist)) + julia_residual)
 
-    ref_path = joinpath(@__DIR__, "..", "results", "julia_reference", ref_csv_name)
+    ref_path = joinpath(@__DIR__, "..", "results", "v3_julia_verify", "julia_reference", ref_csv_name)
     python_dist, python_header = read_reference_csv(ref_path)
 
     println()
@@ -392,7 +392,7 @@ function run_case(theta_i, theta_j, ref_csv_name, case_label)
         println("[$case_label] RESULT: GO -- TVD=$tvd <= $TOL, herald_failure_prob matches within tolerance.")
     else
         println("[$case_label] RESULT: DISAGREEMENT -- TVD=$tvd (tol=$TOL), herald_failure diff=$herald_failure_diff")
-        println("[$case_label] See results/phase19_verify03_weight2_results.md for the honest verdict and analysis.")
+        println("[$case_label] See results/v3_julia_verify/phase19_verify03_weight2_results.md for the honest verdict and analysis.")
     end
     println("=" ^ 70)
 
@@ -420,7 +420,7 @@ result_locked = run_case(pi / 4, pi / 4, "weight2_locked_n2.csv", "locked")
 # marginals uniform simultaneously + normalization forces the anti-diagonal
 # symmetry exactly. Specific to the pi/4-locked pair angle (the only one
 # heralded_cz realizes), not a generic IQP property. Full derivation in
-# results/phase19_verify03_weight2_results.md.
+# results/v3_julia_verify/phase19_verify03_weight2_results.md.
 result_asym = run_case(0.3 + pi / 4, 1.1 + pi / 4, "weight2_asymmetric_n2.csv", "asymmetric")
 
 println()

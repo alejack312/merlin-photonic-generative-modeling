@@ -4,7 +4,7 @@
 Calls this repo's already-tested exact/lossy distribution functions
 directly -- no new physics, no new Python logic beyond wiring and file I/O
 -- and writes plain `bitstring,probability` CSVs under
-`results/julia_reference/` for the independently-built Julia scripts in
+`results/v3_julia_verify/julia_reference/` for the independently-built Julia scripts in
 Plans 19-02..19-05 to diff against.
 
 Run: `python julia/generate_reference.py` (idempotent -- overwrites the same
@@ -24,7 +24,7 @@ from merlin_iqp.hardness.loss_model_weight2 import photonic_weight2_iqp_distribu
 from merlin_iqp.hardness.sweep import sample_thetas, ETA_GRID
 from merlin_iqp.trainability.rng import get_rng
 
-OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "results", "julia_reference")
+OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "results", "v3_julia_verify", "julia_reference")
 
 
 def _write_csv(dist, path, header_comments=None):

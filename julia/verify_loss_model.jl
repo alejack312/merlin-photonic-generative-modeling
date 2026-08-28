@@ -408,13 +408,13 @@ end
 TVD_TOLERANCE = 1e-6
 
 # --- Run weight-1 leg: n=2, thetas fixed from Plan 19-01's single draw
-# (results/julia_reference/weight1_loss_n2_eta*.csv header) ------------------
+# (results/v3_julia_verify/julia_reference/weight1_loss_n2_eta*.csv header) ------------------
 
 WEIGHT1_THETAS = [1.4696702887560742, 0.5745464671322527]
 WEIGHT1_ETA_FILES = Dict(
-    0.99 => "results/julia_reference/weight1_loss_n2_eta099.csv",
-    0.80 => "results/julia_reference/weight1_loss_n2_eta080.csv",
-    0.05 => "results/julia_reference/weight1_loss_n2_eta005.csv",
+    0.99 => "results/v3_julia_verify/julia_reference/weight1_loss_n2_eta099.csv",
+    0.80 => "results/v3_julia_verify/julia_reference/weight1_loss_n2_eta080.csv",
+    0.05 => "results/v3_julia_verify/julia_reference/weight1_loss_n2_eta005.csv",
 )
 
 println("\n--- Weight-1 leg (n=2, thetas=$WEIGHT1_THETAS) ---")
@@ -436,13 +436,13 @@ for eta_val in [0.99, 0.80, 0.05]
 end
 
 # --- Run mixed leg: n=2, i=0, j=1, thetas fixed from Plan 19-01's single
-# draw (results/julia_reference/mixed_loss_n2_eta*.csv header) --------------
+# draw (results/v3_julia_verify/julia_reference/mixed_loss_n2_eta*.csv header) --------------
 
 MIXED_THETAS = [1.6612470810666293, 1.2467258944387942]
 MIXED_ETA_FILES = Dict(
-    0.99 => "results/julia_reference/mixed_loss_n2_eta099.csv",
-    0.80 => "results/julia_reference/mixed_loss_n2_eta080.csv",
-    0.05 => "results/julia_reference/mixed_loss_n2_eta005.csv",
+    0.99 => "results/v3_julia_verify/julia_reference/mixed_loss_n2_eta099.csv",
+    0.80 => "results/v3_julia_verify/julia_reference/mixed_loss_n2_eta080.csv",
+    0.05 => "results/v3_julia_verify/julia_reference/mixed_loss_n2_eta005.csv",
 )
 
 println("\n--- Mixed leg (n=2, i=0, j=1, thetas=$MIXED_THETAS) ---")
@@ -476,18 +476,18 @@ println("=" ^ 70)
 if weight1_pass
     println("Weight-1 leg: PASS (all TVDs <= $TVD_TOLERANCE)")
 else
-    println("Weight-1 leg: DISAGREEMENT (see results/phase19_verify04_results.md)")
+    println("Weight-1 leg: DISAGREEMENT (see results/v3_julia_verify/phase19_verify04_results.md)")
 end
 if mixed_pass
     println("Mixed leg: PASS (all TVDs <= $TVD_TOLERANCE, herald_failure_prob within $HERALD_TOLERANCE)")
 else
-    println("Mixed leg: DISAGREEMENT (see results/phase19_verify04_results.md)")
+    println("Mixed leg: DISAGREEMENT (see results/v3_julia_verify/phase19_verify04_results.md)")
 end
 println("=" ^ 70)
 
 verdict = weight1_pass && mixed_pass ? "GO" : (weight1_pass || mixed_pass ? "PARTIAL-GO (documented disagreement, see below)" : "NO-GO (documented disagreement, see below)")
 
-open("results/phase19_verify04_results.md", "w") do io
+open("results/v3_julia_verify/phase19_verify04_results.md", "w") do io
     println(io, "# Phase 19 Plan 05: VERIFY-04 Results")
     println(io)
     println(io, "## Methodology")
@@ -542,7 +542,7 @@ open("results/phase19_verify04_results.md", "w") do io
     println(io, "Weight-1: an independently-built dual-rail circuit (reusing Plan 19-03's verified")
     println(io, "`H*phase_shift(pi-2*theta)*H` per-qubit construction, block-diagonal, no entangling")
     println(io, "gate) under native uniform loss, marginalized to a physical-mode distribution, diffed")
-    println(io, "against `results/julia_reference/weight1_loss_n2_eta{099,080,005}.csv` (Plan 19-01's")
+    println(io, "against `results/v3_julia_verify/julia_reference/weight1_loss_n2_eta{099,080,005}.csv` (Plan 19-01's")
     println(io, "fixed single-draw thetas=$WEIGHT1_THETAS).")
     println(io)
     println(io, "Mixed: an independently-built n=2, i=0, j=1 weight-1+weight-2 circuit (reusing Plan")
@@ -554,7 +554,7 @@ open("results/phase19_verify04_results.md", "w") do io
     println(io, "including both ancilla modes -- matching Python's ancilla-inclusive HARD-07 model),")
     println(io, "herald accounting done by hand exactly as Plan 19-04 did (ancilla output pattern must be")
     println(io, "[1,1] or the outcome counts as herald failure), diffed against")
-    println(io, "`results/julia_reference/mixed_loss_n2_eta{099,080,005}.csv` (Plan 19-01's fixed")
+    println(io, "`results/v3_julia_verify/julia_reference/mixed_loss_n2_eta{099,080,005}.csv` (Plan 19-01's fixed")
     println(io, "single-draw thetas=$MIXED_THETAS).")
     println(io)
     println(io, "## Results")
@@ -598,4 +598,4 @@ open("results/phase19_verify04_results.md", "w") do io
     end
 end
 
-println("\nWrote results/phase19_verify04_results.md")
+println("\nWrote results/v3_julia_verify/phase19_verify04_results.md")

@@ -68,11 +68,11 @@ Full detail in [`.planning/phases/02-generator-data-loss-infrastructure/02-CONTE
 
 ## 2026-07-25 — Phase 4 tuning: sigma sweep + batch-size sweep don't fix ring structure; `ModGrouping` index-fold identified as a likely cause
 
-**Context:** Phase 4's first checkpoint (`results/phase4_scatter_comparison.png`, sigma=0.1, the Phase 3 checkpoint) showed a diffuse, roughly-uniform generated distribution: no visible two-ring structure, `ring_mass=0.60` vs real data's 1.0. Owner reviewed and called it "sweep needed" (04-01-SUMMARY.md). Two rounds of tuning followed.
+**Context:** Phase 4's first checkpoint (`results/v1_generator/phase4_scatter_comparison.png`, sigma=0.1, the Phase 3 checkpoint) showed a diffuse, roughly-uniform generated distribution: no visible two-ring structure, `ring_mass=0.60` vs real data's 1.0. Owner reviewed and called it "sweep needed" (04-01-SUMMARY.md). Two rounds of tuning followed.
 
-**Round 1 — `SIGMA_GRID` sweep (Plan 04-02, formal):** retrained fresh generators at sigma ∈ {0.02, 0.05, 0.1, 0.2, 0.4}. This sigma is the MMD² loss's own Gaussian-kernel bandwidth, not just a visualization parameter. All 5 plateaued at diffuse, non-ring output (`results/phase4_sweep_comparison.png`, `results/phase4_sweep_metrics.csv`). Owner's own visual read: sigma=0.1 best (ring_mass=0.616), sigma=0.05 "somewhat"; neither judged as genuinely ring-shaped.
+**Round 1 — `SIGMA_GRID` sweep (Plan 04-02, formal):** retrained fresh generators at sigma ∈ {0.02, 0.05, 0.1, 0.2, 0.4}. This sigma is the MMD² loss's own Gaussian-kernel bandwidth, not just a visualization parameter. All 5 plateaued at diffuse, non-ring output (`results/v1_generator/phase4_sweep_comparison.png`, `results/v1_generator/phase4_sweep_metrics.csv`). Owner's own visual read: sigma=0.1 best (ring_mass=0.616), sigma=0.05 "somewhat"; neither judged as genuinely ring-shaped.
 
-**Round 2 — batch-size sweep (ad hoc, not a formal plan):** fixed sigma=0.1 (owner's pick from Round 1), retrained at batch_size ∈ {16, 32, 64, 128}, 300 epochs each, same `train_step` (`batch_sweep.py`, `results/phase4_batch_sweep_comparison.png`, `results/phase4_batch_sweep_metrics.csv`).
+**Round 2 — batch-size sweep (ad hoc, not a formal plan):** fixed sigma=0.1 (owner's pick from Round 1), retrained at batch_size ∈ {16, 32, 64, 128}, 300 epochs each, same `train_step` (`batch_sweep.py`, `results/v1_generator/phase4_batch_sweep_comparison.png`, `results/v1_generator/phase4_batch_sweep_metrics.csv`).
 
 | batch_size | ring_mass | gap_mass |
 |---|---|---|
@@ -153,7 +153,7 @@ Metrics are stable across latent draws, so the gap is not a single-sample artifa
 
 **Status:** this is an improvement, not a solution. Whether it closes Phase 4 (proceed to 04-03's write-up + GEN-07 checkpoint, documenting the diffuse-but-improved result honestly) or motivates a 4th axis is the owner's call with these numbers in hand, deliberately not pre-decided here.
 
-**Artifacts:** `results/phase4_natural_checkpoint.pt`, `results/phase4_natural_metrics.csv`, `results/phase4_natural_loss_history.csv`, `results/phase4_natural_comparison.png` (3-panel: real | prior best | natural order), `results/phase4_natural_rank_profile.png` (rank-domain `p_real` vs `q`).
+**Artifacts:** `results/v1_generator/phase4_natural_checkpoint.pt`, `results/v1_generator/phase4_natural_metrics.csv`, `results/v1_generator/phase4_natural_loss_history.csv`, `results/v1_generator/phase4_natural_comparison.png` (3-panel: real | prior best | natural order), `results/v1_generator/phase4_natural_rank_profile.png` (rank-domain `p_real` vs `q`).
 
 **Decided by:** Alejandro Jackson. The "improvement, still not two rings" verdict is the owner's visual judgment. The mechanism explanation above is Claude's, written after the owner's read and grounded in post-hoc measurements (run-count, total-variation, rank correlation, cross-draw stability) rather than in a plausible-sounding story; the confounds and the weak 0.38 correlation are stated because the owner has to be able to defend this unaided.
 

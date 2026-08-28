@@ -38,10 +38,10 @@ There is **no literal `eta=1.0` row** in either dataset. `eta=0.99` is the close
 
 **n range actually reached, per scope (stated honestly, per this project's TRAIN-05/TRAIN-08 convention):**
 
-- **weight1: n = 2..6** (full 7-point eta grid, 35 rows, `results/phase18_weight1_loss_sweep.csv`), matching Phase 17's own weight-1 ceiling.
-- **mixed: n = 2..4** (full 7-point eta grid, 21 rows, `results/phase18_mixed_loss_sweep.csv`). **Mixed n=5 is a confirmed hard ceiling, not a pending/in-progress item.** A reproducible `MemoryError: bad allocation` inside `Simulator.probs_svd` (called via `Processor.probs()`) occurs on the very first circuit evaluation of a fresh process, independently reproduced 3 times (2 in Plan 18-05's timing probe, 1 in Plan 18-06's own stretch attempt) at different eta values and different free-memory conditions. Draw-chunking does not help: this is a single-call memory ceiling, not a cross-call leak. Mixed scope's usable range for this document and for Plan 18-08 is n=2..4 only.
+- **weight1: n = 2..6** (full 7-point eta grid, 35 rows, `results/v3_hardness/phase18_weight1_loss_sweep.csv`), matching Phase 17's own weight-1 ceiling.
+- **mixed: n = 2..4** (full 7-point eta grid, 21 rows, `results/v3_hardness/phase18_mixed_loss_sweep.csv`). **Mixed n=5 is a confirmed hard ceiling, not a pending/in-progress item.** A reproducible `MemoryError: bad allocation` inside `Simulator.probs_svd` (called via `Processor.probs()`) occurs on the very first circuit evaluation of a fresh process, independently reproduced 3 times (2 in Plan 18-05's timing probe, 1 in Plan 18-06's own stretch attempt) at different eta values and different free-memory conditions. Draw-chunking does not help: this is a single-call memory ceiling, not a cross-call leak. Mixed scope's usable range for this document and for Plan 18-08 is n=2..4 only.
 
-**n_draws and seed.** `n_draws=5` independent random-theta draws per `(n, eta, scope)` cell, `seed_base=180814`, drawn via this project's existing deterministic, reorder-safe RNG substream utility (`trainability.rng.get_rng`, reused across packages). Per this project's `WRITE-06` traceability requirement, every number in this document is reproducible from `results/phase18_weight1_loss_sweep.csv` / `results/phase18_mixed_loss_sweep.csv` plus this seed.
+**n_draws and seed.** `n_draws=5` independent random-theta draws per `(n, eta, scope)` cell, `seed_base=180814`, drawn via this project's existing deterministic, reorder-safe RNG substream utility (`trainability.rng.get_rng`, reused across packages). Per this project's `WRITE-06` traceability requirement, every number in this document is reproducible from `results/v3_hardness/phase18_weight1_loss_sweep.csv` / `results/v3_hardness/phase18_mixed_loss_sweep.csv` plus this seed.
 
 **Theta-init convention.** All circuit parameters are drawn `theta ~ Uniform(0, 2*pi)` (`hardness/sweep.py::sample_thetas`), this phase's own single init convention and a **deliberate scope decision** (`18-CONTEXT.md`, "Claude's Discretion"), not silently inherited from Phase 17. Unlike Phase 17/17.1, this phase has no `init_scheme` axis at all: it reuses only the *shape* of Phase 17's "uniform" branch (the regime that produced Phase 17's own clean measured signal), on the reasoning that HARD-05/HARD-07 want generic/representative circuit instances, not a special-cased warm start.
 
@@ -60,11 +60,11 @@ There is **no literal `eta=1.0` row** in either dataset. `eta=0.99` is the close
 
 ## HARD-05 results: TVD vs eta (weight-1 and mixed)
 
-![weight-1 TVD vs eta](../results/phase18_weight1_tvd_plot.png)
+![weight-1 TVD vs eta](../results/v3_hardness/phase18_weight1_tvd_plot.png)
 
-![mixed TVD vs eta](../results/phase18_mixed_tvd_plot.png)
+![mixed TVD vs eta](../results/v3_hardness/phase18_mixed_tvd_plot.png)
 
-Each plot shows `tvd_to_lossless`, `tvd_to_uniform`, and `tvd_to_product_marginals` vs eta, one line per n, error bars from the CSV's own `_std` columns (5-draw sample std). Full per-cell numbers are in `results/phase18_weight1_loss_sweep.csv` / `results/phase18_mixed_loss_sweep.csv`.
+Each plot shows `tvd_to_lossless`, `tvd_to_uniform`, and `tvd_to_product_marginals` vs eta, one line per n, error bars from the CSV's own `_std` columns (5-draw sample std). Full per-cell numbers are in `results/v3_hardness/phase18_weight1_loss_sweep.csv` / `results/v3_hardness/phase18_mixed_loss_sweep.csv`.
 
 ### weight1 (n=2..6): TVD at the highest measured eta (0.99, near-lossless anchor) and lowest measured eta (0.05, near-total loss)
 
@@ -115,7 +115,7 @@ Separately, and independently verified (not assumed): among shots that *are* suc
 
 ## Anticoncentration results: alpha(eta)
 
-![anticoncentration alpha vs eta](../results/phase18_anticoncentration_plot.png)
+![anticoncentration alpha vs eta](../results/v3_hardness/phase18_anticoncentration_plot.png)
 
 `alpha(eta) = 2**n * sum(p_x**2)` (Bremner-Montanaro-Shepherd's Theorem 4 normalization, arXiv:1610.01808: `Sigma p_x^2 <= alpha * 2^-n`), computed directly/exactly from the full materialized distribution at each `(n, eta)` cell (`hardness/baselines.py::anticoncentration_alpha`), never sampled or estimated. The distribution is renormalized to sum to 1.0 before the computation (i.e. `alpha` is measured **conditioned on detection**) -- see that function's own docstring, and the 2026-08-20 correction note below, for why this is load-bearing rather than incidental. `alpha=1.0` is the uniform/maximally-anticoncentrated reference value (marked with a horizontal line in the plot above) and is a hard floor -- no normalized distribution can go below it. `alpha=2**n` is the maximally-concentrated (delta-distribution) extreme.
 
@@ -132,7 +132,7 @@ Separately, and independently verified (not assumed): among shots that *are* suc
 | mixed | 3 | 2.2634 |
 | mixed | 4 | 3.6085 |
 
-Each value is held constant to a spread of `~1e-15` (at most `4.9e-7`, at weight1 n=6, reflecting accumulated floating-point in the larger Fock space). Every value sits above the `alpha=1` floor, and no curve crosses it at any eta. Exact per-cell values are in `results/phase18_weight1_loss_sweep.csv` / `results/phase18_mixed_loss_sweep.csv`.
+Each value is held constant to a spread of `~1e-15` (at most `4.9e-7`, at weight1 n=6, reflecting accumulated floating-point in the larger Fock space). Every value sits above the `alpha=1` floor, and no curve crosses it at any eta. Exact per-cell values are in `results/v3_hardness/phase18_weight1_loss_sweep.csv` / `results/v3_hardness/phase18_mixed_loss_sweep.csv`.
 
 This invariance is not a coincidence of this circuit family's parameters. It follows directly from the shape-preservation result established in the HARD-05 section above. Uniform per-mode photon loss rescales the surviving distribution's total mass without altering the relative probabilities within it, and `alpha` is a pure shape statistic, so a channel that only rescales mass cannot move it.
 
@@ -172,15 +172,15 @@ The loss transform itself was cross-checked on the identical dual-rail circuits 
 
 The full original sweep design was then repeated unchanged: the same seven-point eta grid, five deterministic theta draws per cell, seed base `180814`, weight-1 `n=2..6`, and mixed `n=2..4`. Results are in:
 
-- `results/phase18_merlin_dual_rail_weight1_loss_sweep.csv`
-- `results/phase18_merlin_dual_rail_mixed_loss_sweep.csv`
-- `results/phase18_backend_comparison.csv` (both values and absolute delta for every shared per-cell metric)
+- `results/v3_hardness/phase18_merlin_dual_rail_weight1_loss_sweep.csv`
+- `results/v3_hardness/phase18_merlin_dual_rail_mixed_loss_sweep.csv`
+- `results/v3_hardness/phase18_backend_comparison.csv` (both values and absolute delta for every shared per-cell metric)
 
-![MerLin dual-rail weight-1 TVD vs eta](../results/phase18_merlin_dual_rail_weight1_tvd_plot.png)
+![MerLin dual-rail weight-1 TVD vs eta](../results/v3_hardness/phase18_merlin_dual_rail_weight1_tvd_plot.png)
 
-![MerLin dual-rail mixed TVD vs eta](../results/phase18_merlin_dual_rail_mixed_tvd_plot.png)
+![MerLin dual-rail mixed TVD vs eta](../results/v3_hardness/phase18_merlin_dual_rail_mixed_tvd_plot.png)
 
-![MerLin dual-rail anticoncentration alpha vs eta](../results/phase18_merlin_dual_rail_anticoncentration_plot.png)
+![MerLin dual-rail anticoncentration alpha vs eta](../results/v3_hardness/phase18_merlin_dual_rail_anticoncentration_plot.png)
 
 ### What agrees, and what does not
 

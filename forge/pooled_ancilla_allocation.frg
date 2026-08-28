@@ -6,7 +6,7 @@ option run_sterling off
 -- pairs receive the same block -- i.e. edge-colouring existence/minimality
 -- over K_n. This is the SEARCH formulation MPAIR-03/MPAIR-04 require, not a
 -- verification of one fixed formula. The prose source this model encodes is
--- results/phase22_allocation_invariant.md -- read it first; in particular
+-- results/v3_forge_formal/phase22_allocation_invariant.md -- read it first; in particular
 -- "## The invariant", "## Mode-index formula", "## Bitwidth justification",
 -- and "## What the Forge model will actually ask" motivate every predicate
 -- below. The round-robin colouring formula itself is deliberately NOT
@@ -43,7 +43,7 @@ option run_sterling off
 -- suite below actually only reaches n=6 (largest ancilla mode index
 -- computed at n=6: 2*6 + 4*4 + 3 = 31) -- n=7 and n=8 both hit D-04's
 -- 10-minute ceiling; see the comment above the commented-out N7/N8 blocks
--- and results/phase22_forge_run_log.md's "## Bound outcome" section.
+-- and results/v3_forge_formal/phase22_forge_run_log.md's "## Bound outcome" section.
 -- `for 7 Int` is kept (not narrowed to fit the smaller n=6 maximum of 31,
 -- which would in fact still fit `for 6 Int`'s [-32,31]) because it remains
 -- the correct, headroom-bearing justification against D-03's original
@@ -56,7 +56,7 @@ option run_sterling off
 -- does NOT establish that reusing those physical modes across sequential
 -- CP(alpha) unitaries reproduces dedicated-ancilla physics -- that is a
 -- unitarity claim outside what a bounded model finder can check, settled
--- separately by MPAIR-07. See results/phase22_reuse_gate.md and its
+-- separately by MPAIR-07. See results/v3_forge_formal/phase22_reuse_gate.md and its
 -- "## Owner ruling" section (owner ruled GO, 2026-08-21, based on the n=4
 -- vertex-disjoint probe's numerical evidence).
 --
@@ -104,7 +104,7 @@ pred pairsAreKn {
 }
 
 -- The vertex-disjoint compatibility rule from
--- results/phase22_allocation_invariant.md's "## Compatibility rule",
+-- results/v3_forge_formal/phase22_allocation_invariant.md's "## Compatibility rule",
 -- negated: pairs that CONFLICT share a qubit index and may not pool.
 pred conflicts[p, q: Pair] {
     p.i = q.i or p.i = q.j or p.j = q.i or p.j = q.j
@@ -117,7 +117,7 @@ pred blocksInRange {
     }
 }
 
--- PAIRWISE formulation. results/phase22_allocation_invariant.md's
+-- PAIRWISE formulation. results/v3_forge_formal/phase22_allocation_invariant.md's
 -- "## Pairwise-reduction argument" licenses this standing in for
 -- subset-quantification: collision is a binary predicate (it is either
 -- witnessed by two specific pairs or it does not exist at all), so "no
@@ -170,7 +170,7 @@ pred genuinePooling {
 -- Four blocks per n: existence at K, minimality at K-1 (no proper
 -- colouring with fewer blocks), data-port disjointness, and genuine
 -- non-vacuous pooling. K = n-1 for even n, K = n for odd n
--- (results/phase22_allocation_invariant.md's round-robin formula's block
+-- (results/v3_forge_formal/phase22_allocation_invariant.md's round-robin formula's block
 -- count; Vizing/Koenig's chromatic-index theorem for K_n).
 
 test expect {
@@ -283,7 +283,7 @@ test expect {
     -- n = 7 and n = 8 (D-03's target bound) were ATTEMPTED and hit D-04's
     -- hard 10-minute-per-n ceiling -- this is a REPORTABLE FINDING, not a
     -- failure to engineer around (D-04). n = 6 is the largest bound that
-    -- converged; see results/phase22_forge_run_log.md for the full
+    -- converged; see results/v3_forge_formal/phase22_forge_run_log.md for the full
     -- per-n timing table and the "## Bound outcome" section.
     --
     -- Measured: an isolated 2-block probe at n=7 (colouringExistsN7,
