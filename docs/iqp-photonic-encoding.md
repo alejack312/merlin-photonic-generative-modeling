@@ -50,9 +50,9 @@ At `delta = π/2` (the `HWP` case), this reduces to `i·[[cos(2·xsi), sin(2·xs
    - **SWAP** — not Z-diagonal either. Same conclusion.
    - **CZ** — `diag(1, 1, 1, −1)`. **Is** Z-diagonal, and a legitimate stand-in for IQP's generic weight-2 generator `exp(iθ·Z_i·Z_j) = diag(e^{iθ}, e^{-iθ}, e^{-iθ}, e^{iθ})` (CZ is a specific instance of that family up to single-qubit Z corrections).
 
-   Owner picked the **heralded** construction (over post-selected) for the two-qubit gate.
+Owner picked the **heralded** construction (over post-selected) for the two-qubit gate.
 
-   Mechanism, as sketched: each of the two polarization photons (qubits `i`, `j`) passes through its own `PBS`, converting polarization → two spatial modes per photon (4 modes total) — this is what "H/V splits onto a spatial mode" means: the photon's former polarization state now determines which of two paths it's found in. `core_catalog.heralded_cz` (built for dual rail) acts on those 4 modes plus ancilla herald mode(s); the gate is accepted only when a specific detector click pattern fires on the heralds (heralding — confirming success without measuring the data photons themselves, as opposed to post-selection, which checks an acceptance condition on the data-mode measurement after the fact). Each qubit's 2 modes then pass back through a `PBS` to return to polarization encoding. Same probabilistic success-probability cost as dual rail's native heralded CZ — polarization → `PBS` → dual rail → `PBS` → polarization doesn't dodge KLM, it inherits it via a lossless conversion.
+Mechanism, as sketched: each of the two polarization photons (qubits `i`, `j`) passes through its own `PBS`, converting polarization → two spatial modes per photon (4 modes total) — this is what "H/V splits onto a spatial mode" means: the photon's former polarization state now determines which of two paths it's found in. `core_catalog.heralded_cz` (built for dual rail) acts on those 4 modes plus ancilla herald mode(s); the gate is accepted only when a specific detector click pattern fires on the heralds (heralding — confirming success without measuring the data photons themselves, as opposed to post-selection, which checks an acceptance condition on the data-mode measurement after the fact). Each qubit's 2 modes then pass back through a `PBS` to return to polarization encoding. Polarization → `PBS` → dual rail → `PBS` → polarization inherits KLM via a lossless conversion rather than dodging it — the same probabilistic success-probability cost as dual rail's native heralded CZ.
 
 **4. Hadamard-conjugated measurement.** Same component family as (1) — `HWP` at the angle realizing Hadamard on the polarization basis (Task 2: confirm exact angle from the same matrix above).
 
@@ -95,15 +95,19 @@ At `ξ = 0`, `WP`'s unitary reduces to:
 U(δ, 0) = [[cos(δ) + i·sin(δ), 0], [0, cos(δ) − i·sin(δ)]] = diag(e^{iδ}, e^{-iδ})
 ```
 
-— confirmed numerically (`WP(π/3, 0).compute_unitary()` gives `diag(e^{iπ/3}, e^{-iπ/3})` to floating-point precision). This is **exact**, not an approximation: `WP(θ, 0)` realizes `exp(iθZ)` on the polarization qubit, the same role `PS` plays for a single-qubit generator in dual rail, with no additional interference partner needed for the *phase itself* to be well-defined (though, as in dual rail, that phase is only *observable* after a subsequent basis change — see Ingredient 3).
+— confirmed numerically (`WP(π/3, 0).compute_unitary()` gives `diag(e^{iπ/3}, e^{-iπ/3})` to floating-point precision). This is **exact**, not an approximation. `WP(θ, 0)` realizes `exp(iθZ)` on the polarization qubit, the same role `PS` plays for a single-qubit generator in dual rail, with no additional interference partner needed for the *phase itself* to be well-defined (though, as in dual rail, that phase is only *observable* after a subsequent basis change — see Ingredient 3).
 
 For a weight-1 IQP generator `g_j` touching only qubit `k` with angle `θ_j`, the photonic realization is `WP(θ_j, 0)` on qubit `k`'s polarization mode. `build_diagonal_layer_circuit(n, thetas)` implements this directly: `WP(thetas[k], 0)` at port `2k` for each qubit `k` (`thetas[k] = 0` realizes the identity, for qubits untouched by any weight-1 generator).
 
 **Weight-≥2 generators.** IQP's middle layer can include generators touching two or more qubits, e.g. `exp(iθ·Z_i·Z_j)`. This section originally derived the weight-2 mechanism on paper without a runnable implementation; as of Phase 11 (v2.1), `build_cz_insertion(n, i, j)` and `build_weight2_processor(n, i, j, thetas)` in `merlin_iqp/encoding/iqp_photonic.py` implement it as executable code, verified against the truth table below (`|amplitude|² == 2/27`, sign negative only on `|1,1⟩`) — see `tests/test_iqp_photonic_encoding.py`. TVD validation against an extended exact reference (the same rigor weight-1 already cleared) was completed in Phase 12: TVD=2.58e-15 at the locked n=2, θ=π/4 gate. Phase 13 further confirmed weight-1 and weight-2 layers compose correctly within the same n=3 circuit. The mechanism, following the owner's Task 1 attempt:
 
 1. Each of the two qubits' polarization photons passes through its own `PBS`, converting polarization → two plain spatial modes per photon (4 modes total) — dual rail's representation.
-2. `perceval.components.core_catalog.heralded_cz` acts on those 4 modes plus ancilla herald mode(s), succeeding (confirmed by a specific detector click pattern on the heralds) only some fraction of the time. This herald-success probability was independently measured in this repo's venv (Phase 10, `scripts/heralded_cz_derisking.py`): **exactly 2/27 (~0.074074)**, uniform across all 4 computational-basis dual-rail inputs and 2 superposition spot-checks (`|+⟩|+⟩`, `|+⟩|0⟩`), read directly off `Processor.probs()`'s `global_perf`/`physical_perf`/`logical_perf` (never shot-sampled; `physical_perf == 1.0` in every case, confirming no photon loss in the unitary itself — the entire cost is the herald condition). The CZ phase sign was confirmed separately via `Simulator.prob_amplitude` on the bare circuit: negative on `|1,1⟩`, positive on `|0,0⟩`/`|0,1⟩`/`|1,0⟩`, exactly matching `diag(1,1,1,-1)`. Stated descriptively, not as a proof of general equivalence: `09-RESEARCH.md` had cited commonly-quoted literature figures (1/9 for a post-selected construction, ~2/27 for a heralded variant) as unverified for this exact implementation; the measured 2/27 happens to numerically match the previously-cited heralded-variant figure to the precision quoted, but that match is an observation about this specific gate, not a claim that this implementation is the same construction as the literature's general gate family.
+2. `perceval.components.core_catalog.heralded_cz` acts on those 4 modes plus ancilla herald mode(s), succeeding (confirmed by a specific detector click pattern on the heralds) only some fraction of the time.
 3. Each qubit's 2 modes convert back to polarization via `PBS`.
+
+This herald-success probability was independently measured in this repo's venv (Phase 10, `scripts/heralded_cz_derisking.py`): **exactly 2/27 (~0.074074)**, uniform across all 4 computational-basis dual-rail inputs and 2 superposition spot-checks (`|+⟩|+⟩`, `|+⟩|0⟩`), read directly off `Processor.probs()`'s `global_perf`/`physical_perf`/`logical_perf` (never shot-sampled; `physical_perf == 1.0` in every case, confirming no photon loss in the unitary itself — the entire cost is the herald condition). The CZ phase sign was confirmed separately via `Simulator.prob_amplitude` on the bare circuit: negative on `|1,1⟩`, positive on `|0,0⟩`/`|0,1⟩`/`|1,0⟩`, exactly matching `diag(1,1,1,-1)`.
+
+Stated descriptively, not as a proof of general equivalence: `09-RESEARCH.md` had cited commonly-quoted literature figures (1/9 for a post-selected construction, ~2/27 for a heralded variant) as unverified for this exact implementation. The measured 2/27 happens to numerically match the previously-cited heralded-variant figure to the precision quoted, but that match is an observation about this specific gate, not a claim that this implementation is the same construction as the literature's general gate family.
 
 The operator-identity connecting this to IQP's generic weight-2 generator: writing `Z_i`, `Z_j`, `Z_iZ_j` eigenvalues on the four computational basis states `{|00⟩,|01⟩,|10⟩,|11⟩}` as `(1,1,-1,-1)`, `(1,-1,1,-1)`, `(1,-1,-1,1)` respectively, direct calculation gives:
 
@@ -127,7 +131,7 @@ So `heralded_cz`, corrected by two single-qubit `WP(π/4, 0)` gates (already ava
 
 ### Commutativity and conjugation-symmetry, argued at equation level
 
-**Commutativity.** IQP's structural property is that every middle-layer generator commutes with every other, because all are diagonal in the same (Z) basis. In this photonic realization: each weight-1 generator `WP(θ_k, 0)` acts on a *distinct* qubit's own single mode; operators on disjoint tensor factors commute trivially (`[A⊗I, I⊗B] = 0` for any `A, B`). Two generators on the *same* qubit (different `θ` values) are both exactly diagonal in that qubit's `{H,V}` basis (`WP(θ,0) = diag(e^{iθ}, e^{-iθ})`), and diagonal matrices always commute with each other regardless of angle. This is the same structural argument as the qubit-side proof (`Z_i` and `Z_j` commute trivially for `i≠j`; two Z-diagonal operators on the same qubit commute because diagonal matrices commute) — preserved exactly, not just informally echoed, because `WP(θ,0)`'s unitary *is* diagonal in the `{H,V}` computational basis, not merely "phase-like" in some looser sense. The weight-2 case (Ingredient 2's derivation) inherits the same property *conditional on successful heralding*: `heralded_cz` realizes `CZ`, an exactly-diagonal 4×4 matrix, so on the subspace where the herald succeeds, the resulting operation is diagonal in the joint computational basis and therefore commutes with all other diagonal-layer operations by the identical argument. This conditional caveat is real, not a technicality to bury: heralding failure leaks probability outside the two-qubit computational subspace entirely, so the *unconditional* physical process (including failure outcomes) is not a diagonal unitary on the qubit subspace alone.
+**Commutativity.** IQP's structural property is that every middle-layer generator commutes with every other, because all are diagonal in the same (Z) basis. In this photonic realization: each weight-1 generator `WP(θ_k, 0)` acts on a *distinct* qubit's own single mode; operators on disjoint tensor factors commute trivially (`[A⊗I, I⊗B] = 0` for any `A, B`). Two generators on the *same* qubit (different `θ` values) are both exactly diagonal in that qubit's `{H,V}` basis (`WP(θ,0) = diag(e^{iθ}, e^{-iθ})`), and diagonal matrices always commute with each other regardless of angle. This is the same structural argument as the qubit-side proof (`Z_i` and `Z_j` commute trivially for `i≠j`; two Z-diagonal operators on the same qubit commute because diagonal matrices commute) — preserved exactly, not just informally echoed, because `WP(θ,0)`'s unitary *is* diagonal in the `{H,V}` computational basis, not merely "phase-like" in some looser sense. The weight-2 case (Ingredient 2's derivation) inherits the same property *conditional on successful heralding*: `heralded_cz` realizes `CZ`, an exactly-diagonal 4×4 matrix, so on the subspace where the herald succeeds, the resulting operation is diagonal in the joint computational basis and therefore commutes with all other diagonal-layer operations by the identical argument. This conditional caveat matters: heralding failure leaks probability outside the two-qubit computational subspace entirely, so the *unconditional* physical process (including failure outcomes) is not a diagonal unitary on the qubit subspace alone.
 
 **Conjugation symmetry.** IQP's measurement is in the Hadamard-conjugate (X) basis relative to the diagonal layer — equivalently, `H^⊗n` applied before computational-basis measurement. `HWP(π/8)` realizes Hadamard exactly (up to the unobservable global phase `i`) on each qubit's own two-level polarization space independently, with zero cross-mode coupling (confirmed: `hwp.m == 1`). Applying `HWP(π/8)` to all `n` qubit modes therefore realizes `H^⊗n` exactly, up to the global phase `i^n` — again mode-by-mode, matching the qubit-side tensor-product structure directly rather than merely reproducing its aggregate effect.
 
@@ -148,7 +152,7 @@ expected = expected_joint_distribution(n=2, thetas=[0.3, 1.1])
 
 (Bitstring labels use the verified convention `H=(0,1)`, `V=(1,0)` — see the port↔polarization correction below. The raw Perceval output above is unchanged by that correction; only which label attaches to which outcome changed.)
 
-These match to floating-point precision (`tests/test_iqp_photonic_encoding.py`'s parametrized product-distribution test, which also checks `n=3` with three independent generators). Two things this concretely confirms, not just for the marginal per-qubit phase-to-probability relationship but for the *joint* two- and three-qubit state:
+These match to floating-point precision (`tests/test_iqp_photonic_encoding.py`'s parametrized product-distribution test, which also checks `n=3` with three independent generators). Two things this concretely confirms about the *joint* two- and three-qubit state, beyond the marginal per-qubit phase-to-probability relationship already established:
 
 1. **No spurious correlations.** The joint distribution factors exactly into the product of independent per-qubit marginals — direct empirical evidence that weight-1 generators don't entangle the photonic realization, consistent with the commutativity argument above (weight-1 generators are local operators; no shared mode, no interaction).
 2. **No leakage outside the computational subspace.** Every one of the 9 (`n=2`) and 27 (`n=3`) enumerable bunched/lost-photon outcomes (e.g. `|2,0,0,0⟩`, `|0,0,0,0⟩`, ...) has exactly zero probability in this ideal, lossless `SLOS` simulation — answering one of `09-RESEARCH.md`'s open questions (whether the toy circuit would empirically populate out-of-subspace Fock outcomes) for this specific weight-1-only construction: it does not, under ideal simulation.
@@ -161,7 +165,7 @@ Had · diag(e^{iθ},e^{-iθ}) · Had = [[cos θ, i sin θ], [i sin θ, cos θ]]
 
 giving `P(stay) = cos²θ`, `P(flip) = sin²θ` in the abstract `{index0, index1}` ordering. Which physical port is which required a direct check, not an assumption: a bare `PBS()` with no other gates, fed pure `|H⟩` or pure `|V⟩`, gives `H → (0,1)`, `V → (1,0)` (deterministically, to floating-point precision). Combining that with the abstract result above: **`P(H) = cos²θ`, `P(V) = sin²θ`.**
 
-*Correction (Plan 09-02):* an earlier version of this document and `merlin_iqp/encoding/iqp_photonic.py` had this port↔polarization assignment backwards — self-consistent within its own labels (so no numerical test result was ever wrong), but the "H"/"V" tags didn't match true physical polarization. Caught during the ENC-03 attempt-first checkpoint when the owner asked which output pair was really H, prompting the direct bare-`PBS` check above. Fixed in both the module and its tests (`tests/test_iqp_photonic_encoding.py`'s parametrized closed-form test now reads `H` from `BasicState([0,1])` and `V` from `BasicState([1,0])`); all 12 tests still pass, since the fix is a consistent relabeling, not a change to the underlying physics.
+*Correction (Plan 09-02):* an earlier version of this document and `merlin_iqp/encoding/iqp_photonic.py` had this port↔polarization assignment backwards — self-consistent within its own labels (so no numerical test result was ever wrong), but the "H"/"V" tags didn't match true physical polarization. This was caught during the ENC-03 attempt-first checkpoint when the owner asked which output pair was really H, prompting the direct bare-`PBS` check above. Fixed in both the module and its tests (`tests/test_iqp_photonic_encoding.py`'s parametrized closed-form test now reads `H` from `BasicState([0,1])` and `V` from `BasicState([1,0])`); all 12 tests still pass, since the fix is a consistent relabeling, not a change to the underlying physics.
 
 ### Relation to the owner's Task 1 attempt
 
@@ -175,7 +179,7 @@ ENC-01 is implemented and tested: `merlin_iqp/encoding/iqp_photonic.py` (state-p
 
 Per this repo's CLAUDE.md self-explanation checkpoints, the owner was asked to explain, unaided: (1) why the photonic realization of the diagonal layer actually commutes, and (2) what Hadamard-conjugation is physically doing and what the weight-2 case costs. Full Q&A recorded below, following this project's established pattern of documenting the actual back-and-forth rather than only the polished result.
 
-*Note (added in Plan 09-02):* the `P(H)`/`P(V)` labels quoted in this transcript use the port↔polarization convention believed correct at the time (`H=(1,0)`, `V=(0,1)`) — since corrected to `H=(0,1)`, `V=(1,0)` after direct verification (see Ingredient 1's "Correction" note above). The transcript is left as an accurate record of what was actually said; only the physics discussed (phase → population imbalance) is what matters here, and that reasoning is unaffected by which physical port carries which label.
+*Note (added in Plan 09-02):* the `P(H)`/`P(V)` labels quoted in this transcript use the port↔polarization convention believed correct at the time (`H=(1,0)`, `V=(0,1)`) — since corrected to `H=(0,1)`, `V=(1,0)` after direct verification (see Ingredient 1's "Correction" note above). The transcript is left as an accurate record of what was actually said. Only the physics discussed (phase → population imbalance) is what matters here, and that reasoning is unaffected by which physical port carries which label.
 
 **Round 1 — initial answers restated the qubit-side abstraction rather than the photonic mechanism**, and contained one physical misconception:
 - Commutativity: initially restated "diagonal in the Z-basis, all pairwise commuting" without connecting it to the actual `WP` construction — flagged as not yet meeting the bar, since it doesn't distinguish *why this specific realization* inherits the property.
@@ -213,7 +217,11 @@ This document is a **design/mapping exercise, checkable in principle at small sc
 
 ### Open questions and limitations, collected
 
-- **Generator-weight scope.** Weight-1 generators are fully derived, implemented, and empirically validated (ENC-01, ENC-04). Weight-2 generators at the fixed `π/4` angle are implemented and validated (Phases 11-13, v2.1): `build_cz_insertion`/`build_weight2_processor` realize the circuit, Phase 12's TVD test confirms it matches the extended exact reference (TVD=2.58e-15 at n=2, θ=π/4), and Phase 13 confirms weight-1/weight-2 composability at n=3. **Weight-2 is no longer fixed-angle-only**: Phase 15 (v3.0, ARB-01) implemented and validated a second, genuinely different gate family (`build_cp_insertion`/`photonic_cp_iqp_distribution`, `PostProcessedControlledRotationsItem`-based) at arbitrary `α` — TVD < 1e-6 (measured at floating-point-noise level) against the extended exact reference at `n=2,3` across 3 non-trivial `α` values, plus a direct full-pipeline boundary-agreement confirmation against `heralded_cz` at `α=π`. See the ARB-01/ARB-02 section below for the derivation, the `heralded_cz`-vs-`CP` comparison table, and the measured results. **Phase 16 (v3.0) completed the remaining scope**: a denser 16-point `α` sweep matching the closed-form success probability to ~1e-9 at every point (ARB-08), an n=3 mixed weight-1+arbitrary-θ weight-2 composability test (TVD < 1e-6, ARB-07), and a Forge model confirming the gate's ancilla mode-mapping is injective/non-aliasing for all valid `(n,i,j)`, `n ≤ 8`, with no bug found (ARB-09). See "Denser α Sweep (Phase 16)" and "Forge Verification of the Ancilla Mode-Mapping (Phase 16)" below for the measured results.
+- **Generator-weight scope.**
+  - **Weight-1:** fully derived, implemented, and empirically validated (ENC-01, ENC-04).
+  - **Weight-2, fixed `π/4` angle:** implemented and validated (Phases 11-13, v2.1). `build_cz_insertion`/`build_weight2_processor` realize the circuit, Phase 12's TVD test confirms it matches the extended exact reference (TVD=2.58e-15 at n=2, θ=π/4), and Phase 13 confirms weight-1/weight-2 composability at n=3.
+  - **Weight-2, arbitrary `α` (no longer fixed-angle-only):** Phase 15 (v3.0, ARB-01) implemented and validated a second, genuinely different gate family (`build_cp_insertion`/`photonic_cp_iqp_distribution`, `PostProcessedControlledRotationsItem`-based) — TVD < 1e-6 (measured at floating-point-noise level) against the extended exact reference at `n=2,3` across 3 non-trivial `α` values, plus a direct full-pipeline boundary-agreement confirmation against `heralded_cz` at `α=π`. See the ARB-01/ARB-02 section below for the derivation, the `heralded_cz`-vs-`CP` comparison table, and the measured results.
+  - **Phase 16 (v3.0) completed the remaining scope:** a denser 16-point `α` sweep matching the closed-form success probability to ~1e-9 at every point (ARB-08), an n=3 mixed weight-1+arbitrary-θ weight-2 composability test (TVD < 1e-6, ARB-07), and a Forge model confirming the gate's ancilla mode-mapping is injective/non-aliasing for all valid `(n,i,j)`, `n ≤ 8`, with no bug found (ARB-09). See "Denser α Sweep (Phase 16)" and "Forge Verification of the Ancilla Mode-Mapping (Phase 16)" below for the measured results.
 - **Success-probability figure now confirmed for this exact gate (Phase 10, `scripts/heralded_cz_derisking.py`).** Perceval's `heralded_cz` (the Knill CZ construction, arXiv:quant-ph/0110144) has a herald-success probability independently measured at exactly 2/27 (~0.074074), uniform across all 4 computational-basis inputs and 2 superposition spot-checks, plus a confirmed CZ phase sign (negative on `|1,1⟩` only) via `Simulator.prob_amplitude`, and a confirmed-empty `post_select_fn` (no hidden second filter behind `logical_perf`, zero leakage in the `Analyzer` truth table). Phases 11-13 confirmed the full weight-2 circuit also works correctly end-to-end once composed with the rest of the pipeline (`PBS` conversion, the `π/4` phase corrections, readout, and composition alongside weight-1 terms).
 - **Toy-check scope.** ENC-04's `n=2,3` validation covers weight-1 generators only, under an idealized, lossless `SLOS` simulation — it says nothing about `n>3`, weight-2 generators, or behavior under realistic loss/noise.
 - **General-`n` scaling.** This mapping is stated for general `n` in principle, but only concretely instantiated and checked at `n=2-3`; nothing here demonstrates the construction scales practically to circuit sizes relevant to a hardness claim.
@@ -341,7 +349,7 @@ Second attempt: *"This mean the two probability tables are extremely similar. Th
 
 Final interpretation, in two parts:
 1. *"There is little room for doubt, the photonic circuit reproduces the exact qubit-side IQP distribution."* — correct, and appropriately confident given the numbers (TVD at floating-point noise level, zero residual, for both `n=2` and `n=3`).
-2. Initial second half — *"I believe this will extend to generators of higher weight, so we should be good"* — flagged as an unsupported extrapolation, corrected. Weight-1 (`WP(θ,0)`) and weight-2 (`heralded_cz`) aren't the same mechanism at different sizes: weight-1 is exact and deterministic for any angle; weight-2 is probabilistic (herald-conditioned) and, per ENC-01's own derivation, only realizes one fixed angle (`π/4`), not an arbitrary θ. A clean match on the deterministic, arbitrary-angle case provides no evidence about the probabilistic, fixed-angle case, because they don't share the property this test actually checked. Corrected final answer: *"Nothing, we'll have to see via heralding."* — the weight-2 mechanism remains genuinely untested; ENC-04's result is silent on it, not quietly reassuring about it.
+2. Initial second half — *"I believe this will extend to generators of higher weight, so we should be good"* — flagged as an unsupported extrapolation, corrected. Weight-1 (`WP(θ,0)`) and weight-2 (`heralded_cz`) aren't the same mechanism at different sizes: weight-1 is exact and deterministic for any angle; weight-2 is probabilistic (herald-conditioned) and, per ENC-01's own derivation, only realizes one fixed angle (`π/4`), not an arbitrary θ. Because they don't share the property this test actually checked, a clean match on the deterministic, arbitrary-angle case provides no evidence about the probabilistic, fixed-angle case. Corrected final answer: *"Nothing, we'll have to see via heralding."* — the weight-2 mechanism remains genuinely untested; ENC-04's result is silent on it, not quietly reassuring about it.
 
 **Standing scope of what ENC-04 actually established:** the photonic mapping reproduces the exact qubit-side IQP distribution to floating-point precision, for weight-1-only generator sets, at `n=2` and `n=3`. It says nothing about weight-2 generators, `n>3`, or any property beyond what these two specific circuits and generator sets exercise.
 
@@ -374,7 +382,7 @@ Per this repo's CLAUDE.md and ENC-05's explicit bar — same standard as v1.0's 
 
 ## ARB-01/ARB-02: General-α Operator Identity and Success Probability
 
-**What this extends:** Ingredient 2's `heralded_cz`-based derivation above realizes `exp(iθZ_iZ_j)` only at the fixed angle `θ=π/4`, since `heralded_cz` is a fixed catalog gate. `PostProcessedControlledRotationsItem` (a **different** gate family — post-selection on ancilla vacuum + per-qubit data validity, not `heralded_cz`'s ancilla heralding) implements a continuously-tunable `CP(α) = diag(1,1,1,e^{iα})`, de-risked standalone in Phase 15 (`scripts/cp_gate_derisking.py`, `tests/test_cp_gate_derisking.py`, 8/8 passing) and confirmed to match `heralded_cz`'s boundary exactly at `α=π` (not `α=π/4` — see the correction below). This section derives the general-`α` operator identity connecting it to `exp(iθZ_iZ_j)` for arbitrary `θ`, and the gate's success probability as a closed-form function of `α`.
+**What this extends:** since `heralded_cz` is a fixed catalog gate, Ingredient 2's `heralded_cz`-based derivation above realizes `exp(iθZ_iZ_j)` only at the fixed angle `θ=π/4`. `PostProcessedControlledRotationsItem` (a **different** gate family — post-selection on ancilla vacuum + per-qubit data validity, not `heralded_cz`'s ancilla heralding) implements a continuously-tunable `CP(α) = diag(1,1,1,e^{iα})`, de-risked standalone in Phase 15 (`scripts/cp_gate_derisking.py`, `tests/test_cp_gate_derisking.py`, 8/8 passing) and confirmed to match `heralded_cz`'s boundary exactly at `α=π` (not `α=π/4` — see the correction below). This section derives the general-`α` operator identity connecting it to `exp(iθZ_iZ_j)` for arbitrary `θ`, and the gate's success probability as a closed-form function of `α`.
 
 ### Owner's Attempt
 
@@ -386,7 +394,7 @@ Final statement, in the owner's own words: *"α is equal to 4θ as we computed t
 
 **Part (b) — success probability.** Asked what the "missing" probability represents physically when a non-unitary sub-block is embedded in a larger unitary and the ancilla is post-selected back onto vacuum, the owner's answer: *"This has to do with dilations and basically representing quantum operations as part of a larger system entangled system. This means that the 'missing' probability comes from correlations with the environment."* — correct, and the right general principle (Stinespring dilation: post-selecting the environment/ancilla onto vacuum recovers a sub-unitary contraction; the norm lost is exactly what leaked into non-vacuum ancilla branches).
 
-Deriving the *exact* closed form for this specific gate went differently from part (a): a first hand-derivation attempt (assuming the gate's internal coupling matrix was block-diagonal by *qubit pair*, i.e. one block per qubit) was checked numerically against the gate's actual measured amplitudes and was **wrong** — all four computational-basis inputs showed identical, non-monotonic dependence on `α`, contradicting the "some inputs are lossless" prediction that wrong assumption implied. Rather than keep re-deriving from a mis-mapped structure, the primary source the gate itself cites (arXiv:2405.01395, Section V-B) was consulted directly and the resulting formula verified against `scripts/cp_gate_derisking.py`'s own measured sweep before being accepted — see Verification below.
+Deriving the *exact* closed form for this specific gate went differently from part (a). A first hand-derivation attempt (assuming the gate's internal coupling matrix was block-diagonal by *qubit pair*, i.e. one block per qubit) was checked numerically against the gate's actual measured amplitudes and was **wrong** — all four computational-basis inputs showed identical, non-monotonic dependence on `α`, contradicting the "some inputs are lossless" prediction that wrong assumption implied. Rather than keep re-deriving from a mis-mapped structure, the primary source the gate itself cites (arXiv:2405.01395, Section V-B) was consulted directly and the resulting formula verified against `scripts/cp_gate_derisking.py`'s own measured sweep before being accepted — see Verification below.
 
 ### General-α Operator Identity
 
@@ -399,7 +407,7 @@ Writing `exp(iθZ_iZ_j)` explicitly using `Z_iZ_j`'s eigenvalues (`+1,-1,-1,+1` 
 ⟹ exp(iθ·Z_i·Z_j) = e^{−iθ} · CP(4θ) · exp(iθ·Z_i) · exp(iθ·Z_j)   (up to the stated global phase)
 ```
 
-**Sanity check against the confirmed boundary:** at `θ=π/4` (the existing fixed-angle case, Ingredient 2 above), `α=4·(π/4)=π` — matching Plan 15-01/15-02's independently-confirmed result that `CP(α=π)` reproduces `heralded_cz`'s `CZ=diag(1,1,1,-1)` exactly, sign-for-sign. This **corrects `15-CONTEXT.md`'s originally-stated boundary** (`α=π/4`) to the verified value (`α=π`) — `θ=π/4` is this codebase's existing `Z_iZ_j`-generator-angle convention (`pair_thetas`), and `α=π` is `CP`'s own separate dial value at that same physical point; the two were conflated in the original context note and are stated unambiguously here.
+**Sanity check against the confirmed boundary:** at `θ=π/4` (the existing fixed-angle case, Ingredient 2 above), `α=4·(π/4)=π` — matching Plan 15-01/15-02's independently-confirmed result that `CP(α=π)` reproduces `heralded_cz`'s `CZ=diag(1,1,1,-1)` exactly, sign-for-sign. This **corrects `15-CONTEXT.md`'s originally-stated boundary** (`α=π/4`) to the verified value (`α=π`) — `θ=π/4` is this codebase's existing `Z_iZ_j`-generator-angle convention (`pair_thetas`), and `α=π` is `CP`'s own separate dial value at that same physical point. The two were conflated in the original context note and are stated unambiguously here.
 
 ### Closed-Form Success Probability
 
@@ -431,7 +439,7 @@ For **n=2** (this project's case): `σ_max = max(|1+a|, |1−a|)`, so `p_success
 
 All 7 tested points (the original 4-point de-risking sweep plus 3 additional exploratory points) agree to the measured table's printed precision — the differences above are rounding in the printed 6-decimal measured values, not a real discrepancy. Notably, `α=π/3` and `α=π` give the *exact same* success probability (`1/9`) for different reasons: at `π/3` only one of the two singular values dominates (`σ_max=√3`, the other `=1`); at `π` both singular values happen to coincide (`σ_max=√3` for both) — a coincidence in the numbers, not a hidden relationship between those two angles.
 
-Success probability is genuinely **non-monotonic** in `α` (confirmed above, matching `.planning/research/STACK.md`'s prior flag) — it decreases from `α→0` toward a minimum somewhere past `α=π/2`, then rises back up by `α=π`. This is a real, `α`-dependent quantity, never a fixed constant like `heralded_cz`'s uniform `2/27` — reported here as the full table/formula per this milestone's Success Criterion 4, not collapsed to a single number.
+Success probability is genuinely **non-monotonic** in `α` (confirmed above, matching `.planning/research/STACK.md`'s prior flag) — it decreases from `α→0` toward a minimum somewhere past `α=π/2`, then rises back up by `α=π`. This is a real, `α`-dependent quantity, never a fixed constant like `heralded_cz`'s uniform `2/27`, so it is reported here as the full table/formula per this milestone's Success Criterion 4.
 
 ### Comparison Against `heralded_cz`
 
@@ -468,7 +476,7 @@ The `α=π` boundary-agreement test is the missing **third** level of confirmati
 
 Phase 15's `test_cp_pipeline_success_probability_vs_alpha_table` validated 4 `α` points (`π/6`, `π/3`, `2π/5`, `π`). Phase 16 extends this to a **16-point sweep** spanning `[0, 2π)`, at the exact same locked configuration (`n=2`, pair `(i,j)=(0,1)`, `thetas=[0.0, 0.0]`) — a direct extension of the existing table, not a new configuration. The 16 points are the 4 already-validated values above plus 12 additional points uniformly spaced across `[0, 2π)`, offset by half a step so none collide with the 4 existing values.
 
-Every one of the 16 measured points (`1 - postselect_failure_prob`, read from `photonic_cp_iqp_distribution`) is **asserted** — not just plotted — against the closed-form `p_success(α) = 1/σ_max(α)⁴` derived in the Closed-Form Success Probability section above, to within `1e-6`. This turns the sweep into a validated dataset, matching every measured point to the theoretical prediction, rather than a decorative plot.
+Every one of the 16 measured points (`1 - postselect_failure_prob`, read from `photonic_cp_iqp_distribution`) is **asserted**, not just plotted, against the closed-form `p_success(α) = 1/σ_max(α)⁴` derived in the Closed-Form Success Probability section above, to within `1e-6`. This turns the sweep into a validated dataset matching every measured point to the theoretical prediction.
 
 `scripts/cp_alpha_sweep.py` (repo root) runs the sweep and produces:
 
@@ -493,7 +501,7 @@ The non-monotonic behavior already established in the Closed-Form Success Probab
 
 So Forge's characteristic advantage — exhaustive search over a space too large to enumerate — never engaged here. What the exercise did genuinely produce: a **declarative, machine-checked statement of the invariant** as a durable artifact (rather than an assertion buried in a test), and the **non-vacuity discipline** — explicitly proving the constraint set is satisfiable before trusting an `unsat` result, which guards against the classic vacuous-truth trap where an over-constrained model "passes" by describing nothing. That discipline is transferable and is the part worth keeping.
 
-**Honest scope limit.** This verifies that *the formula written in the `.frg` file* is injective. The model **re-states** the mapping rather than deriving it from `merlin_iqp/encoding/iqp_photonic.py`, so the two can drift: an edit to the Python dict would leave Forge still passing against the old formula. The formula was re-checked against source on 2026-08-20 and matches. Treat that as a manual re-check to repeat if the mapping ever changes, not as an automated guarantee.
+**Honest scope limit.** This verifies that *the formula written in the `.frg` file* is injective. The model **re-states** the mapping rather than deriving it from `merlin_iqp/encoding/iqp_photonic.py`, so the two can drift. An edit to the Python dict would leave Forge still passing against the old formula. The formula was re-checked against source on 2026-08-20 and matches. Treat that as a manual re-check to repeat if the mapping ever changes, not as an automated guarantee.
 
 See `forge/ancilla_mapping.frg` (the model) and `results/phase16_forge_summary.md` (the pass/fail record and raw `racket` output).
 
@@ -538,15 +546,15 @@ Full derivation, the vertex-sharing argument, and the even-`n` construction proo
 
 **No Python implements this scheme.** No code in `merlin_iqp/encoding/iqp_photonic.py` implements a k-pair pooled circuit. This scheme is a specification, not a description of shipped behaviour. `forge/pooled_ancilla_allocation.frg`, together with `results/phase22_allocation_invariant.md`'s prose invariant, is therefore the **source of truth** any future implementation must be checked against — the model was written and verified before any Python exists to drift from it.
 
-This is the direct opposite of the Phase 16 Forge section above (`### Forge Verification of the Ancilla Mode-Mapping (Phase 16)`). That model **re-states** an already-shipped Python formula, with nothing linking the two, and carries a standing manual drift warning as a result ("Treat that as a manual re-check to repeat if the mapping ever changes, not as an automated guarantee"). Here the risk runs the other direction: there is no shipped Python to drift *from* yet, so there is nothing to re-check for drift. The drift-warning language from the Phase 16 section does not apply here and is deliberately not copied forward — the correct framing for this section is "implement against the model," not "keep the model in sync with the code."
+This is the direct opposite of the Phase 16 Forge section above (`### Forge Verification of the Ancilla Mode-Mapping (Phase 16)`). That model **re-states** an already-shipped Python formula, with nothing linking the two, and carries a standing manual drift warning as a result ("Treat that as a manual re-check to repeat if the mapping ever changes, not as an automated guarantee"). Here the risk runs the other direction. There is no shipped Python to drift *from* yet, so there is nothing to re-check for drift. The drift-warning language from the Phase 16 section does not apply here and is deliberately not copied forward — the correct framing for this section is "implement against the model," not "keep the model in sync with the code."
 
 ### What was checked, and how
 
-Per `22-CONTEXT.md` D-05, the Forge model poses a **search** question, not a verification one: *does an assignment of at most `K` ancilla blocks to all `C(n,2)` pairs of `K_n` exist such that no two vertex-sharing pairs collide, and what is the minimum such `K`?* `Alloc.block` is a free relation the solver searches over; the round-robin formula above is the independently-constructed witness whose colour count the search's minimum must agree with, not an input constraint on the search.
+Per `22-CONTEXT.md` D-05, the Forge model poses a **search** question, not a verification one: *does an assignment of at most `K` ancilla blocks to all `C(n,2)` pairs of `K_n` exist such that no two vertex-sharing pairs collide, and what is the minimum such `K`?* `Alloc.block` is a free relation the solver searches over. The round-robin formula above is the independently-constructed witness whose colour count the search's minimum must agree with, not an input constraint on the search.
 
 The search converged at `n=4,5,6` (minimum `K` found: 3, 5, 5 — matching the round-robin formula exactly at every converged `n`), and timed out at `n=7` (killed at ~610s against a 10-minute ceiling, zero blocks resolved); `n=8` was not separately attempted. Each converged `n` ran a two-part `test expect` suite inherited from Phase 16's discipline (`nonVacuous<N>`, `colouringExists<N>`, `minimality<N>`, `dataPortDisjoint<N>`), with the non-vacuity guard **strengthened** for this set-valued model to require two mutually-compatible pairs that actually share a block — the weaker `some active`-style guard used elsewhere in this codebase would pass vacuously on a single-pair instance and never exercise the pooling behaviour this phase exists to test. Forge bitwidth: `for 7 Int` (signed range `[-64, 63]`), justified against the largest ancilla mode index the model computes — `2*8 + 4*6 + 3 = 43` at `n=8` — with `43` at `n=8` the concrete number driving that choice.
 
-**Pairwise-reduction argument.** Collision is a binary predicate: whether the allocation collides is entirely determined pairwise, two pairs at a time, with no three-or-more-way interaction (unlike a *capacity* constraint, where three simultaneously-active items could jointly violate a bound none of them violates alone). Provided the block assignment is a pure function of each pair's own identity — which the round-robin formula satisfies — "no collision over every subset of simultaneously-active pairs" is **exactly equivalent, not weaker,** to "no collision over every pair of pairs." This is what licenses not literally enumerating the `2^28` subsets the original framing worried about at `n=8`; it collapses to `C(28,2) + 28 = 406` pairwise cases instead.
+**Pairwise-reduction argument.** Collision is a binary predicate. Whether the allocation collides is entirely determined pairwise, two pairs at a time, with no three-or-more-way interaction (unlike a *capacity* constraint, where three simultaneously-active items could jointly violate a bound none of them violates alone). Provided the block assignment is a pure function of each pair's own identity — which the round-robin formula satisfies — "no collision over every subset of simultaneously-active pairs" is **exactly equivalent, not weaker,** to "no collision over every pair of pairs." This is what licenses not literally enumerating the `2^28` subsets the original framing worried about at `n=8`. It collapses to `C(28,2) + 28 = 406` pairwise cases instead.
 
 Full timing tables, per-`n` breakdowns, and the verbatim Forge output are in `results/phase22_forge_summary.md` and `results/phase22_forge_run_log.md`.
 
@@ -560,13 +568,13 @@ Verbatim from `results/phase22_forge_summary.md`: **"A few hundred lines of back
 
 At the domain both tools solved (`n=4..6`), Forge took ~369s total wall time against the Python backtracking search's ~0.003s — Forge is roughly 123,000x slower, not faster. At `n=7`, Forge's exhaustive SAT-backed search hit the 10-minute ceiling with zero blocks resolved, while the Python backtracking search solved `n=7` in 2.28s and `n=8` in 0.006s. Agreement between the two tools is exact at every `n` Forge reached — no disagreement to report — but the Python search additionally reaches `n=7` and `n=8`, both beyond Forge's converging bound.
 
-This is the **second** time this project has reached a "Forge did not earn its place at this scale" verdict — the first being `forge/ancilla_mapping.frg`'s own 2026-08-20 audit for the single-pair model (see `### Forge Verification of the Ancilla Mode-Mapping (Phase 16)` above). Per `.planning/REQUIREMENTS.md`'s MPAIR-05 wording, *"A 'Forge did not earn its place here either' verdict satisfies this requirement"* — this is recorded here as a passing outcome, not a failure, and the comparison is not softened or reframed to flatter the tool.
+This is the **second** time this project has reached a "Forge did not earn its place at this scale" verdict — the first being `forge/ancilla_mapping.frg`'s own 2026-08-20 audit for the single-pair model (see `### Forge Verification of the Ancilla Mode-Mapping (Phase 16)` above). Per `.planning/REQUIREMENTS.md`'s MPAIR-05 wording, *"A 'Forge did not earn its place here either' verdict satisfies this requirement"* — this is recorded here as a passing outcome, not a failure.
 
 ### What this does and does not establish
 
 **Does establish:** the minimum ancilla-block count (`K`) and a concrete, collision-free colouring assigning each pair a block, at bounded `n` (verified `n=4,5,6`; round-robin formula stated for all `n`), for ancilla mode-**index** bookkeeping purposes only.
 
-**Does NOT establish:** that reusing those physical ancilla modes across sequentially-composed `CP(α)` unitaries reproduces the same physics as dedicated per-pair ancilla. That is a separate, independently necessary condition — a unitarity/physics claim categorically outside what a bounded model finder can check, the same tool-category boundary `16-CONTEXT.md` already drew around Forge for the single-pair case. It was settled separately, by **MPAIR-07**: see `results/phase22_reuse_gate.md` and its `## Owner ruling` section (owner ruled **GO**, 2026-08-21, based on the `n=4` vertex-disjoint probe's numerical evidence — `tvd_pooled_vs_dedicated` of `1.305e-14`/`2.899e-14`, both far inside the `1e-9` GO threshold). Any language implying this section, or `forge/pooled_ancilla_allocation.frg`, "proves pooling is safe" rather than "proves the chosen index-allocation scheme does not collide" is wrong — the two questions are independent.
+**Does NOT establish:** that reusing those physical ancilla modes across sequentially-composed `CP(α)` unitaries reproduces the same physics as dedicated per-pair ancilla. That is a separate, independently necessary condition — a unitarity/physics claim categorically outside what a bounded model finder can check, the same tool-category boundary `16-CONTEXT.md` already drew around Forge for the single-pair case. It was settled separately, by **MPAIR-07**. See `results/phase22_reuse_gate.md` and its `## Owner ruling` section (owner ruled **GO**, 2026-08-21, based on the `n=4` vertex-disjoint probe's numerical evidence — `tvd_pooled_vs_dedicated` of `1.305e-14`/`2.899e-14`, both far inside the `1e-9` GO threshold). Any language implying this section, or `forge/pooled_ancilla_allocation.frg`, "proves pooling is safe" rather than "proves the chosen index-allocation scheme does not collide" is wrong — the two questions are independent.
 
 Also explicitly out of scope for this phase: no k-pair Python implementation exists, and no multi-ZZ hardness-under-loss re-run was performed — both are deliberately excluded (`.planning/REQUIREMENTS.md`'s "Out of Scope" table).
 
@@ -595,77 +603,33 @@ After this process, the owner confirmed they could explain the material to Vince
 
 ## Ancilla Lifecycle Safety (Phase 23)
 
-Phase 23 adds the lifecycle question that Phase 22 deliberately left separate:
-whether a pooled four-mode ancilla block can be allocated again while it is
-still live under deferred post-selection. The model is an explicit relational
-`State.next` trace in [`forge/ancilla_lifecycle_safety.frg`](../forge/ancilla_lifecycle_safety.frg),
-not `#lang forge/temporal`. It tracks both individual modes and their grouped
-four-mode block through `free -> allocated -> in-use -> releasable -> free`,
-with explicit `allocate`, `begin/use`, `finish`, terminal `post-selection`,
-and `release` events.
+Phase 23 adds the lifecycle question that Phase 22 deliberately left separate: whether a pooled four-mode ancilla block can be allocated again while it is still live under deferred post-selection. The model is an explicit relational `State.next` trace in [`forge/ancilla_lifecycle_safety.frg`](../forge/ancilla_lifecycle_safety.frg), not `#lang forge/temporal`. It tracks both individual modes and their grouped four-mode block through `free -> allocated -> in-use -> releasable -> free`, with explicit `allocate`, `begin/use`, `finish`, terminal `post-selection`, and `release` events.
 
 ### What the bounded model found
 
-The live n=4 run used the six K4 pairs, two gates, one four-mode block, nine
-ordered states, and `for 7 Int`. The exact command, bound, solver output, and
-timings are preserved in [`results/phase23_lifecycle_run_log.md`](../results/phase23_lifecycle_run_log.md);
-the readable state-by-state projections are in
-[`results/phase23_lifecycle_traces.md`](../results/phase23_lifecycle_traces.md).
+The live n=4 run used the six K4 pairs, two gates, one four-mode block, nine ordered states, and `for 7 Int`. The exact command, bound, solver output, and timings are preserved in [`results/phase23_lifecycle_run_log.md`](../results/phase23_lifecycle_run_log.md); the readable state-by-state projections are in [`results/phase23_lifecycle_traces.md`](../results/phase23_lifecycle_traces.md).
 
-- The unsafe same-trace witness is SAT: after pair `(0,1)` finishes, pair
-  `(2,3)` reaches a second allocation of the same block before terminal
-  post-selection. Under strict deferred liveness, this is a live
-  reallocation/clobber point, not a safe reuse.
+- The unsafe same-trace witness is SAT. After pair `(0,1)` finishes, pair `(2,3)` reaches a second allocation of the same block before terminal post-selection. Under strict deferred liveness, this is a live reallocation/clobber point, not a safe reuse.
 - The valid lifecycle safety query is UNSAT for that live-reallocation shape.
-- The safe cross-epoch witness is SAT: pair `(0,1)` reaches terminal
-  post-selection and explicit release/free before pair `(2,3)` reuses the
-  block in a later epoch.
+- The safe cross-epoch witness is SAT. Pair `(0,1)` reaches terminal post-selection and explicit release/free before pair `(2,3)` reuses the block in a later epoch.
 
-The full evidence summary, including the owner-reviewed interpretation, is
-[`results/phase23_lifecycle_summary.md`](../results/phase23_lifecycle_summary.md).
+The full evidence summary, including the owner-reviewed interpretation, is [`results/phase23_lifecycle_summary.md`](../results/phase23_lifecycle_summary.md).
 
 ### Phase 22 cross-check and static minimum-K boundary
 
-Phase 22's MPAIR-07 Perceval probe measured pooled-versus-dedicated output
-distributions for the n=4 vertex-disjoint configuration and recorded
-`tvd_pooled_vs_dedicated` values of approximately `1.305e-14` and `2.899e-14`,
-inside the pre-committed `1e-9` tolerance (`results/phase22_reuse_gate.md`).
-Phase 23 measures structural lifecycle liveness under the same strict
-deferred-post-selection interpretation. The same-trace numerical GO and
-structural unsafe witness are retained as an unresolved abstraction-level
-disagreement; LIFE-05 does not try to prove one method wrong. Cross-epoch reuse
-is a separate safe-witness sanity check.
+Phase 22's MPAIR-07 Perceval probe measured pooled-versus-dedicated output distributions for the n=4 vertex-disjoint configuration and recorded `tvd_pooled_vs_dedicated` values of approximately `1.305e-14` and `2.899e-14`, inside the pre-committed `1e-9` tolerance (`results/phase22_reuse_gate.md`). Phase 23 measures structural lifecycle liveness under the same strict deferred-post-selection interpretation. The same-trace numerical GO and structural unsafe witness are retained as an unresolved abstraction-level disagreement. LIFE-05 does not try to prove one method wrong. Cross-epoch reuse is a separate safe-witness sanity check.
 
-Temporal safety does not change Phase 22's static minimum-K conclusion:
-`K=n-1` for even n and `K=n` for odd n remains the static graph-colouring
-result (Forge converged through n=6; the Python baseline checked through n=8).
-It does add a separate temporal-capacity constraint: within one deferred
-post-selection epoch, a block remains live after `finish` and cannot be reused
-until terminal release. Phase 23 does not perform a joint scheduling or
-temporal minimum-K search, so it does not claim a replacement minimum for an
-arbitrary same-epoch schedule.
+Temporal safety does not change Phase 22's static minimum-K conclusion. `K=n-1` for even n and `K=n` for odd n remains the static graph-colouring result (Forge converged through n=6; the Python baseline checked through n=8). It does add a separate temporal-capacity constraint: within one deferred post-selection epoch, a block remains live after `finish` and cannot be reused until terminal release. Phase 23 does not perform a joint scheduling or temporal minimum-K search, so it does not claim a replacement minimum for an arbitrary same-epoch schedule.
 
 ### What this does not establish
 
-This is bounded structural evidence. It does not prove Perceval amplitudes,
-physical unitary equivalence, an unbounded theorem, a Python k-pair
-implementation, or a new hardness-under-loss result. Phase 22's numerical
-result and Phase 23's lifecycle result answer related but distinct questions
-and remain independently scoped.
+This is bounded structural evidence. It does not prove Perceval amplitudes, physical unitary equivalence, an unbounded theorem, a Python k-pair implementation, or a new hardness-under-loss result. Phase 22's numerical result and Phase 23's lifecycle result answer related but distinct questions and remain independently scoped.
 
 ### Self-Explanation Checkpoint (Phase 23)
 
-**Provenance note:** Phase 23 was originally executed and closed via an
-unattended Codex session (2026-08-22). Its recorded "owner review" was later
-confirmed, directly by the owner, to be fabricated rather than a genuine
-transcript. The design decisions (D-01 through D-14 in `23-CONTEXT.md`) and
-this checkpoint were re-confirmed and conducted live with the owner on
-2026-08-23. See `results/phase23_lifecycle_summary.md` § "Owner review" for
-the full retraction record and the design-decision re-confirmation.
+**Provenance note:** Phase 23 was originally executed and closed via an unattended Codex session (2026-08-22). Its recorded "owner review" was later confirmed, directly by the owner, to be fabricated rather than a genuine transcript. The design decisions (D-01 through D-14 in `23-CONTEXT.md`) and this checkpoint were re-confirmed and conducted live with the owner on 2026-08-23. See `results/phase23_lifecycle_summary.md` § "Owner review" for the full retraction record and the design-decision re-confirmation.
 
-Four questions were put to the owner unaided, one round, with no answers or
-hints supplied in advance, plus one live follow-up testing whether the
-reasoning behind Q3 transferred to a new hypothetical:
+Four questions were put to the owner unaided, one round, with no answers or hints supplied in advance, plus one live follow-up testing whether the reasoning behind Q3 transferred to a new hypothetical:
 
 1. Why does a mode staying "live" after its own gate finishes matter — why can't it go straight from `finish` to `free`, and only reach `releasable -> free` after final post-selection, not after that one gate's own postselection condition would resolve?
 2. What makes the unsafe witness unsafe and the safe witness safe — what's the one structural difference between them?
@@ -684,36 +648,15 @@ reasoning behind Q3 transferred to a new hypothetical:
 >
 > **Follow-up.** "If Phase 22 had said GO (physically fine) but Phase 23's unsafe witness had come back UNSAT (no clobber trace exists at all, i.e., the model can't even construct an unsafe scenario), that would not be a contradiction we need to resolve. This is because the two checks are observing two different ways that the system can fail. Declaring one 'the real answer' would throw away information the other one caught."
 
-Q3's first answer was correct but thin — it named the mechanism without
-stating what agreement or disagreement would even mean. A live follow-up
-posed a concrete hypothetical absent from the original questions, to test
-transfer rather than recall; the owner correctly identified it as not a
-contradiction and gave the substantive reason. Q1, Q2, and Q4 were correct
-without correction.
+Q3's first answer was correct but thin — it named the mechanism without stating what agreement or disagreement would even mean. A live follow-up posed a concrete hypothetical absent from the original questions, to test transfer rather than recall; the owner correctly identified it as not a contradiction and gave the substantive reason. Q1, Q2, and Q4 were correct without correction.
 
-After this process, the owner confirmed they could explain the material
-unaided.
+After this process, the owner confirmed they could explain the material unaided.
 
 ## What Forge Actually Added (Phases 16, 22, 23)
 
-Phase 22 was added mid-milestone because the owner asked directly what Forge
-was actually contributing to this project — Phase 16's own 2026-08-20 audit
-had already found its exhaustive-search advantage never engaged at the
-single-pair scale. That question, and the honest answer to it, is recorded
-here across all three Forge phases rather than left implicit in a single
-phase's write-up.
+Phase 22 was added mid-milestone because the owner asked directly what Forge was actually contributing to this project — Phase 16's own 2026-08-20 audit had already found its exhaustive-search advantage never engaged at the single-pair scale. That question, and the honest answer to it, is recorded here across all three Forge phases rather than left implicit in a single phase's write-up.
 
-**The corrected success criterion.** `ROADMAP.md`'s Phase 23 entry documents
-the standing mis-grading this project corrected: both `ARB-09`'s audit and
-`MPAIR-05` as originally written judged Forge on "does it beat brute force on
-an intractable domain." A review of the owner's own CS1710 (Logic for
-Systems) coursework — the course this toolchain comes from — showed none of
-its own models meet that bar either (hotel locking runs at 3 rooms / 3
-guests / 8 time steps; goats-and-wolves is BFS-solvable in milliseconds).
-What those models actually buy: (a) finding a scenario you wouldn't think to
-enumerate, (b) trace/reachability properties, where brute force is itself a
-model checker rather than a competitor, (c) the model as a precise
-specification, and (d) verifying a design before building it.
+**The corrected success criterion.** `ROADMAP.md`'s Phase 23 entry documents the standing mis-grading this project corrected. Both `ARB-09`'s audit and `MPAIR-05` as originally written judged Forge on "does it beat brute force on an intractable domain." A review of the owner's own CS1710 (Logic for Systems) coursework — the course this toolchain comes from — showed none of its own models meet that bar either (hotel locking runs at 3 rooms / 3 guests / 8 time steps; goats-and-wolves is BFS-solvable in milliseconds). What those models actually buy: (a) finding a scenario you wouldn't think to enumerate, (b) trace/reachability properties, where brute force is itself a model checker rather than a competitor, (c) the model as a precise specification, and (d) verifying a design before building it.
 
 **Graded against all four, honestly, per phase:**
 
@@ -724,28 +667,9 @@ specification, and (d) verifying a design before building it.
 | (c) Model as precise spec | No — restates already-shipped code, carries a standing drift warning | **Yes** — no Python k-pair implementation exists; the model is what a future one gets checked against | **Yes** — same inversion, for the lifecycle scheme |
 | (d) Verifies a design before building it | No — audits code already shipped | **Yes** — verification precedes any implementation | **Yes** — same |
 
-**The owner's verdict, stated plainly:** Forge earned its place in this
-project — not on the axis it was originally graded on (Phase 16 and Phase
-22's own minimum-K search both lost decisively to brute-force/backtracking
-Python on that axis; see `results/phase22_forge_summary.md`'s unsoftened
-verdict), but on two of the four criteria CS1710's own models are actually
-optimized for. Phase 22 and Phase 23 both function as a precise
-specification for a k-pair circuit that does not exist in Python yet (c),
-and both verify that design before any implementation is attempted (d).
-Phase 23 additionally does something neither Phase 16 nor Phase 22 could:
-check a genuine trace/reachability property (b) — whether an ancilla block
-can ever be reallocated while still live under this pipeline's deferred
-post-selection — which is not a "does it beat brute force" question at all,
-since no brute-force baseline for this property was ever built or needed for
-comparison.
+**The owner's verdict, stated plainly:** Forge earned its place in this project — not on the axis it was originally graded on (Phase 16 and Phase 22's own minimum-K search both lost decisively to brute-force/backtracking Python on that axis; see `results/phase22_forge_summary.md`'s unsoftened verdict), but on two of the four criteria CS1710's own models are actually optimized for. Phase 22 and Phase 23 both function as a precise specification for a k-pair circuit that does not exist in Python yet (c), and both verify that design before any implementation is attempted (d). Phase 23 additionally does something neither Phase 16 nor Phase 22 could: check a genuine trace/reachability property (b) — whether an ancilla block can ever be reallocated while still live under this pipeline's deferred post-selection — which is not a "does it beat brute force" question at all, since no brute-force baseline for this property was ever built or needed for comparison.
 
-**What this does not claim.** Criterion (a) — the solver surfacing a
-scenario nobody anticipated — was not met in any of the three phases. Every
-property Forge checked here was one a human had already fully specified in
-advance; Forge confirmed or refuted a pre-stated claim, it never discovered
-the claim itself. This project's honest use of Forge is real but modest: a
-precise, pre-implementation specification with reachability-checking
-capability, not a source of surprising results.
+**What this does not claim.** Criterion (a) — the solver surfacing a scenario nobody anticipated — was not met in any of the three phases. Every property Forge checked here was one a human had already fully specified in advance, and Forge confirmed or refuted a pre-stated claim rather than discovering it. This project's honest use of Forge is real but modest: a precise, pre-implementation specification with reachability-checking capability, not a source of surprising results.
 
 ## Conclusion and Open Questions
 
@@ -753,7 +677,11 @@ capability, not a source of surprising results.
 
 **What it does not establish** — the full honesty ledger, collected in one place from across ENC-01 through ENC-04:
 
-- **Generator-weight scope.** Weight-1 generators: fully derived, implemented, and validated. Weight-2 generators (`exp(iθZ_iZ_j)`): implemented and validated at fixed `θ=π/4` (v2.1, Phases 11-13) via a `PBS`-mediated conversion to dual rail's `heralded_cz`. TVD=2.58e-15 against the extended exact reference at the locked n=2, θ=π/4 gate (Phase 12); confirmed to compose correctly with weight-1 terms in the same n=3 circuit (Phase 13). The fixed-angle limitation is now also resolved for **arbitrary** θ (v3.0, Phase 15) via a second, genuinely different gate family (`PostProcessedControlledRotationsItem`, post-selection-based) — general operator identity, closed-form success probability, and comparison against `heralded_cz` are in the ARB-01/ARB-02 section above. Plan 15-04 completed the *full-pipeline* TVD validation at arbitrary α (not just the bare gate): TVD at floating-point-noise level against the extended exact reference at `n=2,3` across 3 non-trivial `α` values, plus a direct `α=π` boundary-agreement confirmation against `heralded_cz`'s full pipeline (see the ARB-01/ARB-02 section's "Full-Pipeline Validation" subsection for the measured-results table). **Phase 16's full scope is now complete**: the n=3 mixed weight-1 + arbitrary-θ weight-2 composability test (`test_cp_composability_mixed_generators_n3`, ARB-07) passed with TVD < 1e-6 against the extended exact reference; the 16-point `α` sweep (ARB-08) matched the closed-form success probability at all 16 points to within 1e-6; and the Forge-based structural verification of the ancilla mode-mapping dict (ARB-09) confirmed it injective/non-aliasing for all valid `(n,i,j)`, `n ≤ 8`, with no bug found (see the "Denser α Sweep" and "Forge Verification" subsections above).
+- **Generator-weight scope.**
+  - **Weight-1:** fully derived, implemented, and validated.
+  - **Weight-2, fixed `θ=π/4`** (`exp(iθZ_iZ_j)`, v2.1, Phases 11-13): implemented and validated via a `PBS`-mediated conversion to dual rail's `heralded_cz`. TVD=2.58e-15 against the extended exact reference at the locked n=2, θ=π/4 gate (Phase 12); confirmed to compose correctly with weight-1 terms in the same n=3 circuit (Phase 13).
+  - **Weight-2, arbitrary θ** (v3.0, Phase 15): the fixed-angle limitation is resolved via a second, genuinely different gate family (`PostProcessedControlledRotationsItem`, post-selection-based) — general operator identity, closed-form success probability, and comparison against `heralded_cz` are in the ARB-01/ARB-02 section above. Plan 15-04 completed the *full-pipeline* TVD validation at arbitrary α, not just the bare gate: TVD at floating-point-noise level against the extended exact reference at `n=2,3` across 3 non-trivial `α` values, plus a direct `α=π` boundary-agreement confirmation against `heralded_cz`'s full pipeline (see the ARB-01/ARB-02 section's "Full-Pipeline Validation" subsection for the measured-results table).
+  - **Phase 16's full scope is now complete:** the n=3 mixed weight-1 + arbitrary-θ weight-2 composability test (`test_cp_composability_mixed_generators_n3`, ARB-07) passed with TVD < 1e-6 against the extended exact reference; the 16-point `α` sweep (ARB-08) matched the closed-form success probability at all 16 points to within 1e-6; and the Forge-based structural verification of the ancilla mode-mapping dict (ARB-09) confirmed it injective/non-aliasing for all valid `(n,i,j)`, `n ≤ 8`, with no bug found (see the "Denser α Sweep" and "Forge Verification" subsections above).
 - **`heralded_cz`'s success probability is now confirmed for this exact gate (Phase 10).** The Knill CZ construction it implements (arXiv:quant-ph/0110144) was confirmed real by reading Perceval's source directly in Phase 9; Phase 10's `scripts/heralded_cz_derisking.py` then independently measured its herald-success probability at exactly 2/27 (~0.074074), uniform across all 4 computational-basis inputs and 2 superposition spot-checks, confirmed the CZ phase sign (negative only on `|1,1⟩`, via `Simulator.prob_amplitude`), and confirmed `logical_perf` is pure herald condition — no hidden second filter — via an empty `post_select_fn` and a zero-leakage `Analyzer` truth table. This de-risked the primitive standalone; the weight-2 circuit built on top of it (Ingredient 2's `PBS`-mediated conversion plus the `π/4` phase corrections) was then implemented, run, and validated end-to-end in Phases 11-13.
 - **Toy-check scope.** ENC-04 validated `n=2` and `n=3` for weight-1 generators, and the same `n=2-3` range for weight-2 (Phase 12) and mixed weight-1+weight-2 circuits (Phase 13), all under an idealized, lossless `SLOS`/`Processor` simulation. It says nothing about larger `n` or behavior under realistic loss/noise.
 - **General-`n` scaling is stated, not demonstrated.** The mapping's ingredients are defined for general `n`, but only concretely instantiated and checked at `n=2-3`. Nothing here shows the construction scales practically to circuit sizes that would matter for an actual hardness claim.
