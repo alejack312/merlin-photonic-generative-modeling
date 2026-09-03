@@ -2,7 +2,7 @@
 
 [GitHub repo](https://github.com/alejack312/merlin-photonic-generative-modeling)
 
-A two-milestone project built on Quandela's MerLin photonic framework: an MMD-trained generative model that learns a two-ring dataset from a single quantum circuit (v1.0), and a follow-on study of that circuit family's trainability and sampling-hardness-under-photon-loss (v3.0).
+A project built on Quandela's MerLin photonic framework, across four milestones: an MMD-trained generative model that learns a two-ring dataset from a single quantum circuit (v1.0); a from-scratch IQP-to-photonic encoding design and its weight-2 gate implementation (v2.0/v2.1); a follow-on study of that circuit family's trainability and sampling-hardness-under-photon-loss (v3.0); and a correction to that study's headline findings after an external audit found two of them were pipeline artifacts (v3.1, see below).
 
 **How this was built:** I used Claude Code assistance under a rule I hold myself to. I verify every AI-assisted component against my own unaided explanation before it ships. Full framing in [Process & AI Use](#process--ai-use) below.
 

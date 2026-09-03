@@ -63,6 +63,8 @@ Full per-cell numbers (including fitted parameters) are in `results/v3_trainabil
 
 ## Honest max-n statement (TRAIN-05, TRAIN-08)
 
+**Correction (2026-09-03) — the ceiling below is a simulator-architecture choice, not a physical limit.** The `C(3n-1,n) ~ 6.75^n` growth described below is real for *this pipeline's specific method* (enumerating every photon-number-conserving Fock state across the full `2n`/`2n+2`-mode register at once), but that method is not forced by the physics. `weight1` is `n` independent two-mode blocks with no cross-qubit interaction, and `mixed` adds exactly one fixed eight-mode gate block; a structured simulator that computes the gate's own small Fock space once and tensors the (trivial) per-qubit marginals for the rest would reach `n` in the 20s in milliseconds, not run into a `MemoryError` at `n=7`. This project's own `dual_rail_autograd_sweep.py` cross-check already reached `n=7-8` without hitting this wall, using exactly that kind of decomposition, corroborating the point. Building that structured simulator and re-running toward the `N=20-24` threshold below is out of this milestone's scope (see `.planning/REQUIREMENTS.md`'s v3.1 Out-of-Scope list) — the correction here is only to the *stated reason* for the ceiling, not a re-run.
+
 **Actual n range reached, CORE data (complete and final):**
 
 - `weight1`: n = 2..6, both init schemes, 100 draws/cell.
@@ -101,6 +103,8 @@ No stretch CSVs were produced; the n=2..6 (weight1) / n=2..5 (mixed) CORE range 
 (A subsequent, independent dual-rail/MerLin cross-check *did* reach n=7-8 without hitting this same ceiling — see the new section below — but that used a different physical circuit and computational method, not a fix to this pipeline.)
 
 ## Cross-reference verdict (TRAIN-07)
+
+**Read against the 2026-09-03 correction above:** the "measured shows exponential decay" / "measured data shows exponential decay anyway" language below refers to this document's own now-corrected artifact, not a genuine trainability measurement — so this section compares the qubit-side empirical rule (itself a separate fit, not re-examined here) against a photonic-side result that turned out not to measure the circuit. The comparison is kept as a documented record of the owner's original reasoning process, not as an active cross-validation between two independent findings.
 
 `docs/iqp-baseline.md`'s empirical rule, applied directly to this project's own measured n range (its `not complete_graph_like` escape-hatch clause is a qubit-side structural notion this project's weight-1/mixed photonic circuits have no established mapping onto: treated as inapplicable here, not silently assumed to hold, since this project's circuits were never constructed with "complete-graph-like" as a design axis one way or the other):
 
