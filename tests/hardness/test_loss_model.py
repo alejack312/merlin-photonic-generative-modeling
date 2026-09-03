@@ -171,3 +171,66 @@ def test_hard02_noise_model_and_lc_agree_on_shared_toy_circuit(eta):
         # 18-RESEARCH.md's own verified spot-check value.
         assert abs(probs_noise_model.get("|0,0>", 0.0) - 0.5) <= 1e-9
         assert abs(probs_noise_model.get("|1,0>", 0.0) - 0.5) <= 1e-9
+
+
+# --- REFRAME-02: partial_loss mass-reconciliation regression tests --------
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.0])
+def test_partial_loss_mass_matches_residual(eta):
+    """Test A (backward-compatibility invariant, D-03): residual and
+    partial_loss are accumulated independently inside
+    photonic_iqp_distribution_lossy (residual is not derived from
+    partial_loss), so their agreement is a genuine cross-check that nothing
+    about the pre-existing residual scalar changed."""
+    n = 2
+    thetas = [0.4, 1.1]
+    dist, residual, global_perf, partial_loss = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
+    assert abs(sum(partial_loss.values()) - residual) <= 1e-9
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.0])
+def test_partial_loss_plus_dist_totals_one(eta):
+    """Test B (total mass): sum(dist) + sum(partial_loss) reconstructs the
+    already-shipped, already-exercised julia/generate_reference.py invariant
+    sum(dist) + residual == 1.0."""
+    n = 2
+    thetas = [0.4, 1.1]
+    dist, residual, global_perf, partial_loss = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
+    assert abs(sum(dist.values()) + sum(partial_loss.values()) - 1.0) <= 1e-9
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.0])
+def test_global_perf_is_pinned_and_uninformative_about_partial_loss_mass(eta):
+    """Test C (global_perf consistency) -- derived empirically (see this
+    plan's null-result step, not assumed): global_perf stays pinned at
+    ~1.0 across the entire eta grid, regardless of how much probability mass
+    partial_loss holds, because min_detected_photons_filter(0) never
+    actually filters anything (>=0 detected photons is every outcome) and
+    the injected LC-based loss lives inside the circuit, not in Perceval's
+    own performance-tracking machinery. This is a null result: global_perf
+    is NOT a usable proxy for partial_loss's total mass."""
+    n = 2
+    thetas = [0.4, 1.1]
+    dist, residual, global_perf, partial_loss = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
+    assert abs(global_perf - 1.0) <= 1e-6
+
+
+def test_partial_loss_is_genuinely_populated_not_an_empty_formality():
+    """Test D: at eta strictly between 0 and 1, partial_loss is non-empty
+    and disjoint from dist's keys; at eta=1.0 its mass is ~0; at eta=0.0
+    (weight-1) its total mass is ~1.0, mirroring the existing
+    test_survival_mass_is_monotonically_non_increasing_as_eta_decreases
+    assertion that residual_zero == 1.0."""
+    n = 2
+    thetas = [0.4, 1.1]
+
+    dist_mid, _, _, partial_loss_mid = photonic_iqp_distribution_lossy(n, thetas, eta=0.5)
+    assert partial_loss_mid
+    assert set(partial_loss_mid.keys()).isdisjoint(set(dist_mid.keys()))
+
+    _, _, _, partial_loss_full = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
+    assert sum(partial_loss_full.values()) <= 1e-9
+
+    _, _, _, partial_loss_zero = photonic_iqp_distribution_lossy(n, thetas, eta=0.0)
+    assert abs(sum(partial_loss_zero.values()) - 1.0) <= 1e-9
