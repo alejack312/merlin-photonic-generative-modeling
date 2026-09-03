@@ -35,6 +35,23 @@ This follows directly from what "TVD to lossless" measures here: the pipeline's 
 
 **What this project's data actually establishes about hardness under loss, stated as the real headline:** the *conditional* distribution — among shots where every photon is detected — is **exactly as hard as the lossless case, at every tested eta**, because it *is* the lossless distribution. Loss does not erode this construction's conditional hardness at all. What loss costs is **throughput**: the probability of getting a usable shot at all falls as `eta^n` (weight1) or the mixed-scope closed form above, exponentially in both the number of qubits and the number of heralded gates. For `k` heralded CZs in a circuit with `n` data qubits, the expected resource cost is `eta^(n+2k) · (2/27)^k` samples per useful shot (ignoring cross-gate herald compounding effects analogous to `h(eta)`'s, not yet worked out for `k>1`). This is the honest, non-trivial statement the correction supports; it is a resource/throughput cost, not a complexity-theoretic hardness claim, and does not by itself establish anything about classical simulability of the *unconditional* (all shots, including partial-loss ones) output — that question was not analyzed in this project (see "What this does not establish" below).
 
+**Throughput (expected samples needed per usable shot), the figure this correction leads with:**
+
+| n (data qubits) | k=0 (no CZ) | k=1 | k=2 | k=3 |
+|---|---|---|---|---|
+| **eta = 0.9 (near-lossless)** | | | | |
+| 2 | 1.2 | 21 | 342 | 5.7e3 |
+| 4 | 1.5 | 25 | 424 | 7.0e3 |
+| 6 | 1.9 | 31 | 524 | 8.7e3 |
+| 8 | 2.3 | 39 | 645 | 1.1e4 |
+| **eta = 0.6 (moderate loss)** | | | | |
+| 2 | 2.8 | 104 | 3.9e3 | 1.5e5 |
+| 4 | 7.7 | 289 | 1.1e4 | 4.1e5 |
+| 6 | 21 | 806 | 3.0e4 | 1.1e6 |
+| 8 | 60 | 2.2e3 | 8.4e4 | 3.1e6 |
+
+Each cell is `1 / (eta^(n+2k) · (2/27)^k)` — expected samples until one usable shot arrives — computed directly from the closed form verified above, not measured (no sweep at these `n,k` was run; the underlying pipeline was only tested at the smaller `n<=4`, `k<=1` range `results/v3_hardness/` actually covers). The pattern the table makes visible: one heralded gate costs more than six extra qubits do. At `eta=0.6`, adding a single `k=0->1` CZ costs ~37x throughout (104/2.78 at n=2, 2230/59.5 at n=8 — the ratio is `eta^-2 · 27/2 ≈ 37.5`, independent of `n`), while going from `n=2` to `n=8` at fixed `k=0` costs only ~21x. This is the resource statement Quandela's own hardware roadmap would care about; the TVD-vs-eta plots below are the pipeline check that this closed form is correct, not a separate finding.
+
 **What survives unchanged:** the scope precondition above (only `mixed` bears on hardness at all) and the herald-compounding qualitative story (HARD-07, below) are untouched by this correction — they were already stated correctly. What changes is the *interpretation* of the TVD/alpha numbers: from "evidence about hardness eroding under loss" to "a closed-form throughput cost with the conditional distribution provably unaffected."
 
 ## Methodology

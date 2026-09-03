@@ -32,8 +32,6 @@ After the v1.0 generator above, this project extended into a v3.0 milestone that
 
 Supporting this pair of corrected findings: a continuously-tunable weight-2 gate (ARB-01/ARB-02), verified to ~1e-7 against measurement, and four independently-built Julia cross-checks against the Python results, all four GO — neither is affected by this correction.
 
-Supporting this pair of findings: a continuously-tunable weight-2 gate (ARB-01/ARB-02), verified to ~1e-7 against measurement, and four independently-built Julia cross-checks against the Python results, all four GO.
-
 ## Results
 
 ### v1.0: Photonic Generative Model
