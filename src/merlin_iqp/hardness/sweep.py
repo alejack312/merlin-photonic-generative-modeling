@@ -73,7 +73,7 @@ def _distribution_for_backend(n, thetas, eta, scope, backend, weight2_pair):
     _validate_backend(backend)
     if scope == "weight1":
         if backend == "polarization":
-            dist, residual, _global_perf = photonic_iqp_distribution_lossy(
+            dist, residual, _global_perf, _partial_loss = photonic_iqp_distribution_lossy(
                 n, thetas, eta=eta
             )
         else:
@@ -84,7 +84,7 @@ def _distribution_for_backend(n, thetas, eta, scope, backend, weight2_pair):
 
     i, j = weight2_pair
     if backend == "polarization":
-        dist, residual, herald_failure_prob, _global_perf = (
+        dist, residual, herald_failure_prob, _global_perf, _partial_loss = (
             photonic_weight2_iqp_distribution_lossy(
                 n, i, j, thetas, eta=eta
             )
