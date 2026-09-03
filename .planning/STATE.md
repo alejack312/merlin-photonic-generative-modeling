@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: IQP Circuit Study & Write-Up
-status: Awaiting next milestone
-stopped_at: Phase 23 context gathered
-last_updated: "2026-08-24T07:44:38.144Z"
-last_activity: 2026-08-24 — Milestone v3.0 completed and archived
+milestone: v3.1
+milestone_name: Correction
+status: Phase 24 context gathered — blocked on owner task NULL-01 before planning
+stopped_at: Phase 24 context gathered
+last_updated: "2026-09-03T00:00:00.000Z"
+last_activity: 2026-09-03 — v3.1 scaffolded after external audit; NULL-01 (owner) pending
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 50
-  completed_plans: 50
-  percent: 100
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,7 +21,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Milestone complete
+**Current focus:** v3.1 Correction — Phase 24
+
+## v3.1 Correction (opened 2026-09-03)
+
+An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively, adds the gate to `CLAUDE.md`, and stops there; the audit's frontier directions are v4.0 candidates and undecided. The repo and case study are already public, so the correction is time-sensitive (about a week). The owner's Task 0 (NULL-01: fill `tests/v3_correction/test_null_results.py` by red/green) blocks all planning.
 
 ## Phase 23 provenance correction (2026-08-23)
 
@@ -36,10 +40,10 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 
 ## Current Position
 
-Phase: Milestone v3.0 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-24 — Milestone v3.0 completed and archived
+Phase: 24 (v3.1 Correction) — context gathered, not yet planned
+Plan: — (blocked on NULL-01, owner task)
+Status: Waiting for the owner to fill and green `tests/v3_correction/test_null_results.py`; then `/gsd-plan-phase 24`
+Last activity: 2026-09-03 — v3.1 scaffolded (REQUIREMENTS.md, 24-CONTEXT.md, null-result test harness, CLAUDE.md gate, learning note)
 
 ### Prior position (Phase 21, retained)
 

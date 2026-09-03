@@ -48,6 +48,7 @@ What was measured (stated as measured; interpretation belongs in the study docs 
 
 ## Next Milestone Goals
 
+- **v4.0 candidates from the 2026-09-03 audit (undecided, not in v3.1):** structured tensor-product simulator to n≈20+; trainability rerun with a Hamming kernel and bandwidth ∝ n on a legitimate observable; partial-distinguishability/g2 noise model; non-post-selected lossy IQP simulability (Oszmaniec–Brod / Oh regime); herald-cost gradient variance per attempted shot; train-classical/deploy-photonic generalization gap; KLM-gates vs graph-state-measurement resource comparison for IQP sampling (Hoban et al. 2014 framing). Pick at most one, with Vincent if that thread is live.
 - BMK-03 (exact apples-to-apples QGAN comparison, deferred since v1.0)
 - Sending the drafted v1.0 technical note to Vincent Espitalier (still open, independent of any future milestone)
 
@@ -108,7 +109,7 @@ What was measured (stated as measured; interpretation belongs in the study docs 
 
 ### Active
 
-*(none — v3.0 milestone shipped and archived 2026-08-24; all 11 phases (14-21, 17.1, 22-23) validated above; Phase 24/v4.0 not yet scoped)*
+**v3.1 Correction (Phase 24, opened 2026-09-03).** An external audit found two v3.0 headline findings are pipeline artifacts with closed-form null results (TRAIN: identity-kernel MMD on a product distribution, variance ∝ 2^-n; HARD: `tvd_to_lossless = ½(1 − eta^(n+2))` from post-selection). Requirements in `.planning/REQUIREMENTS.md` (NULL, CORR, REFRAME, GATE, REVIEW, COMM); context in `.planning/phases/24-v3-1-correction/24-CONTEXT.md`. Blocked on the owner's NULL-01 task. No new experiments in this milestone.
 
 **v3.0 milestone fully closed and archived (2026-08-24).** `ROADMAP.md` collapsed to a one-line summary linking `.planning/milestones/v3.0-ROADMAP.md`; `.planning/REQUIREMENTS.md` archived to `.planning/milestones/v3.0-REQUIREMENTS.md` and removed (fresh requirements file starts with the next milestone). Accepted tech debt at close: the milestone audit found 38 of 51 requirements' SUMMARY.md files predate a newer `requirements-completed` frontmatter field the audit schema checks for (one, `VERIFY-01`, orphaned for the same reason) — every phase's own independent `*-VERIFICATION.md` confirms the underlying behavior passed regardless; this is a metadata gap in legacy files, not a functional one, and was knowingly accepted rather than retroactively patched.
 
