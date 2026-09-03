@@ -47,6 +47,7 @@ import pytest
 
 from merlin_iqp.trainability.mmd_exact import gaussian_kernel_matrix_np, mmd2_np
 from merlin_iqp.trainability.target_grid import make_target_grid
+from merlin_iqp.trainability.sweep import pick_tracked_indices
 
 REPO = Path(__file__).resolve().parents[2]
 HARD = REPO / "results" / "v3_hardness"
@@ -144,6 +145,16 @@ def owner_train_null_ratio(scope: str, n: int) -> float | None:
         isn't a clean single number at small n. [owner: replace with your
         own one-sentence why once reviewed — deferred per the
         2026-09-03 ship-first decision.]
+
+    Corrected 2026-09-03 (found by a parallel Fable 5.1 session, independently
+    reverified here): the first version of this function only ever
+    differentiated theta[0]. The real sweep (sweep.py's
+    pooled_gradients_for_cell) pools gradients over pick_tracked_indices(n, 3)
+    -- up to 3 evenly-spaced parameter indices, not just index 0. Matching
+    that pooling drops every row's error from the 35-47% this file previously
+    (wrongly) attributed to "a finite-size effect at the edges" down to
+    0.5-10.0% -- confirming it was a bug in this null model's fidelity to the
+    real sweep, not a genuine discrepancy needing a widened tolerance.
     """
     if n < 3:
         return None
@@ -210,15 +221,14 @@ def test_train_variance_ratio_matches_owner_null(scope, sigma, n, shipped_ratio)
     predicted = owner_train_null_ratio(scope, n)
     if predicted is None:
         pytest.skip("Task 0: owner has not filled owner_train_null_ratio yet")
-    # Loose tolerance on purpose: the shipped sweep tracked 3 parameters and
-    # 100 draws; the null is about the scaling law, not the third decimal.
-    # Widened 2026-09-03 (rel 0.35 -> 0.5) after 3 boundary-n rows (weight1
-    # n=6, the largest swept n; mixed n=3,4, the smallest) came in 35-38%
-    # off with a 2000-5000-draw Monte Carlo estimate of this closed-form
-    # model -- a finite-size effect at the edges of the swept range, not a
-    # wrong-direction mismatch (every other row, including the interior of
-    # both ranges, was within the original 0.35).
-    assert predicted == pytest.approx(shipped_ratio, rel=0.5), (
+    # Tolerance corrected 2026-09-03: the previous rel=0.5 was widened to
+    # paper over a bug in this null model (it only differentiated theta[0]
+    # instead of pooling pick_tracked_indices(n, 3) like the real sweep --
+    # see owner_train_null_ratio's docstring). Once the null pools correctly,
+    # every row is within 0.5-10.0% (2000-draw Monte Carlo vs the shipped
+    # 100-draw sweep), so rel=0.2 has comfortable margin without hiding a
+    # real discrepancy the way rel=0.5 did.
+    assert predicted == pytest.approx(shipped_ratio, rel=0.2), (
         f"{scope} sigma={sigma} n={n}: shipped ratio {shipped_ratio:.3f}, your null {predicted:.3f}"
     )
 
@@ -266,19 +276,26 @@ def closed_form_gradient_variance(
 
     scope="weight1" uses the pure product q; scope="mixed" additionally
     couples qubits (0, 1) via the fixed pi/4 CZ term, matching this
-    project's own pooled_gradients_for_cell construction for mixed."""
+    project's own pooled_gradients_for_cell construction for mixed.
+
+    Pools over pick_tracked_indices(n, 3), exactly matching
+    pooled_gradients_for_cell's own tracked-parameter selection (sweep.py) --
+    NOT just theta[0]. Differentiating only theta[0] was this function's
+    original (wrong) form; see owner_train_null_ratio's 2026-09-03 note."""
     q_fn = _product_q if scope == "weight1" else _mixed_q
     rng = np.random.default_rng(seed)
     centers, p_real, _ = make_target_grid(n)
     K = gaussian_kernel_matrix_np(centers, sigma)
+    tracked = pick_tracked_indices(n, 3)
     grads = []
     h = 1e-5
     for _ in range(draws):
         th = rng.uniform(0, 2 * np.pi, n)
-        tp, tm = th.copy(), th.copy()
-        tp[0] += h
-        tm[0] -= h
-        grads.append((mmd2_np(p_real, q_fn(tp), K) - mmd2_np(p_real, q_fn(tm), K)) / (2 * h))
+        for k in tracked:
+            tp, tm = th.copy(), th.copy()
+            tp[k] += h
+            tm[k] -= h
+            grads.append((mmd2_np(p_real, q_fn(tp), K) - mmd2_np(p_real, q_fn(tm), K)) / (2 * h))
     return float(np.var(grads))
 
 
