@@ -34,7 +34,7 @@ def photonic_iqp_distribution_lossy(n, thetas, eta=1.0):
     result -- tests/test_loss_model.py's dedicated regression test
     demonstrates this failure mode is real, not just avoided).
 
-    Returns (dist, residual, global_perf):
+    Returns (dist, residual, global_perf, partial_loss):
       - dist: {bitstring: probability} over in-subspace outcomes, same shape
         as photonic_iqp_distribution's dist.
       - residual: total probability on out-of-subspace outcomes -- now
@@ -47,6 +47,9 @@ def photonic_iqp_distribution_lossy(n, thetas, eta=1.0):
         buggy pipeline that omits min_detected_photons_filter(0) can look
         loss-invariant in dist/residual while global_perf still correctly
         reflects the true loss (18-RESEARCH.md Pitfall 2's warning sign).
+      - partial_loss: {str(state): probability}, the per-pattern decomposition
+        of residual, keyed by the raw Fock state's string representation.
+        Added for REFRAME-02 -- returned but not analyzed in this milestone.
     """
     if not (0.0 <= eta <= 1.0):
         raise ValueError(f"eta must be in [0.0, 1.0], got {eta!r}")
@@ -63,12 +66,14 @@ def photonic_iqp_distribution_lossy(n, thetas, eta=1.0):
 
     dist = {}
     residual = 0.0
+    partial_loss = {}
     for state, prob in res["results"].items():
         p = float(prob)
         bits = fock_to_bitstring(state, n)
         if bits is None:
             residual += p
+            partial_loss[str(state)] = partial_loss.get(str(state), 0.0) + p
         else:
             dist[bits] = dist.get(bits, 0.0) + p
 
-    return dist, residual, float(res["global_perf"])
+    return dist, residual, float(res["global_perf"]), partial_loss

@@ -42,7 +42,7 @@ def test_eta_1_reproduces_lossless_reference_bit_for_bit(n):
         thetas = rng.uniform(0.0, 2 * np.pi, size=n).tolist()
 
         expected_dist, expected_residual = photonic_iqp_distribution(n, thetas)
-        dist, residual, global_perf = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
+        dist, residual, global_perf, _partial_loss = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
 
         assert _all_keys_close(dist, expected_dist, atol=1e-9)
         assert abs(residual - expected_residual) <= 1e-9
@@ -61,14 +61,14 @@ def test_survival_mass_is_monotonically_non_increasing_as_eta_decreases():
 
     survival = []
     for eta in ETA_GRID:
-        dist, residual, global_perf = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
+        dist, residual, global_perf, _partial_loss = photonic_iqp_distribution_lossy(n, thetas, eta=eta)
         survival.append(sum(dist.values()))
 
     for earlier, later in zip(survival, survival[1:]):
         assert later <= earlier + 1e-9  # non-increasing as eta decreases
 
     # eta=0.0: total loss -- no in-subspace mass survives.
-    dist_zero, residual_zero, global_perf_zero = photonic_iqp_distribution_lossy(
+    dist_zero, residual_zero, global_perf_zero, _partial_loss_zero = photonic_iqp_distribution_lossy(
         n, thetas, eta=0.0
     )
     assert sum(dist_zero.values()) <= 1e-9
@@ -122,8 +122,8 @@ def test_pitfall_2_regression_broken_helper_is_loss_invariant_correct_fn_is_not(
 
     # The real, correct function genuinely differs with eta -- proves the
     # explicit min_detected_photons_filter(0) call actually matters.
-    correct_dist_full, _, _ = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
-    correct_dist_lossy, _, _ = photonic_iqp_distribution_lossy(n, thetas, eta=0.3)
+    correct_dist_full, _, _, _ = photonic_iqp_distribution_lossy(n, thetas, eta=1.0)
+    correct_dist_lossy, _, _, _ = photonic_iqp_distribution_lossy(n, thetas, eta=0.3)
     tvd = total_variation_distance(correct_dist_full, correct_dist_lossy)
     assert tvd > 0.05, (
         f"expected photonic_iqp_distribution_lossy's dist to meaningfully "

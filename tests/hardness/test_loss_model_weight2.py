@@ -60,7 +60,7 @@ def test_eta_1_reproduces_lossless_weight2_reference_n2():
         expected_dist, expected_residual, expected_hfp = photonic_weight2_iqp_distribution(
             n, i, j, thetas
         )
-        dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+        dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=1.0
         )
 
@@ -78,7 +78,7 @@ def test_eta_1_reproduces_lossless_weight2_reference_n3_bystander():
     expected_dist, expected_residual, expected_hfp = photonic_weight2_iqp_distribution(
         n, i, j, thetas
     )
-    dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+    dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=1.0
     )
 
@@ -128,7 +128,7 @@ def test_herald_failure_compounding_is_real_not_analytically_decomposed():
 
     hfp_at_eta = {}
     for eta in eta_grid:
-        _, _, herald_failure_prob, _ = photonic_weight2_iqp_distribution_lossy(
+        _, _, herald_failure_prob, _, _ = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=eta
         )
         hfp_at_eta[eta] = herald_failure_prob
@@ -249,10 +249,10 @@ def test_pitfall_2_regression_broken_helper_is_loss_invariant_correct_fn_is_not(
 
     # The real, correct function genuinely differs with eta -- proves the
     # explicit min_detected_photons_filter(0) call actually matters.
-    correct_dist_full, _, correct_hfp_full, _ = photonic_weight2_iqp_distribution_lossy(
+    correct_dist_full, _, correct_hfp_full, _, _ = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=1.0
     )
-    correct_dist_lossy, _, correct_hfp_lossy, _ = photonic_weight2_iqp_distribution_lossy(
+    correct_dist_lossy, _, correct_hfp_lossy, _, _ = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=0.3
     )
     assert abs(correct_hfp_full - correct_hfp_lossy) > 1e-6, (
@@ -333,7 +333,7 @@ def test_pitfall_3_regression_add_herald_with_pbs_crashes():
         _broken_weight2_with_add_herald(n, i, j, thetas, eta=0.8)
 
     # The real, correct function has no such crash risk -- same n/i/j/thetas.
-    dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+    dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=0.8
     )
     assert dist  # ran successfully, produced a non-empty distribution
@@ -357,7 +357,7 @@ def test_pitfall_4_regression_global_perf_is_not_a_herald_failure_proxy():
     hfp_values = []
     global_perf_values = []
     for eta in eta_grid:
-        _, _, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+        _, _, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=eta
         )
         hfp_values.append(herald_failure_prob)
