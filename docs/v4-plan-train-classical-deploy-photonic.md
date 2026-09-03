@@ -40,11 +40,12 @@
 - M1. Vendored classical trainer inside `merlin_iqp`, convention-tested against the repo's exact reference.
 - M2. A noisy-gate-channel deployment simulator (density matrix on qubits, one tomographed channel per CP gate), cross-checked against full-Fock Perceval at n = 2, 3, including the shared-qubit two-gate case.
 - M3. The TCDP gap sweep on a 1D-chain IQP family at n in {4, 6, 8, 10}, deployment noise grid anchored to Ascella and Altair, six metrics, every null written first.
-- M4. Write-up in `docs/tcdp-study.md`, technical-findings mirror, README paragraph, and the owner's self-explanation checkpoints.
+- M4. Noise-aware classical training: train against the channel-composed deployed distribution instead of the ideal one, at n <= 8, and measure whether the gap closes. Promoted from Should to Must on 2026-09-03 (owner decision on Fable's recommendation); the milestone's method claim either way it comes out. Stop rule in section 6 stays.
+- M5. Non-post-selected (erasure-marked) output distribution returned by the deployment simulator (closes v3.1 REFRAME-02 properly; REFRAME-03).
+- M6. Write-up in `docs/tcdp-study.md`, technical-findings mirror, README paragraph, and the owner's self-explanation checkpoints.
 
 ### Should
-- S1. Non-post-selected (erasure-marked) output distribution returned by the deployment simulator (closes v3.1 REFRAME-02 properly).
-- S2. Noise-aware classical training: train against the channel-composed deployed distribution instead of the ideal one, at n <= 8, and measure whether the gap closes. Stop rule in section 6.
+- none. Everything below Must is in Won't.
 
 ### Won't (write into `.planning/PROJECT.md` Next Milestone Goals if tempted)
 - A structured Fock-space simulator to n = 20. The channel approach makes it unnecessary for this question.
@@ -78,7 +79,7 @@ src/merlin_iqp/deploy/               # M2
     density_matrix.py                # deploy_density_matrix
     fock_reference.py                # noisy_full_fock_distribution (n<=3 cross-check only)
     throughput.py                    # success_probability
-    erasure.py                       # S1
+    erasure.py                       # M5 / REFRAME-03
 tests/v4_tcdp/
     test_convention.py               # 3.3
     test_gate_channel.py             # 4.2
@@ -202,7 +203,7 @@ def success_probability(n, channels: list[GateChannel], eta: float) -> float:
 ```
 Test: at eta = 1 and ideal channels equals the product of `1/sigma_max^4`; at k = 0 equals `eta**n`.
 
-### 4.7 `erasure.py` (S1)
+### 4.7 `erasure.py` (M5, REFRAME-03)
 `erasure_marked_distribution(q_conditional, n, eta, gate_qubits: set[int]) -> dict[str, float]` over strings in `{0,1,E}^n`: each qubit outside `gate_qubits` is erased independently with probability `1 - eta`; any loss on a qubit inside `gate_qubits` fails that gate's post-selection and the shot is dropped (mass reported separately as `dropped`). Test: total mass + dropped == 1; at eta = 1 equals `q_conditional`. This is the honest form of v3.1's REFRAME-02 and is what direction 1 of the audit would consume later.
 
 ---
@@ -263,8 +264,8 @@ The sweep is a finding only where it differs from the nulls in 5.2: nonzero gap 
 
 ---
 
-## 6. Phase 4 (S2, stretch): noise-aware classical training
-Train theta against `q_dep(theta)` instead of `q_ideal(theta)` at n in {4, 6, 8}, k = n - 1, Ascella noise. Gradient by central finite differences on `deploy_density_matrix` (h = 1e-4; parameter-shift is not valid for a channel). Metric: the deployed gap before vs after. **Stop rule:** if one training run at n = 8 exceeds 20 minutes, or if two full days pass without a green end-to-end run at n = 4, record the timing in `PROJECT.md` and stop. This is the SMART spec's stall pattern and the milestone ships without S2.
+## 6. Phase 4 (M4, NAT-01..03): noise-aware classical training
+Train theta against `q_dep(theta)` instead of `q_ideal(theta)` at n in {4, 6, 8}, k = n - 1, Ascella noise. Gradient by central finite differences on `deploy_density_matrix` (h = 1e-4; parameter-shift is not valid for a channel). Metric: the deployed gap before vs after. **Stop rule:** if one training run at n = 8 exceeds 20 minutes, or if two full days pass without a green end-to-end run at n = 4, record the timing in `PROJECT.md` and stop. This is the SMART spec's stall pattern; NAT then ships as "attempted, stopped" with the numbers obtained and the milestone still closes (NAT-03).
 
 ---
 
@@ -303,8 +304,8 @@ Optional context: Maring et al. arXiv:2306.00874 (Ascella numbers), Oh arXiv:240
 ---
 
 ## 10. Finish criteria (checked mechanically at the end, pasted into the phase summary)
-1. `python -m pytest -q` green; `tests/v4_tcdp/` contains the five test files and no skips remain except S2 if abandoned.
-2. `results/v4_tcdp/deploy_sweep.csv` has every cell of 5.1 for n <= 10 (4 n-values x (n choose k as listed) x 3 inits x 5 seeds x 72 noise points) or a `missing_cells.md` explaining each gap.
+1. `python -m pytest -q` green; `tests/v4_tcdp/` contains the five test files and no skips remain except NAT tests if NAT-03's stop rule fired.
+2. `results/v4_tcdp/deploy_sweep.csv` has every cell of 5.1 for n <= 10 (4 n-values x k = 0..n-1 x 2 kernels x 3 inits x 5 seeds x 18 channel points, with the 4 eta values as post-hoc throughput/erasure columns) or a `missing_cells.md` explaining each gap.
 3. `results/v4_tcdp/crosscheck_shared_qubit.json` exists and its number appears verbatim in `docs/tcdp-study.md`.
 4. Every figure in `docs/tcdp-study.md` regenerates from `tcdp_analysis.py` with no manual edits.
 5. Owner checkpoint transcript recorded; review file dispositioned; Vincent note drafted.
@@ -314,4 +315,4 @@ Optional context: Maring et al. arXiv:2306.00874 (Ascella numbers), Oh arXiv:240
 - Phase 3 nulls and Phase 5 items 1, 5, 6: owner.
 - Phase 5 prose: Sonnet drafts, owner reads aloud before commit.
 - Review gate: Fable or Opus, then Codex adversarial.
-- Order: 1 -> 2 -> 5.2 (owner) -> 3 -> 4 (optional) -> 5. Nothing in 3 starts until 4.5's cross-check number is on disk.
+- Order: 1 -> 2 -> 5.2 (owner) -> 3 -> 4 -> 5 (GSD phases 25 -> 26 -> 27 -> 28 -> 29 -> 30 -> 31). Nothing in 3 starts until 4.5's cross-check number is on disk.
