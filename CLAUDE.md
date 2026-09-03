@@ -18,6 +18,8 @@ As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 enc
 - **Forge (ancilla mode-mapping bookkeeping check):** `forge/ancilla_mapping.frg`.
 - **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) is the canonical write-up; it links out to `docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/iqp-photonic-encoding.md`, and `docs/julia-cross-check-study.md` for full detail.
 
+**v3.1 Correction (opened 2026-09-03):** an external audit found the v3.0 trainability and hardness-under-loss headline findings are pipeline artifacts with closed-form null results. Correction requirements: `.planning/REQUIREMENTS.md`; context: `.planning/phases/24-v3-1-correction/24-CONTEXT.md`; owner gate: `tests/v3_correction/test_null_results.py` (fill by red/green, no derivation on paper). No new experiments in v3.1.
+
 Keep this section current at each new milestone — don't leave it stale.
 
 ## Why this project exists
@@ -57,6 +59,10 @@ At each milestone, ask directly: "Can you explain how [specific piece] works rig
 ## No silent unilateral design decisions
 
 For any nontrivial architecture/design choice, state what tradeoff was considered and why this option was picked. The owner wants visibility into the decision, not just the resulting code.
+
+## Null-result gate (added 2026-09-03)
+
+Before any sweep, measurement, or benchmark phase runs, the owner writes the null result: the closed form the pipeline outputs if the circuit contributes nothing (a product distribution, a uniform distribution, pure post-selection, the metric's own floor). It goes in as a test against the data the sweep will produce, red first. A measurement that matches the null is a pipeline check, not a finding, and is written up as one. If no null can be stated, the measurement is not defined well enough to run yet. Reviewers must be handed the null-result question explicitly; internal-consistency review did not catch the v3.0 artifacts. Derivation by experiment (guess, test against data, revise) counts; symbolic derivation is not required. Full note: `.claude/learnings/2026-09-03-null-result-gate-before-sweeps.md`.
 
 ## Jul 25 is not a formality
 

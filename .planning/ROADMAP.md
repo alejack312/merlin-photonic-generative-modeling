@@ -6,6 +6,7 @@
 - ✅ **v2.0 IQP → Photonic Encoding** — Phases 8-9 (shipped 2026-08-05)
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
+- 🔧 **v3.1 Correction** — Phase 24 (started 2026-09-03; corrects two v3.0 findings an external audit found to be pipeline artifacts)
 
 ## Phases
 
@@ -91,3 +92,21 @@ Requirements: [`.planning/milestones/v3.0-REQUIREMENTS.md`](milestones/v3.0-REQU
 Audit: [`.planning/milestones/v3.0-MILESTONE-AUDIT.md`](milestones/v3.0-MILESTONE-AUDIT.md)
 
 </details>
+
+### Phase 24: v3.1 Correction — started 2026-09-03 (in progress)
+
+**Goal:** Correct the public record after the 2026-09-03 external audit (Fable 5.1) established that v3.0's trainability "exponential decay" is the MMD loss normalization on a product distribution (the kernel is the identity when sigma is below grid bin spacing, so variance scales as 2^-n with no circuit content) and that hardness-under-loss's `tvd_to_lossless` equals `½(1 − eta^(n+2))` because the pipeline post-selects on full photon survival. Ship the two null results as owner-written tests against the shipped CSVs, dated additive corrections in every affected document, the throughput reframing of the hardness result, a CLAUDE.md null-result gate, an independent Codex review of the corrected text, and a drafted correction note to Vincent. No new experiments.
+**Depends on:** Phase 20/21 documents (the things being corrected); audit artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`.
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) — NULL-01/02, CORR-01..07, REFRAME-01/02, GATE-01, REVIEW-01, COMM-01.
+**Gate:** NULL-01 is owner-only and blocks every plan: `tests/v3_correction/test_null_results.py` must be filled and green before planning proceeds. Derivation by red/green experiment, not on paper (24-CONTEXT.md D-02).
+**Plans:** not yet planned — see `24-CONTEXT.md` § Suggested plans (24-00 owner task, then 24-01..24-05).
+
+**Success criteria:**
+1. `python -m pytest -q` green including the promoted null-result tests over every shipped HARD row and the sigma ≤ 0.1 TRAIN rows.
+2. Every document that stated the two findings (trainability-study, hardness-under-loss-study, technical-findings, README, iqp-baseline Rudolph row, lit-scoping, Post_Sept1 plan, case-study page) carries a dated additive correction that leads its section.
+3. Hardness section leads with the throughput closed form `eta^(n+2k)·(2/27)^k`; TVD plots retitled as a pipeline check.
+4. `CLAUDE.md` null-result gate present; `.claude/learnings/2026-09-03-null-result-gate-before-sweeps.md` exists.
+5. `24-REVIEW.md` records the Codex null-result review and the disposition of each finding.
+6. Vincent note drafted by the owner; send/hold decision logged in `24-CONTEXT.md`.
+
+**Explicitly out of scope (v4.0 candidates, undecided):** structured simulator to n≈20+, Hamming-kernel trainability rerun, distinguishability noise, non-post-selected simulability analysis, herald-cost gradient variance, train-classical/deploy-photonic gap, KLM-vs-graph-state comparison.

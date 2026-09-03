@@ -19,6 +19,41 @@ The `weight1` scope has no entangling gate, so its output distribution is **exac
 
 Concretely, of this phase's 56 measured rows, **only the 21 `mixed`-scope rows bear on the hardness question at all**. The 35 `weight1` rows are a control. They are a genuinely useful control — the known closed form is what makes the loss channel independently checkable (it is how `survival = eta^n` was confirmed exactly) — but a `weight1` TVD or anticoncentration value is not evidence about sampling hardness, in either direction, and is not presented as such anywhere in this document.
 
+## Correction (2026-09-03) — TVD-vs-eta is a closed form with no circuit content; here is the actual result
+
+**An external audit found, and this project independently re-verified to floating-point precision (`tests/v3_correction/test_null_results.py`), that every `tvd_to_lossless` value below is a closed-form function of `eta` and `n` alone:**
+
+```
+weight1:  TVD(n, eta) = ½ · (1 − eta^n)
+mixed:    TVD(n, eta) = ½ · (1 − (2/27)·eta^(n+2) / h(eta))
+          h(eta) = (2/27)·eta^4 + (8/27)·eta^3·(1−eta) + (10/27)·eta^2·(1−eta)^2
+```
+
+This follows directly from what "TVD to lossless" measures here: the pipeline's `dist` only includes shots where every photon in the circuit survives loss (weight1: `n` photons; mixed: `n` data photons + 2 heralded-CZ ancilla photons), and among those surviving shots the distribution's shape is exactly the lossless one — a fact this document already established below (HARD-05, "shape is exactly preserved"). `TVD = ½·(1 − s)` for whatever fraction `s` of shots survives, and `s` is exactly `eta^n` (weight1) or the herald-conditioned analogue above (mixed) — no property of the circuit's correlational structure enters either formula. `h(eta)` is not an approximation: it matches this CSV's own `herald_success_rate_mean` column to floating-point precision, and reflects a real, non-obvious mechanism worth stating plainly — losing an ancilla photon does not only hurt the herald condition, it can occasionally help it (with only 2 of the gate's 4 relevant photons left, there are fewer ways to violate "exactly one photon per herald mode"), which is why `h(eta)` has three terms (all 4, exactly 3, or exactly 2 of the gate's 4 relevant photons surviving), not a single `eta^k`.
+
+**This means the entire TVD-vs-eta headline below is a pipeline check, not a hardness finding.** The convergence toward ~0.50 as eta decreases (already flagged below as "substantially a property of the metric") is not merely *substantially* a metric artifact — it is *entirely* one, exactly and provably so. Same for anticoncentration `alpha`'s exact invariance under loss: it is a direct consequence of the same shape-preservation fact, not an independent empirical result.
+
+**What this project's data actually establishes about hardness under loss, stated at the strength this actually supports:** the *conditional* distribution — among shots where every photon is detected — is **provably identical to the lossless distribution, at every tested eta**. This is a statement about the distribution's shape, not a complexity-theoretic hardness proof: this project never established (and did not attempt to establish) that the *lossless* distribution is itself hard to sample, only that photon loss does not change its shape when conditioned on full detection. "Conditional hardness is unaffected by loss" is the correct way to read this, contingent on whatever hardness the lossless construction has to begin with — which IQP's own conjectural hardness argument, not new work in this project, is the basis for. What loss costs is **throughput**: the *probability* of getting a usable shot at all falls as `eta^n` (weight1) or the mixed-scope closed form above, exponentially in both the number of qubits and the number of heralded gates — so the *expected number of samples* needed for one usable shot is the reciprocal, `1 / (eta^(n+2k) · (2/27)^k)`, growing exponentially in both `n` and `k` for `k` heralded CZs in a circuit with `n` data qubits (ignoring cross-gate herald compounding effects analogous to `h(eta)`'s, not yet worked out for `k>1` — the `k>=2` figures below are an extrapolation of the `k=1` mechanism, not a measured or cross-gate-verified result). This is the honest, non-trivial statement the correction supports; it is a resource/throughput cost, not a complexity-theoretic hardness claim, and does not by itself establish anything about classical simulability of the *unconditional* (all shots, including partial-loss ones) output — that question was not analyzed in this project (see "What this does not establish" below).
+
+**Throughput (expected samples needed per usable shot), the figure this correction leads with:**
+
+| n (data qubits) | k=0 (no CZ, measured range) | k=1 (measured range) | k=2 (extrapolated, not measured) | k=3 (extrapolated, not measured) |
+|---|---|---|---|---|
+| **eta = 0.9 (near-lossless)** | | | | |
+| 2 | 1.2 | 21 | 342 | 5.7e3 |
+| 4 | 1.5 | 25 | 424 | 7.0e3 |
+| 6 | 1.9 | 31 | 524 | 8.7e3 |
+| 8 | 2.3 | 39 | 645 | 1.1e4 |
+| **eta = 0.6 (moderate loss)** | | | | |
+| 2 | 2.8 | 104 | 3.9e3 | 1.5e5 |
+| 4 | 7.7 | 289 | 1.1e4 | 4.1e5 |
+| 6 | 21 | 806 | 3.0e4 | 1.1e6 |
+| 8 | 60 | 2.2e3 | 8.4e4 | 3.1e6 |
+
+Each cell is `1 / (eta^(n+2k) · (2/27)^k)` — expected samples until one usable shot arrives — computed directly from the closed form verified above, not measured for `k>=2` (no sweep at those `n,k` was run; the underlying pipeline's own data only covers `n<=6` at `k=0`/weight1 and `n<=4` at `k=1`/mixed, `results/v3_hardness/`). Extending to `k>=2` assumes each additional heralded gate's herald-conditioning behaves like the single-gate `h(eta)` mechanism independently — a reasonable but explicitly unverified extrapolation, not a cross-gate-compounded result. The `k=0,1` rows, by contrast, are direct evaluations of the closed form already verified against every shipped row. The pattern the table makes visible, restricted to the verified `k=0->1` columns: one heralded gate costs more than six extra qubits do. At `eta=0.6`, adding a single `k=0->1` CZ costs ~37x throughout (104/2.78 at n=2, 2230/59.5 at n=8 — the ratio is `eta^-2 · 27/2 ≈ 37.5`, independent of `n`), while going from `n=2` to `n=8` at fixed `k=0` costs only ~21x. This is the resource statement Quandela's own hardware roadmap would care about; the TVD-vs-eta plots below are the pipeline check that this closed form is correct, not a separate finding.
+
+**What survives unchanged:** the scope precondition above (only `mixed` bears on hardness at all) and the herald-compounding qualitative story (HARD-07, below) are untouched by this correction — they were already stated correctly. What changes is the *interpretation* of the TVD/alpha numbers: from "evidence about hardness eroding under loss" to "a closed-form throughput cost with the conditional distribution provably unaffected."
+
 ## Methodology
 
 **Loss mechanism.** Photon loss is applied via `pcvl.LC(1 - eta)` component insertion, front-loaded onto every mode of a `Processor` *before* the rest of the circuit is added (`hardness/loss_model.py`, `hardness/loss_model_weight2.py`), never via the `noise=NoiseModel(...)` `Processor` constructor parameter. A reader unfamiliar with Perceval would reasonably expect the `NoiseModel` API to be the "obvious" way to add loss. Because it is confirmed (`18-RESEARCH.md` Pitfall 1) to **silently no-op** on this project's polarization-annotated circuits, it is not used here. `Processor.probs()` runs without error and returns a plausible-looking but loss-invariant result. Two further requirements, both proven avoided by dedicated regression tests rather than merely documented:
@@ -58,7 +93,9 @@ There is **no literal `eta=1.0` row** in either dataset. `eta=0.99` is the close
 
 **HARD-02** (cross-check that `LC`-based loss agrees with Perceval's `NoiseModel` mechanism where the latter *is* valid) is satisfied by Plan 18-02's dedicated cross-check. On a shared bare 2-mode **non-polarization** toy circuit (where `NoiseModel` is not subject to Pitfall 1), `NoiseModel(transmittance=eta)` and `pcvl.LC(1-eta)` agree to **`atol=1e-9`** at `eta=0.5` and `eta=0.8`, matching `18-RESEARCH.md`'s own independently verified spot-check (`{|0,0>: 0.5, |1,0>: 0.5}` at `eta=0.5`). This confirms the `LC` mechanism itself is correct, isolating the earlier Pitfall-1 finding to `NoiseModel`'s behavior specifically on polarization-annotated circuits, not to a flaw in the loss physics being modeled.
 
-## HARD-05 results: TVD vs eta (weight-1 and mixed)
+## HARD-05 results: TVD vs eta (weight-1 and mixed) — pipeline check, see the 2026-09-03 correction above
+
+**Read as a verification plot, not a hardness result:** every curve below is now a proven closed form (see the correction above `## Methodology`), reported here for its original role — confirming the loss channel and the herald-compounding mechanism behave as the pipeline intends — not as evidence about hardness.
 
 ![weight-1 TVD vs eta](../results/v3_hardness/phase18_weight1_tvd_plot.png)
 
@@ -109,11 +146,13 @@ Note: `tvd_to_product_marginals` is numerically **near-equal to `tvd_to_lossless
 
 When the target already sits close to uniform (starts below 0.50 — mixed n=2: 0.109), the curve simply rises toward the floor with no dip. Both patterns are the same underlying convergence, differing only in which side of 0.50 the starting point happens to be on.
 
-**Why every curve converges to ~0.50, and what it does and doesn't mean.** `total_variation_distance` (`merlin_iqp/encoding/iqp_photonic.py:1029`) is computed between the raw, un-renormalized lossy distribution and each comparison distribution, each independently normalized to sum to 1. The lossy distribution's own total mass -- the probability of the photon(s) landing in exactly the expected detected pattern -- shrinks as eta decreases (for weight1, exactly `eta^n`, verified against a closed form matching the CSV to 5 decimal places; for mixed, a messier function compounding ordinary photon loss with `heralded_cz`'s own herald-failure probability, verified directly against the sweep code). As that surviving mass shrinks toward zero, TVD to *any* fixed, normalized reference distribution converges to exactly 0.50 -- a property of the metric itself (`TVD(near-zero, normalized-anything) -> 0.5`), not something specific to the lossless target or either classically-easy baseline. This is why all three curves converge to the same floor.
+**Why every curve converges to ~0.50, and what it does and doesn't mean.** `total_variation_distance` (`merlin_iqp/encoding/iqp_photonic.py:1029`) is computed between the lossy distribution and each comparison distribution, each independently normalized to sum to 1. **Precision added 2026-09-03:** "raw, un-renormalized" describes `weight1`'s lossy `dist` exactly (`photonic_iqp_distribution_lossy` performs no renormalization at all). For `mixed`, `dist` is *not* literally raw — `photonic_weight2_iqp_distribution_lossy` already divides it by `herald_success_prob` before returning it (herald-conditioning is applied first); what still shrinks as `eta` decreases for mixed is the *residual* in-subspace survival on top of that herald conditioning, `s = (2/27)·eta^(n+2) / h(eta)` per the closed form above, not simply `eta^(n+2)`. The mechanism described in this paragraph (surviving mass shrinking toward zero, driving TVD toward the fixed-reference-comparison floor) is the same for both scopes; only the exact quantity that plays the role of "surviving mass" differs, and the closed-form correction above is the precise version of what this paragraph describes qualitatively. The lossy distribution's own total mass — the probability of the photon(s) landing in exactly the expected detected pattern, already herald-conditioned for mixed — shrinks as eta decreases (for weight1, exactly `eta^n`, verified against a closed form matching the CSV to 5 decimal places; for mixed, `s` above, verified to `7.2e-15` against the CSV). As that surviving mass shrinks toward zero, TVD to *any* fixed, normalized reference distribution converges to exactly 0.50 -- a property of the metric itself (`TVD(near-zero, normalized-anything) -> 0.5`), not something specific to the lossless target or either classically-easy baseline. This is why all three curves converge to the same floor.
 
 Separately, and independently verified (not assumed): among shots that *are* successfully detected, the relative shape of the distribution is **exactly preserved** under loss, to floating-point precision (`1.67e-16` at n=3, mixed scope; an exact closed form at n=6, weight1). Loss only makes successful full-pattern detections rarer, without reshaping or degrading the underlying correlational structure. Consequently, this project's measured TVD-to-baseline convergence toward 0.50 is substantially a property of shrinking survival probability under a raw, un-renormalized comparison, not direct evidence that the surviving signal itself is becoming classically simulable. Whether/where this constitutes "classically easy" is not asserted in this document.
 
-## Anticoncentration results: alpha(eta)
+## Anticoncentration results: alpha(eta) — invariance is provable, not merely observed (see 2026-09-03 correction above)
+
+Alpha's exact invariance under loss (below) is a direct, provable consequence of the same shape-preservation fact the TVD correction above establishes — not an independent empirical finding to be weighed alongside it.
 
 ![anticoncentration alpha vs eta](../results/v3_hardness/phase18_anticoncentration_plot.png)
 
@@ -308,6 +347,8 @@ It does **not**:
 This closes HARD-04 (positioning stated plainly, using loss-native regimes instead of a fabricated translation, with the fabrication decision itself on record) and HARD-06 (this explicit scope statement), completing all of HARD-01 through HARD-07 for Phase 18.
 
 ### Cross-reference: Herbst et al.'s anticoncentration-tradeoff prediction
+
+**Correction (2026-09-03):** the alpha-invariance fact this section relies on is now known to be a *provable* consequence of the pipeline's own herald-conditioning (see the correction at the top of this document), not an independent empirical measurement. This section's conclusion — that this project's data is silent on Herbst et al.'s prediction — still holds, and is now on firmer footing: since alpha provably cannot move under this construction's loss channel, this project's `eta`-axis could never have tested the prediction in the first place, not merely "didn't happen to."
 
 `docs/iqp-baseline.md`'s "Fresh Primary-Source Verification" section cites Herbst, Brandic & Perez-Salinas (arXiv:2512.24801) for a formal result: circuits whose output distributions anticoncentrate are predicted to have *both* increased classical-simulability-under-noise (the hardness side) and increased MMD-type-loss concentration (the trainability side). The two effects are predicted to co-occur, not trade off against each other. This document's own Anticoncentration section (above) already reports the real, measured `alpha(eta)` values this prediction can be checked against.
 
