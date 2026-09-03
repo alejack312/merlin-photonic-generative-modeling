@@ -235,7 +235,7 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260903-t9j | Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction (Van den Nest cosine formula), that the owner's sibling project already had a correct Hamming-kernel classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs | 2026-09-03 | (pending) | [260903-t9j-write-into-docs-trainability-study-md-an](./quick/260903-t9j-write-into-docs-trainability-study-md-an/) |
+| 260903-t9j | Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction (Van den Nest cosine formula), that the owner's sibling project already had a correct Hamming-kernel classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs | 2026-09-03 | d7d6294 | [260903-t9j-write-into-docs-trainability-study-md-an](./quick/260903-t9j-write-into-docs-trainability-study-md-an/) |
 
 ### Blockers/Concerns
 
