@@ -23,6 +23,10 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
 **Current focus:** v3.1 Correction — Phase 24
 
+## v4.0 TCDP queued (2026-09-03)
+
+v4.0 "Train Classically, Deploy Photonically" is laid out but NOT current: 30 requirements appended to `.planning/REQUIREMENTS.md`, phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md`. Frontmatter stays on v3.1 deliberately (no `state.milestone-switch`, no `phases.clear`) because v3.1 has three open items: REFRAME-02, the COMM-01 send/hold decision, and the milestone close. When v3.1 is closed via `/gsd-complete-milestone`, run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"` and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
+
 ## v3.1 Correction (opened 2026-09-03)
 
 An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively, adds the gate to `CLAUDE.md`, and stops there; the audit's frontier directions are v4.0 candidates and undecided. The repo and case study are already public, so the correction is time-sensitive (about a week). The owner's Task 0 (NULL-01: fill `tests/v3_correction/test_null_results.py` by red/green) blocks all planning.

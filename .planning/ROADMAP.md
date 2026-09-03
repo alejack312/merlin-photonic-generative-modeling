@@ -7,6 +7,7 @@
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
 - 🔧 **v3.1 Correction** — Phase 24 (started 2026-09-03; corrects two v3.0 findings an external audit found to be pipeline artifacts)
+- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 25-31 (queued 2026-09-03 behind v3.1; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
 
 ## Phases
 
@@ -110,3 +111,82 @@ Audit: [`.planning/milestones/v3.0-MILESTONE-AUDIT.md`](milestones/v3.0-MILESTON
 6. Vincent note drafted by the owner; send/hold decision logged in `24-CONTEXT.md`.
 
 **Explicitly out of scope (v4.0 candidates, undecided):** structured simulator to n≈20+, Hamming-kernel trainability rerun, distinguishability noise, non-post-selected simulability analysis, herald-cost gradient variance, train-classical/deploy-photonic gap, KLM-vs-graph-state comparison.
+
+
+## v4.0 Train Classically, Deploy Photonically (Phases 25-31) — QUEUED 2026-09-03
+
+**Milestone goal:** Measure how far a classically trained IQP Born machine's photonic post-selected output drifts from the distribution the trainer deployed, under partial distinguishability, multi-photon emission, and loss, as a function of gate count and n; then test whether classical training against the tomographed gate channels closes that gap. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) § v4.0. Binding design: [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) table 5.1 and forbidden moves § 9. Starts when v3.1 is closed via `/gsd-complete-milestone`.
+
+**Ordering:** 25 → 26 → 27 → 28 (owner) → 29 → 30 → 31. Phase 29 cannot start until Phase 27's `crosscheck_shared_qubit.json` is on disk and Phase 28's k=0 and noiseless nulls are filled.
+
+### Phase 25: Classical Trainer Vendoring & Convention Lock
+**Goal:** Bring the spring-semester classical IQP trainer into `merlin_iqp.classical` as a numpy-only package and prove its theta is this repo's theta.
+**Depends on:** v3.1 (test conventions); sibling repo `C:\Users\cuqui\iqp-mmd-barren-plateau` at a recorded commit.
+**Requirements:** TRAIN-01, TRAIN-02, TRAIN-03, TRAIN-04.
+**Executor:** Codex (mechanical). Plan section 3 verbatim in the prompt.
+**Success criteria:**
+1. `import merlin_iqp.classical` succeeds in the venv with jax uninstalled; `PROVENANCE.md` names the sibling commit and every stripped path.
+2. `tests/v4_tcdp/test_convention.py` green: Walsh-inverse vs `exact_qubit_iqp_distribution` < 1e-12; scaled-theta variants fail; exact MMD² at n=10 under 60 s.
+3. Full suite still green.
+
+### Phase 26: Noisy Gate Channel Extraction
+**Goal:** Turn one noisy `CP(alpha)` gate into a trace-preserving 2-qubit channel via Perceval tomography, with the Pauli convention proven rather than assumed.
+**Depends on:** none beyond Perceval 1.2.4 (probe facts in plan § 0).
+**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04.
+**Executor:** Codex. Plan sections 4.2-4.3 verbatim.
+**Success criteria:**
+1. Ideal superoperator equals `conj(U) ⊗ U` to 1e-9 at three alphas with the phase on |11⟩.
+2. V=0.9, alpha=π/3 fidelity within 1e-4 of 0.97073; zero-noise success probability equals `1/sigma_max^4` to 1e-9; chi-trace and `probs()` success probabilities agree to 1e-6.
+3. Second call with identical (alpha, V, g2, eta) is served from `results/v4_tcdp/channels/` without tomography.
+
+### Phase 27: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
+**Goal:** Compose gate channels on an n-qubit density matrix, prove it exact against the qubit reference and against full-Fock Perceval, and measure the one approximation it makes.
+**Depends on:** Phase 25 (adapter), Phase 26 (channels).
+**Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, REFRAME-03.
+**Executor:** Codex. Plan sections 4.4-4.7 verbatim.
+**Success criteria:**
+1. Ideal channels reproduce `exact_qubit_iqp_distribution` to 1e-12; k=0 ignores noisy channels.
+2. Channel-composed vs full-Fock TVD < 1e-6 for one gate at n=2 and n=3 across the V/g2 grid.
+3. `results/v4_tcdp/crosscheck_shared_qubit.json` exists with the two-gate shared-qubit TVD at V=0.9.
+4. Throughput and erasure helpers pass their eta=1 / k=0 identities; erasure mass + dropped = 1.
+
+### Phase 28: Owner Null Results (owner-only gate)
+**Goal:** The owner writes, red first, what the deployment sweep outputs if the gates contribute nothing, before any sweep row exists.
+**Depends on:** Phase 27 (the functions the nulls are tested against).
+**Requirements:** NULL-03, NULL-04, NULL-05, NULL-06, NULL-07.
+**Executor:** Owner. Claude asks questions and points at rows; Claude does not supply formulas (24-CONTEXT.md D-02 applies).
+**Success criteria:**
+1. `tests/v4_tcdp/test_nulls_tcdp.py` exists with all five functions filled; k=0, noiseless, eta, and throughput nulls green; scaling hypothesis marked xfail.
+2. Each function's docstring carries the owner's one-sentence "why it has this shape".
+
+### Phase 29: Classical Training Runs & Deployment Gap Sweep
+**Goal:** Train every design-table cell classically, deploy each through the channel simulator across the hardware-anchored noise grid, and report the six metrics against the nulls.
+**Depends on:** Phases 25-28.
+**Requirements:** SWEEP-01, SWEEP-02, SWEEP-03, SWEEP-04, SWEEP-05.
+**Executor:** Codex for scripts and figures; owner interprets first, Claude checks (CLAUDE.md rule).
+**Success criteria:**
+1. `results/v4_tcdp/trained/` complete and byte-reproducible; `deploy_sweep.csv` has every cell or `missing_cells.md` explains each gap.
+2. Figures 1-4 regenerate from `tcdp_analysis.py` with no manual edits.
+3. For each null, the write-up states matched / did not match; the headline outcome from plan § 5.6 is named.
+4. Tomography wall-clock reported; any alpha rounding stated.
+
+### Phase 30: Noise-Aware Classical Training
+**Goal:** Train theta against the channel-composed deployed distribution and measure whether the gap closes at Ascella-grade noise. The milestone's method claim, either way it comes out.
+**Depends on:** Phase 29 (baseline gaps).
+**Requirements:** NAT-01, NAT-02, NAT-03.
+**Executor:** Codex; owner reads timing before each n step.
+**Success criteria:**
+1. Finite-difference training loop on the exact deployed vector runs green end-to-end at n=4.
+2. Before/after gap table at n ∈ {4,6,8}, k=n-1, Ascella noise, 5 seeds, next to the ideal-trained baseline.
+3. Stop rule outcome recorded in `PROJECT.md` (completed, or stopped with numbers).
+
+### Phase 31: Write-Up, Review Gate, Communication
+**Goal:** Owner checkpoint, study document, mirrors, two-stage review, Gibbs pass, Vincent note.
+**Depends on:** Phases 29-30.
+**Requirements:** WRITE-07, WRITE-08, WRITE-09, REVIEW-02, COMM-02.
+**Executor:** Owner (checkpoint, journal, note); Sonnet (prose, read aloud before commit); Fable/Opus then Codex (review).
+**Success criteria:**
+1. Owner checkpoint transcript recorded before prose; no hedging on the four questions.
+2. `docs/tcdp-study.md`, technical-findings section, README paragraph, CLAUDE.md Repo state all present; every number traces to CSV or test.
+3. REVIEW.md dispositions every finding from both reviews.
+4. Vincent note drafted; send/hold recorded; journal entry in the owner's words.

@@ -61,3 +61,102 @@ All Must-have unless marked otherwise. Order matters: NULL-01 gates everything e
 3. `CLAUDE.md` null-result gate present; learning note written.
 4. Codex review run and its findings dispositioned in `24-REVIEW.md`.
 5. Vincent note drafted; send/hold decision recorded in `24-CONTEXT.md`'s decision log.
+
+
+---
+
+# Requirements: v4.0 Train Classically, Deploy Photonically (TCDP)
+
+**Defined:** 2026-09-03 (queued behind v3.1; becomes the current milestone when v3.1 is closed)
+**Core Value:** A working, end-to-end, honestly-benchmarked photonic project the owner can explain unaided. v4.0 asks the first question this repo's tooling can answer that nobody has published: how far does a classically trained IQP Born machine's photonic output drift from what the trainer deployed, and can the classical trainer absorb the device's gate noise without touching the device.
+**Source plan:** [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) — design table 5.1 and forbidden moves section 9 are binding on every phase below.
+
+## Why this milestone exists
+
+v3.1 established that loss alone does not change the post-selected output of this encoding (closed form, throughput pays). The open axes are partial distinguishability and multi-photon emission, which act inside the two-photon gates: a tomographed `CP(alpha)` gate has average fidelity 1.0 ideal and 0.9707 at indistinguishability 0.9 (probe 2026-09-03). The owner's spring-semester project (`iqp-mmd-barren-plateau`) trains IQP Born machines entirely classically; its theta convention equals this repo's exactly (verified 2026-09-03). Combining the two turns the photonic side into a deployment-fidelity study and, if noise-aware training closes the gap, a method result.
+
+## v1 Requirements
+
+All Must-have unless marked otherwise.
+
+### Classical trainer, vendored (TRAIN)
+
+- [ ] **TRAIN-01**: `merlin_iqp.classical` contains the sibling repo's numpy core (expectation, gaussian kernel, mixture cache, loss, analytic gradients, rng, initialization, trainer) with `PROVENANCE.md` recording the sibling commit hash and every removed jax/laplacian/polynomial path; `import merlin_iqp.classical` succeeds with jax absent.
+- [ ] **TRAIN-02**: `families.chain_1d(n, k)` builds n weight-1 rows then the first k nearest-neighbour ZZ rows in that fixed order.
+- [ ] **TRAIN-03**: `adapter.theta_to_repo` / `repo_to_theta` convert between generator-matrix theta and `(thetas, pair_thetas)` with no scaling or sign change, raising on weight-0/weight-3+ rows, duplicates, or a missing weight-1 row.
+- [ ] **TRAIN-04**: `tests/v4_tcdp/test_convention.py` proves the Walsh-inverse of the sibling's exact `<Z_a>` equals `exact_qubit_iqp_distribution` to 1e-12 (n=2..4, k=0,1,n-1, 5 draws), that theta×0.5 and theta×2 fail, and that exact MMD² at n=10 runs in under 60 s.
+
+### Noisy gate channel (CHAN)
+
+- [ ] **CHAN-01**: `deploy.gate_channel.extract_gate_channel(alpha, noise)` tomographs the **bare** catalog `PostProcessedControlledRotationsItem` gate (never the PERM-adapted core) with `add_herald(m,0)` on modes 4–7 and `PostSelect("[0,1]==1 & [2,3]==1")`, returning chi matrix, trace-preserving superoperator, average fidelity, and post-selection success probability.
+- [ ] **CHAN-02**: The Pauli-basis ordering used to convert chi to a superoperator is a module constant proven by `test_ideal_superop_equals_unitary` (ideal superoperator equals `conj(U) ⊗ U` to 1e-9 at alpha ∈ {π/6, π/3, π}, phase on |11⟩).
+- [ ] **CHAN-03**: Success probability from the chi trace and from `probs()` (`min_detected_photons_filter(2)`, mean `global_perf` over the four basis inputs) agree to 1e-6; at zero noise it equals `1/sigma_max(alpha)^4` to 1e-9; V=0.9, alpha=π/3 reproduces the probe fidelity 0.97073 to 1e-4.
+- [ ] **CHAN-04**: Channels are cached on disk under `results/v4_tcdp/channels/` keyed by (alpha, V, g2, eta); a cache hit never re-runs tomography.
+
+### Deployment simulator (DEPLOY)
+
+- [ ] **DEPLOY-01**: `deploy.density_matrix.deploy_density_matrix(n, thetas, pair_thetas, channel_for_pair)` applies exact weight-1 phases, exact single-qubit corrections, one tomographed channel per ZZ pair, and H^n, returning a 2^n probability vector in `exact_qubit_iqp_distribution`'s bit order; raises if `alpha != 4*theta_pair`; n ≤ 10 without an explicitly timed einsum path.
+- [ ] **DEPLOY-02**: With ideal channels the output equals `exact_qubit_iqp_distribution` to 1e-12 (n=2..4, k=0,1,n-1); with k=0 any noisy channel dict leaves the output unchanged. (Phase-level null result.)
+- [ ] **DEPLOY-03**: `deploy.fock_reference.noisy_full_fock_distribution` runs the full dual-rail Perceval circuit under `NoiseModel` at n ≤ 3, and `test_fock_crosscheck.py` shows TVD < 1e-6 against the channel-composed result for one gate at n=2 and n=3 (bystander) for V ∈ {1, 0.9, 0.7}, g2 ∈ {0, 0.02}.
+- [ ] **DEPLOY-04**: The two-gate shared-qubit case (n=3, pairs (0,1),(1,2), V=0.9) records its channel-vs-Fock TVD to `results/v4_tcdp/crosscheck_shared_qubit.json`; the test asserts < 0.05 and the number is carried into the write-up as the independent-gate approximation error. If > 0.01, the sweep also runs the full-Fock reference at n=3 for every noise point.
+- [ ] **DEPLOY-05**: `deploy.throughput.success_probability(n, channels, eta)` returns `eta^n × ∏ p_success` (CP gates carry vacuum ancilla, no `eta^2` per gate) with the heralded-CZ contrast stated in its docstring and tested at eta=1 and k=0.
+- [ ] **REFRAME-03**: `deploy.erasure.erasure_marked_distribution` returns the non-post-selected output over `{0,1,E}^n` plus a separately reported `dropped` mass for gate-touched qubits; total mass + dropped = 1; eta=1 reproduces the conditional distribution. (Closes v3.1's REFRAME-02 in the form the audit's direction 1 would consume.)
+
+### Owner null results (NULL) — owner-only, written red before any sweep runs
+
+- [ ] **NULL-03**: `owner_null_gap_k0(V, g2)` — predicted TVD(ideal, deployed) at k=0 for any V, g2 — filled by the owner and green.
+- [ ] **NULL-04**: `owner_null_gap_noiseless(k)` — predicted gap at V=1, g2=0 for any k — filled and green.
+- [ ] **NULL-05**: `owner_null_eta_effect(n, k, eta)` — predicted change in the conditional distribution from eta alone — filled and green.
+- [ ] **NULL-06**: `owner_null_throughput(n, k, alphas, eta)` — closed form — filled and green.
+- [ ] **NULL-07**: `owner_hypothesis_gap_scaling(k, F)` — the owner's first-order hypothesis for gap vs gate count, marked `xfail(strict=False)`; whether it held is a sentence in the write-up either way.
+
+### Deployment gap sweep (SWEEP)
+
+- [ ] **SWEEP-01**: `scripts/v4_tcdp/train_classical.py` trains every cell of design table 5.1 (chain_1d; n ∈ {4,6,8,10} deployable, {16,20} training-only; k = 0..n-1; 1D Ising target seed 4001; sigma = 0.5√n primary and 1.0 control; three inits; Adam lr 0.05, 300 steps; 5 seeds) and writes deterministic `results/v4_tcdp/trained/{cell}.npz` with G, theta, trajectory, metadata, and q_ideal for n ≤ 10.
+- [ ] **SWEEP-02**: `scripts/v4_tcdp/deploy_sweep.py` writes `results/v4_tcdp/deploy_sweep.csv` with exactly the columns named in plan section 5.4 for every trained cell (n ≤ 10) × noise point (V ∈ {1, .99, .95, .93, .84, .70}; g2 ∈ {0, .007, .025}; eta ∈ {1, .9, .5, .08}), or a `missing_cells.md` naming each gap.
+- [ ] **SWEEP-03**: Metrics are the exact-vector versions defined in plan section 5.4 (TVD, training-kernel MMD² ideal vs deployed, forward KL with a stated 1e-12 floor, Raj et al. coverage and fidelity in population form, order-1/2 marginal error) and nothing else.
+- [ ] **SWEEP-04**: `scripts/v4_tcdp/tcdp_analysis.py` regenerates Figures 1–4 and the summary table from the CSV with no manual edits; every number in the write-up traces to the CSV or a test.
+- [ ] **SWEEP-05**: The write-up states, for each null in NULL-03..07, whether the sweep matched it, and identifies which of the two headline outcomes in plan section 5.6 occurred.
+
+### Noise-aware classical training (NAT) — promoted from Should to Must on 2026-09-03 (owner decision after Fable's recommendation)
+
+- [ ] **NAT-01**: A training loop optimizes theta against `deploy_density_matrix(theta)` (channel-composed deployed distribution) instead of the ideal distribution, using central finite differences (h = 1e-4) on the exact deployed vector; parameter-shift is explicitly not used on a channel.
+- [ ] **NAT-02**: At n ∈ {4, 6, 8}, k = n-1, Ascella noise (V=0.93, g2=0.007), the deployed gap (TVD, coverage, KL) is reported before and after noise-aware training, 5 seeds, alongside the ideal-trained baseline from SWEEP-02.
+- [ ] **NAT-03**: Stop rule enforced and recorded: if one n=8 run exceeds 20 minutes, or two calendar days pass without a green end-to-end n=4 run, timing is written to `PROJECT.md` and NAT ships as "attempted, stopped" with the numbers obtained; the milestone still closes.
+
+### Write-up, gates, communication (WRITE / REVIEW / COMM)
+
+- [ ] **WRITE-07**: Owner self-explanation checkpoint recorded before any prose: theta needs no conversion; why the channel model is exact for one gate and approximate for two gates on a shared qubit, with the measured number; why k=0 is a null for distinguishability but not loss; what changes in throughput between CP and heralded CZ. Hedging stops the phase.
+- [ ] **WRITE-08**: `docs/tcdp-study.md` with question, design table, null outcomes, figures, shared-qubit approximation number, hardware anchors (Ascella V 0.930 / g2 7.3e-3 / ~8% transmission; Altair V 0.84 / purity 0.025; roadmap 70% → 99%), "what this does/doesn't establish", literature table with read-depth labels (full reads: arXiv:2503.02934, 2608.31117, 2405.02277, 2605.11879).
+- [ ] **WRITE-09**: `docs/technical-findings.md` gains a v4.0 section, README gains a v4.0 paragraph, `CLAUDE.md` Repo state updated; no sentence states "barren plateau" as a finding.
+- [ ] **REVIEW-02**: A Fable/Opus review then a Codex adversarial review with the verbatim prompt "For each stated finding, write the null result and check whether the finding differs from it. Then check every number against deploy_sweep.csv"; findings dispositioned in the phase's REVIEW.md.
+- [ ] **COMM-02**: Gibbs pass offered (questions only), journal entry in the owner's words, Vincent note (3–5 sentences, owner's words) drafted with send/hold recorded.
+
+## Out of Scope
+
+| Feature | Reason |
+|---|---|
+| Structured Fock-space simulator to n≈20 | The channel approach answers this milestone's question without it |
+| Any barren-plateau claim or Hamming-kernel gradient-variance rerun | Sibling project already found init and n dominate; not this milestone's question |
+| Graph-state / MBQC realization of IQP (audit direction 4) | Separate, larger milestone; does not reuse the spring trainer |
+| Heralded CZ under distinguishability | CP(alpha) is the validated tunable gate and the cheaper one under loss |
+| Recycling mitigation (Salavrakos et al.) | Threshold-detector, different circuit class; cite only |
+| New dependencies (jax, iqpopt, pennylane, torch training) | Numpy core suffices; adding any is a stop-and-ask |
+| Analysis of the erasure-marked output (REFRAME-03's consumer) | Audit direction 1, future milestone |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|---|---|---|
+| TRAIN-01..04 | Phase 25 | Pending |
+| CHAN-01..04 | Phase 26 | Pending |
+| DEPLOY-01..05, REFRAME-03 | Phase 27 | Pending |
+| NULL-03..07 | Phase 28 | Pending (owner) |
+| SWEEP-01..05 | Phase 29 | Pending |
+| NAT-01..03 | Phase 30 | Pending |
+| WRITE-07..09, REVIEW-02, COMM-02 | Phase 31 | Pending |
+
+**Coverage:** v1 requirements: 30 total; mapped: 30; unmapped: 0.
+
+---
+*v4.0 requirements defined: 2026-09-03, from `docs/v4-plan-train-classical-deploy-photonic.md`; owner promoted NAT to Must the same day.*
