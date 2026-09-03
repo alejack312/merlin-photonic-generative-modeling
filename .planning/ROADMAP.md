@@ -129,15 +129,15 @@ Audit: [`.planning/milestones/v3.0-MILESTONE-AUDIT.md`](milestones/v3.0-MILESTON
 2. `tests/v4_tcdp/test_convention.py` green: Walsh-inverse vs `exact_qubit_iqp_distribution` < 1e-12; scaled-theta variants fail; exact MMD² at n=10 under 60 s.
 3. Full suite still green.
 
-### Phase 26: Noisy Gate Channel Extraction
-**Goal:** Turn one noisy `CP(alpha)` gate into a trace-preserving 2-qubit channel via Perceval tomography, with the Pauli convention proven rather than assumed.
+### Phase 26: Noisy Gate Map Reconstruction
+**Goal:** Reconstruct one noisy `CP(alpha)` gate as a trace-decreasing completely positive 2-qubit map by linear inversion from absolute post-selected Perceval probabilities (method verified 2026-09-03: exact to 5e-16 ideal, CP at V=0.9, 2.3 s per map); Perceval tomography is a fidelity cross-check only.
 **Depends on:** none beyond Perceval 1.2.4 (probe facts in plan § 0).
-**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04, CHAN-05.
+**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04.
 **Executor:** Codex. Plan sections 4.2-4.3 verbatim.
 **Success criteria:**
-1. Ideal superoperator equals `conj(U) ⊗ U` to 1e-9 at three alphas with the phase on |11⟩.
-2. V=0.9, alpha=π/3 fidelity within 1e-4 of 0.97073; zero-noise success probability (from `probs()`) equals `1/sigma_max^4` to 1e-9; the eta=0.9 channel equals the eta=1 channel to 1e-9.
-3. Second call with identical rounded (alpha, V, g2) is served from `results/v4_tcdp/channels/` without tomography; `tomography_timing.json` exists and the 1134-channel budget is under 10 single-core hours (measured ~7 h on 2026-09-03) or the owner has chosen which noise row to drop.
+1. Ideal maps equal `(1/sigma_max^4) U ρ U†` to 1e-9 at four alphas with the phase on |11⟩; every cached map is CP and trace-non-increasing on all 16 matrix units; no per-gate renormalisation anywhere.
+2. Input-dependence of success at V=0.9 recorded; repeatability 1e-13; Perceval tomography fidelity agrees with the map's exact conditional fidelity within 5e-3 at three noise points.
+3. `alpha_key` yields exactly 63 keys; `map_timing.json` exists, measured at the slowest condition, and the 1134-map budget is under 3 single-core hours (measured ~45 min on 2026-09-03).
 
 ### Phase 27: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
 **Goal:** Compose gate channels on an n-qubit density matrix, prove it exact against the qubit reference and against full-Fock Perceval, and measure the one approximation it makes.
@@ -145,19 +145,20 @@ Audit: [`.planning/milestones/v3.0-MILESTONE-AUDIT.md`](milestones/v3.0-MILESTON
 **Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, REFRAME-03.
 **Executor:** Codex. Plan sections 4.4-4.7 verbatim.
 **Success criteria:**
-1. Ideal channels reproduce `exact_qubit_iqp_distribution` to 1e-12; k=0 ignores noisy channels.
-2. Channel-composed vs full-Fock TVD < 1e-6 for one gate at n=2 and n=3 across the V/g2 grid.
-3. `results/v4_tcdp/crosscheck_shared_qubit.json` exists with the two-gate shared-qubit TVD at V=0.9.
-4. Throughput and erasure helpers pass their eta=1 / k=0 identities; erasure mass + dropped = 1.
+1. Ideal maps reproduce `exact_qubit_iqp_distribution` to 1e-12 and the closed-form success product to 1e-9; k=0 ignores noisy maps; the hand-computed asymmetric n=3 fixture matches by named bitstring; no `4^n × 4^n` matrix is formed.
+2. Composed vs full-Fock: TVD < 1e-9 **and** success probability agreement to 1e-9 for one gate at n=2 and n=3 (bystander, V-only and g2-only separately).
+3. `results/v4_tcdp/crosscheck_shared_qubit.json` holds the shared-qubit discrepancies at three noise points × two alphas, with the pre-registered band applied.
+4. Erasure helper passes hand-enumerated per-pattern tests including the shared-qubit case; heralded-CZ throughput overlay function exists.
 
 ### Phase 28: Owner Null Results (owner-only gate)
 **Goal:** The owner writes, red first, what the deployment sweep outputs if the gates contribute nothing, before any sweep row exists.
 **Depends on:** Phase 27 (the functions the nulls are tested against).
-**Requirements:** NULL-03, NULL-04, NULL-05, NULL-06, NULL-07.
-**Executor:** Owner. Claude asks questions and points at rows; Claude does not supply formulas (24-CONTEXT.md D-02 applies).
+**Requirements:** NULL-03, NULL-04, NULL-05, NULL-06, NULL-07, NULL-08, NULL-09.
+**Executor:** Owner for NULL-03..08 (Claude asks questions and points at rows; does not supply formulas, 24-CONTEXT.md D-02); Codex for NULL-09's pipeline control tests.
 **Success criteria:**
-1. `tests/v4_tcdp/test_nulls_tcdp.py` exists with all five functions filled; k=0, noiseless, eta, and throughput nulls green; scaling hypothesis marked xfail.
-2. Each function's docstring carries the owner's one-sentence "why it has this shape".
+1. `tests/v4_tcdp/test_nulls_tcdp.py` exists with all owner functions filled; k=0, noiseless, eta, both throughput, and NAT-ideal nulls green; scaling hypothesis marked xfail.
+2. Each owner function's docstring carries the owner's one-sentence "why it has this shape".
+3. `test_control_point_every_cell` and `test_control_point_can_fail` present and green on three cells.
 
 ### Phase 29: Classical Training Runs & Deployment Gap Sweep
 **Goal:** Train every design-table cell classically, deploy each through the channel simulator across the hardware-anchored noise grid, and report the six metrics against the nulls.
