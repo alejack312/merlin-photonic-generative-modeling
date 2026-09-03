@@ -43,7 +43,7 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 Phase: 24 (v3.1 Correction) — context gathered, not yet planned
 Plan: — (blocked on NULL-01, owner task)
 Status: Waiting for the owner to fill and green `tests/v3_correction/test_null_results.py`; then `/gsd-plan-phase 24`
-Last activity: 2026-09-03 — v3.1 scaffolded (REQUIREMENTS.md, 24-CONTEXT.md, null-result test harness, CLAUDE.md gate, learning note)
+Last activity: 2026-09-03 - Completed quick task 260903-t9j: Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction, that the owner's sibling project already had a correct classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs
 
 ### Prior position (Phase 21, retained)
 
@@ -230,6 +230,12 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 - **RESOLVED 2026-08-12 (same day):** the two items below were decided by the owner and turned into real new milestone scope — TRAIN-09 and TRAIN-10, mapped to a newly-inserted Phase 17.1 (see `ROADMAP.md`/`REQUIREMENTS.md`). Phase 17 itself was NOT reopened or reversed; its shipped/verified result stands, with 17.1 as an explicit follow-up check.
   - **TRAIN-09** (bandwidth confound): owner chose the empirical re-run option over documenting-only. Rudolph et al.'s (arXiv:2305.02881v2) literal `σ∈Θ(n)` mechanism was checked against this project's actual kernel code (`trainability/target_grid.py`, `trainability/mmd_exact.py`) and confirmed NOT to transfer — their bodyness argument requires a bitstring-Hamming kernel where each coordinate is one qubit; this project's kernel is Euclidean distance over a fixed-2D bin-center grid with an arbitrary bitstring→index mapping. The real, verified confound is geometric instead: `2^n` bins pack into the same fixed `[lo,hi]^2` region, so bin spacing shrinks from 1.20 (n=2) to 0.17 (n=5-6) while `SIGMA=0.1` stayed literally fixed — kernel value between adjacent bins rises from ≈0 to ≈0.23 across that range (computed directly, not estimated). TRAIN-09 re-runs the sweep holding `sigma/bin-spacing` constant instead.
   - **TRAIN-10** (init scheme): owner chose to actually implement and test Recio-Armengol et al.'s (arXiv:2503.02934v2) data-dependent initialization (weight-1 angles from empirical training-data means, weight-2 from empirical pairwise covariances) as a real alternative to the inconclusive fixed-magnitude `small_angle` scheme, rather than only noting it as future work.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260903-t9j | Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction (Van den Nest cosine formula), that the owner's sibling project already had a correct Hamming-kernel classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs | 2026-09-03 | (pending) | [260903-t9j-write-into-docs-trainability-study-md-an](./quick/260903-t9j-write-into-docs-trainability-study-md-an/) |
 
 ### Blockers/Concerns
 
