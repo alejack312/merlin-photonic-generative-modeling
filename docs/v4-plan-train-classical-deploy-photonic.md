@@ -154,15 +154,21 @@ Implementation constraints:
 - Build the processor exactly as in the 2026-09-03 probe: `Processor("SLOS", 8, noise=noise)`, `add(0, PostProcessedControlledRotationsItem().build_circuit(n=2, alpha=float(alpha)))`, `add_herald(m, 0)` for m in 4..7, `set_postselection(PostSelect("[0,1]==1 & [2,3]==1"))`. **Bare catalog gate, no PERM adapters.**
 - `chi = ProcessTomography(proc).chi_matrix()`; `avg_fidelity = ProcessTomography(proc).average_fidelity(U)`.
 - Convert chi to a superoperator with an explicit Pauli-basis convention test (4.3, `test_ideal_superop_equals_unitary`). If Perceval's Pauli ordering is undocumented, determine it empirically from the ideal gate and write the ordering into a module constant with the test as its proof.
-- Renormalise the superoperator to trace-preserving (divide by the trace of the Choi state). Record the pre-renormalisation trace as `p_success_from_chi` and check it against `p_success` from `probs()` (`min_detected_photons_filter(2)`, mean `global_perf` over the four basis inputs). They must agree to 1e-6 or Codex stops and reports.
-- Cache channels on disk under `results/v4_tcdp/channels/{alpha:.6f}_{V}_{g2}_{eta}.npz`; tomography is slow relative to everything else.
+- Renormalise the superoperator to trace-preserving (divide by the trace of the Choi state). **`p_success` comes from `probs()` only** (`min_detected_photons_filter(2)`, mean `global_perf` over the four basis inputs). Do not derive success probability from the chi matrix; Perceval may already normalise it and nothing in this plan depends on its trace.
+- **The channel key is `(alpha, V, g2)`; eta is not part of it.** Loss before a CP gate only removes shots in which a data photon is missing; conditioned on both photons arriving, the gate is identical. Eta enters only through `throughput.py` and `erasure.py`. (Null check in 4.3: a channel extracted with `transmittance=0.9` must equal the eta = 1 channel to 1e-9.)
+- **Alpha is rounded to the grid `round(alpha / 0.1) * 0.1` (63 values on [0, 2pi)) before any channel lookup or deployment**, and the rounded value is stored in the sweep CSV next to the trained one. This bounds the number of distinct channels at 63 alphas x 18 (V, g2) points = 1134 tomographies. Measured 2026-09-03 in this venv: one tomography takes 19.6 s ideal, 22.0 s at Ascella noise, so the full set is about 7 hours on one core; tomographies are independent and may be run in parallel processes, provided the cached result for a key is byte-identical regardless of which process produced it. The rounding error on the deployed distribution is measured once (ideal channels, rounded vs unrounded alpha, n = 4, k = 3) and reported.
+- Cache channels on disk under `results/v4_tcdp/channels/{alpha_rounded:.1f}_{V}_{g2}.npz`.
+- **Timing gate:** `test_tomography_wall_clock` records the seconds per tomography into `results/v4_tcdp/tomography_timing.json`. If 1134 x that number exceeds 10 hours single-core, Codex stops and reports; the owner then chooses between dropping the g2 = 0.025 row and dropping V = 0.99. Neither is chosen by the executor.
+- **Fallback if 4.5's single-gate cross-check fails:** tomography under `NoiseModel` is then not trusted. Reconstruct the channel by direct simulation instead: run the bare gate processor on the 16 product inputs `{|0>,|1>,|+>,|+i>}^2` with readout in the Z basis and, via an added `BS()` / phase on each dual-rail pair before detection, in the X and Y bases; invert to the process matrix by standard linear inversion. Same tests apply. If that also fails the n = 2 cross-check, stop: the milestone's method has a problem the owner must see.
 
 ### 4.3 `tests/v4_tcdp/test_gate_channel.py`
 - `test_ideal_superop_equals_unitary`: noise = None, alpha in {pi/6, pi/3, pi}: `superop` equals `conj(U) kron U` (column-stacking) to 1e-9. Phase must sit on `|11>`.
 - `test_ideal_fidelity_one`: avg_fidelity == 1.0 within 1e-9; V = 1, g2 = 0, eta = 1 explicitly also gives 1.0.
 - `test_V09_fidelity_matches_probe`: V = 0.9, alpha = pi/3: avg_fidelity within 1e-4 of 0.97073 (the probe value).
 - `test_trace_preserving`: for every cached channel, applying `superop` to vec(I/4) returns trace 1.
-- `test_p_success_consistent`: `abs(p_success - p_success_from_chi) < 1e-6`; at noise = None, `p_success == 1/sigma_max(alpha)^4` from `iqp_photonic`'s closed form within 1e-9.
+- `test_p_success_closed_form`: at noise = None, `p_success == 1/sigma_max(alpha)^4` from `iqp_photonic`'s closed form within 1e-9.
+- `test_eta_does_not_change_channel`: superoperator at `transmittance=0.9, V=0.9` equals the one at `V=0.9` alone to 1e-9.
+- `test_tomography_wall_clock`: writes seconds-per-tomography to `results/v4_tcdp/tomography_timing.json`; asserts nothing, but Phase 3 reads it (5.1).
 
 ### 4.4 `density_matrix.py`
 ```python
@@ -183,7 +189,7 @@ Memory rule: n <= 10 in this milestone (4^10 * 16 B = 16 MB per copy). If n = 12
 ### 4.5 `fock_reference.py` and `tests/v4_tcdp/test_fock_crosscheck.py` (the trust gate for option (b))
 `noisy_full_fock_distribution(n, thetas, pair_thetas, noise: NoiseModel) -> (dist, p_success)` for n <= 3 only: build the dual-rail circuit with `dual_rail.make_weight2_cp_circuit_and_input` (one pair) or a two-pair variant assembled through `Processor.add(mapping, ...)` following `_build_weight2_cp_processor_no_postselect`'s mapping pattern, attach `noise`, `min_detected_photons_filter(n)`, and do the manual per-pair post-selection and ancilla-vacuum filtering exactly as `photonic_cp_iqp_distribution` does. Tests:
 - `test_single_gate_n2_matches_channel`: n = 2, pair (0,1), V in {1, 0.9, 0.7}, g2 in {0, 0.02}: TVD(channel-composed, full-Fock) < 1e-6.
-- `test_single_gate_n3_bystander`: n = 3, pair (1,2), bystander qubit 0: same bound.
+- `test_single_gate_n3_bystander`: n = 3, pair (1,2), bystander qubit 0: same bound, run separately for V-only noise and for g2-only noise. **If the g2-only case fails while the V-only case passes**, multi-photon emission is leaking into bystander modes, which a per-gate channel cannot represent. Then: g2 is demoted from a headline axis to a "gate-local approximation" column, the write-up states the measured n = 3 discrepancy as its error bar, and the V axis carries the headline. The executor does not decide this; it reports both numbers and stops.
 - `test_two_gates_shared_qubit_n3`: n = 3, pairs (0,1) and (1,2), V = 0.9: **record** TVD(channel-composed, full-Fock) into `results/v4_tcdp/crosscheck_shared_qubit.json`. Assert only that it is < 0.05. The measured value is reported in the write-up as the independent-gate approximation error; if it exceeds 0.01, section 5's sweep additionally runs the full-Fock reference at n = 3 for every noise point and plots both.
 
 **Done when:** all three test files green; `results/v4_tcdp/crosscheck_shared_qubit.json` exists with a number in it.
@@ -211,16 +217,16 @@ Test: at eta = 1 and ideal channels equals the product of `1/sigma_max^4`; at k 
 | n (deployment) | 4, 6, 8, 10 | density-matrix budget |
 | n (training only) | 16, 20 | shows training scales; deployment there via loss closed form only |
 | k | 0, 1, 2, ..., n-1 | k = 0 is the null; gap vs gate count is the primary curve |
-| Target | 1D Ising chain, beta = 1, couplings J_i ~ N(0,1) seed 4001, exact enumeration for n <= 20, 20 000 samples | structured, low-order correlations, sibling-compatible |
+| Target | 1D open Ising chain: `p(x) = exp(beta * sum_{i<n-1} J_i s_i s_{i+1}) / Z`, `s_i = 1 - 2 x_i`, beta = 1, `J_i ~ N(0,1)` drawn once from `np.random.default_rng(4001)`, Z by exact enumeration of all 2^n strings (n <= 20), 20 000 samples drawn by inverse-CDF from the exact vector with `default_rng(4002)`; the exact vector itself is the target for every exact metric | structured, low-order correlations, sibling-compatible; the exact vector removes sampling noise from every population metric |
 | Kernel | Gaussian on Hamming distance, sigma = 0.5 * sqrt(n) (primary), sigma = 1.0 fixed (control) | Rudolph et al.: bandwidth in Theta(sqrt n) keeps the loss low-bodied |
 | Loss | exact (`mmd2_exact_small_n`) for n <= 10; MC (`num_a_samples` 512, `num_z_samples` 2048) for n in {16, 20} | |
 | Init | `data_dependent` (primary), `small_angle` std 0.1, `uniform` | sibling's three schemes |
 | Optimizer | Adam, lr 0.05, 300 steps, checkpoint every 50 | sibling defaults |
 | Seeds | 5 per cell, `derive_seed("tcdp", n, k, init, seed_idx)` via `trainability/rng.py` | |
-| Deployment noise grid | V in {1.0, 0.99, 0.95, 0.93, 0.84, 0.70}; g2 in {0, 0.007, 0.025}; eta in {1.0, 0.9, 0.5, 0.08} | Ascella, Altair, roadmap anchors |
-| Gate angle | alpha = 4 * theta_pair from the trained theta | ARB-01 identity |
+| Deployment noise grid | V in {1.0, 0.99, 0.95, 0.93, 0.84, 0.70}; g2 in {0, 0.007, 0.025} (18 channel points); eta in {1.0, 0.9, 0.5, 0.08} applied post hoc through throughput and erasure only | Ascella, Altair, roadmap anchors; eta does not change the conditional gate (4.2) |
+| Gate angle | alpha = 4 * theta_pair from the trained theta, rounded to the 0.1 rad grid (4.2); both values stored; rounding error on the deployed distribution measured once and reported | ARB-01 identity |
 
-Channels are tomographed once per `(alpha, V, g2, eta)`; alpha varies per trained pair, so cache aggressively (4.2). If tomography for the full grid exceeds 6 hours wall-clock, Codex reports the timing and the owner decides whether to coarsen the alpha grid by rounding alpha to 1e-3 (state this rounding in the write-up).
+Channels are tomographed once per rounded `(alpha, V, g2)`, at most 1134 in total (about 7 single-core hours at the measured 20 s each), budgeted by Phase 2's timing gate before this phase starts. **No value in this table may be changed by the executor.** A cell that cannot be run goes into `missing_cells.md` with the reason; it is not replaced with a nearby value.
 
 ### 5.2 `tests/v4_tcdp/test_nulls_tcdp.py` (OWNER writes the formulas; written red BEFORE `deploy_sweep.py` runs)
 The owner fills these; Claude may ask questions and point at rows, not supply formulas:
@@ -283,6 +289,7 @@ Optional context: Maring et al. arXiv:2306.00874 (Ascella numbers), Oh arXiv:240
 ---
 
 ## 9. Forbidden moves (the executor stops and asks instead)
+- **Loosening any tolerance, seed count, grid value, or threshold stated in this plan.** A failing tolerance is reported with the measured number, never adjusted to pass. (v3.1's null test was widened from 0.35 to 0.5 by executor discretion and the reason given was wrong; that is the failure this rule exists to prevent.)
 - Changing any value in table 5.1.
 - Running `deploy_sweep.py` before `test_nulls_tcdp.py` exists with at least the k = 0 and noiseless nulls filled by the owner.
 - Tomographing the PERM-adapted core instead of the bare catalog gate.

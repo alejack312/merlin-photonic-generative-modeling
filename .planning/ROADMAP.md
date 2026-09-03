@@ -132,12 +132,12 @@ Audit: [`.planning/milestones/v3.0-MILESTONE-AUDIT.md`](milestones/v3.0-MILESTON
 ### Phase 26: Noisy Gate Channel Extraction
 **Goal:** Turn one noisy `CP(alpha)` gate into a trace-preserving 2-qubit channel via Perceval tomography, with the Pauli convention proven rather than assumed.
 **Depends on:** none beyond Perceval 1.2.4 (probe facts in plan § 0).
-**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04.
+**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04, CHAN-05.
 **Executor:** Codex. Plan sections 4.2-4.3 verbatim.
 **Success criteria:**
 1. Ideal superoperator equals `conj(U) ⊗ U` to 1e-9 at three alphas with the phase on |11⟩.
-2. V=0.9, alpha=π/3 fidelity within 1e-4 of 0.97073; zero-noise success probability equals `1/sigma_max^4` to 1e-9; chi-trace and `probs()` success probabilities agree to 1e-6.
-3. Second call with identical (alpha, V, g2, eta) is served from `results/v4_tcdp/channels/` without tomography.
+2. V=0.9, alpha=π/3 fidelity within 1e-4 of 0.97073; zero-noise success probability (from `probs()`) equals `1/sigma_max^4` to 1e-9; the eta=0.9 channel equals the eta=1 channel to 1e-9.
+3. Second call with identical rounded (alpha, V, g2) is served from `results/v4_tcdp/channels/` without tomography; `tomography_timing.json` exists and the 1134-channel budget is under 10 single-core hours (measured ~7 h on 2026-09-03) or the owner has chosen which noise row to drop.
 
 ### Phase 27: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
 **Goal:** Compose gate channels on an n-qubit density matrix, prove it exact against the qubit reference and against full-Fock Perceval, and measure the one approximation it makes.
