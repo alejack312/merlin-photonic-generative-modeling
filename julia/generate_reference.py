@@ -175,7 +175,7 @@ def generate_loss_references():
         for eta in LOSS_ETAS:
             suffix = _eta_suffix(eta)
             if scope == "weight1":
-                dist, residual, global_perf = photonic_iqp_distribution_lossy(LOSS_N, thetas, eta=eta)
+                dist, residual, global_perf, _partial_loss = photonic_iqp_distribution_lossy(LOSS_N, thetas, eta=eta)
                 total = sum(dist.values()) + residual
                 if abs(total - 1.0) > 1e-9:
                     raise AssertionError(
@@ -194,7 +194,7 @@ def generate_loss_references():
                 )
             else:
                 i, j = 0, 1
-                dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+                dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
                     LOSS_N, i, j, thetas, eta=eta
                 )
                 total = sum(dist.values()) + residual

@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: IQP Circuit Study & Write-Up
-status: Awaiting next milestone
-stopped_at: Phase 23 context gathered
-last_updated: "2026-08-24T07:44:38.144Z"
-last_activity: 2026-08-24 — Milestone v3.0 completed and archived
+milestone: v3.1
+milestone_name: Correction
+status: Phase 24 context gathered — blocked on owner task NULL-01 before planning
+stopped_at: Phase 24 context gathered
+last_updated: "2026-09-03T00:00:00.000Z"
+last_activity: 2026-09-03 — v3.1 scaffolded after external audit; NULL-01 (owner) pending
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 50
-  completed_plans: 50
-  percent: 100
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,7 +21,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** Milestone complete
+**Current focus:** v3.1 Correction — Phase 24
+
+## v3.1 Correction (opened 2026-09-03)
+
+An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively, adds the gate to `CLAUDE.md`, and stops there; the audit's frontier directions are v4.0 candidates and undecided. The repo and case study are already public, so the correction is time-sensitive (about a week). The owner's Task 0 (NULL-01: fill `tests/v3_correction/test_null_results.py` by red/green) blocks all planning.
 
 ## Phase 23 provenance correction (2026-08-23)
 
@@ -36,10 +40,10 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 
 ## Current Position
 
-Phase: Milestone v3.0 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-24 — Milestone v3.0 completed and archived
+Phase: 24 (v3.1 Correction) — context gathered, not yet planned
+Plan: — (blocked on NULL-01, owner task)
+Status: Waiting for the owner to fill and green `tests/v3_correction/test_null_results.py`; then `/gsd-plan-phase 24`
+Last activity: 2026-09-03 - Completed quick task 260903-ukn: REFRAME-02 (partial_loss returned as first-class data from both loss-model functions, all callers updated, 451/451 tests pass) and fixed technical-findings.md's stale anchor
 
 ### Prior position (Phase 21, retained)
 
@@ -226,6 +230,13 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 - **RESOLVED 2026-08-12 (same day):** the two items below were decided by the owner and turned into real new milestone scope — TRAIN-09 and TRAIN-10, mapped to a newly-inserted Phase 17.1 (see `ROADMAP.md`/`REQUIREMENTS.md`). Phase 17 itself was NOT reopened or reversed; its shipped/verified result stands, with 17.1 as an explicit follow-up check.
   - **TRAIN-09** (bandwidth confound): owner chose the empirical re-run option over documenting-only. Rudolph et al.'s (arXiv:2305.02881v2) literal `σ∈Θ(n)` mechanism was checked against this project's actual kernel code (`trainability/target_grid.py`, `trainability/mmd_exact.py`) and confirmed NOT to transfer — their bodyness argument requires a bitstring-Hamming kernel where each coordinate is one qubit; this project's kernel is Euclidean distance over a fixed-2D bin-center grid with an arbitrary bitstring→index mapping. The real, verified confound is geometric instead: `2^n` bins pack into the same fixed `[lo,hi]^2` region, so bin spacing shrinks from 1.20 (n=2) to 0.17 (n=5-6) while `SIGMA=0.1` stayed literally fixed — kernel value between adjacent bins rises from ≈0 to ≈0.23 across that range (computed directly, not estimated). TRAIN-09 re-runs the sweep holding `sigma/bin-spacing` constant instead.
   - **TRAIN-10** (init scheme): owner chose to actually implement and test Recio-Armengol et al.'s (arXiv:2503.02934v2) data-dependent initialization (weight-1 angles from empirical training-data means, weight-2 from empirical pairwise covariances) as a real alternative to the inconclusive fixed-magnitude `small_angle` scheme, rather than only noting it as future work.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260903-t9j | Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction (Van den Nest cosine formula), that the owner's sibling project already had a correct Hamming-kernel classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs | 2026-09-03 | d7d6294 | [260903-t9j-write-into-docs-trainability-study-md-an](./quick/260903-t9j-write-into-docs-trainability-study-md-an/) |
+| 260903-ukn | REFRAME-02: stop loss_model.py/loss_model_weight2.py from discarding partial-loss outcomes into residual — return them as first-class partial_loss data instead; also fix technical-findings.md's stale trainability-study.md anchor | 2026-09-03 | 8c6065b | [260903-ukn-reframe-02-stop-loss-model-py-and-loss-m](./quick/260903-ukn-reframe-02-stop-loss-model-py-and-loss-m/) |
 
 ### Blockers/Concerns
 

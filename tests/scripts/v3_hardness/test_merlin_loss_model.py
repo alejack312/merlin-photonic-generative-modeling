@@ -113,7 +113,7 @@ def test_hardness_sweep_backend_preserves_theta_substreams(monkeypatch):
 
     def polarization(n, thetas, eta):
         calls.append(("polarization", eta, tuple(thetas)))
-        return {"00": 1.0}, 0.0, 1.0
+        return {"00": 1.0}, 0.0, 1.0, {}
 
     def merlin(n, thetas, eta):
         calls.append(("merlin-dual-rail", eta, tuple(thetas)))
