@@ -139,13 +139,20 @@ def photonic_weight2_iqp_distribution_lossy(n, i, j, thetas, eta=1.0):
     HARD-07 lock); herald_failure_prob itself is reported as a separate,
     un-renormalized number, never merged into residual.
 
-    Returns (dist, residual, herald_failure_prob, global_perf) -- a 4-tuple:
-    the lossless function's existing 3-tuple convention, plus global_perf
-    (Processor.probs()'s own reported physical_perf * logical_perf) appended
-    as a genuinely new quantity this lossy variant needs to report. NOTE
-    (18-RESEARCH.md Pitfall 4): global_perf alone conflates loss-driven and
-    herald-driven attrition into one scalar -- callers needing herald-rate-
-    vs-eta specifically must use herald_failure_prob, not global_perf.
+    Returns (dist, residual, herald_failure_prob, global_perf, partial_loss)
+    -- a 5-tuple: the lossless function's existing 3-tuple convention, plus
+    global_perf (Processor.probs()'s own reported physical_perf *
+    logical_perf) appended as a genuinely new quantity this lossy variant
+    needs to report, plus partial_loss (added for REFRAME-02) appended last.
+    NOTE (18-RESEARCH.md Pitfall 4): global_perf alone conflates loss-driven
+    and herald-driven attrition into one scalar -- callers needing herald-
+    rate-vs-eta specifically must use herald_failure_prob, not global_perf.
+
+    partial_loss is {str(state): probability}, the per-pattern decomposition
+    of residual, keyed by the raw Fock state's string representation, herald-
+    success-conditioned and renormalized by herald_success_prob exactly like
+    residual (never including herald-failure mass) -- returned but not
+    analyzed in this milestone.
 
     eta=1.0 (the default) reproduces photonic_weight2_iqp_distribution's
     output bit-for-bit (LC(0) is a genuine identity, proven by this module's
@@ -163,6 +170,7 @@ def photonic_weight2_iqp_distribution_lossy(n, i, j, thetas, eta=1.0):
 
     dist = {}
     residual = 0.0
+    partial_loss = {}
     herald_failure_prob = 0.0
     for state, p in res["results"].items():
         p = float(p)
@@ -172,6 +180,7 @@ def photonic_weight2_iqp_distribution_lossy(n, i, j, thetas, eta=1.0):
         bits = fock_to_bitstring(state, n)
         if bits is None:
             residual += p
+            partial_loss[str(state)] = partial_loss.get(str(state), 0.0) + p
         else:
             dist[bits] = dist.get(bits, 0.0) + p
 
@@ -179,5 +188,6 @@ def photonic_weight2_iqp_distribution_lossy(n, i, j, thetas, eta=1.0):
     if herald_success_prob > 0:
         dist = {k: v / herald_success_prob for k, v in dist.items()}
         residual = residual / herald_success_prob
+        partial_loss = {k: v / herald_success_prob for k, v in partial_loss.items()}
 
-    return dist, residual, herald_failure_prob, res["global_perf"]
+    return dist, residual, herald_failure_prob, res["global_perf"], partial_loss

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Correction
-status: Phase 24 context gathered — blocked on owner task NULL-01 before planning
-stopped_at: Phase 24 context gathered
-last_updated: "2026-09-03T00:00:00.000Z"
-last_activity: 2026-09-03 — v3.1 scaffolded after external audit; NULL-01 (owner) pending
+status: v3.1 shipped and archived (2026-09-04); awaiting next milestone
+stopped_at: v3.1 milestone close
+last_updated: "2026-09-04T21:00:00.000Z"
+last_activity: 2026-09-04 — Ran /gsd-complete-milestone v3.1 (12/13 requirements shipped; NULL-01 tracked as a known gap per owner instruction, not a blocker)
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 0
   completed_plans: 0
-  percent: 0
+  percent: 100
 ---
 
 # Project State
@@ -21,15 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.1 Correction — Phase 24
+**Current focus:** v3.1 Correction — closed. v4.0 (Train Classically, Deploy Photonically) is queued and unblocked; NULL-01 is the one remaining owner-gated item, tracked separately, not blocking either milestone.
 
-## v4.0 TCDP queued (2026-09-03)
+## v4.0 TCDP queued (2026-09-03), unblocked (2026-09-04)
 
-v4.0 "Train Classically, Deploy Photonically" is laid out but NOT current: 30 requirements appended to `.planning/REQUIREMENTS.md`, phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md`. Frontmatter stays on v3.1 deliberately (no `state.milestone-switch`, no `phases.clear`) because v3.1 has three open items: REFRAME-02, the COMM-01 send/hold decision, and the milestone close. When v3.1 is closed via `/gsd-complete-milestone`, run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"` and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
+v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: 32 requirements in `.planning/REQUIREMENTS.md` (a fresh file — v3.1's requirements are archived at `.planning/milestones/v3.1-REQUIREMENTS.md`), phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.1 for now (no `state.milestone-switch` run yet) — v3.1 itself has closed (see below), so nothing blocks starting v4.0 except the owner's decision to begin it. When ready: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"` and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
 
-## v3.1 Correction (opened 2026-09-03)
+## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 
-An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively, adds the gate to `CLAUDE.md`, and stops there; the audit's frontier directions are v4.0 candidates and undecided. The repo and case study are already public, so the correction is time-sensitive (about a week). The owner's Task 0 (NULL-01: fill `tests/v3_correction/test_null_results.py` by red/green) blocks all planning.
+An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively and adds the gate to `CLAUDE.md`; the audit's frontier directions became v4.0 candidates (see `docs/v4-plan-train-classical-deploy-photonic.md` on the `claude/merlin-photonic-iqp-audit-e8144c` branch, not yet executed).
+
+**Shipped, merged, and archived.** PR #1 (`claude/serene-sanderson-728202` → `master`) merged 2026-09-04. Executed interactively (no gsd-executor/PLAN.md), plus two `/gsd-quick` tasks (`260903-t9j` TCDQ framing gap, `260903-ukn` REFRAME-02) — see `.planning/quick/`. Full requirements/gap accounting in `.planning/milestones/v3.1-MILESTONE-AUDIT.md` (run via `/gsd-audit-milestone v3.1`, 2026-09-04; archived by `/gsd-complete-milestone v3.1`, same day). Final: **12/13 requirements satisfied.** REFRAME-01/REFRAME-02/REVIEW-01 all confirmed done on re-check (the phase's own `24-VERIFICATION.md` is stale, dated mid-correction, and undercounted these); COMM-01 closed same-day (owner sent the note to Vincent directly). One requirement remains open, tracked separately per explicit owner instruction rather than blocking the milestone close:
+
+- **NULL-01 (partial):** the mixed-scope `h(eta)` null formula was sourced from a parallel Fable session, not derived by the owner — its self-explanation placeholder in `tests/v3_correction/test_null_results.py` is still unfilled (weight-1's formula is fully owner-derived and self-explained). Owner-gated by the requirement's own design.
+
+The 2026-09-04 audit's integration check also found and fixed two small doc-drift items (both real, both now fixed): `docs/trainability-study.md` quoted a superseded `rel=0.5` regression tolerance (the actual, current test asserts `rel=0.2` after the REVIEW-01 pooling-bug fix), and `docs/technical-findings.md` had 3 broken cross-doc anchors to `hardness-under-loss-study.md`'s HARD-05 heading (the heading text grew during the correction pass, anchors weren't updated).
 
 ## Phase 23 provenance correction (2026-08-23)
 
@@ -44,10 +50,10 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 
 ## Current Position
 
-Phase: 24 (v3.1 Correction) — context gathered, not yet planned
-Plan: — (blocked on NULL-01, owner task)
-Status: Waiting for the owner to fill and green `tests/v3_correction/test_null_results.py`; then `/gsd-plan-phase 24`
-Last activity: 2026-09-03 — v3.1 scaffolded (REQUIREMENTS.md, 24-CONTEXT.md, null-result test harness, CLAUDE.md gate, learning note)
+Phase: **v3.1 (Correction) shipped and archived — 2026-09-04**
+Plan: — (no next milestone scoped yet)
+Status: Awaiting next milestone decision. One tracked-separately gap remains: NULL-01's mixed-scope self-explanation (owner task, not blocking). A v4.0 "Train Classically, Deploy Photonically" plan already exists on `claude/merlin-photonic-iqp-audit-e8144c` (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 25-31) as one candidate for `/gsd-new-milestone`, alongside the audit's other deferred frontier directions.
+Last activity: 2026-09-04 — `/gsd-complete-milestone v3.1`: archived to `.planning/milestones/v3.1-{ROADMAP,REQUIREMENTS,MILESTONE-AUDIT}.md`, `.planning/REQUIREMENTS.md` removed (fresh for next milestone), `MILESTONES.md` entry written with real accomplishments/stats, `ROADMAP.md` reorganized with v3.1 collapsed into the milestone list.
 
 ### Prior position (Phase 21, retained)
 
@@ -234,6 +240,13 @@ Full decision log archived in `.planning/PROJECT.md`'s Key Decisions table, `.pl
 - **RESOLVED 2026-08-12 (same day):** the two items below were decided by the owner and turned into real new milestone scope — TRAIN-09 and TRAIN-10, mapped to a newly-inserted Phase 17.1 (see `ROADMAP.md`/`REQUIREMENTS.md`). Phase 17 itself was NOT reopened or reversed; its shipped/verified result stands, with 17.1 as an explicit follow-up check.
   - **TRAIN-09** (bandwidth confound): owner chose the empirical re-run option over documenting-only. Rudolph et al.'s (arXiv:2305.02881v2) literal `σ∈Θ(n)` mechanism was checked against this project's actual kernel code (`trainability/target_grid.py`, `trainability/mmd_exact.py`) and confirmed NOT to transfer — their bodyness argument requires a bitstring-Hamming kernel where each coordinate is one qubit; this project's kernel is Euclidean distance over a fixed-2D bin-center grid with an arbitrary bitstring→index mapping. The real, verified confound is geometric instead: `2^n` bins pack into the same fixed `[lo,hi]^2` region, so bin spacing shrinks from 1.20 (n=2) to 0.17 (n=5-6) while `SIGMA=0.1` stayed literally fixed — kernel value between adjacent bins rises from ≈0 to ≈0.23 across that range (computed directly, not estimated). TRAIN-09 re-runs the sweep holding `sigma/bin-spacing` constant instead.
   - **TRAIN-10** (init scheme): owner chose to actually implement and test Recio-Armengol et al.'s (arXiv:2503.02934v2) data-dependent initialization (weight-1 angles from empirical training-data means, weight-2 from empirical pairwise covariances) as a real alternative to the inconclusive fixed-magnitude `small_angle` scheme, rather than only noting it as future work.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260903-t9j | Write into docs/trainability-study.md and docs/technical-findings.md that IQP Born machines are trained classically by construction (Van den Nest cosine formula), that the owner's sibling project already had a correct Hamming-kernel classical trainer, and that v3.0 chose parameter-shift through Perceval instead without asking what gradient an IQP model needs | 2026-09-03 | d7d6294 | [260903-t9j-write-into-docs-trainability-study-md-an](./quick/260903-t9j-write-into-docs-trainability-study-md-an/) |
+| 260903-ukn | REFRAME-02: stop loss_model.py/loss_model_weight2.py from discarding partial-loss outcomes into residual — return them as first-class partial_loss data instead; also fix technical-findings.md's stale trainability-study.md anchor | 2026-09-03 | 8c6065b | [260903-ukn-reframe-02-stop-loss-model-py-and-loss-m](./quick/260903-ukn-reframe-02-stop-loss-model-py-and-loss-m/) |
 
 ### Blockers/Concerns
 

@@ -60,7 +60,7 @@ def test_eta_1_reproduces_lossless_weight2_reference_n2():
         expected_dist, expected_residual, expected_hfp = photonic_weight2_iqp_distribution(
             n, i, j, thetas
         )
-        dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+        dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=1.0
         )
 
@@ -78,7 +78,7 @@ def test_eta_1_reproduces_lossless_weight2_reference_n3_bystander():
     expected_dist, expected_residual, expected_hfp = photonic_weight2_iqp_distribution(
         n, i, j, thetas
     )
-    dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+    dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=1.0
     )
 
@@ -128,7 +128,7 @@ def test_herald_failure_compounding_is_real_not_analytically_decomposed():
 
     hfp_at_eta = {}
     for eta in eta_grid:
-        _, _, herald_failure_prob, _ = photonic_weight2_iqp_distribution_lossy(
+        _, _, herald_failure_prob, _, _ = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=eta
         )
         hfp_at_eta[eta] = herald_failure_prob
@@ -249,10 +249,10 @@ def test_pitfall_2_regression_broken_helper_is_loss_invariant_correct_fn_is_not(
 
     # The real, correct function genuinely differs with eta -- proves the
     # explicit min_detected_photons_filter(0) call actually matters.
-    correct_dist_full, _, correct_hfp_full, _ = photonic_weight2_iqp_distribution_lossy(
+    correct_dist_full, _, correct_hfp_full, _, _ = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=1.0
     )
-    correct_dist_lossy, _, correct_hfp_lossy, _ = photonic_weight2_iqp_distribution_lossy(
+    correct_dist_lossy, _, correct_hfp_lossy, _, _ = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=0.3
     )
     assert abs(correct_hfp_full - correct_hfp_lossy) > 1e-6, (
@@ -333,7 +333,7 @@ def test_pitfall_3_regression_add_herald_with_pbs_crashes():
         _broken_weight2_with_add_herald(n, i, j, thetas, eta=0.8)
 
     # The real, correct function has no such crash risk -- same n/i/j/thetas.
-    dist, residual, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+    dist, residual, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
         n, i, j, thetas, eta=0.8
     )
     assert dist  # ran successfully, produced a non-empty distribution
@@ -357,7 +357,7 @@ def test_pitfall_4_regression_global_perf_is_not_a_herald_failure_proxy():
     hfp_values = []
     global_perf_values = []
     for eta in eta_grid:
-        _, _, herald_failure_prob, global_perf = photonic_weight2_iqp_distribution_lossy(
+        _, _, herald_failure_prob, global_perf, _partial_loss = photonic_weight2_iqp_distribution_lossy(
             n, i, j, thetas, eta=eta
         )
         hfp_values.append(herald_failure_prob)
@@ -396,3 +396,88 @@ def test_eta_out_of_range_raises():
         photonic_weight2_iqp_distribution_lossy(2, 0, 1, [0.0, 0.0], eta=1.5)
     with pytest.raises(ValueError):
         photonic_weight2_iqp_distribution_lossy(2, 0, 1, [0.0, 0.0], eta=-0.1)
+
+
+# --- REFRAME-02: partial_loss mass-reconciliation regression tests --------
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.1])
+def test_partial_loss_mass_matches_residual(eta):
+    """Test A (backward-compatibility invariant, D-03): residual and
+    partial_loss are accumulated independently inside
+    photonic_weight2_iqp_distribution_lossy (residual is not derived from
+    partial_loss), and both receive the SAME herald-success renormalization,
+    so their agreement is a genuine cross-check that nothing about the
+    pre-existing residual scalar changed. eta=0.0 is excluded here: at total
+    loss herald_success_prob is exactly 0 and both quantities are left
+    un-renormalized by the existing (pre-REFRAME-02) guard, which Test D
+    covers separately."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+    dist, residual, herald_failure_prob, global_perf, partial_loss = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=eta
+    )
+    assert abs(sum(partial_loss.values()) - residual) <= 1e-9
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.1])
+def test_partial_loss_plus_dist_totals_one_herald_success_conditioned(eta):
+    """Test B (total mass), herald-success-conditioned: sum(dist) +
+    sum(partial_loss) reconstructs the already-shipped, already-exercised
+    julia/generate_reference.py invariant sum(dist) + residual == 1.0 for
+    weight-2's renormalized (herald-success-conditioned) outputs. eta=0.0
+    is excluded -- see test_partial_loss_mass_matches_residual's docstring."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+    dist, residual, herald_failure_prob, global_perf, partial_loss = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=eta
+    )
+    assert abs(sum(dist.values()) + sum(partial_loss.values()) - 1.0) <= 1e-9
+
+
+@pytest.mark.parametrize("eta", [1.0, 0.7, 0.3, 0.1])
+def test_global_perf_is_pinned_and_uninformative_about_partial_loss_mass(eta):
+    """Test C (global_perf consistency) -- derived empirically (see this
+    plan's null-result step, not assumed): global_perf stays pinned at
+    ~1.0 across the entire eta grid, regardless of how much probability mass
+    partial_loss holds or how herald_failure_prob moves, because
+    min_detected_photons_filter(0) never actually filters anything (>=0
+    detected photons is every outcome) and the injected LC-based loss lives
+    inside the circuit, not in Perceval's own performance-tracking
+    machinery. This is a null result: global_perf is NOT a usable proxy for
+    partial_loss's total mass, extending the existing Pitfall-4 finding that
+    global_perf is also not a usable proxy for herald_failure_prob."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+    dist, residual, herald_failure_prob, global_perf, partial_loss = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=eta
+    )
+    assert abs(global_perf - 1.0) <= 1e-6
+
+
+def test_partial_loss_is_genuinely_populated_not_an_empty_formality():
+    """Test D: at eta strictly between 0 and 1, partial_loss is non-empty
+    and disjoint from dist's keys; at eta=1.0 its mass is ~0; at eta=0.0
+    herald_success_prob is exactly 0 so the existing (pre-REFRAME-02)
+    renormalization guard leaves both dist and partial_loss at their raw
+    accumulated value of 0.0 (no herald ever succeeds under total loss, so
+    the bits-decoding branch that would populate them is never reached)."""
+    n, i, j = 2, 0, 1
+    thetas = [0.4, 0.9]
+
+    dist_mid, _, _, _, partial_loss_mid = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=0.5
+    )
+    assert partial_loss_mid
+    assert set(partial_loss_mid.keys()).isdisjoint(set(dist_mid.keys()))
+
+    _, _, _, _, partial_loss_full = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=1.0
+    )
+    assert sum(partial_loss_full.values()) <= 1e-6
+
+    _, _, herald_failure_prob_zero, _, partial_loss_zero = photonic_weight2_iqp_distribution_lossy(
+        n, i, j, thetas, eta=0.0
+    )
+    assert abs(herald_failure_prob_zero - 1.0) <= 1e-9
+    assert abs(sum(partial_loss_zero.values())) <= 1e-9
