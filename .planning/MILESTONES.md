@@ -1,5 +1,38 @@
 # Project Milestones: MerLin Photonic Generative Modeling
 
+## v3.1 Correction (Shipped: 2026-09-04)
+
+**Delivered:** Corrected the public record after a 2026-09-03 external audit (Fable 5.1) found both v3.0 co-lead findings were pipeline artifacts — trainability's exponential decay was the MMD kernel going numerically identity below the target grid's bin spacing (no circuit content), and hardness-under-loss's `tvd_to_lossless` was a closed form in `eta`/`n` alone from post-selecting on full photon survival. Shipped owner-derived null-result regression tests, dated additive corrections across every affected document and the public case-study page, a throughput reframing of the hardness result, a standing `CLAUDE.md` null-result gate, and an independent Codex adversarial review of the correction itself.
+
+**Phases completed:** 1 (Phase 24 — executed interactively, no `gsd-executor`/PLAN.md; substance delivered via direct commits plus 2 `/gsd-quick` tasks: `260903-t9j` TCDQ framing gap, `260903-ukn` REFRAME-02)
+
+**Key accomplishments:**
+
+- Diagnosed and closed-form-proved both v3.0 artifacts: TRAIN's `weight1/uniform` exponential decay reproduced by a no-circuit-content product-distribution model; HARD's `tvd_to_lossless` = `½(1−eta^n)` (weight1) / a herald-conditioned analogue (mixed) — both verified to floating-point precision against the shipped CSVs
+- Built the owner-derived null-result test suite (`tests/v3_correction/test_null_results.py`), gating every other correction task per this phase's own attempt-first rule
+- Shipped dated, additive corrections in all 7 required documents (trainability-study, hardness-under-loss-study, technical-findings, README, iqp-lit-scoping, Post_Sept1 plan) plus the separate public case-study repo — originals kept, never deleted
+- Reframed the hardness section around what it actually shows: a throughput-vs-`n,k` table (verified `k=0,1`, flagged-extrapolated `k≥2`) now leads the section, replacing the old TVD-as-hardness framing
+- REFRAME-02: stopped silently discarding partial-loss photon data — both loss-model functions now return a `partial_loss` breakdown, all 5 real call sites updated, mass-conservation regression tests added
+- Added a standing `CLAUDE.md` null-result gate + learning note so a future sweep can't repeat this failure mode
+- Ran an independent Codex adversarial review of the correction itself (not just the original findings) — confirmed 9 of 13 flagged issues as real overclaims (e.g. the trainability correction's own "identity kernel at every n" claim overstated past `n=4`) and fixed them
+- Sent the correction note to Vincent Espitalier (COMM-01), closing the milestone's one external-facing commitment
+
+**Stats:**
+
+- 34 files changed, 2,138 insertions / 74 deletions
+- 1 phase, 0 formal plans (interactive + 2 quick tasks), 19 commits
+- 2 days (2026-09-03 → 2026-09-04)
+- 12/13 requirements shipped; 1 tracked as a known gap (see below)
+
+**Git range:** `0658ab6` (first correction commit) → `ab969ed` (COMM-01 closed)
+
+**Known gaps at close (tracked separately, not blocking):**
+- **NULL-01 (partial):** the mixed-scope `h(eta)` null formula was sourced from a parallel Fable 5.1 session rather than derived by the owner. The weight-1 formula is fully owner-derived and self-explained; the mixed-scope formula's self-explanation placeholder in `tests/v3_correction/test_null_results.py` remains unfilled. Owner-gated by the requirement's own design — not a task for Claude to close.
+
+**What's next:** v4.0 direction undecided (per `24-CONTEXT.md`'s decision log). A "Train Classically, Deploy Photonically" plan already exists on the `claude/merlin-photonic-iqp-audit-e8144c` branch (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 25-31, not yet executed) as one candidate, alongside the other audit-identified frontier directions explicitly deferred out of v3.1's scope (structured n≈20+ simulator, Hamming-kernel trainability rerun, distinguishability noise, non-post-selected simulability analysis).
+
+---
+
 ## v3.0 IQP Circuit Study & Write-Up (Shipped: 2026-08-24)
 
 **Phases completed:** 11 phases, 50 plans, 88 tasks
