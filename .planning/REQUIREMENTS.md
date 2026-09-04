@@ -43,7 +43,7 @@ All Must-have unless marked otherwise. Order matters: NULL-01 gates everything e
 
 ### Communication (COMM)
 
-- [ ] **COMM-01**: A correction note to Vincent Espitalier is drafted by the owner (three to five sentences: what was wrong, what each result actually shows, link to the corrected repo). Whether and when to send is the owner's call and is recorded as a decision either way; the draft exists regardless, because the public case study and repo already carry the claims.
+- [x] **COMM-01**: A correction note to Vincent Espitalier is drafted by the owner (three to five sentences: what was wrong, what each result actually shows, link to the corrected repo). Whether and when to send is the owner's call and is recorded as a decision either way; the draft exists regardless, because the public case study and repo already carry the claims. **Done 2026-09-04:** owner drafted and sent the note directly (outside this repo/session). Send/hold decision recorded in `24-CONTEXT.md`'s decision log as "sent." The accuracy check D-03 assigns to Claude (checking the draft against the corrected docs before sending) did not happen, since the draft wasn't routed through this session.
 
 ## Out of Scope (explicit — v4.0 candidates, not decided here)
 
