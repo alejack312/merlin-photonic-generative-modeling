@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Correction
-status: Phase 24 shipped and merged (PR #1) — 2 owner-gated items open (NULL-01 mixed-scope self-explanation, COMM-01 Vincent note)
-stopped_at: Phase 24 closed
-last_updated: "2026-09-04T00:00:00.000Z"
-last_activity: 2026-09-04 — /gsd-audit-milestone v3.1 run; 2 doc-drift findings from integration check fixed (stale rel=0.5 tolerance in trainability-study.md, 3 broken HARD-05 anchors in technical-findings.md); audit report at .planning/v3.1-MILESTONE-AUDIT.md
+status: v3.1 shipped and archived (2026-09-04); awaiting next milestone
+stopped_at: v3.1 milestone close
+last_updated: "2026-09-04T21:00:00.000Z"
+last_activity: 2026-09-04 — Ran /gsd-complete-milestone v3.1 (12/13 requirements shipped; NULL-01 tracked as a known gap per owner instruction, not a blocker)
 progress:
   total_phases: 1
   completed_phases: 1
@@ -27,9 +27,9 @@ See: .planning/PROJECT.md (updated 2026-08-06)
 
 An external audit (Fable 5.1, 2026-09-03, artifact `claude.ai/code/artifact/2eb88fd5-d090-4933-82b8-396135c2f348`) established by recomputation that two v3.0 headline findings are pipeline artifacts with closed-form null results: TRAIN's exponential decay is the identity-kernel MMD (= L2) on a product distribution, variance ∝ 2^-n; HARD's `tvd_to_lossless` is `½(1 − eta^(n+2))` from post-selection on full survival. The v3.0 reviewers (Sonnet, Opus, Sol, and the 2026-08-20 self-verification pass) shared the author's frame and checked internal consistency, which held. Root cause is a missing gate, not a model: nobody wrote the null result before the sweep ran. v3.1 corrects the record additively and adds the gate to `CLAUDE.md`; the audit's frontier directions became v4.0 candidates (see `docs/v4-plan-train-classical-deploy-photonic.md` on the `claude/merlin-photonic-iqp-audit-e8144c` branch, not yet executed).
 
-**Shipped and merged:** PR #1 (`claude/serene-sanderson-728202` → `master`) merged 2026-09-04. Executed interactively (no gsd-executor/PLAN.md), plus two `/gsd-quick` tasks (`260903-t9j` TCDQ framing gap, `260903-ukn` REFRAME-02) — see `.planning/quick/`. Full requirements/gap accounting in `.planning/v3.1-MILESTONE-AUDIT.md` (run via `/gsd-audit-milestone v3.1`, 2026-09-04). Summary: 11/13 requirements satisfied, REFRAME-01/REFRAME-02/REVIEW-01 all confirmed done on re-check (the phase's own `24-VERIFICATION.md` is stale, dated mid-correction, and undercounts these). Two requirements remain genuinely open, both owner-gated by design (Claude may not complete them):
-- **NULL-01 (partial):** the mixed-scope `h(eta)` null formula was sourced from a parallel Fable session, not derived by the owner — its self-explanation placeholder in `tests/v3_correction/test_null_results.py` is still unfilled (weight-1's formula is fully owner-derived and self-explained).
-- **COMM-01 (not started):** the correction note to Vincent Espitalier has not been drafted; send/hold decision still "pending" in `24-CONTEXT.md`.
+**Shipped, merged, and archived.** PR #1 (`claude/serene-sanderson-728202` → `master`) merged 2026-09-04. Executed interactively (no gsd-executor/PLAN.md), plus two `/gsd-quick` tasks (`260903-t9j` TCDQ framing gap, `260903-ukn` REFRAME-02) — see `.planning/quick/`. Full requirements/gap accounting in `.planning/milestones/v3.1-MILESTONE-AUDIT.md` (run via `/gsd-audit-milestone v3.1`, 2026-09-04; archived by `/gsd-complete-milestone v3.1`, same day). Final: **12/13 requirements satisfied.** REFRAME-01/REFRAME-02/REVIEW-01 all confirmed done on re-check (the phase's own `24-VERIFICATION.md` is stale, dated mid-correction, and undercounted these); COMM-01 closed same-day (owner sent the note to Vincent directly). One requirement remains open, tracked separately per explicit owner instruction rather than blocking the milestone close:
+
+- **NULL-01 (partial):** the mixed-scope `h(eta)` null formula was sourced from a parallel Fable session, not derived by the owner — its self-explanation placeholder in `tests/v3_correction/test_null_results.py` is still unfilled (weight-1's formula is fully owner-derived and self-explained). Owner-gated by the requirement's own design.
 
 The 2026-09-04 audit's integration check also found and fixed two small doc-drift items (both real, both now fixed): `docs/trainability-study.md` quoted a superseded `rel=0.5` regression tolerance (the actual, current test asserts `rel=0.2` after the REVIEW-01 pooling-bug fix), and `docs/technical-findings.md` had 3 broken cross-doc anchors to `hardness-under-loss-study.md`'s HARD-05 heading (the heading text grew during the correction pass, anchors weren't updated).
 
@@ -46,10 +46,10 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 
 ## Current Position
 
-Phase: 24 (v3.1 Correction) — **closed and merged**
-Plan: — (executed interactively; no PLAN.md/gsd-executor for this phase)
-Status: PR #1 merged 2026-09-04. Two owner-gated items remain open outside any Claude task: NULL-01's mixed-scope self-explanation, COMM-01's Vincent draft. See `.planning/v3.1-MILESTONE-AUDIT.md` for the full requirements accounting.
-Last activity: 2026-09-04 - Ran `/gsd-audit-milestone v3.1`: re-verified all 13 requirements against current files (not the stale 24-VERIFICATION.md), confirmed REFRAME-01/REFRAME-02/REVIEW-01 all done, spawned gsd-integration-checker (found and fixed 2 doc-drift issues: stale tolerance number in trainability-study.md, 3 broken anchors in technical-findings.md), wrote `.planning/v3.1-MILESTONE-AUDIT.md`.
+Phase: **v3.1 (Correction) shipped and archived — 2026-09-04**
+Plan: — (no next milestone scoped yet)
+Status: Awaiting next milestone decision. One tracked-separately gap remains: NULL-01's mixed-scope self-explanation (owner task, not blocking). A v4.0 "Train Classically, Deploy Photonically" plan already exists on `claude/merlin-photonic-iqp-audit-e8144c` (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 25-31) as one candidate for `/gsd-new-milestone`, alongside the audit's other deferred frontier directions.
+Last activity: 2026-09-04 — `/gsd-complete-milestone v3.1`: archived to `.planning/milestones/v3.1-{ROADMAP,REQUIREMENTS,MILESTONE-AUDIT}.md`, `.planning/REQUIREMENTS.md` removed (fresh for next milestone), `MILESTONES.md` entry written with real accomplishments/stats, `ROADMAP.md` reorganized with v3.1 collapsed into the milestone list.
 
 ### Prior position (Phase 21, retained)
 
