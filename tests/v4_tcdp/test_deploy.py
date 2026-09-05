@@ -1,0 +1,155 @@
+"""Focused v4 deployment/compiler contracts.
+
+These tests are intentionally independent of the existing v2/v3 encoding
+tests. They exercise signs, winding, ideal instruments, density composition,
+resource controls, and optional-backend capability boundaries.
+"""
+
+from __future__ import annotations
+
+import inspect
+
+import numpy as np
+import pytest
+
+from merlin_iqp.deploy import (
+    MapCache,
+    apply_compiled_density,
+    compile_iqp,
+    compile_generators,
+    conditional_erasure_distribution,
+    fixed_photon_attempts_per_sample,
+    full_fock_cp_reference,
+    heralded_cz_attempts_per_sample,
+    ideal_cp_map,
+    ideal_iqp_distribution,
+    nearest_alpha_key,
+    quantize_theta,
+    reconstruct_cp_map,
+    success_weighted_haar_fidelity,
+    validate_gate_map,
+)
+from merlin_iqp.deploy.density import compose_instruments
+
+
+def _tvd(left: dict[str, float], right: dict[str, float]) -> float:
+    return 0.5 * sum(abs(left.get(key, 0.0) - right.get(key, 0.0)) for key in set(left) | set(right))
+
+
+def test_negative_phase_sign_and_pair_identity_metadata() -> None:
+    compiled = compile_iqp(2, [0.2, -0.1], [(0, 1, 0.3)], quantize=False)
+    assert compiled.gates[0].metadata["optical_phase"] == pytest.approx(-0.4)
+    pair_compensations = [gate for gate in compiled.gates if gate.kind == "pair_compensation"]
+    assert [gate.metadata["optical_phase"] for gate in pair_compensations] == pytest.approx([-0.6, -0.6])
+    assert all(gate.metadata["sign"] == "negative_PS" for gate in pair_compensations)
+
+
+@pytest.mark.parametrize("key", range(63))
+def test_all_integer_alpha_keys_are_reachable(key: int) -> None:
+    angle = key * 0.1
+    nearest, wrapped = nearest_alpha_key(angle)
+    assert nearest == key
+    assert wrapped == pytest.approx(angle)
+
+
+def test_circular_nearest_negative_and_tie_boundaries() -> None:
+    assert nearest_alpha_key(-0.01)[0] == 0
+    assert nearest_alpha_key(-0.08)[0] == 62
+    assert nearest_alpha_key(3.15)[0] == 31  # deterministic lower-key tie
+    wrapped = quantize_theta(np.pi / 2)
+    assert wrapped.key == 0
+    assert wrapped.winding == 1
+    assert wrapped.lifted_theta == pytest.approx(np.pi / 2)
+
+
+def test_winding_is_preserved_in_compiled_pair() -> None:
+    compiled = compile_iqp(2, [0.3, 0.7], [(0, 1, 0.2 + np.pi / 2)], quantize=True)
+    angle = compiled.pair_angles[0][1]
+    assert angle.key == 8
+    assert angle.winding == 1
+    assert angle.lifted_theta == pytest.approx(0.2 + np.pi / 2)
+    assert compiled.gates[-1].alpha == pytest.approx(0.8)
+    assert compiled.gates[-2].metadata["lifted_theta"] == pytest.approx(0.2 + np.pi / 2)
+
+
+def test_ideal_map_is_cp_and_trace_nonincreasing() -> None:
+    gate = ideal_cp_map(np.pi / 3)
+    report = validate_gate_map(gate)
+    assert report.passed
+    assert report.min_choi_eigenvalue >= -1e-9
+    assert report.max_edagger_i_eigenvalue <= 1.0 + 1e-9
+    U = np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
+    assert success_weighted_haar_fidelity(gate, U) == pytest.approx(1.0, abs=1e-12)
+
+
+def test_reconstructed_tomography_retains_zero_outcomes_and_is_physical() -> None:
+    reconstructed = reconstruct_cp_map(np.pi / 3, use_perceval=False)
+    assert reconstructed.metadata["tomography"]["preparations"] == 16
+    assert reconstructed.metadata["tomography"]["readout_settings"] == 9
+    assert reconstructed.metadata["raw_outcomes_included"] is True
+    assert reconstructed.metadata["global_perf_retained"] is True
+    assert validate_gate_map(reconstructed).passed
+    assert success_weighted_haar_fidelity(
+        reconstructed, np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
+    ) == pytest.approx(1.0, abs=1e-9)
+
+
+def test_density_composition_matches_direct_ideal_compiled_reference() -> None:
+    compiled = compile_iqp(3, [0.2, -0.1, 0.31], [(0, 2, -0.2), (1, 2, 0.311)], quantize=False)
+    observed, success = apply_compiled_density(compiled)
+    expected = ideal_iqp_distribution(3, compiled.singles, [(i, j, a.lifted_theta) for (i, j), a in compiled.pair_angles])
+    assert _tvd(observed, expected) < 1e-12
+    expected_success = ideal_cp_map(0.2 * 4).success * ideal_cp_map(0.311 * 4).success
+    assert success == pytest.approx(expected_success, abs=1e-12)
+
+
+def test_quantized_compiled_distribution_is_compared_to_compiled_not_raw() -> None:
+    compiled = compile_iqp(2, [0.3, 0.7], [(0, 1, 0.311)], quantize=True)
+    observed, success = apply_compiled_density(compiled)
+    expected = ideal_iqp_distribution(2, compiled.singles, [(0, 1, compiled.pair_angles[0][1].lifted_theta)])
+    raw = ideal_iqp_distribution(2, compiled.singles, [(0, 1, 0.311)])
+    assert _tvd(observed, expected) < 1e-12
+    assert _tvd(observed, raw) > 1e-5
+    assert success == pytest.approx(ideal_cp_map(1.2).success, abs=1e-12)
+
+
+def test_composition_tracks_unnormalized_model_success() -> None:
+    rho = np.diag([1.0, 0.0, 0.0, 0.0]).astype(complex)
+    normalized, success = compose_instruments(2, rho, [((0, 1), ideal_cp_map(np.pi))])
+    assert success == pytest.approx(1 / 9, abs=1e-12)
+    assert np.trace(normalized) == pytest.approx(1.0, abs=1e-12)
+
+
+def test_capability_failures_are_explicit() -> None:
+    with pytest.raises(ValueError, match="weight 3"):
+        compile_generators(np.array([[1, 1, 1]], dtype=np.uint8), [0.1])
+    with pytest.raises(ValueError, match="cycle"):
+        compile_iqp(4, [0.0] * 4, [(0, 2, 0.1)], topology="cycle")
+    result = full_fock_cp_reference(2, 0, 1, [0.0, 0.0], np.pi / 3, g2=0.025)
+    assert result.status == "INCONCLUSIVE"
+    assert "D1" in result.diagnostics["reason"]
+
+
+def test_throughput_and_conditional_erasure_conserve_mass() -> None:
+    assert fixed_photon_attempts_per_sample(0.5, 2, 0.25) == pytest.approx(16.0)
+    assert heralded_cz_attempts_per_sample(1.0, 2, 1) == pytest.approx(27 / 2)
+    distribution = conditional_erasure_distribution(
+        {"00": 0.25, "01": 0.25, "10": 0.25, "11": 0.25}, 0.5, gate_success=0.8
+    )
+    assert distribution["FAILURE"] == pytest.approx(0.2)
+    assert sum(distribution.values()) == pytest.approx(1.0)
+
+
+def test_cache_rejects_stale_source_metadata(tmp_path) -> None:
+    cache = MapCache(tmp_path)
+    key = cache.key(alpha_key=3, raw_alpha=0.31, lifted_alpha=0.31, source={"g2": 0}, noise={"eta": 1}, detector={"kind": "pnr"})
+    cache.save_metadata(key, {"source_hash": "fresh"})
+    assert cache.load_metadata(key, {"source_hash": "fresh"})["source_hash"] == "fresh"
+    with pytest.raises(ValueError, match="stale cache"):
+        cache.load_metadata(key, {"source_hash": "stale"})
+
+
+def test_density_path_does_not_construct_embedded_4n_square_superoperator() -> None:
+    source = inspect.getsource(compose_instruments)
+    assert "4**n" not in source.replace(" ", "")
+    assert "np.eye(4**n" not in source.replace(" ", "")
