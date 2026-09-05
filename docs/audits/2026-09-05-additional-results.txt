@@ -1,0 +1,5 @@
+deterministic_init {"gradient": [0.007477609749509798, -0.008903934890461568, 0.00011974404396229016], "pooled_var": 4.487999711597906e-05, "per_coordinate_var": [0.0, 0.0, 0.0]}
+n=2 eta=0.9: combined 2 chunks, n_draws=4, tvd_to_lossless_mean=5.250e-01 -> C:\Users\cuqui\AppData\Local\Temp\tmpfn4mpnmd\loss.csv
+overlapping_loss_chunks {"reported_draws": 4, "reported_mean": 0.525, "unique_draws": 3, "correct_unique_mean": 0.39999999999999997}
+n=2 init=uniform: combined 2 chunks, 8 total pooled grads, mean=5.250e-01 var=1.419e-01 -> C:\Users\cuqui\AppData\Local\Temp\tmpfn4mpnmd\train.csv
+overlapping_train_chunks {"n": 2, "generator_scope": "weight1", "init_scheme": "uniform", "n_tracked_params": 2, "n_samples": 8, "mean": 0.525, "var": 0.14187500000000003, "std": 0.37666297933298415, "median": 0.55, "abs_mean": 0.525, "rms": 0.6461423991660044, "sigma": 0.1, "bin_spacing": 1.2000000000000002}

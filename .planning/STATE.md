@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Correction
-status: v3.1 shipped and archived (2026-09-04); awaiting next milestone
-stopped_at: v3.1 milestone close
-last_updated: "2026-09-04T21:00:00.000Z"
-last_activity: 2026-09-04 — Ran /gsd-complete-milestone v3.1 (12/13 requirements shipped; NULL-01 tracked as a known gap per owner instruction, not a blocker)
+milestone: v3.2
+milestone_name: Correction (Audit Response)
+status: Phase 25 scaffolded — mechanical track (CORR-08..17) Claude-executable now, conceptual track (CONCEPT-01..03) owner-only
+stopped_at: Phase 25 scaffolded
+last_updated: "2026-09-05T00:00:00.000Z"
+last_activity: 2026-09-05 — Independent audit (GPT-6 Astra) found real overreach in the v3.1 correction plus code-level defects; v3.2 opened in response
 progress:
   total_phases: 1
-  completed_phases: 1
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 100
+  percent: 0
 ---
 
 # Project State
@@ -21,7 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.1 Correction — closed. Next: v4.0 (Train Classically, Deploy Photonically) decision, or address the 2 owner-gated items below.
+**Current focus:** v3.2 Correction (Audit Response) — Phase 25, just opened. NULL-01 (v3.1's one remaining owner-gated item) still stands separately, untouched by this milestone. v4.0 decision (PR #3, unmerged) is on hold behind this.
+
+## v3.2 Correction — Audit Response (opened 2026-09-05)
+
+An independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) found the v3.1 correction itself overreached in two places (CONCEPT-01: conflating "classically reproducible" with "no landscape effect"; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure actually scales with `n` — it doesn't, so it factors exactly like `weight1` does), plus a mismatched-statistics issue in TRAIN-10's retained negative result (CONCEPT-03), plus real code bugs (a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own documented single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing data). I independently re-verified the four P1 findings by reading the actual source directly before treating any of it as real (see `.planning/phases/25-v3-2-correction/25-CONTEXT.md`). Full detail: `.planning/REQUIREMENTS.md`, `.planning/phases/25-v3-2-correction/25-CONTEXT.md`.
+
+**Split into two independent tracks, per this milestone's own CONTEXT.md decision D-02:** conceptual corrections (CONCEPT-01..03) are owner-only, per `CLAUDE.md`'s "do not shortcut interpretation" rule; mechanical corrections (CORR-08..17, GATE-02/03) are Claude-executable now and don't depend on how the conceptual track resolves.
+
+## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 
 ## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 

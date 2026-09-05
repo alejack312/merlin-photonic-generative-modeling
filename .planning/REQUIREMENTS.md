@@ -1,0 +1,58 @@
+# Requirements: MerLin Photonic Generative Modeling — v3.2 Correction (Audit Response)
+
+**Defined:** 2026-09-05
+**Core Value:** A working, end-to-end, honestly-benchmarked photonic project, published in a public repo — explainable unaided to Vincent Espitalier. v3.2 exists because an independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) found the v3.1 correction itself overreached in two places, and found real, code-level defects in the tooling that produced other surviving claims.
+
+## Why this milestone exists
+
+The 2026-09-05 audit reviewed the post-v3.1 codebase and, via two runnable probe scripts calling this repo's own functions directly, established:
+
+1. **Overreach in the trainability correction.** `tests/v3_correction/test_null_results.py`'s `_product_q`/`_mixed_q` compute the *same* `q(theta)` the real circuit computes (exact classical formulas for an IQP circuit's output — the already-established "classically trainable by construction" fact), not a mechanism-removed control. Reproducing the gradient decay this way proves classical reproducibility, not absence of a loss-landscape effect. `docs/trainability-study.md`'s claim that the decay "cannot be attributed to this circuit's loss landscape" overreaches past what the evidence supports.
+2. **The `mixed` scope is also classically easy, independent of loss.** `sweep.py`'s mixed scope always uses exactly one fixed-size entangling pair (`weight2_pair=(0,1)`), regardless of `n`. Any IQP circuit with one constant-size entangling block and the rest product terms factors exactly: `P(x) = P_01(x0,x1) * prod_{k>=2} P_k(xk)` (verified to 1.11e-16 at n=2,3,5,8; also mathematically forced by the diagonal-gate tensor structure, not a numerical coincidence). `hardness-under-loss-study.md`'s scope precondition correctly rules out `weight1` (zero ZZ terms) but never checks whether `mixed`'s one-ZZ-term structure actually scales with `n` — it doesn't, so `mixed` inherits no more hardness than `weight1` does. This was never touched by the v3.1 correction; it is a separate, more basic gap.
+3. **TRAIN-10's retained negative result compares the wrong quantities.** Spread across parameter coordinates at one deterministic initialization is not the same statistic as variance across random draws; the deterministic vector's per-coordinate variance across repeated identical draws is exactly zero.
+4. **A real code bug in the plateau classifier.** `fit_verdict_to_plateau_label` only checks `b > 0` in `a*exp(-b*n)+c`; whether the curve actually decays depends on `a`'s sign too. `1 - exp(-0.8n)` (a strictly increasing sequence) is classified "plateau." Independently reproduced by direct code read (`scripts/v3_trainability/trainability_analysis.py:124-141`) and the audit's own probe.
+5. **`fit_and_compare` contradicts its own documented contract.** If exactly one of exp/poly converges, that model wins outright with no AIC-delta check — the docstring says single-convergence should be "inconclusive." Confirmed by direct code read (`src/merlin_iqp/trainability/curve_fit.py:116-119`).
+
+Six further P2-severity findings (chunked-sweep double-counting, Julia verifiers returning exit 0 on disagreement, the null-result gate silently skipping missing CSVs, incorrect dual-rail API equivalence math, an inaccurate MBQC/Hoban et al. literature summary, and a coloring-search timeout that isn't enforced inside the recursion) plus several minor drift items are in the full report.
+
+## v1 Requirements
+
+Two independent tracks. Neither blocks the other — the conceptual items are the owner's interpretive call; the mechanical items are code-level bugs fixable regardless of how the interpretation lands.
+
+### Conceptual corrections, owner-owned (CONCEPT)
+
+- [ ] **CONCEPT-01**: The owner rewrites `docs/trainability-study.md`'s "cannot be attributed to this circuit's loss landscape" claim, distinguishing "classically reproducible via the same q(theta)" from "the landscape has no effect." Claude may point at the exact code (`_product_q`/`_mixed_q`, the TCDQ note) and ask questions; Claude does not draft the corrected sentence.
+- [ ] **CONCEPT-02**: The owner decides how to reclassify the `mixed` scope in `docs/hardness-under-loss-study.md`'s scope precondition, given its entangling structure is fixed-size and does not scale with `n` (same complexity class as `weight1`, just a wider constant-size factor). Options include: reclassify `mixed` as a second easy control, or state precisely what would be needed for a genuine hardness candidate (a scaling entangling structure) and note none was tested. Claude does not choose between these on the owner's behalf.
+- [ ] **CONCEPT-03**: The owner decides TRAIN-10's disposition — retract the "negative literature-init result" claim, narrow it to "deterministic-initialization diagnostic, not a matched comparison," or defend it with a corrected statistic. Claude does not write the replacement claim.
+
+### Mechanical corrections, Claude-implementable (CORR)
+
+- [ ] **CORR-08**: Fix `fit_verdict_to_plateau_label` to check the actual decay condition (the exponential term must shrink toward `c` as `n` grows, not just `b > 0`), with adversarial regression tests for increasing curves and positive-floor cases.
+- [ ] **CORR-09**: Fix `fit_and_compare` so single-model convergence returns `"inconclusive"`, matching its own documented contract. Regression test for the single-convergence case.
+- [ ] **CORR-10**: Add draw-interval validation to the chunked-sweep combiners (`scripts/v3_hardness/loss_sweep.py`, `scripts/v3_trainability/gradient_variance_sweep.py`) — reject overlapping/duplicate intervals rather than silently double-counting; persist a complete cell/interval manifest.
+- [ ] **CORR-11**: Make the Julia verifier scripts (`verify_photonic_iqp_weight1.jl`, `verify_photonic_iqp_weight2.jl`, `verify_loss_model.jl`) exit nonzero when a required comparison reports DISAGREEMENT/PARTIAL-GO/NO-GO, not just print and reach normal termination.
+- [ ] **CORR-12**: Harden `tests/v3_correction/test_null_results.py`'s null-result gate — require the expected CSVs to exist rather than silently skipping; add the original Phase 17 CSV to `TRAIN_CSVS`; parametrize the TRAIN ratio check over each row's actual `sigma` instead of hardcoding `0.1`; add at least one absolute (not ratio-only) check so a uniform scaling error can't hide.
+- [ ] **CORR-13** *(Should)*: Correct or narrow `dual_rail.py`'s incorrect equivalence-math claims (`exp(i*theta*Z)` mislabel, `BS()` self-inverse claim); document the actual mapping between the dual-rail and polarization conventions rather than asserting a false equivalence.
+- [ ] **CORR-14** *(Should)*: Correct `docs/iqp-lit-scoping.md`'s MBQC/Hoban et al. summary to describe the actual construction (resource qubits, commuting Z byproducts), not a collapsed "one local measurement angle per qubit" recipe.
+- [ ] **CORR-15** *(Should)*: Regenerate the throughput table in `docs/hardness-under-loss-study.md` from code rather than transcribed values (two rows found with rounding drift).
+- [ ] **CORR-16** *(Should)*: Enforce `backtracking_min_colouring`'s timeout inside the recursive search, not only between top-level calls.
+- [ ] **CORR-17** *(Should)*: Fix README's "same circuit family" v1-vs-v3 comparison and `julia/generate_reference.py`'s stale comment about weight-2 label-error coverage (per the audit's "additional correction drift" section).
+
+### Process gate (GATE)
+
+- [ ] **GATE-02**: Promote `.Codex/learnings/2026-09-05-reference-controls.md`'s distinction (exact classical reference vs. mechanism-removing control) into `CLAUDE.md` as a standing rule, next to the existing null-result gate.
+- [ ] **GATE-03**: Add a standing rule that any classifier/verdict function backing a scientific claim needs adversarial test cases for its documented edge behavior (sign conventions, partial-convergence, boundary cases) before its output is trusted as a finding.
+
+## Out of Scope
+
+- Rerunning any full sweep, training run, Julia numerical verifier, or Forge solver suite (the audit's own coverage limit — this milestone corrects code and claims, it does not regenerate data).
+- Deciding v4.0's direction in light of these findings — a separate decision, after this milestone closes.
+- Auditing every historical CSV row for the chunk-overlap bug (CORR-10 fixes the mechanism going forward; no claim is made that any archived run actually contains overlaps).
+
+## Finish criteria
+
+1. CONCEPT-01..03 each have an owner-authored resolution (rewritten claim, reclassification, or explicit retraction) recorded in the affected document(s), dated and additive per this project's correction convention.
+2. CORR-08, CORR-09, CORR-10, CORR-11, CORR-12 implemented with regression tests; `python -m pytest -q` green.
+3. CORR-13..17 (Should) addressed or explicitly declined with a stated reason.
+4. GATE-02/GATE-03 added to `CLAUDE.md`.
+5. A dated, additive correction section added wherever CONCEPT-01/02 changes a document's headline claim (`docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/technical-findings.md`, `README.md`, mirroring v3.1's convention).

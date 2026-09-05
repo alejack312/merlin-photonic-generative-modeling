@@ -7,6 +7,7 @@
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
 - ✅ **v3.1 Correction** — Phase 24 (shipped 2026-09-04; corrected two v3.0 findings an external audit found to be pipeline artifacts)
+- 🔧 **v3.2 Correction (Audit Response)** — Phase 25 (opened 2026-09-05; corrects overreach in the v3.1 correction itself plus code-level defects a second independent audit found)
 
 ## Phases
 
@@ -103,3 +104,16 @@ Requirements: [`.planning/milestones/v3.1-REQUIREMENTS.md`](milestones/v3.1-REQU
 Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTONE-AUDIT.md)
 
 </details>
+
+### Phase 25: v3.2 Correction (Audit Response) — opened 2026-09-05 (in progress)
+
+**Goal:** Correct two places where the v3.1 correction itself overreached (CONCEPT-01: an exact classical reference mistaken for a mechanism-removing control; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure scales with `n` — it doesn't), retract or narrow TRAIN-10's mismatched-statistics negative result (CONCEPT-03), and fix the code-level defects a second independent audit (GPT-6 Astra) found: a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing CSVs.
+**Depends on:** `docs/trainability-study.md`/`docs/hardness-under-loss-study.md` (the documents being corrected); `docs/audits/2026-09-05-codebase-audit.md` and its two probe scripts.
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) — CONCEPT-01..03, CORR-08..17, GATE-02/03.
+**Note:** phases 25-31 are also claimed by the still-unmerged v4.0 plan (PR #3, `claude/merlin-photonic-iqp-audit-e8144c`) — one of the two will need renumbering when the other merges.
+
+**Success criteria:**
+1. CONCEPT-01..03 each have an owner-authored resolution recorded in the affected document(s), dated and additive.
+2. CORR-08, CORR-09, CORR-10, CORR-11, CORR-12 implemented with regression tests; `python -m pytest -q` green.
+3. CORR-13..17 addressed or explicitly declined with a stated reason.
+4. GATE-02/GATE-03 added to `CLAUDE.md`.
