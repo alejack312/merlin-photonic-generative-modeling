@@ -1,0 +1,69 @@
+{
+  "versions": {
+    "numpy": "2.5.1",
+    "perceval": "1.2.4"
+  },
+  "rounding_control_tvd": 0.005208220787971757,
+  "wrapped_theta_tvd": 0.7601844418546907,
+  "nat_pair_zero_difference_fraction": 0.9919,
+  "nat_evaluations_actual": 51750,
+  "cp_counterexample_max_product_success": 0.5499999999999999,
+  "cp_counterexample_bell_success": 1.1,
+  "trained_files_if_all_k": 1920,
+  "ising_support": {
+    "4": {
+      "size": 16,
+      "total": 16,
+      "minimum": 0.006579082169642041
+    },
+    "6": {
+      "size": 64,
+      "total": 64,
+      "minimum": 0.0008205414908189373
+    },
+    "8": {
+      "size": 256,
+      "total": 256,
+      "minimum": 8.057247255432195e-05
+    },
+    "10": {
+      "size": 1024,
+      "total": 1024,
+      "minimum": 1.743579356784025e-06
+    }
+  },
+  "parity_init_single_gradients": [
+    -1.1102230246251564e-11,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "parity_init_odd_mass": 3.4719401145887084e-33,
+  "target_odd_mass": 0.6812398522713121,
+  "end_only_vs_intermediate_projection_max_amplitude": 0.4637735012325435,
+  "fock_correct_sign_tvd": 3.7470027081099033e-16,
+  "fock_plan_phase_sign_tvd": 0.44265114590648585,
+  "noise_g2=0.0_eta=1.0": {
+    "success": 0.10266972533167884,
+    "tvd_from_ideal": 0.0,
+    "success_over_eta_n": 0.10266972533167884
+  },
+  "noise_g2=0.0_eta=0.5": {
+    "success": 0.02566743133291971,
+    "tvd_from_ideal": 0.0,
+    "success_over_eta_n": 0.10266972533167884
+  },
+  "noise_g2=0.025_eta=1.0": {
+    "success": 0.10005361634341052,
+    "tvd_from_ideal": 2.7755575615628914e-17,
+    "success_over_eta_n": 0.10005361634341052
+  },
+  "noise_g2=0.025_eta=0.5": {
+    "success": 0.026141318120511906,
+    "tvd_from_ideal": 0.00811283583349559,
+    "success_over_eta_n": 0.10456527248204762
+  },
+  "g2_source_success_ratio_n2": 0.9745191780749696,
+  "g2_source_success_ratio_n3": 0.9620232882271247,
+  "probe_assertions": "PASS"
+}
