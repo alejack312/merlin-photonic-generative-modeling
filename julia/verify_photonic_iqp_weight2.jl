@@ -425,9 +425,17 @@ result_asym = run_case(0.3 + pi / 4, 1.1 + pi / 4, "weight2_asymmetric_n2.csv", 
 
 println()
 println("#" ^ 70)
-if result_locked.tvd_pass && result_locked.herald_pass && result_asym.tvd_pass && result_asym.herald_pass
+all_pass = result_locked.tvd_pass && result_locked.herald_pass && result_asym.tvd_pass && result_asym.herald_pass
+if all_pass
     println("OVERALL RESULT: GO -- both locked and asymmetric cases pass.")
 else
     println("OVERALL RESULT: DISAGREEMENT in at least one case -- see per-case output above.")
 end
 println("#" ^ 70)
+
+# CORR-11 (2026-09-05): the diagnostic printout above previously still
+# reached normal script termination on DISAGREEMENT -- a command runner
+# would see exit status 0 regardless. Exit nonzero so that's detectable.
+if !all_pass
+    exit(1)
+end

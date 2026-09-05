@@ -87,6 +87,38 @@ def test_verdict_key_is_one_of_expected_values():
     assert result["verdict"] in ("exp", "poly", "inconclusive")
 
 
+@pytest.mark.parametrize("which_fails", ["exp", "poly"])
+def test_single_convergence_is_inconclusive_not_a_winner(monkeypatch, which_fails):
+    """CORR-09 (2026-09-05): if exactly one of exp/poly converges, the
+    module's own docstring says the verdict must be "inconclusive" -- an
+    independent audit found the code instead declared the lone converged
+    model the winner, with no AIC-delta comparison at all. A competing
+    model's numerical non-convergence is not evidence against it.
+
+    Monkeypatches `_fit_one` to deterministically force exactly one model's
+    convergence to False, isolating the verdict-selection logic from
+    whether any particular synthetic curve happens to make scipy's solver
+    fail -- the failure mode here is in the branching, not the fitting.
+    """
+    import merlin_iqp.trainability.curve_fit as curve_fit_module
+
+    converged_result = {"params": np.array([1.0, 1.0, 1.0]), "r2": 0.99, "aic": -10.0, "converged": True}
+    failed_result = {"params": None, "r2": float("nan"), "aic": float("nan"), "converged": False}
+
+    def fake_fit_one(model_fn, ns, ys):
+        if model_fn is curve_fit_module.exp_model:
+            return failed_result if which_fails == "exp" else converged_result
+        return failed_result if which_fails == "poly" else converged_result
+
+    monkeypatch.setattr(curve_fit_module, "_fit_one", fake_fit_one)
+
+    result = curve_fit_module.fit_and_compare(NS, np.ones_like(NS))
+
+    assert result["exp"]["converged"] is (which_fails != "exp")
+    assert result["poly"]["converged"] is (which_fails != "poly")
+    assert result["verdict"] == "inconclusive"
+
+
 def test_convergence_failure_is_surfaced_not_swallowed():
     """Degenerate input (fewer points than free params) must not crash the
     whole analysis -- fit_and_compare should surface converged=False and

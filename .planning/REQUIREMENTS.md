@@ -1,97 +1,58 @@
-# Requirements: v4.0 Train Classically, Deploy Photonically (TCDP)
+# Requirements: MerLin Photonic Generative Modeling — v3.2 Correction (Audit Response)
 
-**Defined:** 2026-09-03 (queued behind v3.1; becomes the current milestone when v3.1 is closed)
-**Core Value:** A working, end-to-end, honestly-benchmarked photonic project the owner can explain unaided. v4.0 asks the first question this repo's tooling can answer that nobody has published: how far does a classically trained IQP Born machine's photonic output drift from what the trainer deployed, and can the classical trainer absorb the device's gate noise without touching the device.
-**Source plan:** [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) — design table 5.1 and forbidden moves section 9 are binding on every phase below.
+**Defined:** 2026-09-05
+**Core Value:** A working, end-to-end, honestly-benchmarked photonic project, published in a public repo — explainable unaided to Vincent Espitalier. v3.2 exists because an independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) found the v3.1 correction itself overreached in two places, and found real, code-level defects in the tooling that produced other surviving claims.
 
 ## Why this milestone exists
 
-v3.1 established that loss alone does not change the post-selected output of this encoding (closed form, throughput pays). The open axes are partial distinguishability and multi-photon emission, which act inside the two-photon gates: a tomographed `CP(alpha)` gate has average fidelity 1.0 ideal and 0.9707 at indistinguishability 0.9 (probe 2026-09-03). The owner's spring-semester project (`iqp-mmd-barren-plateau`) trains IQP Born machines entirely classically; its theta convention equals this repo's exactly (verified 2026-09-03). Combining the two turns the photonic side into a deployment-fidelity study and, if noise-aware training closes the gap, a method result.
+The 2026-09-05 audit reviewed the post-v3.1 codebase and, via two runnable probe scripts calling this repo's own functions directly, established:
+
+1. **Overreach in the trainability correction.** `tests/v3_correction/test_null_results.py`'s `_product_q`/`_mixed_q` compute the *same* `q(theta)` the real circuit computes (exact classical formulas for an IQP circuit's output — the already-established "classically trainable by construction" fact), not a mechanism-removed control. Reproducing the gradient decay this way proves classical reproducibility, not absence of a loss-landscape effect. `docs/trainability-study.md`'s claim that the decay "cannot be attributed to this circuit's loss landscape" overreaches past what the evidence supports.
+2. **The `mixed` scope is also classically easy, independent of loss.** `sweep.py`'s mixed scope always uses exactly one fixed-size entangling pair (`weight2_pair=(0,1)`), regardless of `n`. Any IQP circuit with one constant-size entangling block and the rest product terms factors exactly: `P(x) = P_01(x0,x1) * prod_{k>=2} P_k(xk)` (verified to 1.11e-16 at n=2,3,5,8; also mathematically forced by the diagonal-gate tensor structure, not a numerical coincidence). `hardness-under-loss-study.md`'s scope precondition correctly rules out `weight1` (zero ZZ terms) but never checks whether `mixed`'s one-ZZ-term structure actually scales with `n` — it doesn't, so `mixed` inherits no more hardness than `weight1` does. This was never touched by the v3.1 correction; it is a separate, more basic gap.
+3. **TRAIN-10's retained negative result compares the wrong quantities.** Spread across parameter coordinates at one deterministic initialization is not the same statistic as variance across random draws; the deterministic vector's per-coordinate variance across repeated identical draws is exactly zero.
+4. **A real code bug in the plateau classifier.** `fit_verdict_to_plateau_label` only checks `b > 0` in `a*exp(-b*n)+c`; whether the curve actually decays depends on `a`'s sign too. `1 - exp(-0.8n)` (a strictly increasing sequence) is classified "plateau." Independently reproduced by direct code read (`scripts/v3_trainability/trainability_analysis.py:124-141`) and the audit's own probe.
+5. **`fit_and_compare` contradicts its own documented contract.** If exactly one of exp/poly converges, that model wins outright with no AIC-delta check — the docstring says single-convergence should be "inconclusive." Confirmed by direct code read (`src/merlin_iqp/trainability/curve_fit.py:116-119`).
+
+Six further P2-severity findings (chunked-sweep double-counting, Julia verifiers returning exit 0 on disagreement, the null-result gate silently skipping missing CSVs, incorrect dual-rail API equivalence math, an inaccurate MBQC/Hoban et al. literature summary, and a coloring-search timeout that isn't enforced inside the recursion) plus several minor drift items are in the full report.
 
 ## v1 Requirements
 
-All Must-have unless marked otherwise.
+Two independent tracks. Neither blocks the other — the conceptual items are the owner's interpretive call; the mechanical items are code-level bugs fixable regardless of how the interpretation lands.
 
-### Classical trainer, vendored (TRAIN)
+### Conceptual corrections, owner-owned (CONCEPT)
 
-- [ ] **TRAIN-01**: `merlin_iqp.classical` contains the sibling repo's numpy core (expectation, gaussian kernel, mixture cache, loss, analytic gradients, rng, initialization, trainer) with `PROVENANCE.md` recording the sibling commit hash and every removed jax/laplacian/polynomial path; `import merlin_iqp.classical` succeeds with jax absent.
-- [ ] **TRAIN-02**: `families.chain_1d(n, k)` builds n weight-1 rows then the first k nearest-neighbour ZZ rows in that fixed order.
-- [ ] **TRAIN-03**: `adapter.theta_to_repo` / `repo_to_theta` convert between generator-matrix theta and `(thetas, pair_thetas)` with no scaling or sign change, raising on weight-0/weight-3+ rows, duplicates, or a missing weight-1 row.
-- [ ] **TRAIN-04**: `tests/v4_tcdp/test_convention.py` proves the Walsh-inverse of the sibling's exact `<Z_a>` equals `exact_qubit_iqp_distribution` to 1e-12 (n=2..4, k=0,1,n-1, 5 draws), that theta×0.5 and theta×2 fail, and that exact MMD² at n=10 runs in under 60 s.
+- [ ] **CONCEPT-01**: The owner rewrites `docs/trainability-study.md`'s "cannot be attributed to this circuit's loss landscape" claim, distinguishing "classically reproducible via the same q(theta)" from "the landscape has no effect." Claude may point at the exact code (`_product_q`/`_mixed_q`, the TCDQ note) and ask questions; Claude does not draft the corrected sentence.
+- [ ] **CONCEPT-02**: The owner decides how to reclassify the `mixed` scope in `docs/hardness-under-loss-study.md`'s scope precondition, given its entangling structure is fixed-size and does not scale with `n` (same complexity class as `weight1`, just a wider constant-size factor). Options include: reclassify `mixed` as a second easy control, or state precisely what would be needed for a genuine hardness candidate (a scaling entangling structure) and note none was tested. Claude does not choose between these on the owner's behalf.
+- [ ] **CONCEPT-03**: The owner decides TRAIN-10's disposition — retract the "negative literature-init result" claim, narrow it to "deterministic-initialization diagnostic, not a matched comparison," or defend it with a corrected statistic. Claude does not write the replacement claim.
 
-### Noisy gate map (CHAN) — revised 2026-09-03 after the Codex plan review (method changed; plan § 4.1-4.3)
+### Mechanical corrections, Claude-implementable (CORR)
 
-- [ ] **CHAN-01**: `deploy.gate_map.reconstruct_gate_map(alpha, V, g2)` reconstructs the **bare** catalog `PostProcessedControlledRotationsItem` gate (never the PERM-adapted core) as a **trace-decreasing completely positive map** by linear inversion from absolute post-selected Perceval probabilities (`results × global_perf`) over 16 product inputs × 9 readout-basis pairs, with prep states and readout POVMs derived from the circuits' own `compute_unitary()`, never hand-written; rank 256 and fit residual < 1e-12 asserted.
-- [ ] **CHAN-02**: Ideal maps (V=1, g2=0) equal `(1/sigma_max(alpha)^4) · U ρ U†` to 1e-9 at alpha ∈ {π/6, π/3, π, 2.0} for random pure ρ, phase on |11⟩; every cached map is CP (Choi min eigenvalue > −1e-9), Hermiticity-preserving, and trace-non-increasing on all 16 matrix units; no map is ever renormalised per gate.
-- [ ] **CHAN-03**: Input-dependence of success is recorded (at V=0.9, alpha=π/3 the basis successes differ by > 1e-4); two reconstructions of one key agree to 1e-13; Perceval `ProcessTomography` average fidelity agrees with the map's exact conditional average fidelity within 5e-3 at (1,0), (0.9,0), (0.93,0.007), discrepancy recorded.
-- [ ] **CHAN-04**: Maps are cached under `results/v4_tcdp/channels/` keyed by `alpha_key(alpha)` (reduce mod 2π, round to 0.1 rad, wrap: exactly 63 keys, tested), V, g2; eta is not a key; `test_reconstruction_wall_clock` records seconds per map at the slowest condition (V=0.84, g2=0.025) into `results/v4_tcdp/map_timing.json` (measured 2026-09-03: 2.3 s, so 1134 maps ≈ 45 min); if 1134 × that exceeds 3 hours the executor stops.
+- [x] **CORR-08**: Fix `fit_verdict_to_plateau_label` to check the actual decay condition (the exponential term must shrink toward `c` as `n` grows, not just `b > 0`), with adversarial regression tests for increasing curves and positive-floor cases. **Done 2026-09-05**: fixed in both `scripts/v3_trainability/trainability_analysis.py` and the sibling `classify_survival` in `trainability_analysis_1701.py` (same bug, same fix — added `_exp_a` helper). 4 adversarial tests added in `tests/scripts/v3_trainability/test_trainability_analysis.py` (new file), all passing.
+- [x] **CORR-09**: Fix `fit_and_compare` so single-model convergence returns `"inconclusive"`, matching its own documented contract. **Done 2026-09-05**: `src/merlin_iqp/trainability/curve_fit.py`; 2 new parametrized regression tests (monkeypatched single-convergence cases) added to `tests/trainability/test_curve_fit.py`, all 9 tests in that file passing.
+- [ ] **CORR-10**: Add draw-interval validation to the chunked-sweep combiners (`scripts/v3_hardness/loss_sweep.py`, `scripts/v3_trainability/gradient_variance_sweep.py`) — reject overlapping/duplicate intervals rather than silently double-counting; persist a complete cell/interval manifest. **Not done this pass** — deferred, needs a manifest-format design decision.
+- [x] **CORR-11**: Make the Julia verifier scripts (`verify_photonic_iqp_weight1.jl`, `verify_photonic_iqp_weight2.jl`, `verify_loss_model.jl`) exit nonzero when a required comparison reports DISAGREEMENT/PARTIAL-GO/NO-GO, not just print and reach normal termination. **Done 2026-09-05**, all three scripts. Not executed end-to-end (BosonSampling.jl not instantiated in this worktree) — matches the audit's own "no fresh Julia run" scope limit; syntax is a straightforward `if !all_pass: exit(1)` appended after each script's existing results-file write.
+- [x] **CORR-12**: Harden `tests/v3_correction/test_null_results.py`'s null-result gate — require the expected CSVs to exist rather than silently skipping; add the original Phase 17 CSV to `TRAIN_CSVS`; parametrize the TRAIN ratio check over each row's actual `sigma` instead of hardcoding `0.1`; add at least one absolute (not ratio-only) check so a uniform scaling error can't hide. **Done 2026-09-05**, all four sub-items. `owner_train_null_ratio` now takes `sigma` explicitly; a new `test_train_absolute_variance_matches_owner_null` covers the absolute-value gap; `phase17_{weight1,mixed}_gradient_variance.csv` added (with a documented sigma-column fallback, since they predate the sigma sweep). **163/163 tests pass** in this file, run to completion (491s) — the owner's existing formulas hold up against the corrected sigma-threading and the newly-covered Phase 17 rows, not just the previously-tested subset.
+- [ ] **CORR-13** *(Should)*: Correct or narrow `dual_rail.py`'s incorrect equivalence-math claims (`exp(i*theta*Z)` mislabel, `BS()` self-inverse claim); document the actual mapping between the dual-rail and polarization conventions rather than asserting a false equivalence. **Not done this pass** — deferred.
+- [ ] **CORR-14** *(Should)*: Correct `docs/iqp-lit-scoping.md`'s MBQC/Hoban et al. summary to describe the actual construction (resource qubits, commuting Z byproducts), not a collapsed "one local measurement angle per qubit" recipe. **Not done this pass** — deferred; borders on interpretation of how a citation should be framed, worth an owner glance even though it's not a CONCEPT item.
+- [ ] **CORR-15** *(Should)*: Regenerate the throughput table in `docs/hardness-under-loss-study.md` from code rather than transcribed values (two rows found with rounding drift). **Not done this pass** — deferred.
+- [x] **CORR-16** *(Should)*: Enforce `backtracking_min_colouring`'s timeout inside the recursive search, not only between top-level calls. **Done 2026-09-05**: `scripts/v3_forge_formal/pooled_allocation_baseline.py` — `_try_colour` now takes a `deadline` and checks it every 4096 recursive calls, raising `_SearchTimeout`; the caller distinguishes a real timeout from genuine infeasibility. Manually verified (this file is deliberately outside `tests/` per its own header comment, matching Phase 16's `cp_alpha_sweep.py` precedent) — an artificially near-zero deadline on a hard n=8/k=2 instance now returns `timed_out=True` in 0.0007s instead of running to exhaustion; a normal n=4 case is unaffected.
+- [x] **CORR-17** *(Should)*: Fix README's "same circuit family" v1-vs-v3 comparison and `julia/generate_reference.py`'s stale comment about weight-2 label-error coverage (per the audit's "additional correction drift" section). **Done 2026-09-05**, both.
 
-### Deployment simulator (DEPLOY)
+### Process gate (GATE)
 
-- [ ] **DEPLOY-01**: `deploy.density_matrix.deploy_density_matrix(n, thetas, pair_thetas, gate_maps)` evolves `|+⟩^n` as a `(2,)*2n` tensor: exact weight-1 phases, exact single-qubit corrections, one unnormalised gate map per ZZ pair in ascending pair order (raises unless `gate_maps[(i,j)].alpha == alpha_key(4·theta_pair)`), H^n, then **one** final normalisation; returns `(probs, p_success)` with `p_success` the composed trace; bit order equals `exact_qubit_iqp_distribution`; two-qubit maps applied by einsum, no `4^n × 4^n` matrix ever formed (tested by monkeypatch); peak RSS growth at n=10 under 400 MB.
-- [ ] **DEPLOY-02**: With ideal maps the output equals `exact_qubit_iqp_distribution` to 1e-12 and `p_success` equals the product of `1/sigma_max^4` to 1e-9 (n=2..4, k=0,1,n-1); with k=0 noisy maps leave the output unchanged and `p_success = 1`; the hand-computed asymmetric n=3 fixture (thetas (0.3, 0, 0.9), pair (0,2) θ=0.4) matches by named bitstring. (Phase-level null result.)
-- [ ] **DEPLOY-03**: `deploy.fock_reference.noisy_full_fock_distribution` runs the full dual-rail Perceval circuit under `NoiseModel` at n ≤ 3 with the exact mode map in plan § 4.5, returning normalised probs and the full-Fock success probability; `test_fock_crosscheck.py` shows TVD < 1e-9 **and** success-probability agreement to 1e-9 against `deploy_density_matrix` for one gate at n=2 (V ∈ {1, 0.9, 0.7} × g2 ∈ {0, 0.02}) and n=3 bystander, the latter run separately for V-only and g2-only noise; if g2-only fails while V-only passes, g2 is demoted to a flagged gate-local approximation and the executor stops to report both numbers.
-- [ ] **DEPLOY-04**: The two-gate shared-qubit case (n=3, pairs (0,1),(1,2)) at (V,g2) ∈ {(0.9,0), (1,0.02), (0.93,0.007)} × theta_pair ∈ {π/12, 0.5} records every TVD and success discrepancy to `results/v4_tcdp/crosscheck_shared_qubit.json`; pre-registered bands: max TVD < 0.01 → error bar on every figure; 0.01–0.05 → full-Fock n=3 overlay on every figure and the discrepancy leads the write-up; > 0.05 → method fails, executor stops.
-- [ ] **DEPLOY-05**: CP throughput is `1/(eta^n · p_success)` with `p_success` the composed trace; `deploy.throughput.heralded_cz_throughput(n, k, eta) = 1/(eta^(n+2k) · (2/27)^k)` exists for the Fig 4 overlay only; no function multiplies per-gate mean successes.
-- [ ] **REFRAME-03**: `deploy.erasure.erasure_marked_distribution(q, n, eta, gates)` returns the non-post-selected output over `{0,1,E}^n` by the exact per-pattern formula in plan § 4.7 plus `dropped = 1 − eta^(n_gate)`; tested against hand-enumerated patterns for k=0 (n=2), one gate (n=3), and the shared-qubit case; mass + dropped = 1 to 1e-12; eta=1 reproduces `q`.
-
-### Owner null results (NULL) — owner-only, written red before any sweep runs
-
-- [ ] **NULL-03**: `owner_null_gap_k0(V, g2)` — predicted TVD(ideal, deployed) at k=0 for any V, g2 — filled by the owner and green.
-- [ ] **NULL-04**: `owner_null_gap_noiseless(k)` — predicted gap at V=1, g2=0 for any k — filled and green.
-- [ ] **NULL-05**: `owner_null_eta_effect(n, k, eta)` — predicted change in the conditional distribution from eta alone — filled and green.
-- [ ] **NULL-06**: `owner_null_throughput_cp(n, alphas, eta)` and `owner_null_throughput_hcz(n, k, eta)` — both closed forms — filled and green.
-- [ ] **NULL-07**: `owner_hypothesis_gap_scaling(k, F)` — the owner's first-order hypothesis for gap vs gate count, marked `xfail(strict=False)`; whether it held is a sentence in the write-up either way.
-- [ ] **NULL-08**: `owner_null_nat_ideal()` — what noise-aware training does when every gate map is ideal (predicted before/after gap and the relation of the NAT-trained theta to the ideal-trained theta) — filled and green before Phase 30.
-- [ ] **NULL-09** (pipeline null, may be written by Codex): `test_control_point_every_cell` asserts at (V,g2)=(1,0), for every trained cell, that every deployed metric equals its ideal counterpart (TVD = 0 to 1e-12; MMD², KL at both floors, coverage, fidelity, marginal errors equal; `mean_gate_fidelity = 1`; `p_success` equals the closed-form product), run inside `deploy_sweep.py` on the control rows and standalone on three cells; `test_control_point_can_fail` perturbs one entry by 1e-3 and every equality must fail.
-
-### Deployment gap sweep (SWEEP)
-
-- [ ] **SWEEP-01**: `scripts/v4_tcdp/train_classical.py` trains every cell of design table 5.1 (chain_1d; n ∈ {4,6,8,10} deployable, {16,20} training-only; k = 0..n-1; 1D Ising target seed 4001; sigma = 0.5√n primary and 1.0 control; three inits; Adam lr 0.05, 300 steps; 5 seeds) and writes deterministic `results/v4_tcdp/trained/{cell}.npz` with G, theta, trajectory, metadata, and q_ideal for n ≤ 10.
-- [ ] **SWEEP-02**: `scripts/v4_tcdp/deploy_sweep.py --build-maps` precomputes all 1134 maps, then writes `results/v4_tcdp/deploy_sweep.csv` with exactly the column list in plan § 5.5, one row per (trained cell, V, g2): 840 cells × 18 = 15 120 rows, or a `missing_cells.md` naming each missing row; eta enters only as the four `throughput_eta*` columns; `alpha_trained_list`, `alpha_rounded_list`, `theta_eff_list`, `tvd_rounding_only`, and `rounding_flag` (10% of the noise gap) are mandatory columns; `--erasure` writes the erasure npz files for n ≤ 6; no tolerance, grid value, seed count, or formula is adjustable by the executor.
-- [ ] **SWEEP-03**: Metrics are exactly the formulas in plan § 5.4 (`deploy/metrics.py`, each checked on a hand case in `test_metrics.py`): TVD; MMD² from the vectors with the training kernel's spectral weights; forward KL at floors 1e-12 and 1e-9; population coverage `(1/|S|) Σ_{x∈S} (1−(1−q(x))^Q)` and population fidelity `Σ_{x∈S} q(x)` with `S = {x: p(x) > 1e-6}`, `Q = 20000`, and the stated deviation from Raj et al.'s sample protocol; order-1 and order-2 marginal TVD; nothing else.
-- [ ] **SWEEP-04**: `scripts/v4_tcdp/tcdp_analysis.py` regenerates Figures 1–4 and the summary table from the CSV with no manual edits, using the fixed aggregation (primary kernel, `data_dependent` init, mean ± std over 5 seeds; other combinations in an appendix table); the control line in Fig 1 is drawn and is zero; the headline is pre-registered on one cell (n=10, k=9, Ascella, median over seeds) with the two descriptive outcome bands of plan § 5.6; every number in the write-up traces to the CSV or a test.
-- [ ] **SWEEP-05**: The write-up states, for each null in NULL-03..07, whether the sweep matched it, and identifies which of the two headline outcomes in plan section 5.6 occurred.
-
-### Noise-aware classical training (NAT) — promoted from Should to Must on 2026-09-03 (owner decision after Fable's recommendation)
-
-- [ ] **NAT-01**: `scripts/v4_tcdp/nat_train.py` optimizes theta against `mmd2_train(q_dep(theta))` with `q_dep` from `deploy_density_matrix` (theta_eff inside), warm-started from the Phase-29 ideal-trained theta, Adam lr 0.02, 150 steps, central finite differences h = 1e-4 on the exact deployed vector (parameter-shift is not valid for a channel; the piecewise objective from alpha rounding is accepted and stated); all 63 Ascella-point maps are precomputed before the first step.
-- [ ] **NAT-02**: At n ∈ {4, 6, 8}, k = n−1, primary kernel, `data_dependent` init, the 5 Phase-29 seeds, Ascella noise (V=0.93, g2=0.007): all six metrics of `q_dep(theta_NAT)` reported next to `q_dep(theta_ideal-trained)` and `q_ideal(theta_ideal-trained)`; NULL-08 run first with ideal maps and its prediction confirmed; the cost budget (29 250 evaluations × the per-call time measured in Phase 27) recorded before the run.
-- [ ] **NAT-03**: Stop rule enforced and recorded: if one n=8 run exceeds 20 minutes, or two calendar days pass without a green end-to-end n=4 run, timing is written to `PROJECT.md` and NAT ships as "attempted, stopped" with the numbers obtained; the milestone still closes.
-
-### Write-up, gates, communication (WRITE / REVIEW / COMM)
-
-- [ ] **WRITE-07**: Owner self-explanation checkpoint recorded before any prose: theta needs no conversion; why the channel model is exact for one gate and approximate for two gates on a shared qubit, with the measured number; why k=0 is a null for distinguishability but not loss; what changes in throughput between CP and heralded CZ. Hedging stops the phase.
-- [ ] **WRITE-08**: `docs/tcdp-study.md` with question, design table, null outcomes, figures, shared-qubit approximation number, hardware anchors (Ascella V 0.930 / g2 7.3e-3 / ~8% transmission; Altair V 0.84 / purity 0.025; roadmap 70% → 99%), "what this does/doesn't establish", literature table with read-depth labels (full reads: arXiv:2503.02934, 2608.31117, 2405.02277, 2605.11879).
-- [ ] **WRITE-09**: `docs/technical-findings.md` gains a v4.0 section, README gains a v4.0 paragraph, `CLAUDE.md` Repo state updated; no sentence states "barren plateau" as a finding.
-- [ ] **REVIEW-02**: A Fable/Opus review then a Codex adversarial review with the verbatim prompt "For each stated finding, write the null result and check whether the finding differs from it. Then check every number against deploy_sweep.csv"; findings dispositioned in the phase's REVIEW.md.
-- [ ] **COMM-02**: Gibbs pass offered (questions only), journal entry in the owner's words, Vincent note (3–5 sentences, owner's words) drafted with send/hold recorded.
+- [x] **GATE-02**: Promote `.Codex/learnings/2026-09-05-reference-controls.md`'s distinction (exact classical reference vs. mechanism-removing control) into `CLAUDE.md` as a standing rule, next to the existing null-result gate. **Done 2026-09-05.**
+- [x] **GATE-03**: Add a standing rule that any classifier/verdict function backing a scientific claim needs adversarial test cases for its documented edge behavior (sign conventions, partial-convergence, boundary cases) before its output is trusted as a finding. **Done 2026-09-05.**
 
 ## Out of Scope
 
-| Feature | Reason |
-|---|---|
-| Structured Fock-space simulator to n≈20 | The channel approach answers this milestone's question without it |
-| Any barren-plateau claim or Hamming-kernel gradient-variance rerun | Sibling project already found init and n dominate; not this milestone's question |
-| Graph-state / MBQC realization of IQP (audit direction 4) | Separate, larger milestone; does not reuse the spring trainer |
-| Heralded CZ under distinguishability | CP(alpha) is the validated tunable gate and the cheaper one under loss |
-| Recycling mitigation (Salavrakos et al.) | Threshold-detector, different circuit class; cite only |
-| New dependencies (jax, iqpopt, pennylane, torch training) | Numpy core suffices; adding any is a stop-and-ask |
-| Analysis of the erasure-marked output (REFRAME-03's consumer) | Audit direction 1, future milestone |
+- Rerunning any full sweep, training run, Julia numerical verifier, or Forge solver suite (the audit's own coverage limit — this milestone corrects code and claims, it does not regenerate data).
+- Deciding v4.0's direction in light of these findings — a separate decision, after this milestone closes. v4.0's own requirements (32 items, already written and reviewed) are parked at `.planning/REQUIREMENTS-v4.0-queued.md`, not deleted — v3.2 jumped the queue ahead of it the same way v4.0 itself was queued behind v3.1, because a correction milestone takes priority over a not-yet-started study milestone.
+- Auditing every historical CSV row for the chunk-overlap bug (CORR-10 fixes the mechanism going forward; no claim is made that any archived run actually contains overlaps).
 
-## Traceability
+## Finish criteria
 
-| Requirement | Phase | Status |
-|---|---|---|
-| TRAIN-01..04 | Phase 25 | Pending |
-| CHAN-01..04 | Phase 26 | Pending |
-| DEPLOY-01..05, REFRAME-03 | Phase 27 | Pending |
-| NULL-03..09 | Phase 28 | Pending (owner; NULL-09 pipeline) |
-| SWEEP-01..05 | Phase 29 | Pending |
-| NAT-01..03 | Phase 30 | Pending |
-| WRITE-07..09, REVIEW-02, COMM-02 | Phase 31 | Pending |
-
-**Coverage:** v1 requirements: 32 total; mapped: 32; unmapped: 0.
-
----
-*v4.0 requirements defined: 2026-09-03, from `docs/v4-plan-train-classical-deploy-photonic.md`; owner promoted NAT to Must the same day; revised the same day after the Codex adversarial plan review (`.planning/research/v4-plan-codex-review-disposition.md`): gate maps are reconstructed trace-decreasing CP maps composed unnormalised, not renormalised tomography channels.*
+1. CONCEPT-01..03 each have an owner-authored resolution (rewritten claim, reclassification, or explicit retraction) recorded in the affected document(s), dated and additive per this project's correction convention.
+2. CORR-08, CORR-09, CORR-10, CORR-11, CORR-12 implemented with regression tests; `python -m pytest -q` green.
+3. CORR-13..17 (Should) addressed or explicitly declined with a stated reason.
+4. GATE-02/GATE-03 added to `CLAUDE.md`.
+5. A dated, additive correction section added wherever CONCEPT-01/02 changes a document's headline claim (`docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/technical-findings.md`, `README.md`, mirroring v3.1's convention).

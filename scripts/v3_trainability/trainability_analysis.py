@@ -125,17 +125,31 @@ def fit_verdict_to_plateau_label(fit_result):
     """Map fit_and_compare's exp/poly/inconclusive verdict onto a
     plateau/no_plateau label for comparison against the baseline rule.
 
-    "exp" only counts as a plateau signature if the fitted exponential is
-    actually decaying with n (b > 0 in a*exp(-b*n)+c) -- an exp-model win
-    with b < 0 (growing, not shrinking, with n) is NOT a shrinking-with-n
-    signature consistent with a plateau, even though the exp model
-    statistically outfit poly; that distinction is preserved rather than
-    silently treating "exp wins" as always meaning "plateau".
+    CORR-08 (2026-09-05): "exp" only counts as a plateau signature if the
+    fitted curve a*exp(-b*n)+c is actually DECREASING with n, i.e.
+    shrinking toward its floor c as n grows. The derivative is
+    f'(n) = -a*b*exp(-b*n), whose sign is sign(-a*b) -- it depends on BOTH
+    a and b, not b alone. The original check here (`b > 0`) mislabeled the
+    adversarial case a=-1, b=0.8, c=1 (an INCREASING sequence, e.g.
+    1-exp(-0.8n)) as "plateau", because a<0 flips the curve's direction
+    while b stays positive. Confirmed by direct code read plus an
+    independent audit's probe (docs/audits/2026-09-05-codebase-audit.md,
+    finding 4) before this fix; see tests/trainability/test_curve_fit.py's
+    adversarial cases.
+
+    Known, deliberately NOT resolved here: even when a>0 and b>0 (genuine
+    decay), an unrestricted positive c means the curve approaches a
+    NONZERO floor, not zero -- winning this exponential-with-offset fit is
+    evidence of decay-to-a-floor, not of variance vanishing exponentially
+    to zero. Whether that distinction changes what counts as a "plateau"
+    for this project's scientific claims is a CONCEPT-track (owner)
+    question, not a code-logic bug this function's contract covers.
     """
     verdict = fit_result["verdict"]
     if verdict == "exp":
-        b = fit_result["exp"]["params"][1]
-        return "plateau" if b > 0 else "no_plateau (exp fit growing, not shrinking)"
+        a, b = fit_result["exp"]["params"][0], fit_result["exp"]["params"][1]
+        decaying = b > 0 and a > 0
+        return "plateau" if decaying else "no_plateau (exp fit not decaying with n)"
     if verdict == "poly":
         return "no_plateau"
     return "inconclusive"

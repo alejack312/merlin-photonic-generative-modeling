@@ -295,3 +295,12 @@ open("results/v3_julia_verify/phase19_verify03_weight1_results.md", "w") do io
 end
 
 println("\nWrote results/v3_julia_verify/phase19_verify03_weight1_results.md")
+
+# CORR-11 (2026-09-05): the diagnostic report above and the results file
+# are always written first, but a DISAGREEMENT/PARTIAL-GO here previously
+# still reached normal script termination -- a command runner would see
+# exit status 0 despite a failed comparison. Exit nonzero now so CI-style
+# invocation can actually detect this.
+if !all_pass
+    exit(1)
+end

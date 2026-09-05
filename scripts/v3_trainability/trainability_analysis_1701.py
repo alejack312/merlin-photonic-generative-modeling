@@ -125,6 +125,16 @@ def _exp_b(fit_result):
     return float("nan")
 
 
+def _exp_a(fit_result):
+    """The fitted exponential amplitude (params[0] of a*exp(-b*n)+c), or
+    NaN if the exp fit did not converge. CORR-08 (2026-09-05): needed
+    alongside _exp_b because whether the curve actually DECREASES with n
+    depends on sign(-a*b), not on b's sign alone -- see classify_survival."""
+    if fit_result["exp"]["converged"]:
+        return float(fit_result["exp"]["params"][0])
+    return float("nan")
+
+
 def load_train09_series(rows, scope, init_scheme, sigma):
     """Return (ns, variances, bin_spacings) for one (scope, init_scheme,
     sigma) cell, sorted by n ascending."""
@@ -181,9 +191,13 @@ def classify_survival(baseline_cell, current_fit_result):
     if verdict != "exp":
         return "disappears"
     b = _exp_b(current_fit_result)
-    if not (b > 0):
-        # exp technically wins the AIC comparison but is growing, not
-        # shrinking, with n -- not a plateau signature, so treat as disappeared.
+    a = _exp_a(current_fit_result)
+    if not (b > 0 and a > 0):
+        # CORR-08 (2026-09-05): exp technically wins the AIC comparison,
+        # but decreasing-with-n depends on sign(-a*b), not b alone -- a<0
+        # with b>0 is growing toward the floor, not shrinking toward it
+        # (the original `not (b > 0)` check missed this; confirmed by an
+        # independent audit's adversarial probe, see 25-CONTEXT.md).
         return "disappears"
 
     baseline_b = baseline_cell["exp_b"]

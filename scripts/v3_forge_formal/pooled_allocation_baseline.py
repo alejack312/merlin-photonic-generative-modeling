@@ -73,10 +73,32 @@ def greedy_colouring(n, order=None):
 # the K+1... actually K-1 value at which infeasibility was proven (mirrors
 # Forge's `minimality<N>`: unsat at K-1 proves K is minimum).
 # ---------------------------------------------------------------------------
-def _try_colour(pair_list, k, conflict_pairs):
-    """DFS with backtracking: can `pair_list` be properly coloured with k colours?"""
+class _SearchTimeout(Exception):
+    """CORR-16 (2026-09-05): internal-only signal that a deadline fired
+    inside the recursive backtracking search itself, not merely between
+    top-level calls to it."""
+
+
+def _try_colour(pair_list, k, conflict_pairs, deadline=None):
+    """DFS with backtracking: can `pair_list` be properly coloured with k colours?
+
+    CORR-16 (2026-09-05): the caller's own time_ceiling_s was previously
+    checked only BETWEEN calls to this function -- once a single k's DFS
+    started, it ran to completion (find-or-exhaust) no matter how long
+    that took, so a hard adversarial instance at one k could blow the
+    documented ceiling by an unbounded amount. `deadline` (an absolute
+    time.time() value) is now checked periodically DURING the recursion
+    itself, every `_DEADLINE_CHECK_INTERVAL` calls -- frequent enough to
+    bound overrun, infrequent enough that time.time() isn't a per-call
+    bottleneck on the exponential-blowup instances this exists to guard.
+    Raises `_SearchTimeout` rather than returning a value, so a genuine
+    "no colouring exists" (`None`) is never confused with "search was cut
+    off before it could tell you" -- the caller must handle both distinctly.
+    """
     n_pairs = len(pair_list)
     colour = [-1] * n_pairs
+    call_count = 0
+    _DEADLINE_CHECK_INTERVAL = 4096
 
     def neighbours(idx):
         p = pair_list[idx]
@@ -85,6 +107,11 @@ def _try_colour(pair_list, k, conflict_pairs):
     adj = [neighbours(idx) for idx in range(n_pairs)]
 
     def backtrack(idx):
+        nonlocal call_count
+        if deadline is not None:
+            call_count += 1
+            if call_count % _DEADLINE_CHECK_INTERVAL == 0 and time.time() > deadline:
+                raise _SearchTimeout()
         if idx == n_pairs:
             return True
         used = {colour[j] for j in adj[idx] if colour[j] != -1}
@@ -139,12 +166,22 @@ def backtracking_min_colouring(n, k_start=None, time_ceiling_s=600.0):
 
     ordered_pairs = sorted(pair_list, key=degree, reverse=True)
 
+    deadline = start + time_ceiling_s
     k = k_start
     while k >= 0:
-        if time.time() - start > time_ceiling_s:
+        if time.time() > deadline:
             timed_out = True
             break
-        witness = _try_colour(ordered_pairs, k, conflict_pairs)
+        try:
+            witness = _try_colour(ordered_pairs, k, conflict_pairs, deadline=deadline)
+        except _SearchTimeout:
+            # CORR-16 (2026-09-05): the deadline fired INSIDE this k's own
+            # search -- distinct from "infeasible at k" (which _try_colour
+            # would have returned None for after a genuine exhaustive
+            # search). Report the ceiling honestly rather than letting the
+            # loop's between-call check be the only thing that ever fires.
+            timed_out = True
+            break
         if witness is None:
             infeasible_at = k
             break

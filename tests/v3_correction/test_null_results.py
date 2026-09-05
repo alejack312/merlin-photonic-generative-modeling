@@ -60,6 +60,16 @@ HARD_CSVS = [
     HARD / "phase18_merlin_dual_rail_mixed_loss_sweep.csv",
 ]
 TRAIN_CSVS = [
+    # CORR-12 (2026-09-05): the original Phase 17 CSVs were absent here --
+    # an independent audit found the null-result gate never covered
+    # Phase 17's own first-shipped "exp verdict" data, only its later
+    # Phase 17.1 bandwidth-sweep follow-up. These predate the sigma sweep
+    # and carry no `sigma` column at all; `_train_ratio_cases` below
+    # defaults a missing column to Phase 17's known fixed SIGMA=0.1
+    # (documented in trainability-study.md, sweep.py's SIGMA constant),
+    # not an assumed value.
+    TRAIN / "phase17_weight1_gradient_variance.csv",
+    TRAIN / "phase17_mixed_gradient_variance.csv",
     TRAIN / "phase171_train09_weight1_gradient_variance.csv",
     TRAIN / "phase171_train09_mixed_gradient_variance.csv",
 ]
@@ -125,11 +135,20 @@ def owner_hard_null_tvd(scope: str, n: int, eta: float) -> float | None:
     return None
 
 
-def owner_train_null_ratio(scope: str, n: int) -> float | None:
+def owner_train_null_ratio(scope: str, n: int, sigma: float = 0.1) -> float | None:
     """Predicted ratio  var(n) / var(n-1)  of the uniform-init gradient
     variance at a bandwidth where the kernel is the identity.
 
     scope is "weight1" or "mixed". Return a float, or None to skip.
+
+    CORR-12 (2026-09-05): `sigma` used to be silently hardcoded to 0.1
+    inside this function while the calling test also exercised sigma=0.03
+    rows -- for n<=4 both bandwidths give an identical (to float
+    precision) identity kernel, so this stayed invisible, but at n=5,6
+    the kernel genuinely differs between sigma=0.03 and 0.1 (see
+    trainability-study.md's 2026-09-03 correction), so the old code was
+    silently checking a sigma=0.03 row's shipped ratio against a
+    sigma=0.1 prediction there. Now threaded through explicitly.
 
     Why it has this shape (owner, one sentence):
         At sigma=0.1 the kernel is the identity (see
@@ -158,8 +177,8 @@ def owner_train_null_ratio(scope: str, n: int) -> float | None:
     """
     if n < 3:
         return None
-    hi = closed_form_gradient_variance(n, sigma=0.1, scope=scope, draws=2000, seed=17)
-    lo = closed_form_gradient_variance(n - 1, sigma=0.1, scope=scope, draws=2000, seed=17)
+    hi = closed_form_gradient_variance(n, sigma=sigma, scope=scope, draws=2000, seed=17)
+    lo = closed_form_gradient_variance(n - 1, sigma=sigma, scope=scope, draws=2000, seed=17)
     return hi / lo
 
 
@@ -173,10 +192,25 @@ def _rows(path: Path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
+def _require_csv(path: Path) -> Path:
+    """CORR-12 (2026-09-05): a missing required CSV must fail the gate
+    loudly, not silently vanish its test cases. An independent audit found
+    the previous `if not path.exists(): continue` meant a deleted or
+    renamed CSV would quietly shrink coverage instead of failing -- this
+    file is a MANDATORY shipped gate (CLAUDE.md's null-result gate), not
+    a best-effort scan."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Required null-result CSV missing: {path}. This gate must cover "
+            f"every listed file -- either restore it or remove it from "
+            f"HARD_CSVS/TRAIN_CSVS with a stated reason, not a silent skip."
+        )
+    return path
+
+
 def _hard_cases():
     for path in HARD_CSVS:
-        if not path.exists():
-            continue
+        _require_csv(path)
         for r in _rows(path):
             yield pytest.param(
                 path.name, r["generator_scope"], int(r["n"]), float(r["eta"]),
@@ -196,17 +230,27 @@ def test_hard_tvd_to_lossless_matches_owner_null(csv_name, scope, n, eta, shippe
     )
 
 
+PHASE17_FIXED_SIGMA = 0.1  # sweep.py's SIGMA constant; Phase 17 predates the sigma sweep.
+
+
+def _row_sigma(r: dict) -> float:
+    """CORR-12 (2026-09-05): Phase 17's original CSVs have no `sigma`
+    column (they predate TRAIN-09's bandwidth sweep) -- default to the
+    known fixed value rather than raising, so this file's own listed
+    coverage requirement (the sigma<=0.1 TRAIN rows) can include them."""
+    return float(r["sigma"]) if "sigma" in r else PHASE17_FIXED_SIGMA
+
+
 def _train_ratio_cases():
     for path in TRAIN_CSVS:
-        if not path.exists():
-            continue
+        _require_csv(path)
         rows = [
             r for r in _rows(path)
-            if r["init_scheme"] == "uniform" and float(r["sigma"]) <= 0.1
+            if r["init_scheme"] == "uniform" and _row_sigma(r) <= 0.1
         ]
         by_key: dict[tuple[str, float], dict[int, float]] = {}
         for r in rows:
-            by_key.setdefault((r["generator_scope"], float(r["sigma"])), {})[int(r["n"])] = float(r["var"])
+            by_key.setdefault((r["generator_scope"], _row_sigma(r)), {})[int(r["n"])] = float(r["var"])
         for (scope, sigma), series in by_key.items():
             ns = sorted(series)
             for a, b in zip(ns, ns[1:]):
@@ -216,9 +260,39 @@ def _train_ratio_cases():
                 )
 
 
+def _train_absolute_cases():
+    """CORR-12 (2026-09-05): companion to _train_ratio_cases yielding the
+    raw shipped variance (not a ratio between two n's). An independent
+    audit noted that a uniform scaling error applied to every variance in
+    a series would leave every ratio unchanged -- ratios alone can't catch
+    that class of bug. This yields every (scope, sigma, n) row directly."""
+    for path in TRAIN_CSVS:
+        _require_csv(path)
+        rows = [
+            r for r in _rows(path)
+            if r["init_scheme"] == "uniform" and _row_sigma(r) <= 0.1
+        ]
+        for r in rows:
+            yield pytest.param(
+                r["generator_scope"], _row_sigma(r), int(r["n"]), float(r["var"]),
+                id=f"{r['generator_scope']}-sigma{_row_sigma(r)}-n{r['n']}",
+            )
+
+
+@pytest.mark.parametrize("scope,sigma,n,shipped_var", list(_train_absolute_cases()))
+def test_train_absolute_variance_matches_owner_null(scope, sigma, n, shipped_var):
+    """Absolute-value companion to test_train_variance_ratio_matches_owner_null
+    -- catches a same-factor scaling bug across an entire series that a
+    ratio-only check cannot (CORR-12)."""
+    predicted = closed_form_gradient_variance(n, sigma=sigma, scope=scope, draws=2000, seed=17)
+    assert predicted == pytest.approx(shipped_var, rel=0.2), (
+        f"{scope} sigma={sigma} n={n}: shipped var {shipped_var:.6g}, your null {predicted:.6g}"
+    )
+
+
 @pytest.mark.parametrize("scope,sigma,n,shipped_ratio", list(_train_ratio_cases()))
 def test_train_variance_ratio_matches_owner_null(scope, sigma, n, shipped_ratio):
-    predicted = owner_train_null_ratio(scope, n)
+    predicted = owner_train_null_ratio(scope, n, sigma=sigma)
     if predicted is None:
         pytest.skip("Task 0: owner has not filled owner_train_null_ratio yet")
     # Tolerance corrected 2026-09-03: the previous rel=0.5 was widened to

@@ -113,11 +113,14 @@ def fit_and_compare(ns, variances):
             verdict = "poly"
         else:
             verdict = "inconclusive"
-    elif exp_result["converged"] and not poly_result["converged"]:
-        verdict = "exp"
-    elif poly_result["converged"] and not exp_result["converged"]:
-        verdict = "poly"
     else:
+        # CORR-09 (2026-09-05): the module docstring has always said "if
+        # one/both fits fail to converge, the verdict is inconclusive" --
+        # the code previously contradicted that by declaring the lone
+        # converged model the winner with no AIC-delta comparison at all.
+        # A competing model's numerical non-convergence is not evidence
+        # against it; confirmed by an independent audit reading this
+        # branch against its own documented contract.
         verdict = "inconclusive"
 
     return {"exp": exp_result, "poly": poly_result, "verdict": verdict}

@@ -599,3 +599,11 @@ open("results/v3_julia_verify/phase19_verify04_results.md", "w") do io
 end
 
 println("\nWrote results/v3_julia_verify/phase19_verify04_results.md")
+
+# CORR-11 (2026-09-05): the diagnostic report and results file above are
+# always written first, but PARTIAL-GO/NO-GO previously still reached
+# normal script termination -- a command runner would see exit status 0
+# regardless. Exit nonzero so a failed comparison is actually detectable.
+if !(weight1_pass && mixed_pass)
+    exit(1)
+end

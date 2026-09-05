@@ -7,7 +7,8 @@
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
 - ✅ **v3.1 Correction** — Phase 24 (shipped 2026-09-04; corrected two v3.0 findings an external audit found to be pipeline artifacts)
-- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 25-31 (queued 2026-09-03, unblocked 2026-09-04 now that v3.1 has shipped; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
+- 🔧 **v3.2 Correction (Audit Response)** — Phase 32 (opened 2026-09-05; corrects overreach in the v3.1 correction itself plus code-level defects a second independent audit found)
+- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 25-31 (queued 2026-09-03, requeued 2026-09-05 behind v3.2; requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md`; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
 
 ## Phases
 
@@ -105,7 +106,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 
 </details>
 
-## v4.0 Train Classically, Deploy Photonically (Phases 25-31) — QUEUED 2026-09-03
+## v4.0 Train Classically, Deploy Photonically (Phases 25-31) — QUEUED 2026-09-03, behind v3.2 (2026-09-05)
+
+**Requeued 2026-09-05:** v3.2 Correction opened after this section was already merged and claimed phases 25-31. A correction milestone takes priority over a not-yet-started study milestone — the same rule this section's own "Starts when v3.1 is closed" line already applied once. v4.0's requirements moved to `.planning/REQUIREMENTS-v4.0-queued.md` (parked, not deleted); this phase breakdown is otherwise unchanged and its phase numbers are undisturbed — v3.2 was renumbered instead (Phase 32, below) specifically to avoid colliding with these. Starts when v3.2 closes and the owner picks v4.0 as the next milestone.
 
 **Milestone goal:** Measure how far a classically trained IQP Born machine's photonic post-selected output drifts from the distribution the trainer deployed, under partial distinguishability, multi-photon emission, and loss, as a function of gate count and n; then test whether classical training against the tomographed gate channels closes that gap. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) § v4.0. Binding design: [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) table 5.1 and forbidden moves § 9. Starts when v3.1 is closed via `/gsd-complete-milestone`.
 
@@ -183,3 +186,18 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 2. `docs/tcdp-study.md`, technical-findings section, README paragraph, CLAUDE.md Repo state all present; every number traces to CSV or test.
 3. REVIEW.md dispositions every finding from both reviews.
 4. Vincent note drafted; send/hold recorded; journal entry in the owner's words.
+
+### Phase 32: v3.2 Correction (Audit Response) — opened 2026-09-05 (in progress)
+
+**Goal:** Correct two places where the v3.1 correction itself overreached (CONCEPT-01: an exact classical reference mistaken for a mechanism-removing control; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure scales with `n` — it doesn't), retract or narrow TRAIN-10's mismatched-statistics negative result (CONCEPT-03), and fix the code-level defects a second independent audit (GPT-6 Astra) found: a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing CSVs.
+**Depends on:** `docs/trainability-study.md`/`docs/hardness-under-loss-study.md` (the documents being corrected); `docs/audits/2026-09-05-codebase-audit.md` and its two probe scripts.
+**Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) — CONCEPT-01..03, CORR-08..17, GATE-02/03.
+**Note:** originally numbered Phase 25; renumbered to 32 on 2026-09-05 when merging against `master`, since v4.0's plan (PR #3) had already merged claiming phases 25-31 first. This phase's own content is otherwise unaffected — it never had internal sub-phase cross-references the way v4.0's plan doc does, so renumbering it (not v4.0) kept the merge to two files instead of v4.0's entire plan/review corpus.
+
+**Progress (2026-09-05):** mechanical track (CORR-08, 09, 11, 12, 16, 17, GATE-02/03) shipped — see `.planning/REQUIREMENTS.md` for per-item evidence. Conceptual track (CONCEPT-01..03) not started, owner-only.
+
+**Success criteria:**
+1. CONCEPT-01..03 each have an owner-authored resolution recorded in the affected document(s), dated and additive.
+2. CORR-08, CORR-09, CORR-10, CORR-11, CORR-12 implemented with regression tests; `python -m pytest -q` green.
+3. CORR-13..17 addressed or explicitly declined with a stated reason.
+4. GATE-02/GATE-03 added to `CLAUDE.md`.

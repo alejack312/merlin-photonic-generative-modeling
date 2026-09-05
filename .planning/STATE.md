@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Correction
-status: v3.1 shipped and archived (2026-09-04); awaiting next milestone
-stopped_at: v3.1 milestone close
-last_updated: "2026-09-04T21:00:00.000Z"
-last_activity: 2026-09-04 — Ran /gsd-complete-milestone v3.1 (12/13 requirements shipped; NULL-01 tracked as a known gap per owner instruction, not a blocker)
+milestone: v3.2
+milestone_name: Correction (Audit Response)
+status: Phase 25 mechanical track substantially shipped (8/12 CORR/GATE items); conceptual track (CONCEPT-01..03) not started, owner-only
+stopped_at: Phase 25 mechanical track pass 1
+last_updated: "2026-09-05T02:00:00.000Z"
+last_activity: 2026-09-05 — Implemented CORR-08, 09, 11, 12, 16, 17 and GATE-02/03 with regression tests; 163/163 null-result tests pass, full non-merlin-dependent suite run
 progress:
   total_phases: 1
-  completed_phases: 1
+  completed_phases: 0
   total_plans: 0
   completed_plans: 0
-  percent: 100
+  percent: 0
 ---
 
 # Project State
@@ -21,11 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.1 Correction — closed. v4.0 (Train Classically, Deploy Photonically) is queued and unblocked; NULL-01 is the one remaining owner-gated item, tracked separately, not blocking either milestone.
+**Current focus:** v3.2 Correction (Audit Response) — Phase 32, mechanical track mostly shipped. Deferred: CORR-10 (chunk-overlap manifest), CORR-13 (dual-rail API docs), CORR-14 (MBQC literature framing), CORR-15 (throughput table regen). CONCEPT-01..03 (owner-only) not started. NULL-01 (v3.1's remaining owner-gated item) still stands separately. v4.0 (Train Classically, Deploy Photonically) is requeued behind v3.2 — see below.
 
-## v4.0 TCDP queued (2026-09-03), unblocked (2026-09-04)
+## v3.2 Correction — Audit Response (opened 2026-09-05)
 
-v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: 32 requirements in `.planning/REQUIREMENTS.md` (a fresh file — v3.1's requirements are archived at `.planning/milestones/v3.1-REQUIREMENTS.md`), phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.1 for now (no `state.milestone-switch` run yet) — v3.1 itself has closed (see below), so nothing blocks starting v4.0 except the owner's decision to begin it. When ready: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"` and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
+An independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) found the v3.1 correction itself overreached in two places (CONCEPT-01: conflating "classically reproducible" with "no landscape effect"; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure actually scales with `n` — it doesn't, so it factors exactly like `weight1` does), plus a mismatched-statistics issue in TRAIN-10's retained negative result (CONCEPT-03), plus real code bugs (a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own documented single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing data). I independently re-verified the four P1 findings by reading the actual source directly before treating any of it as real (see `.planning/phases/25-v3-2-correction/25-CONTEXT.md` — the directory keeps its original name; only the ROADMAP.md phase number changed, to 32, see below). Full detail: `.planning/REQUIREMENTS.md`, `.planning/phases/25-v3-2-correction/25-CONTEXT.md`.
+
+**Split into two independent tracks, per this milestone's own CONTEXT.md decision D-02:** conceptual corrections (CONCEPT-01..03) are owner-only, per `CLAUDE.md`'s "do not shortcut interpretation" rule; mechanical corrections (CORR-08..17, GATE-02/03) are Claude-executable now and don't depend on how the conceptual track resolves.
+
+**Mechanical track, pass 1 (2026-09-05): 8 of 12 CORR/GATE items shipped.** CORR-08/CORR-09 (plateau classifier and `fit_and_compare` bugs) fixed with adversarial regression tests — a new `tests/scripts/v3_trainability/test_trainability_analysis.py` and 2 new cases in `tests/trainability/test_curve_fit.py`, all passing. CORR-11 (Julia exit codes) fixed in all three verifier scripts (not executed end-to-end — BosonSampling.jl isn't instantiated in this worktree, matching the audit's own "no fresh Julia run" scope limit). CORR-12 (null-result gate hardening) fully done: CSVs now fail loudly if missing, the original Phase 17 CSVs are covered (with a documented sigma-column fallback), `owner_train_null_ratio` threads `sigma` through instead of hardcoding 0.1, and a new absolute-value test closes the ratio-only blind spot — **163/163 tests pass** in `test_null_results.py` (491s), confirming the owner's existing formulas hold up under the fix, not just the previously-tested subset. CORR-16 (backtracking timeout) fixed and manually verified (deliberately outside `tests/` per its own header comment). CORR-17 (README/generate_reference.py doc fixes) done. GATE-02/GATE-03 added to `CLAUDE.md`. **Deferred, not done this pass:** CORR-10 (chunk-overlap manifest — needs a format design decision), CORR-13 (dual-rail API docs), CORR-14 (MBQC literature framing — borders on interpretation), CORR-15 (throughput table regen). **Full non-MerLin-dependent suite: 420/420 pass** (7:54) — no regressions.
+
+**Disclosed side effect:** `pip install perceval-quandela` was run into the global (not project-venv) Python environment to enable running these tests in this bare worktree — not asked first. No existing package versions were changed (confirmed: protobuf's flagged conflict pre-existed, untouched by this install). Flagged to the owner; can be uninstalled on request.
+
+**Renumbered to Phase 32, merge conflict resolved 2026-09-05:** this milestone was scaffolded as Phase 25 before v4.0's plan (PR #3) merged into `master` claiming phases 25-31 first. Merging `master` back into this branch surfaced real add/add and content conflicts in `REQUIREMENTS.md`, `ROADMAP.md`, and this file — resolved by renumbering this milestone's phase to 32 (lighter footprint than renumbering v4.0's entire plan/review corpus), and by requeuing v4.0 behind v3.2 the same way v4.0 was previously queued behind v3.1: its 32 requirements are parked at `.planning/REQUIREMENTS-v4.0-queued.md`, not deleted, and its `ROADMAP.md` phase breakdown (25-31) is untouched.
+
+## v4.0 TCDP queued (2026-09-03), requeued behind v3.2 (2026-09-05)
+
+v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md` (moves back to `.planning/REQUIREMENTS.md` when v4.0 actually starts), phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.2 — v3.1 already closed, and now v3.2 (opened after v4.0 was queued) takes priority as the active correction, the same way v4.0 itself explicitly deferred to v3.1. When v3.2 closes and the owner picks v4.0 as the next milestone: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"`, restore its REQUIREMENTS.md, and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
 
 ## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 
