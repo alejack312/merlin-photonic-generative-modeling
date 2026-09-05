@@ -21,7 +21,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.1 Correction — closed. Next: v4.0 (Train Classically, Deploy Photonically) decision, or address the 2 owner-gated items below.
+**Current focus:** v3.1 Correction — closed. v4.0 (Train Classically, Deploy Photonically) is queued and unblocked; NULL-01 is the one remaining owner-gated item, tracked separately, not blocking either milestone.
+
+## v4.0 TCDP queued (2026-09-03), unblocked (2026-09-04)
+
+v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: 32 requirements in `.planning/REQUIREMENTS.md` (a fresh file — v3.1's requirements are archived at `.planning/milestones/v3.1-REQUIREMENTS.md`), phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.1 for now (no `state.milestone-switch` run yet) — v3.1 itself has closed (see below), so nothing blocks starting v4.0 except the owner's decision to begin it. When ready: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"` and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
 
 ## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 
