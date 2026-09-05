@@ -22,7 +22,7 @@ This design was chosen over two alternatives: collapsing `q` to a single weighte
 
 ### v3.0: IQP Circuit Study
 
-After the v1.0 generator above, this project extended into a v3.0 milestone that studies the same circuit family (an IQP-style photonic ansatz) from two angles: trainability (does it show barren-plateau-style gradient behavior as it scales?) and hardness-under-loss (does the sampling-hardness argument survive realistic photon loss?) — plus a continuously-tunable weight-2 gate and an independent Julia-based numeric verification path.
+After the v1.0 generator above, this project extended into a v3.0 milestone that studies an IQP-style photonic ansatz (a different, explicit commuting-gate circuit built for this milestone, not v1.0's `QuantumLayer.simple`-based generator — the two share MerLin's framework and MMD training methodology, not the same circuit family) from two angles: trainability (does it show barren-plateau-style gradient behavior as it scales?) and hardness-under-loss (does the sampling-hardness argument survive realistic photon loss?) — plus a continuously-tunable weight-2 gate and an independent Julia-based numeric verification path.
 
 **Correction (2026-09-03):** an external audit found that both headline findings originally reported here were pipeline artifacts, not properties of the circuit. Both are independently re-verified and corrected in full in [docs/trainability-study.md](docs/trainability-study.md) and [docs/hardness-under-loss-study.md](docs/hardness-under-loss-study.md), with regression tests in `tests/v3_correction/test_null_results.py`. Corrected findings:
 

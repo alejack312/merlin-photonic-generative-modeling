@@ -122,10 +122,23 @@ def generate_exact_references():
     # distribution symmetric under a 00<->11 and/or 01<->10 relabeling
     # (P(01)=P(10)=0, P(00)=P(11)=0.5 exactly) -- so a hidden Julia/Python
     # bit-to-rail convention mismatch would be numerically INVISIBLE to that
-    # test case; a wrong labeling would still print a passing TVD. Distinct,
-    # nonzero, non-special thetas break every one of those relabeling
-    # symmetries, so all four bitstring probabilities differ and a
-    # convention bug becomes detectable.
+    # test case; a wrong labeling would still print a passing TVD.
+    #
+    # CORR-14 correction (2026-09-05): distinct, nonzero, non-special
+    # thetas break the DEGENERATE equality (both pairs equal AND two
+    # entries exactly zero), turning it into P(00)=P(11)=x, P(01)=P(10)=y
+    # with x != y and both nonzero -- enough to catch a single-qubit
+    # rail-convention error, per the weight-2 Julia verifier's own comment
+    # (julia/verify_photonic_iqp_weight2.jl). It does NOT make "all four
+    # bitstring probabilities differ": P(00)=P(11) and P(01)=P(10) hold
+    # for ANY theta_i/theta_j on this pi/4-locked pair (Hein, Eisert &
+    # Briegel, Phys. Rev. A 69, 062311 (2004), Eqs. 9-10 & 41 -- the
+    # graph state's single-qubit marginal is exactly maximally mixed for
+    # any local rotation), so a simultaneous both-qubit bit-flip or a
+    # qubit-order swap remains structurally undetectable by this case.
+    # This comment previously overstated the regression's label-error
+    # coverage; the correct, narrower claim is already stated accurately
+    # in the Julia verifier itself.
     thetas_asym = [0.3, 1.1]
     weight2_asym_n2, residual_w2_asym, herald_failure_prob_asym = photonic_weight2_iqp_distribution(
         n, i, j, thetas_asym
