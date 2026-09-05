@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Correction (Audit Response)
-status: Phase 32 audit-response corrections complete; all CONCEPT/CORR/GATE requirements checked
-stopped_at: Phase 32 correction pass
+status: Phase 25 audit-response corrections complete; all CONCEPT/CORR/GATE requirements checked
+stopped_at: Phase 25 correction pass
 last_updated: "2026-09-05T12:00:00.000Z"
 last_activity: 2026-09-05 — Closed CONCEPT-01..03 and CORR-08..17/GATE-02/03; full pytest suite 506 passed, commit 62142e4
 progress:
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.2 Correction (Audit Response) — Phase 32 complete. CONCEPT-01..03 and CORR-08..17/GATE-02/03 are resolved in the canonical docs, code, and tests. NULL-01 (v3.1's remaining owner-gated item) still stands separately. v4.0 (Train Classically, Deploy Photonically) is requeued behind v3.2 — see below.
+**Current focus:** v3.2 Correction (Audit Response) — Phase 25 complete. CONCEPT-01..03 and CORR-08..17/GATE-02/03 are resolved in the canonical docs, code, and tests. NULL-01 (v3.1's remaining owner-gated item) still stands separately. v4.0 (Train Classically, Deploy Photonically) is requeued behind v3.2 as Phases 26-32 — see below.
 
 ## v3.2 Correction — Audit Response (opened and completed 2026-09-05)
 
@@ -29,15 +29,15 @@ An independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) f
 
 **Split into two independent tracks, per this milestone's own CONTEXT.md decision D-02:** conceptual corrections (CONCEPT-01..03) are owner-only, per `CLAUDE.md`'s "do not shortcut interpretation" rule; mechanical corrections (CORR-08..17, GATE-02/03) are Claude-executable now and don't depend on how the conceptual track resolves.
 
-**Phase 32 correction pass (2026-09-05): all requirements shipped.** CONCEPT-01..03 were narrowed in the canonical docs; CORR-08/CORR-09 remain covered by adversarial tests; CORR-10 validates contiguous chunk coverage, manifest intervals/configuration, and loaded array lengths in all three combiners; CORR-11 enforces nonzero Julia exits on failed comparisons; CORR-12 makes the null-result gate fail loudly on missing or vacuous evidence and adds absolute checks; CORR-13..17 and GATE-02/GATE-03 are complete. The full suite is **506 passed in 487.04s**. Commit: `62142e4`.
+**Phase 25 correction pass (2026-09-05): all requirements shipped.** CONCEPT-01..03 were narrowed in the canonical docs; CORR-08/CORR-09 remain covered by adversarial tests; CORR-10 validates contiguous chunk coverage, manifest intervals/configuration, and loaded array lengths in all three combiners; CORR-11 enforces nonzero Julia exits on failed comparisons; CORR-12 makes the null-result gate fail loudly on missing or vacuous evidence and adds absolute checks; CORR-13..17 and GATE-02/GATE-03 are complete. The full suite is **506 passed in 487.04s**. Commit: `62142e4`.
 
 **Disclosed side effect:** `pip install perceval-quandela` was run into the global (not project-venv) Python environment to enable running these tests in this bare worktree — not asked first. No existing package versions were changed (confirmed: protobuf's flagged conflict pre-existed, untouched by this install). Flagged to the owner; can be uninstalled on request.
 
-**Renumbered to Phase 32, merge conflict resolved 2026-09-05:** this milestone was scaffolded as Phase 25 before v4.0's plan (PR #3) merged into `master` claiming phases 25-31 first. Merging `master` back into this branch surfaced real add/add and content conflicts in `REQUIREMENTS.md`, `ROADMAP.md`, and this file — resolved by renumbering this milestone's phase to 32 (lighter footprint than renumbering v4.0's entire plan/review corpus), and by requeuing v4.0 behind v3.2 the same way v4.0 was previously queued behind v3.1: its 32 requirements are parked at `.planning/REQUIREMENTS-v4.0-queued.md`, not deleted, and its `ROADMAP.md` phase breakdown (25-31) is untouched.
+**Phase numbering resolution, 2026-09-05:** this milestone was scaffolded as Phase 25 before v4.0's plan merged. The agreed resolution keeps v3.2 at Phase 25 and shifts v4.0's seven phases to 26-32. Its 32 requirements remain parked at `.planning/REQUIREMENTS-v4.0-queued.md`, and the v3.2 directory/context retain their original `25-` names.
 
 ## v4.0 TCDP queued (2026-09-03), requeued behind v3.2 (2026-09-05)
 
-v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md` (moves back to `.planning/REQUIREMENTS.md` when v4.0 actually starts), phases 25-31 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.2 — v3.1 already closed, and now v3.2 (opened after v4.0 was queued) takes priority as the active correction, the same way v4.0 itself explicitly deferred to v3.1. When v3.2 closes and the owner picks v4.0 as the next milestone: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"`, restore its REQUIREMENTS.md, and proceed to `/gsd-discuss-phase 25`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
+v4.0 "Train Classically, Deploy Photonically" is laid out but not yet started: requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md` (moves back to `.planning/REQUIREMENTS.md` when v4.0 actually starts), phases 26-32 in `ROADMAP.md`, binding design in `docs/v4-plan-train-classical-deploy-photonic.md` (revision 2, after an independent Codex adversarial review — 9 of 13 findings accepted and fixed, see `.planning/research/v4-plan-codex-review-disposition.md`). Frontmatter stays on v3.2 — v3.1 already closed, and now v3.2 (opened after v4.0 was queued) takes priority as the active correction. When v3.2 closes and the owner picks v4.0 as the next milestone: run `state.milestone-switch --milestone v4.0 --name "Train Classically, Deploy Photonically"`, restore its REQUIREMENTS.md, and proceed to `/gsd-discuss-phase 26`. Owner decision 2026-09-03: noise-aware training (NAT) promoted to Must on Fable's recommendation.
 
 ## v3.1 Correction (opened 2026-09-03, closed 2026-09-04)
 
@@ -64,7 +64,7 @@ Phase 23's completion is now genuinely satisfied. No code or Forge model changed
 
 Phase: **v3.1 (Correction) shipped and archived — 2026-09-04**
 Plan: — (no next milestone scoped yet)
-Status: Awaiting next milestone decision. One tracked-separately gap remains: NULL-01's mixed-scope self-explanation (owner task, not blocking). A v4.0 "Train Classically, Deploy Photonically" plan already exists on `claude/merlin-photonic-iqp-audit-e8144c` (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 25-31) as one candidate for `/gsd-new-milestone`, alongside the audit's other deferred frontier directions.
+Status: Awaiting next milestone decision. One tracked-separately gap remains: NULL-01's mixed-scope self-explanation (owner task, not blocking). A v4.0 "Train Classically, Deploy Photonically" plan already exists on `claude/merlin-photonic-iqp-audit-e8144c` (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 26-32) as one candidate for `/gsd-new-milestone`, alongside the audit's other deferred frontier directions.
 Last activity: 2026-09-04 — `/gsd-complete-milestone v3.1`: archived to `.planning/milestones/v3.1-{ROADMAP,REQUIREMENTS,MILESTONE-AUDIT}.md`, `.planning/REQUIREMENTS.md` removed (fresh for next milestone), `MILESTONES.md` entry written with real accomplishments/stats, `ROADMAP.md` reorganized with v3.1 collapsed into the milestone list.
 
 ### Prior position (Phase 21, retained)

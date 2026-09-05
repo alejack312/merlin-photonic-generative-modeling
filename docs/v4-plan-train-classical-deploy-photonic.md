@@ -11,7 +11,7 @@
 
 **Question.** An IQP Born machine is trained entirely classically (Van den Nest's cosine formula, the spring-semester `iqp-mmd-barren-plateau` methodology). The trained parameters are deployed on a photonic device: dual-rail photons, post-selected `CP(alpha)` gates for every ZZ term, realistic loss, partial distinguishability, and multi-photon emission. **How far is the device's post-selected output from the distribution the classical trainer thinks it deployed, as a function of gate count, system size, and the three noise parameters; what does a usable sample cost; and does training against the device's gate maps instead of the ideal gate close the gap?**
 
-**Why it is open, stated at the strength the evidence supports.** In the four works reviewed for this plan and the 2026-09-03 literature searches (queries recorded in `docs/iqp-lit-scoping.md`'s addendum), no study deploys a classically trained IQP model through a photonic gate-noise model. Recio-Armengol, Ahmed, Bowles (arXiv:2503.02934) study qubit IQP deployment and do not study a photonic noise model. Raj, Mathur, Perdomo-Ortiz (arXiv:2608.31117, full text) evaluate the objective by state-vector simulation up to 30 qubits and define the coverage, fidelity, and forward-KL metrics used here. Salavrakos et al. (Quandela, arXiv:2405.02277) run a photonic Born machine on hardware with loss mitigation; whether its training route or circuit class overlaps this one is checked by a full read in Phase 31 before the write-up relies on it. The v3.1 closed forms settle the loss axis: conditioned on full detection the output is unchanged and throughput pays. The open axes are distinguishability and g2, which act inside the two-photon gates and are the parameters Quandela's roadmap tracks ("distinguishability 70% -> 99%").
+**Why it is open, stated at the strength the evidence supports.** In the four works reviewed for this plan and the 2026-09-03 literature searches (queries recorded in `docs/iqp-lit-scoping.md`'s addendum), no study deploys a classically trained IQP model through a photonic gate-noise model. Recio-Armengol, Ahmed, Bowles (arXiv:2503.02934) study qubit IQP deployment and do not study a photonic noise model. Raj, Mathur, Perdomo-Ortiz (arXiv:2608.31117, full text) evaluate the objective by state-vector simulation up to 30 qubits and define the coverage, fidelity, and forward-KL metrics used here. Salavrakos et al. (Quandela, arXiv:2405.02277) run a photonic Born machine on hardware with loss mitigation; whether its training route or circuit class overlaps this one is checked by a full read in Phase 32 before the write-up relies on it. The v3.1 closed forms settle the loss axis: conditioned on full detection the output is unchanged and throughput pays. The open axes are distinguishability and g2, which act inside the two-photon gates and are the parameters Quandela's roadmap tracks ("distinguishability 70% -> 99%").
 
 **Verified facts this plan builds on (2026-09-03; do not re-derive):**
 
@@ -105,7 +105,7 @@ No file outside this list is modified except `docs/technical-findings.md`, `READ
 
 ---
 
-## 3. Phase 25 (MECH, Codex): vendor the classical trainer
+## 3. Phase 26 (MECH, Codex): vendor the classical trainer
 
 ### 3.1 Copy, strip, add `chain_1d`
 1. Record `git -C C:\Users\cuqui\iqp-mmd-barren-plateau rev-parse HEAD` into `PROVENANCE.md`.
@@ -148,7 +148,7 @@ def ising_chain_samples(n: int, m: int = 20000) -> np.ndarray:
 
 ---
 
-## 4. Phases 26-27 (MECH, Codex): gate maps and the deployment simulator
+## 4. Phases 27-28 (MECH, Codex): gate maps and the deployment simulator
 
 ### 4.1 Design decision (recorded; not re-decided)
 Full-Fock simulation of n qubits with k CP gates is infeasible past n ~ 5. Instead each gate is reconstructed once as a **trace-decreasing completely positive map** `Lambda_{alpha,V,g2}` on two qubits, and the n-qubit density matrix is evolved by composing these maps; the final state is normalised once, and its trace is the exact success probability of the composed post-selection. This is exact for post-selection applied at the end of the circuit, which is what the device does. The single approximation is that a photon's distinguishability is drawn independently in each gate it enters, whereas Perceval treats it as a property of the photon; 4.5 measures that error directly and the write-up carries it.
@@ -197,7 +197,7 @@ def deploy_density_matrix(n, thetas, pair_thetas, gate_maps: dict[tuple[int,int]
 Bit order: index = `int(bitstring, 2)`, qubit 0 most significant, matching `exact_qubit_iqp_distribution`. n <= 10; `test_peak_memory_n10` asserts peak RSS growth under 400 MB and records seconds per call at n = 8 into `results/v4_tcdp/deploy_timing.json`.
 
 `tests/v4_tcdp/test_density_matrix.py`:
-- `test_ideal_maps_reproduce_exact_reference`: n in {2,3,4}, k in {0,1,n-1}, ideal maps: probs vs `exact_qubit_iqp_distribution` < 1e-12 and `p_success` equals the product of `1/sigma_max^4` to 1e-9. (Phase 27 null.)
+- `test_ideal_maps_reproduce_exact_reference`: n in {2,3,4}, k in {0,1,n-1}, ideal maps: probs vs `exact_qubit_iqp_distribution` < 1e-12 and `p_success` equals the product of `1/sigma_max^4` to 1e-9. (Phase 28 null.)
 - `test_k0_ignores_maps`: n = 4, k = 0, noisy maps passed: probs unchanged, `p_success == 1`.
 - `test_asymmetric_hand_fixture_deployed`: the n = 3 fixture of 3.4 through `deploy_density_matrix` with ideal maps, compared by named bitstring.
 - `test_alpha_mismatch_raises`; `test_no_4n_matrix_allocated` (monkeypatch `np.zeros`/`np.empty` to fail on shape `(4**n, 4**n)` for n = 6).
@@ -229,7 +229,7 @@ Tests: exact per-pattern values against a hand-enumerated case for k = 0 (n = 2)
 
 ---
 
-## 5. Phases 28-29: nulls, training, and the deployment gap sweep
+## 5. Phases 29-30: nulls, training, and the deployment gap sweep
 
 ### 5.1 Fixed experimental design
 
@@ -292,22 +292,22 @@ Only rows that differ from the nulls of 5.2: nonzero gap at k >= 1 under V < 1 o
 
 ---
 
-## 6. Phase 30 (M4): noise-aware classical training (NAT)
+## 6. Phase 31 (M4): noise-aware classical training (NAT)
 Design (fixed):
-- Cells: n in {4, 6, 8}, k = n - 1, primary kernel, `data_dependent` init, the 5 Phase-29 seeds. Noise: Ascella (V = 0.93, g2 = 0.007). Maps: all 63 alphas at the Ascella point, precomputed (part of the 1134).
+- Cells: n in {4, 6, 8}, k = n - 1, primary kernel, `data_dependent` init, the 5 Phase-30 seeds. Noise: Ascella (V = 0.93, g2 = 0.007). Maps: all 63 alphas at the Ascella point, precomputed (part of the 1134).
 - Objective: `mmd2_train(q_dep(theta))` with `q_dep` from `deploy_density_matrix` using `theta_eff = alpha_key(4 theta_pair) / 4` inside; the weight-1 angles enter exactly.
-- Warm start: theta from the corresponding Phase-29 ideal-trained cell. Adam, lr 0.02, 150 steps. Gradient: central finite differences, h = 1e-4, on the exact deployed vector (parameter-shift is not valid for a channel; the alpha rounding makes the objective piecewise, which is accepted and stated).
+- Warm start: theta from the corresponding Phase-30 ideal-trained cell. Adam, lr 0.02, 150 steps. Gradient: central finite differences, h = 1e-4, on the exact deployed vector (parameter-shift is not valid for a channel; the alpha rounding makes the objective piecewise, which is accepted and stated).
 - Cost: (2m + 1) evaluations per step, m = n + k: 9, 13, 17 at n = 4, 6, 8; x 150 steps x 5 seeds = 29 250 evaluations; budget = that number x the per-call time in `results/v4_tcdp/deploy_timing.json`, recorded before the run.
 - Report: for each seed, the six metrics of `q_dep(theta_NAT)` next to `q_dep(theta_ideal-trained)` and `q_ideal(theta_ideal-trained)`; the owner's `owner_null_nat_ideal` is run with ideal maps first (NAT on ideal maps must reproduce the ideal-trained gap, zero, and change theta by less than the optimizer's own step noise, quantified as the theta change from 150 further Adam steps on the ideal objective).
 - **Stop rule:** one n = 8 run over 20 minutes, or two calendar days without a green n = 4 end-to-end run: record timing in `PROJECT.md`, ship NAT as "attempted, stopped" with the numbers obtained. The milestone still closes.
 
 ---
 
-## 7. Phase 31: write-up, gates, review
+## 7. Phase 32: write-up, gates, review
 1. **OWNER checkpoint before any prose:** (a) why theta needs no conversion; (b) why composing unnormalised maps and normalising once is exact for end-of-circuit post-selection, and why per-gate renormalisation is not; (c) why k = 0 is a null for distinguishability but not for loss; (d) what the shared-qubit approximation is, and the measured number; (e) CP vs heralded-CZ throughput under loss. Hedging stops the phase.
 2. `docs/tcdp-study.md`: question, design table, per-null outcome, figures with the shared-qubit error bar, hardware anchors, "what this does/doesn't establish", literature table with read-depth labels.
 3. Mirrors: `docs/technical-findings.md` v4.0 section, README paragraph, `CLAUDE.md` Repo state.
-4. **REVIEW gate:** Fable or Opus, then Codex, prompt verbatim: "For each stated finding, write the null result and check whether the finding differs from it. Then check every number against `deploy_sweep.csv`." Dispositioned in `.planning/phases/31-*/31-REVIEW.md`.
+4. **REVIEW gate:** Fable or Opus, then Codex, prompt verbatim: "For each stated finding, write the null result and check whether the finding differs from it. Then check every number against `deploy_sweep.csv`." Dispositioned in `.planning/phases/32-*/32-REVIEW.md`.
 5. Gibbs pass offered (questions only); journal entry in the owner's words.
 6. Vincent note, owner's words; send/hold recorded.
 
@@ -344,8 +344,8 @@ Design (fixed):
 5. Owner checkpoint transcript recorded; both reviews dispositioned; Vincent note drafted.
 
 ## 11. Model routing and sequencing
-- Phases 25, 26, 27, 29 scripts, 30 scripts: Codex (`codex exec`), one phase per prompt, the relevant section of this file pasted verbatim plus the verified-facts table.
-- Phase 28 and the owner items of Phase 31: owner.
-- Phase 31 prose: Sonnet drafts, owner reads aloud before commit.
+- Phases 26, 27, 28, 30 scripts, 31 scripts: Codex (`codex exec`), one phase per prompt, the relevant section of this file pasted verbatim plus the verified-facts table.
+- Phase 29 and the owner items of Phase 32: owner.
+- Phase 32 prose: Sonnet drafts, owner reads aloud before commit.
 - Review gate: Fable or Opus, then Codex adversarial.
-- Order: 25 -> 26 -> 27 -> 28 -> 29 -> 30 -> 31. Phase 29 does not start until `crosscheck_shared_qubit.json` is on disk and the owner nulls are filled.
+- Order: 26 -> 27 -> 28 -> 29 -> 30 -> 31 -> 32. Phase 30 does not start until `crosscheck_shared_qubit.json` is on disk and the owner nulls are filled.

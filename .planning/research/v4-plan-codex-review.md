@@ -12,7 +12,7 @@ Let \(q_0=q_{\text{ideal}}\), and let \(L_0,K_0,C_0,F_0,M_{1,0},M_{2,0}\) denote
 
 - **MINOR** — **Plan:** “Fig 4: throughput ... with the heralded-CZ curve from v3.1 overlaid.” **Problem:** `owner_null_throughput` appears to cover CP throughput, but the heralded-CZ overlay has no separately specified null formula or test. **Fix:** Require both exact curves: CP `η^n ∏ σ_max(α_eff)^-4`; heralded CZ `η^(n+2k)(2/27)^k`.
 
-- **BLOCKER** — **Plan:** “Metric: the deployed gap before vs after.” **Problem:** NAT has no null. Under an ideal channel, noise-aware training optimizes the same distribution as ideal training, so it should show no device-induced improvement: TVD before/after should remain zero, while coverage and KL should remain at their ideal-trained values. The plan also does not say which gap metrics are measured, despite requirements naming TVD, coverage, and KL. **Fix:** Add `owner_null_nat_ideal` and define the before/after metrics and expected equality before Phase 30.
+- **BLOCKER** — **Plan:** “Metric: the deployed gap before vs after.” **Problem:** NAT has no null. Under an ideal channel, noise-aware training optimizes the same distribution as ideal training, so it should show no device-induced improvement: TVD before/after should remain zero, while coverage and KL should remain at their ideal-trained values. The plan also does not say which gap metrics are measured, despite requirements naming TVD, coverage, and KL. **Fix:** Add `owner_null_nat_ideal` and define the before/after metrics and expected equality before Phase 31.
 
 # B. Silent-failure paths
 
@@ -92,5 +92,5 @@ Let \(q_0=q_{\text{ideal}}\), and let \(L_0,K_0,C_0,F_0,M_{1,0},M_{2,0}\) denote
 
 ## Verdict
 
-Phase 25 can start only after the plan’s own contract is repaired. The immediate blockers are the rounded-alpha versus `alpha == 4*theta` contradiction, the invalid scalar “trace-preserving” renormalization, the missing nulls for non-TVD metrics and NAT, and the undefined population coverage/fidelity metrics. Fix those before vendoring begins; otherwise a literal executor can produce a green, reproducible pipeline whose reported deployment gap and sample cost do not mean what the plan claims.
+Phase 26 can start only after the plan’s own contract is repaired. The immediate blockers are the rounded-alpha versus `alpha == 4*theta` contradiction, the invalid scalar “trace-preserving” renormalization, the missing nulls for non-TVD metrics and NAT, and the undefined population coverage/fidelity metrics. Fix those before vendoring begins; otherwise a literal executor can produce a green, reproducible pipeline whose reported deployment gap and sample cost do not mean what the plan claims.
 

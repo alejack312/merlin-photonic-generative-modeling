@@ -32,6 +32,6 @@ Review: `v4-plan-codex-review.md` (verbatim Codex output, `codex exec -s read-on
 | F2 | Row count wrong | Accepted | 840 trained cells x 18 = 15 120 rows; 900 trained files |
 | F3 | Timing must use slowest condition | Accepted | Timing gate measured at (0.84, 0.025); direct reconstruction is 2.3 s, budget ~45 min |
 | F4 | Memory bound unstated | Accepted | einsum on the (2,)*2n tensor; 4^n x 4^n forbidden and tested; peak RSS asserted at n=10 |
-| F5 | NAT cost unbudgeted | Accepted | 29 250 evaluations; per-call time measured in Phase 27 |
+| F5 | NAT cost unbudgeted | Accepted | 29 250 evaluations; per-call time measured in Phase 28 |
 
 Verified by probe before accepting B1/B2/B6: direct linear-inversion reconstruction of the bare CP gate from absolute Perceval probabilities (16 product inputs x 9 readout pairs, prep/readout unitaries from `compute_unitary()`) reproduces `(1/9) U rho U^dag` to 5e-16 at alpha = pi/3 and pi, is completely positive to 2e-15 at V = 0.9, takes 2.3 s per gate, and gives mean conditional fidelity 0.9703 at V = 0.9 vs Perceval tomography's 0.9707.
