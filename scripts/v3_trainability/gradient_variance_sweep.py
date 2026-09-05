@@ -53,6 +53,7 @@ the leak without changing any result:
 import argparse
 import csv
 import glob
+import json
 import os
 import time
 import re
@@ -82,7 +83,7 @@ FIELDNAMES = [
 ]
 
 
-def _validated_chunk_files(pattern, expected_draws=None):
+def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
     """Return chunk files after rejecting malformed or incompatible ranges."""
     files = sorted(glob.glob(pattern))
     if not files:
@@ -109,6 +110,19 @@ def _validated_chunk_files(pattern, expected_draws=None):
             f"chunk coverage is [{intervals[0][0]},{intervals[-1][1]}), "
             f"expected [0,{expected_draws})"
         )
+    if expected_config is not None:
+        for path in [p for _, _, p in intervals]:
+            manifest_path = f"{path}.json"
+            if not os.path.exists(manifest_path):
+                raise ValueError(f"missing chunk manifest: {manifest_path}")
+            with open(manifest_path, encoding="utf-8") as manifest_file:
+                manifest = json.load(manifest_file)
+            for key, expected in expected_config.items():
+                if manifest.get(key) != expected:
+                    raise ValueError(
+                        f"chunk configuration mismatch for {path}: {key}={manifest.get(key)!r}, "
+                        f"expected {expected!r}"
+                    )
     return [path for _, _, path in intervals]
 
 
@@ -258,6 +272,14 @@ def run_chunk(args):
         args.out, args.scope, n, init_scheme, args.sigma, args.draw_start, args.draw_count
     )
     np.save(path, pooled_grads)
+    with open(f"{path}.json", "w", encoding="utf-8") as manifest_file:
+        json.dump({
+            "scope": args.scope, "n": n, "init_scheme": init_scheme,
+            "sigma": args.sigma, "scale_factor": args.scale_factor,
+            "max_tracked_params": args.max_tracked_params,
+            "n_draws": args.n_draws, "draw_start": args.draw_start,
+            "draw_count": args.draw_count,
+        }, manifest_file, sort_keys=True)
     print(
         f"n={n} init={init_scheme} draws=[{args.draw_start},{args.draw_start + args.draw_count}): "
         f"{len(pooled_grads)} pooled grads, n_tracked_params={n_tracked} ({elapsed:.1f}s) -> {path}",
@@ -274,7 +296,15 @@ def combine_chunks(args, writer, f):
     pattern = os.path.join(
         _chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_*.npy"
     )
-    chunk_files = _validated_chunk_files(pattern, expected_draws=args.n_draws)
+    chunk_files = _validated_chunk_files(
+        pattern,
+        expected_draws=args.n_draws,
+        expected_config={
+            "scope": args.scope, "n": n, "init_scheme": init_scheme,
+            "sigma": args.sigma, "scale_factor": args.scale_factor,
+            "max_tracked_params": args.max_tracked_params, "n_draws": args.n_draws,
+        },
+    )
     arrays = [np.load(p) for p in chunk_files]
     pooled_grads = np.concatenate(arrays)
     # n_tracked_params is constant across chunks of the same cell; derive it from

@@ -44,6 +44,7 @@ all draws in one process.
 import argparse
 import csv
 import glob
+import json
 import os
 import time
 import re
@@ -72,7 +73,7 @@ FIELDNAMES = [
 ]
 
 
-def _validated_chunk_files(pattern, expected_draws=None):
+def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
     """Return chunk files after rejecting malformed or incompatible ranges."""
     files = sorted(glob.glob(pattern))
     if not files:
@@ -101,6 +102,19 @@ def _validated_chunk_files(pattern, expected_draws=None):
             f"chunk coverage is [{intervals[0][0]},{intervals[-1][1]}), "
             f"expected [0,{expected_draws})"
         )
+    if expected_config is not None:
+        for path in [p for _, _, p in intervals]:
+            manifest_path = f"{path}.json"
+            if not os.path.exists(manifest_path):
+                raise ValueError(f"missing chunk manifest: {manifest_path}")
+            with open(manifest_path, encoding="utf-8") as manifest_file:
+                manifest = json.load(manifest_file)
+            for key, expected in expected_config.items():
+                if manifest.get(key) != expected:
+                    raise ValueError(
+                        f"chunk configuration mismatch for {path}: {key}={manifest.get(key)!r}, "
+                        f"expected {expected!r}"
+                    )
     return [path for _, _, path in intervals]
 
 # weight2_pair/seed_base are fixed constants across every invocation of this
@@ -280,6 +294,12 @@ def run_chunk(args):
             args.draw_count,
         )
         np.save(path, raw)
+        with open(f"{path}.json", "w", encoding="utf-8") as manifest_file:
+            json.dump({
+                "scope": args.scope, "n": n, "backend": args.backend,
+                "eta": eta, "n_draws": args.n_draws,
+                "draw_start": args.draw_start, "draw_count": args.draw_count,
+            }, manifest_file, sort_keys=True)
         print(
             f"n={n} eta={eta:g} draws=[{args.draw_start},{args.draw_start + args.draw_count}): "
             f"{raw.shape[0]} draws ({elapsed:.1f}s) -> {path}",
@@ -298,7 +318,14 @@ def combine_chunks(args, writer, f):
             _chunk_dir(args.out),
             f"{args.backend}_{args.scope}_n{n}_eta{eta:g}_*.npy",
         )
-        chunk_files = _validated_chunk_files(pattern, expected_draws=args.n_draws)
+        chunk_files = _validated_chunk_files(
+            pattern,
+            expected_draws=args.n_draws,
+            expected_config={
+                "scope": args.scope, "n": n, "backend": args.backend,
+                "eta": eta, "n_draws": args.n_draws,
+            },
+        )
         arrays = [np.load(p) for p in chunk_files]
         summary = sweep.combine_pooled_cells(arrays, args.scope)
         row = _row_from_summary(n, args.scope, args.backend, eta, summary)
