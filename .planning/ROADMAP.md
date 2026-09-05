@@ -7,8 +7,8 @@
 - ✅ **v2.1 Weight-2 Implementation** — Phases 10-13 (shipped 2026-08-06)
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
 - ✅ **v3.1 Correction** — Phase 24 (shipped 2026-09-04; corrected two v3.0 findings an external audit found to be pipeline artifacts)
-- 🔧 **v3.2 Correction (Audit Response)** — Phase 32 (opened 2026-09-05; corrects overreach in the v3.1 correction itself plus code-level defects a second independent audit found)
-- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 25-31 (queued 2026-09-03, requeued 2026-09-05 behind v3.2; requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md`; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
+- ✅ **v3.2 Correction (Audit Response)** — Phase 25 (shipped 2026-09-05; corrected overreach in the v3.1 correction itself plus code-level defects a second independent audit found)
+- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 26-32 (queued 2026-09-03, requeued 2026-09-05 behind v3.2; requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md`; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
 
 ## Phases
 
@@ -106,15 +106,15 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 
 </details>
 
-## v4.0 Train Classically, Deploy Photonically (Phases 25-31) — QUEUED 2026-09-03, behind v3.2 (2026-09-05)
+## v4.0 Train Classically, Deploy Photonically (Phases 26-32) — QUEUED 2026-09-03, behind v3.2 (2026-09-05)
 
-**Requeued 2026-09-05:** v3.2 Correction opened after this section was already merged and claimed phases 25-31. A correction milestone takes priority over a not-yet-started study milestone — the same rule this section's own "Starts when v3.1 is closed" line already applied once. v4.0's requirements moved to `.planning/REQUIREMENTS-v4.0-queued.md` (parked, not deleted); this phase breakdown is otherwise unchanged and its phase numbers are undisturbed — v3.2 was renumbered instead (Phase 32, below) specifically to avoid colliding with these. Starts when v3.2 closes and the owner picks v4.0 as the next milestone.
+**Requeued 2026-09-05:** v3.2 Correction opened after this section was already merged. The agreed numbering keeps v3.2 as Phase 25 and shifts v4.0's seven phases to 26-32. v4.0's requirements remain parked at `.planning/REQUIREMENTS-v4.0-queued.md` (not deleted). It starts when v3.2 closes and the owner picks v4.0 as the next milestone.
 
 **Milestone goal:** Measure how far a classically trained IQP Born machine's photonic post-selected output drifts from the distribution the trainer deployed, under partial distinguishability, multi-photon emission, and loss, as a function of gate count and n; then test whether classical training against the tomographed gate channels closes that gap. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) § v4.0. Binding design: [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) table 5.1 and forbidden moves § 9. Starts when v3.1 is closed via `/gsd-complete-milestone`.
 
-**Ordering:** 25 → 26 → 27 → 28 (owner) → 29 → 30 → 31. Phase 29 cannot start until Phase 27's `crosscheck_shared_qubit.json` is on disk and Phase 28's k=0 and noiseless nulls are filled.
+**Ordering:** 26 → 27 → 28 → 29 (owner) → 30 → 31 → 32. Phase 30 cannot start until Phase 28's `crosscheck_shared_qubit.json` is on disk and Phase 29's k=0 and noiseless nulls are filled.
 
-### Phase 25: Classical Trainer Vendoring & Convention Lock
+### Phase 26: Classical Trainer Vendoring & Convention Lock
 **Goal:** Bring the spring-semester classical IQP trainer into `merlin_iqp.classical` as a numpy-only package and prove its theta is this repo's theta.
 **Depends on:** v3.1 (test conventions); sibling repo `C:\Users\cuqui\iqp-mmd-barren-plateau` at a recorded commit.
 **Requirements:** TRAIN-01, TRAIN-02, TRAIN-03, TRAIN-04.
@@ -124,7 +124,7 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 2. `tests/v4_tcdp/test_convention.py` green: Walsh-inverse vs `exact_qubit_iqp_distribution` < 1e-12; scaled-theta variants fail; exact MMD² at n=10 under 60 s.
 3. Full suite still green.
 
-### Phase 26: Noisy Gate Map Reconstruction
+### Phase 27: Noisy Gate Map Reconstruction
 **Goal:** Reconstruct one noisy `CP(alpha)` gate as a trace-decreasing completely positive 2-qubit map by linear inversion from absolute post-selected Perceval probabilities (method verified 2026-09-03: exact to 5e-16 ideal, CP at V=0.9, 2.3 s per map); Perceval tomography is a fidelity cross-check only.
 **Depends on:** none beyond Perceval 1.2.4 (probe facts in plan § 0).
 **Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04.
@@ -134,9 +134,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 2. Input-dependence of success at V=0.9 recorded; repeatability 1e-13; Perceval tomography fidelity agrees with the map's exact conditional fidelity within 5e-3 at three noise points.
 3. `alpha_key` yields exactly 63 keys; `map_timing.json` exists, measured at the slowest condition, and the 1134-map budget is under 3 single-core hours (measured ~45 min on 2026-09-03).
 
-### Phase 27: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
+### Phase 28: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
 **Goal:** Compose gate channels on an n-qubit density matrix, prove it exact against the qubit reference and against full-Fock Perceval, and measure the one approximation it makes.
-**Depends on:** Phase 25 (adapter), Phase 26 (channels).
+**Depends on:** Phase 26 (adapter), Phase 27 (channels).
 **Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, REFRAME-03.
 **Executor:** Codex. Plan sections 4.4-4.7 verbatim.
 **Success criteria:**
@@ -145,9 +145,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 3. `results/v4_tcdp/crosscheck_shared_qubit.json` holds the shared-qubit discrepancies at three noise points × two alphas, with the pre-registered band applied.
 4. Erasure helper passes hand-enumerated per-pattern tests including the shared-qubit case; heralded-CZ throughput overlay function exists.
 
-### Phase 28: Owner Null Results (owner-only gate)
+### Phase 29: Owner Null Results (owner-only gate)
 **Goal:** The owner writes, red first, what the deployment sweep outputs if the gates contribute nothing, before any sweep row exists.
-**Depends on:** Phase 27 (the functions the nulls are tested against).
+**Depends on:** Phase 28 (the functions the nulls are tested against).
 **Requirements:** NULL-03, NULL-04, NULL-05, NULL-06, NULL-07, NULL-08, NULL-09.
 **Executor:** Owner for NULL-03..08 (Claude asks questions and points at rows; does not supply formulas, 24-CONTEXT.md D-02); Codex for NULL-09's pipeline control tests.
 **Success criteria:**
@@ -155,9 +155,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 2. Each owner function's docstring carries the owner's one-sentence "why it has this shape".
 3. `test_control_point_every_cell` and `test_control_point_can_fail` present and green on three cells.
 
-### Phase 29: Classical Training Runs & Deployment Gap Sweep
+### Phase 30: Classical Training Runs & Deployment Gap Sweep
 **Goal:** Train every design-table cell classically, deploy each through the channel simulator across the hardware-anchored noise grid, and report the six metrics against the nulls.
-**Depends on:** Phases 25-28.
+**Depends on:** Phases 26-29.
 **Requirements:** SWEEP-01, SWEEP-02, SWEEP-03, SWEEP-04, SWEEP-05.
 **Executor:** Codex for scripts and figures; owner interprets first, Claude checks (CLAUDE.md rule).
 **Success criteria:**
@@ -166,9 +166,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 3. For each null, the write-up states matched / did not match; the headline outcome from plan § 5.6 is named.
 4. Tomography wall-clock reported; any alpha rounding stated.
 
-### Phase 30: Noise-Aware Classical Training
+### Phase 31: Noise-Aware Classical Training
 **Goal:** Train theta against the channel-composed deployed distribution and measure whether the gap closes at Ascella-grade noise. The milestone's method claim, either way it comes out.
-**Depends on:** Phase 29 (baseline gaps).
+**Depends on:** Phase 30 (baseline gaps).
 **Requirements:** NAT-01, NAT-02, NAT-03.
 **Executor:** Codex; owner reads timing before each n step.
 **Success criteria:**
@@ -176,9 +176,9 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 2. Before/after gap table at n ∈ {4,6,8}, k=n-1, Ascella noise, 5 seeds, next to the ideal-trained baseline.
 3. Stop rule outcome recorded in `PROJECT.md` (completed, or stopped with numbers).
 
-### Phase 31: Write-Up, Review Gate, Communication
+### Phase 32: Write-Up, Review Gate, Communication
 **Goal:** Owner checkpoint, study document, mirrors, two-stage review, Gibbs pass, Vincent note.
-**Depends on:** Phases 29-30.
+**Depends on:** Phases 30-31.
 **Requirements:** WRITE-07, WRITE-08, WRITE-09, REVIEW-02, COMM-02.
 **Executor:** Owner (checkpoint, journal, note); Sonnet (prose, read aloud before commit); Fable/Opus then Codex (review).
 **Success criteria:**
@@ -187,14 +187,14 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 3. REVIEW.md dispositions every finding from both reviews.
 4. Vincent note drafted; send/hold recorded; journal entry in the owner's words.
 
-### Phase 32: v3.2 Correction (Audit Response) — opened 2026-09-05 (in progress)
+### Phase 25: v3.2 Correction (Audit Response) — shipped 2026-09-05
 
 **Goal:** Correct two places where the v3.1 correction itself overreached (CONCEPT-01: an exact classical reference mistaken for a mechanism-removing control; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure scales with `n` — it doesn't), retract or narrow TRAIN-10's mismatched-statistics negative result (CONCEPT-03), and fix the code-level defects a second independent audit (GPT-6 Astra) found: a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing CSVs.
 **Depends on:** `docs/trainability-study.md`/`docs/hardness-under-loss-study.md` (the documents being corrected); `docs/audits/2026-09-05-codebase-audit.md` and its two probe scripts.
 **Requirements:** [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) — CONCEPT-01..03, CORR-08..17, GATE-02/03.
-**Note:** originally numbered Phase 25; renumbered to 32 on 2026-09-05 when merging against `master`, since v4.0's plan (PR #3) had already merged claiming phases 25-31 first. This phase's own content is otherwise unaffected — it never had internal sub-phase cross-references the way v4.0's plan doc does, so renumbering it (not v4.0) kept the merge to two files instead of v4.0's entire plan/review corpus.
+**Note:** this phase was originally numbered 25. After merging v4.0, the agreed resolution kept this correction at Phase 25 and shifted v4.0's phases to 26-32; the on-disk directory and context file therefore retain their original `25-` names.
 
-**Progress (2026-09-05):** mechanical track (CORR-08, 09, 11, 12, 16, 17, GATE-02/03) shipped — see `.planning/REQUIREMENTS.md` for per-item evidence. Conceptual track (CONCEPT-01..03) not started, owner-only.
+**Progress (2026-09-05):** all CONCEPT-01..03, CORR-08..17, and GATE-02/03 requirements shipped — see `.planning/REQUIREMENTS.md` for per-item evidence.
 
 **Success criteria:**
 1. CONCEPT-01..03 each have an owner-authored resolution recorded in the affected document(s), dated and additive.

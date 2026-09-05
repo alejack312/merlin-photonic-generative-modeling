@@ -22,7 +22,9 @@ likely to be needed in practice.
 import argparse
 import csv
 import glob
+import json
 import os
+import re
 import time
 
 import numpy as np
@@ -43,6 +45,77 @@ FIELDNAMES = [
     "abs_mean",
     "rms",
 ]
+
+
+def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
+    """Return chunk files after rejecting malformed or incompatible ranges."""
+    files = sorted(glob.glob(pattern))
+    if not files:
+        raise FileNotFoundError(f"no chunk files found matching {pattern}")
+    intervals = []
+    for path in files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        if start >= end:
+            raise ValueError(f"invalid empty/reversed draw interval in {path}")
+        intervals.append((start, end, path))
+    intervals.sort()
+    for (_, previous_end, previous_path), (start, _, path) in zip(intervals, intervals[1:]):
+        if start < previous_end:
+            raise ValueError(f"overlapping draw chunks: {previous_path} and {path}")
+        if start != previous_end:
+            raise ValueError(f"gap between draw chunks: {previous_path} and {path}")
+    if expected_draws is not None and (
+        intervals[0][0] != 0 or intervals[-1][1] != expected_draws
+    ):
+        raise ValueError(
+            f"chunk coverage is [{intervals[0][0]},{intervals[-1][1]}), "
+            f"expected [0,{expected_draws})"
+        )
+    if expected_config is not None:
+        for start, end, path in intervals:
+            manifest_path = f"{path}.json"
+            if not os.path.exists(manifest_path):
+                raise ValueError(f"missing chunk manifest: {manifest_path}")
+            with open(manifest_path, encoding="utf-8") as manifest_file:
+                manifest = json.load(manifest_file)
+            if manifest.get("draw_start") != start or manifest.get("draw_count") != end - start:
+                raise ValueError(
+                    f"chunk manifest draw interval mismatch for {path}: "
+                    f"draw_start={manifest.get('draw_start')!r}, "
+                    f"draw_count={manifest.get('draw_count')!r}, "
+                    f"expected draw_start={start}, draw_count={end - start}"
+                )
+            for key, expected in expected_config.items():
+                if manifest.get(key) != expected:
+                    raise ValueError(
+                        f"chunk configuration mismatch for {path}: {key}={manifest.get(key)!r}, "
+                        f"expected {expected!r}"
+                    )
+    return [path for _, _, path in intervals]
+
+
+def _load_validated_chunk_arrays(chunk_files, n_tracked_params):
+    """Load pooled gradient chunks and require tracked gradients per draw."""
+    arrays = []
+    for path in chunk_files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        array = np.load(path)
+        expected_rows = (end - start) * n_tracked_params
+        if array.ndim == 0 or array.shape[0] != expected_rows:
+            actual_rows = array.shape[0] if array.ndim else "scalar"
+            raise ValueError(
+                f"chunk array row count mismatch for {path}: "
+                f"got {actual_rows!r}, expected {expected_rows} "
+                f"({end - start} draws x {n_tracked_params} tracked params)"
+            )
+        arrays.append(array)
+    return arrays
 
 
 def parse_args():
@@ -97,6 +170,12 @@ def run_chunk(args):
     elapsed = time.time() - start
     path = _chunk_path(args.out, args.scope, n, init_scheme, args.draw_start, args.draw_count)
     np.save(path, pooled_grads)
+    with open(f"{path}.json", "w", encoding="utf-8") as manifest_file:
+        json.dump({
+            "scope": args.scope, "n": n, "init_scheme": init_scheme,
+            "n_draws": args.n_draws, "draw_start": args.draw_start,
+            "draw_count": args.draw_count,
+        }, manifest_file, sort_keys=True)
     print(
         f"n={n} init={init_scheme} draws=[{args.draw_start},{args.draw_start + args.draw_count}): "
         f"{len(pooled_grads)} pooled grads, n_tracked_params={n_tracked} ({elapsed:.1f}s) -> {path}",
@@ -108,10 +187,17 @@ def combine_chunks(args, writer, f):
     n = args.n_values[0]
     init_scheme = args.init_schemes[0]
     pattern = os.path.join(_chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_*.npy")
-    chunk_files = sorted(glob.glob(pattern))
-    if not chunk_files:
-        raise FileNotFoundError(f"no chunk files found matching {pattern}")
-    pooled_grads = np.concatenate([np.load(p) for p in chunk_files])
+    chunk_files = _validated_chunk_files(
+        pattern,
+        expected_draws=args.n_draws,
+        expected_config={
+            "scope": args.scope, "n": n, "init_scheme": init_scheme,
+            "n_draws": args.n_draws,
+        },
+    )
+    pooled_grads = np.concatenate(
+        _load_validated_chunk_arrays(chunk_files, n_tracked_params=n)
+    )
     result = {
         "n": n,
         "generator_scope": args.scope,

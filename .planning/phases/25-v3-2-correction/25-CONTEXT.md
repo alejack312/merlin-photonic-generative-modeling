@@ -17,7 +17,7 @@ I (Claude) independently re-verified CONCEPT-01, CONCEPT-02, and the classifier/
 
 - **D-01:** Per `CLAUDE.md`'s "do not shortcut — interpreting benchmark/metric results" rule, Claude does not draft the corrected scientific claims for CONCEPT-01/02/03. Claude may point at the exact code, the exact q(theta) definitions, and the exact factorization math, and answer questions — the owner writes the sentence.
 - **D-02:** The mechanical track (CORR-08..17, GATE-02/03) does not depend on how CONCEPT-01..03 resolve — a wrong classifier is wrong regardless of what the mixed-scope framing ends up being — so it proceeds independently rather than being gated behind the owner's review, unlike v3.1's NULL-01 (which structurally had to come first there).
-- **D-03:** This phase is numbered 25 on `master`. The open, unmerged v4.0 plan (PR #3, `claude/merlin-photonic-iqp-audit-e8144c`) also claims phases 25-31. Whichever merges second will need its phase numbers shifted — noted here rather than silently resolved, since it affects both branches' `ROADMAP.md`.
+- **D-03:** This phase remains numbered 25. After v4.0 merged claiming phases 25-31, the agreed resolution keeps v3.2 at Phase 25 and shifts v4.0 to Phases 26-32; this directory and context file retain their original `25-` names.
 - **D-04:** No full sweep, training run, Julia verifier, or Forge solver was rerun as part of this phase (matches the audit's own stated coverage limit). CORR-08..12 are fixed and regression-tested against synthetic/adversarial cases, not by re-deriving every historical CSV.
 
 ## What's owner-only vs. Claude-executable, restated plainly

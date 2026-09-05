@@ -2,7 +2,7 @@
 
 **Parked here 2026-09-05** because v3.2 Correction (Audit Response) opened after this file was already merged as `.planning/REQUIREMENTS.md`, and a correction milestone takes priority over a not-yet-started study milestone (the same rule v4.0 itself already applied to v3.1 — see its own "Defined" line below). This is the exact content that was `.planning/REQUIREMENTS.md` on `master` immediately before v3.2 became current; nothing has been reworded. Move it back to `.planning/REQUIREMENTS.md` when v4.0 actually starts (v3.2 closes, and the owner picks v4.0 as the next milestone over any other v4.0-candidate direction).
 
-Phase numbers below (25-31) are as originally written and are unaffected by v3.2's own phase, which was renumbered to Phase 32 specifically to avoid colliding with these — see `.planning/ROADMAP.md`.
+Phase numbers below (26-32) reflect the agreed numbering: v3.2 remains Phase 25 and v4.0's seven phases shift up by one — see `.planning/ROADMAP.md`.
 
 ---
 
@@ -52,7 +52,7 @@ All Must-have unless marked otherwise.
 - [ ] **NULL-05**: `owner_null_eta_effect(n, k, eta)` — predicted change in the conditional distribution from eta alone — filled and green.
 - [ ] **NULL-06**: `owner_null_throughput_cp(n, alphas, eta)` and `owner_null_throughput_hcz(n, k, eta)` — both closed forms — filled and green.
 - [ ] **NULL-07**: `owner_hypothesis_gap_scaling(k, F)` — the owner's first-order hypothesis for gap vs gate count, marked `xfail(strict=False)`; whether it held is a sentence in the write-up either way.
-- [ ] **NULL-08**: `owner_null_nat_ideal()` — what noise-aware training does when every gate map is ideal (predicted before/after gap and the relation of the NAT-trained theta to the ideal-trained theta) — filled and green before Phase 30.
+- [ ] **NULL-08**: `owner_null_nat_ideal()` — what noise-aware training does when every gate map is ideal (predicted before/after gap and the relation of the NAT-trained theta to the ideal-trained theta) — filled and green before Phase 31.
 - [ ] **NULL-09** (pipeline null, may be written by Codex): `test_control_point_every_cell` asserts at (V,g2)=(1,0), for every trained cell, that every deployed metric equals its ideal counterpart (TVD = 0 to 1e-12; MMD², KL at both floors, coverage, fidelity, marginal errors equal; `mean_gate_fidelity = 1`; `p_success` equals the closed-form product), run inside `deploy_sweep.py` on the control rows and standalone on three cells; `test_control_point_can_fail` perturbs one entry by 1e-3 and every equality must fail.
 
 ### Deployment gap sweep (SWEEP)
@@ -65,8 +65,8 @@ All Must-have unless marked otherwise.
 
 ### Noise-aware classical training (NAT) — promoted from Should to Must on 2026-09-03 (owner decision after Fable's recommendation)
 
-- [ ] **NAT-01**: `scripts/v4_tcdp/nat_train.py` optimizes theta against `mmd2_train(q_dep(theta))` with `q_dep` from `deploy_density_matrix` (theta_eff inside), warm-started from the Phase-29 ideal-trained theta, Adam lr 0.02, 150 steps, central finite differences h = 1e-4 on the exact deployed vector (parameter-shift is not valid for a channel; the piecewise objective from alpha rounding is accepted and stated); all 63 Ascella-point maps are precomputed before the first step.
-- [ ] **NAT-02**: At n ∈ {4, 6, 8}, k = n−1, primary kernel, `data_dependent` init, the 5 Phase-29 seeds, Ascella noise (V=0.93, g2=0.007): all six metrics of `q_dep(theta_NAT)` reported next to `q_dep(theta_ideal-trained)` and `q_ideal(theta_ideal-trained)`; NULL-08 run first with ideal maps and its prediction confirmed; the cost budget (29 250 evaluations × the per-call time measured in Phase 27) recorded before the run.
+- [ ] **NAT-01**: `scripts/v4_tcdp/nat_train.py` optimizes theta against `mmd2_train(q_dep(theta))` with `q_dep` from `deploy_density_matrix` (theta_eff inside), warm-started from the Phase-30 ideal-trained theta, Adam lr 0.02, 150 steps, central finite differences h = 1e-4 on the exact deployed vector (parameter-shift is not valid for a channel; the piecewise objective from alpha rounding is accepted and stated); all 63 Ascella-point maps are precomputed before the first step.
+- [ ] **NAT-02**: At n ∈ {4, 6, 8}, k = n−1, primary kernel, `data_dependent` init, the 5 Phase-30 seeds, Ascella noise (V=0.93, g2=0.007): all six metrics of `q_dep(theta_NAT)` reported next to `q_dep(theta_ideal-trained)` and `q_ideal(theta_ideal-trained)`; NULL-08 run first with ideal maps and its prediction confirmed; the cost budget (29 250 evaluations × the per-call time measured in Phase 28) recorded before the run.
 - [ ] **NAT-03**: Stop rule enforced and recorded: if one n=8 run exceeds 20 minutes, or two calendar days pass without a green end-to-end n=4 run, timing is written to `PROJECT.md` and NAT ships as "attempted, stopped" with the numbers obtained; the milestone still closes.
 
 ### Write-up, gates, communication (WRITE / REVIEW / COMM)
@@ -93,13 +93,13 @@ All Must-have unless marked otherwise.
 
 | Requirement | Phase | Status |
 |---|---|---|
-| TRAIN-01..04 | Phase 25 | Pending |
-| CHAN-01..04 | Phase 26 | Pending |
-| DEPLOY-01..05, REFRAME-03 | Phase 27 | Pending |
-| NULL-03..09 | Phase 28 | Pending (owner; NULL-09 pipeline) |
-| SWEEP-01..05 | Phase 29 | Pending |
-| NAT-01..03 | Phase 30 | Pending |
-| WRITE-07..09, REVIEW-02, COMM-02 | Phase 31 | Pending |
+| TRAIN-01..04 | Phase 26 | Pending |
+| CHAN-01..04 | Phase 27 | Pending |
+| DEPLOY-01..05, REFRAME-03 | Phase 28 | Pending |
+| NULL-03..09 | Phase 29 | Pending (owner; NULL-09 pipeline) |
+| SWEEP-01..05 | Phase 30 | Pending |
+| NAT-01..03 | Phase 31 | Pending |
+| WRITE-07..09, REVIEW-02, COMM-02 | Phase 32 | Pending |
 
 **Coverage:** v1 requirements: 32 total; mapped: 32; unmapped: 0.
 

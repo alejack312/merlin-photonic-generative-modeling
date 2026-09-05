@@ -11,13 +11,13 @@ The phase's canonical reference document that details methodology, the real meas
 - **HARD-04's positioning against loss-native hardness regimes and HARD-06's final scope statement** (`## HARD-04/HARD-06`) — including the owner's attempt-first response and a direct primary-source verification of arXiv:2511.07853.
 - **Added by Phase 20:** a literature comparison table (WRITE-02, `### Literature comparison table`) and a cross-reference note against Herbst et al.'s anticoncentration-tradeoff prediction (`### Cross-reference: Herbst et al.'s anticoncentration-tradeoff prediction`, at the end of this document).
 
-## Scope precondition: only the mixed scope is a hardness candidate
+## Scope precondition: neither current scope is an asymptotic hardness candidate
 
-**Read this before interpreting any number below.** IQP's conjectured sampling hardness comes from the correlations that the `ZZ` (weight-2) terms create between qubits. Strip those out and nothing hard remains — not "hard but degraded," just **absent by construction**.
+**Read this before interpreting any number below.** IQP's conjectured sampling hardness requires correlations from an entangling structure that scales with system size. Neither scope tested here meets that condition.
 
 The `weight1` scope has no entangling gate, so its output distribution is **exactly a product distribution**: `P(x) = prod_k cos^2(theta_k)` or `sin^2(theta_k)` per bit, verified against the analytic form to `2.2e-16` at every swept size `n=2..6`. A product distribution over `n` bits is sampled classically in `O(n)` time by flipping `n` independent biased coins. There is no hardness there to preserve, erode, or measure.
 
-Concretely, of this phase's 56 measured rows, **only the 21 `mixed`-scope rows bear on the hardness question at all**. The 35 `weight1` rows are a control. They are a genuinely useful control — the known closed form is what makes the loss channel independently checkable (it is how `survival = eta^n` was confirmed exactly) — but a `weight1` TVD or anticoncentration value is not evidence about sampling hardness, in either direction, and is not presented as such anywhere in this document.
+Concretely, this phase's 56 measured rows cover two classically sampleable scopes. The 35 `weight1` rows are a product-distribution control. The 21 `mixed` rows add one fixed-size entangled pair, so they factor into a constant-size two-qubit distribution times independent single-qubit factors and remain classically sampleable. Both scopes make the loss channel independently checkable; neither supplies evidence for an asymptotic hardness claim. A denser entangling family whose correlations grow with `n` would be needed before that question is testable.
 
 ## Correction (2026-09-03) — TVD-vs-eta is a closed form with no circuit content; here is the actual result
 
@@ -40,21 +40,21 @@ This follows directly from what "TVD to lossless" measures here: the pipeline's 
 | n (data qubits) | k=0 (no CZ, measured range) | k=1 (measured range) | k=2 (extrapolated, not measured) | k=3 (extrapolated, not measured) |
 |---|---|---|---|---|
 | **eta = 0.9 (near-lossless)** | | | | |
-| 2 | 1.2 | 21 | 342 | 5.7e3 |
-| 4 | 1.5 | 25 | 424 | 7.0e3 |
-| 6 | 1.9 | 31 | 524 | 8.7e3 |
-| 8 | 2.3 | 39 | 645 | 1.1e4 |
+| 2 | 1.23 | 20.6 | 343 | 5.72e3 |
+| 4 | 1.52 | 25.4 | 423 | 7.06e3 |
+| 6 | 1.9 | 31.4 | 523 | 8.71e3 |
+| 8 | 2.32 | 38.7 | 645 | 1.08e4 |
 | **eta = 0.6 (moderate loss)** | | | | |
-| 2 | 2.8 | 104 | 3.9e3 | 1.5e5 |
-| 4 | 7.7 | 289 | 1.1e4 | 4.1e5 |
-| 6 | 21 | 806 | 3.0e4 | 1.1e6 |
-| 8 | 60 | 2.2e3 | 8.4e4 | 3.1e6 |
+| 2 | 2.78 | 104 | 3.91e3 | 1.46e5 |
+| 4 | 7.72 | 289 | 1.09e4 | 4.07e5 |
+| 6 | 21.4 | 804 | 3.01e4 | 1.13e6 |
+| 8 | 59.5 | 2.23e3 | 8.37e4 | 3.14e6 |
 
 Each cell is `1 / (eta^(n+2k) · (2/27)^k)` — expected samples until one usable shot arrives — computed directly from the closed form verified above, not measured for `k>=2` (no sweep at those `n,k` was run. The underlying pipeline's own data only covers `n<=6` at `k=0`/weight1 and `n<=4` at `k=1`/mixed, `results/v3_hardness/`). Extending to `k>=2` assumes each additional heralded gate's herald-conditioning behaves like the single-gate `h(eta)` mechanism independently — a reasonable but explicitly unverified extrapolation, not a cross-gate-compounded result. The `k=0,1` rows, by contrast, are direct evaluations of the closed form already verified against every shipped row. The pattern the table makes visible, restricted to the verified `k=0->1` columns: one heralded gate costs more than six extra qubits do. At `eta=0.6`, adding a single `k=0->1` CZ costs ~37x throughout (104/2.78 at n=2, 2230/59.5 at n=8 — the ratio is `eta^-2 · 27/2 ≈ 37.5`, independent of `n`), while going from `n=2` to `n=8` at fixed `k=0` costs only ~21x. This is the resource statement Quandela's own hardware roadmap would care about. The TVD-vs-eta plots below are the pipeline check that this closed form is correct, not a separate finding.
 
 **Scope correction (2026-09-03, found by a parallel Fable 5.1 session, independently reverified here): the throughput cost above is `heralded_cz`-specific, not a general two-qubit-photonic-gate fact.** This project also implements a second, tunable two-qubit gate, `CP(alpha)` (ARB-01, `scripts/v3_arb_gate/cp_alpha_sweep.py`), and its loss profile is structurally different. `build_cp_insertion` (`iqp_photonic.py:295-367`) gives `CP(alpha)`'s 4 ancilla modes an all-vacuum input on both ends — the gate succeeds by *post-selecting* on those modes staying empty, not by heralding a real ancilla photon pair. Since `pcvl.LC(1-eta)` loss only removes photons that exist, a vacuum mode has nothing to lose: `CP(alpha)`'s loss cost is `eta^n` (the `n` data photons only), independent of how many `CP(alpha)` gates the circuit has, unlike `heralded_cz`'s `eta^(n+2k)`. Its post-selection cost is separately `1/sigma_max(alpha)^4` per gate (verified in `cp_alpha_sweep.py`, independent of `eta`), not the `(27/2)^k` factor above. **No loss sweep was ever run against `CP(alpha)`** — this is a structural fact read directly from the gate's construction, not a measured or extrapolated throughput number, and no such table is given here. The takeaway is qualitative but real: "one heralded gate costs more than six extra qubits" describes `heralded_cz` specifically. Because this project's own tunable gate never puts real photons where `heralded_cz` does, it does not inherit that cost.
 
-**What survives unchanged:** the scope precondition above (only `mixed` bears on hardness at all) and the herald-compounding qualitative story (HARD-07, below) are untouched by this correction — they were already stated correctly. What changes is the *interpretation* of the TVD/alpha numbers: from "evidence about hardness eroding under loss" to "a closed-form throughput cost with the conditional distribution provably unaffected," now correctly scoped to the `heralded_cz` construction rather than presented as a general two-qubit-gate cost.
+**What survives unchanged:** the scope precondition above and the herald-compounding qualitative story (HARD-07, below) are untouched by this correction. What changes is the *interpretation* of the TVD/alpha numbers: from "evidence about hardness eroding under loss" to "a closed-form throughput cost with the conditional distribution provably unaffected," now correctly scoped to the `heralded_cz` construction rather than presented as a general two-qubit-gate cost.
 
 ## Methodology
 

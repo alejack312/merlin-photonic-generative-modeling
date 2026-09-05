@@ -28,8 +28,10 @@ answers):
     with n? What does that do to the gradient's variance from one n to the
     next?
 
-While a function still returns ``None`` its tests SKIP, so the full suite
-stays green. NULL-02 (a later plan) removes the skips once you are done.
+The harness treats a ``None`` prediction as a gate failure. A missing formula
+must not silently reduce coverage; the only legitimate omission is a case that
+cannot define the requested statistic (for example, a variance ratio before
+the first adjacent n pair is available).
 Claude's job in Task 0 is to ask questions and point at rows, not to fill
 these in. If you are genuinely stuck after an attempt, ask for the
 interactive visualization of the mechanism (Willison §13) before asking for
@@ -189,7 +191,17 @@ def owner_train_null_ratio(scope: str, n: int, sigma: float = 0.1) -> float | No
 
 def _rows(path: Path) -> list[dict]:
     with path.open(newline="") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+    if not rows:
+        raise ValueError(f"Required null-result CSV has no data rows: {path}")
+    return rows
+
+
+def test_required_csv_with_header_only_fails(tmp_path):
+    path = tmp_path / "header-only.csv"
+    path.write_text("n,generator_scope\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="no data rows"):
+        _rows(path)
 
 
 def _require_csv(path: Path) -> Path:
@@ -223,7 +235,7 @@ def _hard_cases():
 def test_hard_tvd_to_lossless_matches_owner_null(csv_name, scope, n, eta, shipped):
     predicted = owner_hard_null_tvd(scope, n, eta)
     if predicted is None:
-        pytest.skip("Task 0: owner has not filled owner_hard_null_tvd yet")
+        pytest.fail(f"owner_hard_null_tvd returned None for scope={scope}, n={n}, eta={eta}")
     assert predicted == pytest.approx(shipped, abs=2e-3), (
         f"{csv_name}: scope={scope} n={n} eta={eta}: shipped {shipped:.5f}, "
         f"your null {predicted:.5f}"
@@ -260,6 +272,37 @@ def _train_ratio_cases():
                 )
 
 
+def _eligible_uniform_rows(path: Path) -> list[dict]:
+    return [
+        r
+        for r in _rows(path)
+        if r["init_scheme"] == "uniform" and _row_sigma(r) <= 0.1
+    ]
+
+
+def test_each_required_train_csv_contributes_eligible_uniform_rows():
+    """The TRAIN null-result parametrization must not pass vacuously."""
+    for path in TRAIN_CSVS:
+        _require_csv(path)
+        rows = _eligible_uniform_rows(path)
+        assert rows, f"{path}: no eligible uniform-init rows with sigma <= 0.1"
+
+
+def test_each_train_ratio_group_has_an_adjacent_pair():
+    """Every eligible (scope, sigma) series must support a variance ratio."""
+    for path in TRAIN_CSVS:
+        _require_csv(path)
+        groups: dict[tuple[str, float], set[int]] = {}
+        for row in _eligible_uniform_rows(path):
+            groups.setdefault((row["generator_scope"], _row_sigma(row)), set()).add(int(row["n"]))
+        assert groups, f"{path}: no eligible ratio groups"
+        for (scope, sigma), ns in groups.items():
+            ordered = sorted(ns)
+            assert any(b == a + 1 for a, b in zip(ordered, ordered[1:])), (
+                f"{path}: ratio group scope={scope} sigma={sigma} has no adjacent n pair"
+            )
+
+
 def _train_absolute_cases():
     """CORR-12 (2026-09-05): companion to _train_ratio_cases yielding the
     raw shipped variance (not a ratio between two n's). An independent
@@ -294,7 +337,7 @@ def test_train_absolute_variance_matches_owner_null(scope, sigma, n, shipped_var
 def test_train_variance_ratio_matches_owner_null(scope, sigma, n, shipped_ratio):
     predicted = owner_train_null_ratio(scope, n, sigma=sigma)
     if predicted is None:
-        pytest.skip("Task 0: owner has not filled owner_train_null_ratio yet")
+        pytest.fail(f"owner_train_null_ratio returned None for scope={scope}, n={n}, sigma={sigma}")
     # Tolerance corrected 2026-09-03: the previous rel=0.5 was widened to
     # paper over a bug in this null model (it only differentiated theta[0]
     # instead of pooling pick_tracked_indices(n, 3) like the real sweep --

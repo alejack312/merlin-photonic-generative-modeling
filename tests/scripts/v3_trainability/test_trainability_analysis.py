@@ -44,10 +44,10 @@ def test_increasing_curve_is_not_labeled_plateau():
     assert label != "plateau"
 
 
-def test_genuinely_decaying_curve_is_still_labeled_plateau():
+def test_zero_floor_decaying_curve_is_labeled_plateau():
     """Sanity check the fix doesn't over-correct: a real decaying curve
     (a>0, b>0) must still be labeled "plateau"."""
-    ys = 2.0 * np.exp(-0.8 * NS) + 0.001
+    ys = 2.0 * np.exp(-0.8 * NS)
     fit = _fit(ys)
 
     assert fit["verdict"] == "exp"
@@ -55,6 +55,14 @@ def test_genuinely_decaying_curve_is_still_labeled_plateau():
     assert a > 0 and b > 0, "test setup must reproduce the genuine-decay case"
 
     assert fit_verdict_to_plateau_label(fit) == "plateau"
+
+
+def test_positive_floor_is_inconclusive_not_plateau():
+    ys = 2.0 * np.exp(-0.8 * NS) + 0.001
+    fit = _fit(ys)
+
+    assert fit["verdict"] == "exp"
+    assert fit_verdict_to_plateau_label(fit) == "inconclusive (exp fit has nonzero floor)"
 
 
 def test_classify_survival_does_not_survive_an_increasing_curve():
@@ -71,10 +79,18 @@ def test_classify_survival_does_not_survive_an_increasing_curve():
 
 
 def test_classify_survival_survives_a_genuinely_decaying_curve():
-    ys = 2.0 * np.exp(-0.8 * NS) + 0.001
+    ys = 2.0 * np.exp(-0.8 * NS)
     fit = _fit(ys)
     baseline_cell = {"exp_b": 0.8, "exp_aic": -50.0, "poly_aic": -10.0, "verdict": "exp"}
 
     result = classify_survival(baseline_cell, fit)
 
     assert result in ("survives", "weakens")
+
+
+def test_classify_survival_rejects_positive_floor():
+    ys = 2.0 * np.exp(-0.8 * NS) + 0.001
+    fit = _fit(ys)
+    baseline_cell = {"exp_b": 0.8, "exp_aic": -50.0, "poly_aic": -10.0, "verdict": "exp"}
+
+    assert classify_survival(baseline_cell, fit) == "disappears"

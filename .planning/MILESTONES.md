@@ -29,7 +29,7 @@
 **Known gaps at close (tracked separately, not blocking):**
 - **NULL-01 (partial):** the mixed-scope `h(eta)` null formula was sourced from a parallel Fable 5.1 session rather than derived by the owner. The weight-1 formula is fully owner-derived and self-explained; the mixed-scope formula's self-explanation placeholder in `tests/v3_correction/test_null_results.py` remains unfilled. Owner-gated by the requirement's own design — not a task for Claude to close.
 
-**What's next:** v4.0 direction undecided (per `24-CONTEXT.md`'s decision log). A "Train Classically, Deploy Photonically" plan already exists on the `claude/merlin-photonic-iqp-audit-e8144c` branch (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 25-31, not yet executed) as one candidate, alongside the other audit-identified frontier directions explicitly deferred out of v3.1's scope (structured n≈20+ simulator, Hamming-kernel trainability rerun, distinguishability noise, non-post-selected simulability analysis).
+**What's next:** v4.0 direction undecided (per `24-CONTEXT.md`'s decision log). A "Train Classically, Deploy Photonically" plan already exists on the `claude/merlin-photonic-iqp-audit-e8144c` branch (`docs/v4-plan-train-classical-deploy-photonic.md`, phases 26-32, not yet executed) as one candidate, alongside the other audit-identified frontier directions explicitly deferred out of v3.1's scope (structured n≈20+ simulator, Hamming-kernel trainability rerun, distinguishability noise, non-post-selected simulability analysis).
 
 ---
 

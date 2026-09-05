@@ -70,6 +70,7 @@ GENERATOR_SCOPES = ["weight1", "mixed"]
 INIT_SCHEMES = ["small_angle", "uniform"]
 SIGMAS = [0.03, 0.1, 0.3, 1.0, 3.0, 9.0]
 BASELINE_SIGMA = 0.1  # Phase 17's original, fixed bandwidth -- the baseline CSV's own sigma.
+EXP_FLOOR_TOLERANCE = 1e-9
 
 # "weakens" threshold: if the fitted exp decay rate b, or the AIC margin
 # (poly_aic - exp_aic, positive = exp favored) drops below this fraction of
@@ -135,6 +136,13 @@ def _exp_a(fit_result):
     return float("nan")
 
 
+def _exp_c(fit_result):
+    """The fitted exponential floor c, or NaN when the fit did not converge."""
+    if fit_result["exp"]["converged"]:
+        return float(fit_result["exp"]["params"][2])
+    return float("nan")
+
+
 def load_train09_series(rows, scope, init_scheme, sigma):
     """Return (ns, variances, bin_spacings) for one (scope, init_scheme,
     sigma) cell, sorted by n ascending."""
@@ -192,12 +200,15 @@ def classify_survival(baseline_cell, current_fit_result):
         return "disappears"
     b = _exp_b(current_fit_result)
     a = _exp_a(current_fit_result)
+    c = _exp_c(current_fit_result)
     if not (b > 0 and a > 0):
         # CORR-08 (2026-09-05): exp technically wins the AIC comparison,
         # but decreasing-with-n depends on sign(-a*b), not b alone -- a<0
         # with b>0 is growing toward the floor, not shrinking toward it
         # (the original `not (b > 0)` check missed this; confirmed by an
         # independent audit's adversarial probe, see 25-CONTEXT.md).
+        return "disappears"
+    if not np.isclose(c, 0.0, atol=EXP_FLOOR_TOLERANCE, rtol=0.0):
         return "disappears"
 
     baseline_b = baseline_cell["exp_b"]
