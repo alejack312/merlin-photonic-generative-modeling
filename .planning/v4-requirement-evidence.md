@@ -49,7 +49,7 @@ Statuses are strict: `PASS` means the bounded implementation criterion has direc
 | RING-04 | INCONCLUSIVE | validated photonic ring adapter is not available |
 | REPRO-01 | PASS | sibling inventory: both packages, configs, artifacts and dispositions |
 | REPRO-02 | PASS | pinned clean state plus separately hashed local artifacts; sibling unchanged |
-| REPRO-03 | INCONCLUSIVE | replay requires source data/checkpoint execution closure |
+| REPRO-03 | INCONCLUSIVE | frozen `training_smoke` checkpoint replay passes as adapted; source SGD/data trajectory and bandwidth/Ghosh–Kim retraining remain unavailable |
 | REPRO-04 | PASS | inventory preserves unsupported topology/weights and source fields |
 | REPRO-05 | PASS | every inventoried row has explicit disposition; no reproduction claim |
 | COMPARE-01 | INCONCLUSIVE | raw/qubit-like and ideal map control exists; supported physical arm absent |

@@ -19,3 +19,9 @@ Each source row has one of four dispositions: `exact_reproduction`, `adapted_rep
 The safe boundary accepts JSON/YAML/CSV and NumPy `.npy`/`.npz` metadata reads. NumPy loads always use `allow_pickle=False`; Python pickle, joblib, torch, and dill artifacts are rejected. Manifest import reads JSON metadata only and never follows or deserializes a referenced object. A later replay must validate the manifest, input hashes, source defaults, data order/splits, graph/generator rows, theta, estimator mode, and environment before executing.
 
 The inventory supports faithful replay planning. It does not certify the sibling’s scientific claims, validate every historical aggregate, prove dataset rights, or establish physical photonic realizability.
+
+## Bounded checkpoint replay
+
+`scripts/v4_tcdp/replay_sibling.py` safely replays the available `training_smoke` step-4 NPZ checkpoint through the ideal compiler and CP-map density path. It preserves the source `G`, theta, step, source SGD loss, Gaussian bandwidth, source commit and checkpoint hash, and writes separate raw/compiled/deployed vectors under `results/v4_tcdp/sibling_replays/`. The frozen raw/compiled TVD is `3.46e-16` and the deployed acceptance mass is `1.0000000000000002`.
+
+This is recorded as `adapted_reproduction`: the source checkpoint is replayed, while the source SGD/data trajectory cannot be rerun from the exported closure because the product-Bernoulli target samples are not included. Bandwidth/marginal and Ghosh–Kim checkpoint retraining remain unexecuted and are not called reproduced.
