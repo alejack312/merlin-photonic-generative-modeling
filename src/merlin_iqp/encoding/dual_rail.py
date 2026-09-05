@@ -7,8 +7,9 @@ encoding, which MerLin's QuantumLayer categorically cannot wrap (rejects
 polarization-annotated BasicStates outright).
 
 Does NOT modify iqp_photonic.py or any other existing v2.0/v2.1 code.
-Purely additive: a second, parallel encoding of the same abstract IQP circuit
-family. Reuses `_build_cz_insertion_core`, `fock_to_bitstring`, and
+Purely additive: a second, parallel encoding of the same intended abstract IQP
+gate family, with distinct physical angle and phase conventions. Reuses
+`_build_cz_insertion_core`, `fock_to_bitstring`, and
 `_decode_single_qubit_pair` directly from iqp_photonic.py -- both are
 already pure Fock-space/mode-occupation logic with no polarization dependence,
 so they apply unchanged to this dual-rail circuit too, rather than being
@@ -19,7 +20,7 @@ comparability): mode pair (2k, 2k+1) occupation (0,1) = bit '0', (1,0) = bit
 '1' -- per `_decode_single_qubit_pair`, reused unmodified below.
 
 Dual-rail structural analogues of the polarization gate family:
-    HWP(pi/8)   [state-prep/conjugation, Hadamard-equivalent]  -> BS()
+    HWP(pi/8)   [state-prep/conjugation, mixing analogue]      -> BS()
     WP(theta,0) [diagonal Z-phase generator]                   -> PS(theta) on
                                                                    mode 2k only
     PBS()       [polarization -> dual-rail readout conversion] -> not needed;
@@ -30,7 +31,7 @@ Single-sided PS(theta) note (why this is safe, not a simplifying
 approximation): PS(theta) on mode 2k only realizes diag(e^{i*theta}, 1) on
 qubit k's own 2-dim subspace, which factors as e^{i*theta/2} *
 diag(e^{i*theta/2}, e^{-i*theta/2}) -- an exact scalar times the pure
-exp(i*theta*Z) rotation. Because Perceval circuit evolution is linear, that
+exp(i*(theta/2)*Z) rotation. Because Perceval circuit evolution is linear, that
 per-qubit scalar commutes through every downstream gate, including the
 entangling CZ-insertion core, and lands as an unobservable overall phase on
 the full measured state -- never a state-dependent relative phase. Verified
@@ -82,7 +83,7 @@ from merlin_iqp.encoding.iqp_photonic import (
 
 
 def build_dual_rail_state_prep_circuit(n):
-    """BS() per qubit pair -- the dual-rail Hadamard-equivalent, matching
+    """BS() per qubit pair -- the dual-rail mixing analogue, matching
     build_state_prep_circuit's role (HWP(pi/8) per qubit) for the polarization
     encoding. Returns a Circuit(2n)."""
     circuit = pcvl.Circuit(2 * n)
@@ -105,8 +106,10 @@ def build_dual_rail_diagonal_layer_circuit(n, thetas):
 
 
 def build_dual_rail_conjugation_circuit(n):
-    """Same BS() as state prep (its own inverse), matching
-    build_conjugation_circuit's role. Returns a Circuit(2n)."""
+    """Same BS() component as state prep, matching
+    build_conjugation_circuit's role. Perceval's default BS phase convention
+    does not make this component literally self-inverse; the repeated
+    sandwich is part of this encoding's convention. Returns a Circuit(2n)."""
     return build_dual_rail_state_prep_circuit(n)
 
 

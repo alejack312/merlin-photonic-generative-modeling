@@ -55,6 +55,7 @@ import csv
 import glob
 import os
 import time
+import re
 
 import numpy as np
 
@@ -79,6 +80,27 @@ FIELDNAMES = [
     "sigma",
     "bin_spacing",
 ]
+
+
+def _validated_chunk_files(pattern):
+    """Return chunk files after rejecting malformed or overlapping ranges."""
+    files = sorted(glob.glob(pattern))
+    if not files:
+        raise FileNotFoundError(f"no chunk files found matching {pattern}")
+    intervals = []
+    for path in files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        if start >= end:
+            raise ValueError(f"invalid empty/reversed draw interval in {path}")
+        intervals.append((start, end, path))
+    intervals.sort()
+    for (_, previous_end, previous_path), (start, _, path) in zip(intervals, intervals[1:]):
+        if start < previous_end:
+            raise ValueError(f"overlapping draw chunks: {previous_path} and {path}")
+    return [path for _, _, path in intervals]
 
 
 def parse_args():
@@ -243,9 +265,7 @@ def combine_chunks(args, writer, f):
     pattern = os.path.join(
         _chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_*.npy"
     )
-    chunk_files = sorted(glob.glob(pattern))
-    if not chunk_files:
-        raise FileNotFoundError(f"no chunk files found matching {pattern}")
+    chunk_files = _validated_chunk_files(pattern)
     arrays = [np.load(p) for p in chunk_files]
     pooled_grads = np.concatenate(arrays)
     # n_tracked_params is constant across chunks of the same cell; derive it from

@@ -40,15 +40,15 @@ This follows directly from what "TVD to lossless" measures here: the pipeline's 
 | n (data qubits) | k=0 (no CZ, measured range) | k=1 (measured range) | k=2 (extrapolated, not measured) | k=3 (extrapolated, not measured) |
 |---|---|---|---|---|
 | **eta = 0.9 (near-lossless)** | | | | |
-| 2 | 1.2 | 21 | 342 | 5.7e3 |
-| 4 | 1.5 | 25 | 424 | 7.0e3 |
-| 6 | 1.9 | 31 | 524 | 8.7e3 |
-| 8 | 2.3 | 39 | 645 | 1.1e4 |
+| 2 | 1.23 | 20.6 | 343 | 5.72e3 |
+| 4 | 1.52 | 25.4 | 423 | 7.06e3 |
+| 6 | 1.9 | 31.4 | 523 | 8.71e3 |
+| 8 | 2.32 | 38.7 | 645 | 1.08e4 |
 | **eta = 0.6 (moderate loss)** | | | | |
-| 2 | 2.8 | 104 | 3.9e3 | 1.5e5 |
-| 4 | 7.7 | 289 | 1.1e4 | 4.1e5 |
-| 6 | 21 | 806 | 3.0e4 | 1.1e6 |
-| 8 | 60 | 2.2e3 | 8.4e4 | 3.1e6 |
+| 2 | 2.78 | 104 | 3.91e3 | 1.46e5 |
+| 4 | 7.72 | 289 | 1.09e4 | 4.07e5 |
+| 6 | 21.4 | 804 | 3.01e4 | 1.13e6 |
+| 8 | 59.5 | 2.23e3 | 8.37e4 | 3.14e6 |
 
 Each cell is `1 / (eta^(n+2k) · (2/27)^k)` — expected samples until one usable shot arrives — computed directly from the closed form verified above, not measured for `k>=2` (no sweep at those `n,k` was run. The underlying pipeline's own data only covers `n<=6` at `k=0`/weight1 and `n<=4` at `k=1`/mixed, `results/v3_hardness/`). Extending to `k>=2` assumes each additional heralded gate's herald-conditioning behaves like the single-gate `h(eta)` mechanism independently — a reasonable but explicitly unverified extrapolation, not a cross-gate-compounded result. The `k=0,1` rows, by contrast, are direct evaluations of the closed form already verified against every shipped row. The pattern the table makes visible, restricted to the verified `k=0->1` columns: one heralded gate costs more than six extra qubits do. At `eta=0.6`, adding a single `k=0->1` CZ costs ~37x throughout (104/2.78 at n=2, 2230/59.5 at n=8 — the ratio is `eta^-2 · 27/2 ≈ 37.5`, independent of `n`), while going from `n=2` to `n=8` at fixed `k=0` costs only ~21x. This is the resource statement Quandela's own hardware roadmap would care about. The TVD-vs-eta plots below are the pipeline check that this closed form is correct, not a separate finding.
 

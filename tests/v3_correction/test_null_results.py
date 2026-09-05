@@ -189,7 +189,17 @@ def owner_train_null_ratio(scope: str, n: int, sigma: float = 0.1) -> float | No
 
 def _rows(path: Path) -> list[dict]:
     with path.open(newline="") as f:
-        return list(csv.DictReader(f))
+        rows = list(csv.DictReader(f))
+    if not rows:
+        raise ValueError(f"Required null-result CSV has no data rows: {path}")
+    return rows
+
+
+def test_required_csv_with_header_only_fails(tmp_path):
+    path = tmp_path / "header-only.csv"
+    path.write_text("n,generator_scope\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="no data rows"):
+        _rows(path)
 
 
 def _require_csv(path: Path) -> Path:
