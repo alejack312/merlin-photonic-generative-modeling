@@ -168,12 +168,24 @@ def _tomography_from_callable(apply: Callable[[np.ndarray], np.ndarray]) -> tupl
     choi = np.zeros((d * d, d * d), complex)
     for (i, j), output in unit_outputs.items():
         choi += np.kron(np.eye(d)[:, i : i + 1] @ np.eye(d)[j : j + 1, :], output)
+    heldout_vector = np.array([1.0 + 0.2j, -0.3 + 0.7j, 0.4 - 0.1j, 0.8 + 0.5j], complex)
+    heldout_vector /= np.linalg.norm(heldout_vector)
+    heldout_input = np.outer(heldout_vector, heldout_vector.conj())
+    heldout_direct = apply(heldout_input)
+    heldout_predicted = (superoperator @ heldout_input.reshape(-1, order="F")).reshape((d, d), order="F")
+    heldout_input_error = float(np.max(np.abs(heldout_direct - heldout_predicted)))
+    readout = np.diag([0.2, -0.1, 0.3, -0.4]).astype(complex)
+    heldout_readout_error = float(
+        abs(np.trace(readout @ heldout_direct) - np.trace(readout @ heldout_predicted))
+    )
     return superoperator, {
         "preparations": 16,
         "readout_settings": 9,
         "readout_outcomes_per_setting": 4,
         "retained_zero_outcomes": True,
         "linear_system_rank": int(np.linalg.matrix_rank(input_matrix)),
+        "heldout_input_error": heldout_input_error,
+        "heldout_readout_error": heldout_readout_error,
         "choi": choi,
     }
 
@@ -243,7 +255,7 @@ def _edagger_identity(map_obj: GateMap) -> np.ndarray:
     units = _matrix_units(d)
     for a in range(d):
         for b in range(d):
-            result[a, b] = np.trace(map_obj.apply(units[b * d + a]))
+            result[a, b] = np.trace(map_obj.apply(units[a * d + b]))
     return result
 
 

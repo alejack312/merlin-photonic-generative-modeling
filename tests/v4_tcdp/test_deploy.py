@@ -86,6 +86,8 @@ def test_reconstructed_tomography_retains_zero_outcomes_and_is_physical() -> Non
     reconstructed = reconstruct_cp_map(np.pi / 3, use_perceval=False)
     assert reconstructed.metadata["tomography"]["preparations"] == 16
     assert reconstructed.metadata["tomography"]["readout_settings"] == 9
+    assert reconstructed.metadata["tomography"]["heldout_input_error"] < 1e-9
+    assert reconstructed.metadata["tomography"]["heldout_readout_error"] < 1e-9
     assert reconstructed.metadata["raw_outcomes_included"] is True
     assert reconstructed.metadata["global_perf_retained"] is True
     assert validate_gate_map(reconstructed).passed
@@ -101,6 +103,14 @@ def test_density_composition_matches_direct_ideal_compiled_reference() -> None:
     assert _tvd(observed, expected) < 1e-12
     expected_success = ideal_cp_map(0.2 * 4).success * ideal_cp_map(0.311 * 4).success
     assert success == pytest.approx(expected_success, abs=1e-12)
+
+
+def test_k_zero_is_a_valid_identity_instrument_control() -> None:
+    compiled = compile_iqp(3, [0.2, -0.1, 0.31], [])
+    observed, success = apply_compiled_density(compiled)
+    expected = ideal_iqp_distribution(3, compiled.singles)
+    assert _tvd(observed, expected) < 1e-12
+    assert success == pytest.approx(1.0, abs=1e-12)
 
 
 def test_quantized_compiled_distribution_is_compared_to_compiled_not_raw() -> None:

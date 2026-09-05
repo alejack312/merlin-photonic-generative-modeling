@@ -4,19 +4,22 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Repo state
 
+As of 2026-09-06, branch `codex/v4-implementation` contains the additive v4.0 implementation through bounded ring smoke comparisons. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); scientific interpretation remains provisional and D1/D2/D3-dependent work is not claimed complete.
+
 As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up), and was repackaged into an installable `merlin_iqp` library (src-layout) with phase scripts moved to `scripts/`. Real commands:
 
 - **Python env:** `venv/Scripts/python.exe` (Python 3.12; MerLin caps `python>=3.10,<=3.12`, `torch<2.13`).
 - **Install (editable):** `venv/Scripts/python.exe -m pip install -e . --no-deps` — required once per venv for `import merlin_iqp` to resolve; `pytest.ini`'s `pythonpath = src` is a fallback for test runs without it.
-- **Tests:** `venv/Scripts/python.exe -m pytest -q` — 296 tests (`testpaths = tests` per `pytest.ini`).
-- **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0). No dependency on anything outside itself.
+- **Tests:** `venv/Scripts/python.exe -m pytest -q` — full-suite execution remains the required gate; v4 focused evidence is recorded in the ledger. (`testpaths = tests` per `pytest.ini`.)
+- **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0), `classical/` (v4 NumPy trainer), `experiments/` (v4 rings and sibling inventory), and `deploy/` (v4 compiler/qualified CP-map boundary). No existing pipeline was migrated.
 - **Study scripts:** `scripts/` — phase-tagged sweep/analysis/de-risking CLIs, not library code. Run from repo root, e.g. `python scripts/natural_order_train.py`.
 - **Trainability study:** `scripts/gradient_variance_sweep.py` (raw sweep) → `scripts/trainability_analysis.py` / `scripts/trainability_analysis_1701.py` (curve-fit analysis).
 - **Hardness-under-loss study:** `scripts/loss_sweep.py` (raw sweep) → `scripts/hardness_analysis.py` (TVD-vs-η/anticoncentration analysis).
 - **ARB-01 (arbitrary-θ weight-2 gate):** `scripts/cp_alpha_sweep.py`.
+- **v4 bounded CLIs:** `scripts/v4_tcdp/train_rings.py`, `scripts/v4_tcdp/inventory_sibling.py`, and `scripts/v4_tcdp/compare_backends.py`. Results are isolated under `results/v4_tcdp/`.
 - **Julia independent verifier:** `julia --project=julia julia/verify_qubit_iqp.jl` (and the other `julia/verify_*.jl` scripts) — Julia 1.10 LTS, Yao.jl, BosonSampling.jl.
 - **Forge (ancilla mode-mapping bookkeeping check):** `forge/ancilla_mapping.frg`.
-- **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) is the canonical write-up; it links out to `docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/iqp-photonic-encoding.md`, and `docs/julia-cross-check-study.md` for full detail.
+- **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) remains the legacy canonical write-up; v4 evidence is in [docs/v4-tcdp-study.md](docs/v4-tcdp-study.md), with [docs/v4-rings-study.md](docs/v4-rings-study.md), [docs/v4-sibling-reproduction.md](docs/v4-sibling-reproduction.md), and [docs/v4-backend-comparison.md](docs/v4-backend-comparison.md).
 
 Keep this section current at each new milestone — don't leave it stale.
 

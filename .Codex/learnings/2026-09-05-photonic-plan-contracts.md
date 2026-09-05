@@ -34,3 +34,16 @@ Date: 2026-09-05 · Scope: project · Recurs when: composing noisy post-selected
 ## Next time
 - Do: inspect actual source APIs, joint noise assumptions and reference definitions before allocating a sweep budget.
 - Don't: accept “every finding dispositioned” as evidence that revised contracts are mutually consistent.
+
+## 2026-09-06 addendum: implement the contract boundary
+
+### Decision rules
+- If a pair angle is quantized, store raw alpha, wrapped catalog alpha, winding, and lifted theta as separate fields; never derive compensation from the wrapped key alone.
+- If an optical Z phase is represented on the logical-1 rail, assert the negative PS sign in metadata and compare the compiled distribution against a direct logical compiled reference.
+- If a post-selected gate is composed, apply its unnormalized local map to density blocks and normalize once; return the trace as model success.
+- If a physical backend is optional or its environment cannot run, return INCONCLUSIVE with the exact failure; do not turn an analytic control into a physical PASS.
+
+### Verification
+- venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py -> 76 passed.
+- venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py -> PASS, probability sum 1.0, Haar fidelity 1.0, 0.17 seconds.
+- Optional Perceval probe was attempted and returned INCONCLUSIVE because its log file could not be opened; the n=2 full-Fock adapter separately returned PASS with accepted mass 0.11111133 and no general-agreement claim.
