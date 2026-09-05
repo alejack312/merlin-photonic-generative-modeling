@@ -111,12 +111,19 @@ def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
             f"expected [0,{expected_draws})"
         )
     if expected_config is not None:
-        for path in [p for _, _, p in intervals]:
+        for start, end, path in intervals:
             manifest_path = f"{path}.json"
             if not os.path.exists(manifest_path):
                 raise ValueError(f"missing chunk manifest: {manifest_path}")
             with open(manifest_path, encoding="utf-8") as manifest_file:
                 manifest = json.load(manifest_file)
+            if manifest.get("draw_start") != start or manifest.get("draw_count") != end - start:
+                raise ValueError(
+                    f"chunk manifest draw interval mismatch for {path}: "
+                    f"draw_start={manifest.get('draw_start')!r}, "
+                    f"draw_count={manifest.get('draw_count')!r}, "
+                    f"expected draw_start={start}, draw_count={end - start}"
+                )
             for key, expected in expected_config.items():
                 if manifest.get(key) != expected:
                     raise ValueError(
@@ -124,6 +131,27 @@ def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
                         f"expected {expected!r}"
                     )
     return [path for _, _, path in intervals]
+
+
+def _load_validated_chunk_arrays(chunk_files, n_tracked_params):
+    """Load pooled gradient chunks and require tracked gradients per draw."""
+    arrays = []
+    for path in chunk_files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        array = np.load(path)
+        expected_rows = (end - start) * n_tracked_params
+        if array.ndim == 0 or array.shape[0] != expected_rows:
+            actual_rows = array.shape[0] if array.ndim else "scalar"
+            raise ValueError(
+                f"chunk array row count mismatch for {path}: "
+                f"got {actual_rows!r}, expected {expected_rows} "
+                f"({end - start} draws x {n_tracked_params} tracked params)"
+            )
+        arrays.append(array)
+    return arrays
 
 
 def parse_args():
@@ -305,8 +333,6 @@ def combine_chunks(args, writer, f):
             "max_tracked_params": args.max_tracked_params, "n_draws": args.n_draws,
         },
     )
-    arrays = [np.load(p) for p in chunk_files]
-    pooled_grads = np.concatenate(arrays)
     # n_tracked_params is constant across chunks of the same cell; derive it from
     # this cell's own tracked-index count rather than re-deriving from array shape.
     _, n_tracked = pooled_gradients_for_cell(
@@ -314,6 +340,8 @@ def combine_chunks(args, writer, f):
         max_tracked_params=args.max_tracked_params, weight2_pair=(0, 1), seed_base=170917,
         sigma=args.sigma, scale_factor=args.scale_factor,
     )
+    arrays = _load_validated_chunk_arrays(chunk_files, n_tracked)
+    pooled_grads = np.concatenate(arrays)
     result = {
         "n": n,
         "generator_scope": args.scope,

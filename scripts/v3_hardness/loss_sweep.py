@@ -103,12 +103,19 @@ def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
             f"expected [0,{expected_draws})"
         )
     if expected_config is not None:
-        for path in [p for _, _, p in intervals]:
+        for start, end, path in intervals:
             manifest_path = f"{path}.json"
             if not os.path.exists(manifest_path):
                 raise ValueError(f"missing chunk manifest: {manifest_path}")
             with open(manifest_path, encoding="utf-8") as manifest_file:
                 manifest = json.load(manifest_file)
+            if manifest.get("draw_start") != start or manifest.get("draw_count") != end - start:
+                raise ValueError(
+                    f"chunk manifest draw interval mismatch for {path}: "
+                    f"draw_start={manifest.get('draw_start')!r}, "
+                    f"draw_count={manifest.get('draw_count')!r}, "
+                    f"expected draw_start={start}, draw_count={end - start}"
+                )
             for key, expected in expected_config.items():
                 if manifest.get(key) != expected:
                     raise ValueError(
@@ -116,6 +123,26 @@ def _validated_chunk_files(pattern, expected_draws=None, expected_config=None):
                         f"expected {expected!r}"
                     )
     return [path for _, _, path in intervals]
+
+
+def _load_validated_chunk_arrays(chunk_files):
+    """Load raw chunks and require one row per draw in each filename interval."""
+    arrays = []
+    for path in chunk_files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        array = np.load(path)
+        expected_rows = end - start
+        if array.ndim == 0 or array.shape[0] != expected_rows:
+            actual_rows = array.shape[0] if array.ndim else "scalar"
+            raise ValueError(
+                f"chunk array row count mismatch for {path}: "
+                f"got {actual_rows!r}, expected {expected_rows}"
+            )
+        arrays.append(array)
+    return arrays
 
 # weight2_pair/seed_base are fixed constants across every invocation of this
 # CLI (mirroring gradient_variance_sweep.py's own fixed weight2_pair=(0, 1),
@@ -326,7 +353,7 @@ def combine_chunks(args, writer, f):
                 "eta": eta, "n_draws": args.n_draws,
             },
         )
-        arrays = [np.load(p) for p in chunk_files]
+        arrays = _load_validated_chunk_arrays(chunk_files)
         summary = sweep.combine_pooled_cells(arrays, args.scope)
         row = _row_from_summary(n, args.scope, args.backend, eta, summary)
         writer.writerow(row)

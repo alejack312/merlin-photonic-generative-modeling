@@ -272,6 +272,37 @@ def _train_ratio_cases():
                 )
 
 
+def _eligible_uniform_rows(path: Path) -> list[dict]:
+    return [
+        r
+        for r in _rows(path)
+        if r["init_scheme"] == "uniform" and _row_sigma(r) <= 0.1
+    ]
+
+
+def test_each_required_train_csv_contributes_eligible_uniform_rows():
+    """The TRAIN null-result parametrization must not pass vacuously."""
+    for path in TRAIN_CSVS:
+        _require_csv(path)
+        rows = _eligible_uniform_rows(path)
+        assert rows, f"{path}: no eligible uniform-init rows with sigma <= 0.1"
+
+
+def test_each_train_ratio_group_has_an_adjacent_pair():
+    """Every eligible (scope, sigma) series must support a variance ratio."""
+    for path in TRAIN_CSVS:
+        _require_csv(path)
+        groups: dict[tuple[str, float], set[int]] = {}
+        for row in _eligible_uniform_rows(path):
+            groups.setdefault((row["generator_scope"], _row_sigma(row)), set()).add(int(row["n"]))
+        assert groups, f"{path}: no eligible ratio groups"
+        for (scope, sigma), ns in groups.items():
+            ordered = sorted(ns)
+            assert any(b == a + 1 for a, b in zip(ordered, ordered[1:])), (
+                f"{path}: ratio group scope={scope} sigma={sigma} has no adjacent n pair"
+            )
+
+
 def _train_absolute_cases():
     """CORR-12 (2026-09-05): companion to _train_ratio_cases yielding the
     raw shipped variance (not a ratio between two n's). An independent

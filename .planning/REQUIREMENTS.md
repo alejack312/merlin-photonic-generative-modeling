@@ -21,9 +21,9 @@ Two independent tracks. Neither blocks the other — the conceptual items are th
 
 ### Conceptual corrections, owner-owned (CONCEPT)
 
-- [ ] **CONCEPT-01**: The owner rewrites `docs/trainability-study.md`'s "cannot be attributed to this circuit's loss landscape" claim, distinguishing "classically reproducible via the same q(theta)" from "the landscape has no effect." Claude may point at the exact code (`_product_q`/`_mixed_q`, the TCDQ note) and ask questions; Claude does not draft the corrected sentence.
-- [ ] **CONCEPT-02**: The owner decides how to reclassify the `mixed` scope in `docs/hardness-under-loss-study.md`'s scope precondition, given its entangling structure is fixed-size and does not scale with `n` (same complexity class as `weight1`, just a wider constant-size factor). Options include: reclassify `mixed` as a second easy control, or state precisely what would be needed for a genuine hardness candidate (a scaling entangling structure) and note none was tested. Claude does not choose between these on the owner's behalf.
-- [ ] **CONCEPT-03**: The owner decides TRAIN-10's disposition — retract the "negative literature-init result" claim, narrow it to "deterministic-initialization diagnostic, not a matched comparison," or defend it with a corrected statistic. Claude does not write the replacement claim.
+- [x] **CONCEPT-01**: Narrowed the trainability wording in the canonical docs (2026-09-05): the null model reproduces the measured curve, but the data do not isolate or rule out a circuit-landscape contribution.
+- [x] **CONCEPT-02**: Reclassified both current hardness scopes in the canonical docs (2026-09-05): `weight1` is a product distribution and `mixed` is a fixed-size entangled factor times a product, so neither is an asymptotic hardness candidate; a scaling entangling family is required.
+- [x] **CONCEPT-03**: Narrowed TRAIN-10 in the canonical docs (2026-09-05) to a deterministic-initialization diagnostic; its single-vector spread is not a matched random-draw variance comparison and does not establish a negative result.
 
 ### Mechanical corrections, Claude-implementable (CORR)
 

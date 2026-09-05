@@ -4,6 +4,7 @@ import importlib
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 
@@ -51,7 +52,7 @@ def test_chunk_validation_rejects_manifest_mismatch(tmp_path):
     chunk = tmp_path / "cell_0-2.npy"
     chunk.touch()
     (tmp_path / "cell_0-2.npy.json").write_text(
-        json.dumps({"scope": "weight1", "n": 2}), encoding="utf-8"
+        json.dumps({"scope": "weight1", "n": 2, "draw_start": 0, "draw_count": 2}), encoding="utf-8"
     )
     with pytest.raises(ValueError, match="configuration mismatch"):
         module._validated_chunk_files(
@@ -59,3 +60,21 @@ def test_chunk_validation_rejects_manifest_mismatch(tmp_path):
             expected_draws=2,
             expected_config={"scope": "mixed", "n": 2},
         )
+
+
+@pytest.mark.parametrize(
+    ("module_name", "kwargs", "expected_rows"),
+    [
+        ("scripts.v3_trainability.gradient_variance_sweep", {"n_tracked_params": 3}, 6),
+        ("scripts.v3_trainability.dual_rail_gradient_variance_sweep", {"n_tracked_params": 3}, 6),
+        ("scripts.v3_hardness.loss_sweep", {}, 2),
+    ],
+)
+def test_chunk_array_validation_rejects_row_count_mismatch(
+    tmp_path, module_name, kwargs, expected_rows
+):
+    module = importlib.import_module(module_name)
+    path = tmp_path / "cell_0-2.npy"
+    np.save(path, np.zeros((expected_rows - 1, 1)))
+    with pytest.raises(ValueError, match="row count mismatch"):
+        module._load_validated_chunk_arrays([str(path)], **kwargs)
