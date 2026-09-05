@@ -1,6 +1,6 @@
 # Phase 25: v3.2 Correction (Audit Response) — Context
 
-**Status:** Scaffolded 2026-09-05. Mechanical track (CORR-08..17, GATE-02/03) is Claude-executable and starts immediately. Conceptual track (CONCEPT-01..03) is owner-only and gates nothing else — it can proceed independently of the mechanical fixes.
+**Status:** Mechanical track substantially done 2026-09-05 (CORR-08, 09, 11, 12, 16, 17, GATE-02, GATE-03 shipped; CORR-10, 13, 14, 15 deferred — see `.planning/REQUIREMENTS.md` for per-item disposition and evidence). Conceptual track (CONCEPT-01..03) is owner-only and not started.
 
 ## Why this phase exists
 
