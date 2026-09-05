@@ -23,6 +23,7 @@ import argparse
 import csv
 import glob
 import os
+import re
 import time
 
 import numpy as np
@@ -43,6 +44,36 @@ FIELDNAMES = [
     "abs_mean",
     "rms",
 ]
+
+
+def _validated_chunk_files(pattern, expected_draws=None):
+    """Return chunk files after rejecting malformed or incompatible ranges."""
+    files = sorted(glob.glob(pattern))
+    if not files:
+        raise FileNotFoundError(f"no chunk files found matching {pattern}")
+    intervals = []
+    for path in files:
+        match = re.search(r"_(\d+)-(\d+)\.npy$", path)
+        if match is None:
+            raise ValueError(f"chunk filename has no draw interval: {path}")
+        start, end = map(int, match.groups())
+        if start >= end:
+            raise ValueError(f"invalid empty/reversed draw interval in {path}")
+        intervals.append((start, end, path))
+    intervals.sort()
+    for (_, previous_end, previous_path), (start, _, path) in zip(intervals, intervals[1:]):
+        if start < previous_end:
+            raise ValueError(f"overlapping draw chunks: {previous_path} and {path}")
+        if start != previous_end:
+            raise ValueError(f"gap between draw chunks: {previous_path} and {path}")
+    if expected_draws is not None and (
+        intervals[0][0] != 0 or intervals[-1][1] != expected_draws
+    ):
+        raise ValueError(
+            f"chunk coverage is [{intervals[0][0]},{intervals[-1][1]}), "
+            f"expected [0,{expected_draws})"
+        )
+    return [path for _, _, path in intervals]
 
 
 def parse_args():
@@ -108,9 +139,7 @@ def combine_chunks(args, writer, f):
     n = args.n_values[0]
     init_scheme = args.init_schemes[0]
     pattern = os.path.join(_chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_*.npy")
-    chunk_files = sorted(glob.glob(pattern))
-    if not chunk_files:
-        raise FileNotFoundError(f"no chunk files found matching {pattern}")
+    chunk_files = _validated_chunk_files(pattern, expected_draws=args.n_draws)
     pooled_grads = np.concatenate([np.load(p) for p in chunk_files])
     result = {
         "n": n,

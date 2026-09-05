@@ -82,8 +82,8 @@ FIELDNAMES = [
 ]
 
 
-def _validated_chunk_files(pattern):
-    """Return chunk files after rejecting malformed or overlapping ranges."""
+def _validated_chunk_files(pattern, expected_draws=None):
+    """Return chunk files after rejecting malformed or incompatible ranges."""
     files = sorted(glob.glob(pattern))
     if not files:
         raise FileNotFoundError(f"no chunk files found matching {pattern}")
@@ -100,6 +100,15 @@ def _validated_chunk_files(pattern):
     for (_, previous_end, previous_path), (start, _, path) in zip(intervals, intervals[1:]):
         if start < previous_end:
             raise ValueError(f"overlapping draw chunks: {previous_path} and {path}")
+        if start != previous_end:
+            raise ValueError(f"gap between draw chunks: {previous_path} and {path}")
+    if expected_draws is not None and (
+        intervals[0][0] != 0 or intervals[-1][1] != expected_draws
+    ):
+        raise ValueError(
+            f"chunk coverage is [{intervals[0][0]},{intervals[-1][1]}), "
+            f"expected [0,{expected_draws})"
+        )
     return [path for _, _, path in intervals]
 
 
@@ -265,7 +274,7 @@ def combine_chunks(args, writer, f):
     pattern = os.path.join(
         _chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_*.npy"
     )
-    chunk_files = _validated_chunk_files(pattern)
+    chunk_files = _validated_chunk_files(pattern, expected_draws=args.n_draws)
     arrays = [np.load(p) for p in chunk_files]
     pooled_grads = np.concatenate(arrays)
     # n_tracked_params is constant across chunks of the same cell; derive it from

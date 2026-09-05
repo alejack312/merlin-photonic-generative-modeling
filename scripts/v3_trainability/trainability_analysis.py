@@ -52,6 +52,7 @@ SUMMARY_CSV_PATH = os.path.join(RESULTS_DIR, "phase17_curve_fit_summary.csv")
 
 GENERATOR_SCOPES = ["weight1", "mixed"]
 INIT_SCHEMES = ["small_angle", "uniform"]
+EXP_FLOOR_TOLERANCE = 1e-9
 
 SUMMARY_FIELDNAMES = [
     "generator_scope",
@@ -137,19 +138,19 @@ def fit_verdict_to_plateau_label(fit_result):
     finding 4) before this fix; see tests/trainability/test_curve_fit.py's
     adversarial cases.
 
-    Known, deliberately NOT resolved here: even when a>0 and b>0 (genuine
-    decay), an unrestricted positive c means the curve approaches a
-    NONZERO floor, not zero -- winning this exponential-with-offset fit is
-    evidence of decay-to-a-floor, not of variance vanishing exponentially
-    to zero. Whether that distinction changes what counts as a "plateau"
-    for this project's scientific claims is a CONCEPT-track (owner)
-    question, not a code-logic bug this function's contract covers.
+    A positive fitted floor c means the curve approaches a nonzero variance,
+    so the fit does not establish a barren-plateau signature (which requires
+    decay toward zero). Such fits are reported as inconclusive.
     """
     verdict = fit_result["verdict"]
     if verdict == "exp":
-        a, b = fit_result["exp"]["params"][0], fit_result["exp"]["params"][1]
+        a, b, c = fit_result["exp"]["params"]
         decaying = b > 0 and a > 0
-        return "plateau" if decaying else "no_plateau (exp fit not decaying with n)"
+        if not decaying:
+            return "no_plateau (exp fit not decaying with n)"
+        if not np.isclose(c, 0.0, atol=EXP_FLOOR_TOLERANCE, rtol=0.0):
+            return "inconclusive (exp fit has nonzero floor)"
+        return "plateau"
     if verdict == "poly":
         return "no_plateau"
     return "inconclusive"

@@ -28,8 +28,10 @@ answers):
     with n? What does that do to the gradient's variance from one n to the
     next?
 
-While a function still returns ``None`` its tests SKIP, so the full suite
-stays green. NULL-02 (a later plan) removes the skips once you are done.
+The harness treats a ``None`` prediction as a gate failure. A missing formula
+must not silently reduce coverage; the only legitimate omission is a case that
+cannot define the requested statistic (for example, a variance ratio before
+the first adjacent n pair is available).
 Claude's job in Task 0 is to ask questions and point at rows, not to fill
 these in. If you are genuinely stuck after an attempt, ask for the
 interactive visualization of the mechanism (Willison §13) before asking for
@@ -233,7 +235,7 @@ def _hard_cases():
 def test_hard_tvd_to_lossless_matches_owner_null(csv_name, scope, n, eta, shipped):
     predicted = owner_hard_null_tvd(scope, n, eta)
     if predicted is None:
-        pytest.skip("Task 0: owner has not filled owner_hard_null_tvd yet")
+        pytest.fail(f"owner_hard_null_tvd returned None for scope={scope}, n={n}, eta={eta}")
     assert predicted == pytest.approx(shipped, abs=2e-3), (
         f"{csv_name}: scope={scope} n={n} eta={eta}: shipped {shipped:.5f}, "
         f"your null {predicted:.5f}"
@@ -304,7 +306,7 @@ def test_train_absolute_variance_matches_owner_null(scope, sigma, n, shipped_var
 def test_train_variance_ratio_matches_owner_null(scope, sigma, n, shipped_ratio):
     predicted = owner_train_null_ratio(scope, n, sigma=sigma)
     if predicted is None:
-        pytest.skip("Task 0: owner has not filled owner_train_null_ratio yet")
+        pytest.fail(f"owner_train_null_ratio returned None for scope={scope}, n={n}, sigma={sigma}")
     # Tolerance corrected 2026-09-03: the previous rel=0.5 was widened to
     # paper over a bug in this null model (it only differentiated theta[0]
     # instead of pooling pick_tracked_indices(n, 3) like the real sweep --
