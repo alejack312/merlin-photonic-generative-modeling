@@ -270,10 +270,14 @@ def _chunk_dir(out_path):
     return d
 
 
-def _chunk_path(out_path, scope, n, init_scheme, sigma, draw_start, draw_count):
+def _chunk_path(
+    out_path, scope, n, init_scheme, sigma, scale_factor, max_tracked_params,
+    draw_start, draw_count
+):
     return os.path.join(
         _chunk_dir(out_path),
-        f"{scope}_n{n}_{init_scheme}_sigma{sigma:g}_{draw_start}-{draw_start + draw_count}.npy",
+        f"{scope}_n{n}_{init_scheme}_sigma{sigma:g}_scale{scale_factor:g}"
+        f"_maxp{max_tracked_params}_{draw_start}-{draw_start + draw_count}.npy",
     )
 
 
@@ -297,7 +301,8 @@ def run_chunk(args):
     )
     elapsed = time.time() - start
     path = _chunk_path(
-        args.out, args.scope, n, init_scheme, args.sigma, args.draw_start, args.draw_count
+        args.out, args.scope, n, init_scheme, args.sigma, args.scale_factor,
+        args.max_tracked_params, args.draw_start, args.draw_count
     )
     np.save(path, pooled_grads)
     with open(f"{path}.json", "w", encoding="utf-8") as manifest_file:
@@ -322,7 +327,9 @@ def combine_chunks(args, writer, f):
     n = args.n_values[0]
     init_scheme = args.init_schemes[0]
     pattern = os.path.join(
-        _chunk_dir(args.out), f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_*.npy"
+        _chunk_dir(args.out),
+        f"{args.scope}_n{n}_{init_scheme}_sigma{args.sigma:g}_"
+        f"scale{args.scale_factor:g}_maxp{args.max_tracked_params}_*.npy",
     )
     chunk_files = _validated_chunk_files(
         pattern,

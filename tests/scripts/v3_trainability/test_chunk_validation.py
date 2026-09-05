@@ -78,3 +78,13 @@ def test_chunk_array_validation_rejects_row_count_mismatch(
     np.save(path, np.zeros((expected_rows - 1, 1)))
     with pytest.raises(ValueError, match="row count mismatch"):
         module._load_validated_chunk_arrays([str(path)], **kwargs)
+
+
+def test_trainability_chunk_path_separates_configuration(tmp_path):
+    from scripts.v3_trainability import gradient_variance_sweep as module
+
+    first = module._chunk_path(str(tmp_path), "weight1", 4, "uniform", 0.1, 1.0, 3, 0, 2)
+    second = module._chunk_path(str(tmp_path), "weight1", 4, "uniform", 0.1, 2.0, 3, 0, 2)
+    third = module._chunk_path(str(tmp_path), "weight1", 4, "uniform", 0.1, 1.0, 4, 0, 2)
+    assert first != second
+    assert first != third
