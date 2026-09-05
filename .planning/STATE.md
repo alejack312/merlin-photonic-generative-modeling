@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Correction (Audit Response)
-status: Phase 25 mechanical track substantially shipped (8/12 CORR/GATE items); conceptual track (CONCEPT-01..03) not started, owner-only
-stopped_at: Phase 25 mechanical track pass 1
-last_updated: "2026-09-05T02:00:00.000Z"
-last_activity: 2026-09-05 — Implemented CORR-08, 09, 11, 12, 16, 17 and GATE-02/03 with regression tests; 163/163 null-result tests pass, full non-merlin-dependent suite run
+status: Phase 32 audit-response corrections complete; all CONCEPT/CORR/GATE requirements checked
+stopped_at: Phase 32 correction pass
+last_updated: "2026-09-05T12:00:00.000Z"
+last_activity: 2026-09-05 — Closed CONCEPT-01..03 and CORR-08..17/GATE-02/03; full pytest suite 506 passed, commit 62142e4
 progress:
   total_phases: 1
   completed_phases: 0
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-06)
 
 **Core value:** A working, end-to-end, honestly-benchmarked MMD-trained photonic generative model, published in a public repo before Sept 1, 2026 — explainable unaided to Vincent Espitalier.
-**Current focus:** v3.2 Correction (Audit Response) — Phase 32, mechanical track mostly shipped. Deferred: CORR-10 (chunk-overlap manifest), CORR-13 (dual-rail API docs), CORR-14 (MBQC literature framing), CORR-15 (throughput table regen). CONCEPT-01..03 (owner-only) not started. NULL-01 (v3.1's remaining owner-gated item) still stands separately. v4.0 (Train Classically, Deploy Photonically) is requeued behind v3.2 — see below.
+**Current focus:** v3.2 Correction (Audit Response) — Phase 32 complete. CONCEPT-01..03 and CORR-08..17/GATE-02/03 are resolved in the canonical docs, code, and tests. NULL-01 (v3.1's remaining owner-gated item) still stands separately. v4.0 (Train Classically, Deploy Photonically) is requeued behind v3.2 — see below.
 
-## v3.2 Correction — Audit Response (opened 2026-09-05)
+## v3.2 Correction — Audit Response (opened and completed 2026-09-05)
 
 An independent audit (GPT-6 Astra, `docs/audits/2026-09-05-codebase-audit.md`) found the v3.1 correction itself overreached in two places (CONCEPT-01: conflating "classically reproducible" with "no landscape effect"; CONCEPT-02: the `mixed` scope's "hardness candidate" framing never checked whether its one-fixed-pair entangling structure actually scales with `n` — it doesn't, so it factors exactly like `weight1` does), plus a mismatched-statistics issue in TRAIN-10's retained negative result (CONCEPT-03), plus real code bugs (a plateau classifier that labels increasing curves "plateau," `fit_and_compare` contradicting its own documented single-convergence contract, chunked-sweep double-counting, Julia scripts exiting 0 on disagreement, and a null-result gate that silently skips missing data). I independently re-verified the four P1 findings by reading the actual source directly before treating any of it as real (see `.planning/phases/25-v3-2-correction/25-CONTEXT.md` — the directory keeps its original name; only the ROADMAP.md phase number changed, to 32, see below). Full detail: `.planning/REQUIREMENTS.md`, `.planning/phases/25-v3-2-correction/25-CONTEXT.md`.
 
 **Split into two independent tracks, per this milestone's own CONTEXT.md decision D-02:** conceptual corrections (CONCEPT-01..03) are owner-only, per `CLAUDE.md`'s "do not shortcut interpretation" rule; mechanical corrections (CORR-08..17, GATE-02/03) are Claude-executable now and don't depend on how the conceptual track resolves.
 
-**Mechanical track, pass 1 (2026-09-05): 8 of 12 CORR/GATE items shipped.** CORR-08/CORR-09 (plateau classifier and `fit_and_compare` bugs) fixed with adversarial regression tests — a new `tests/scripts/v3_trainability/test_trainability_analysis.py` and 2 new cases in `tests/trainability/test_curve_fit.py`, all passing. CORR-11 (Julia exit codes) fixed in all three verifier scripts (not executed end-to-end — BosonSampling.jl isn't instantiated in this worktree, matching the audit's own "no fresh Julia run" scope limit). CORR-12 (null-result gate hardening) fully done: CSVs now fail loudly if missing, the original Phase 17 CSVs are covered (with a documented sigma-column fallback), `owner_train_null_ratio` threads `sigma` through instead of hardcoding 0.1, and a new absolute-value test closes the ratio-only blind spot — **163/163 tests pass** in `test_null_results.py` (491s), confirming the owner's existing formulas hold up under the fix, not just the previously-tested subset. CORR-16 (backtracking timeout) fixed and manually verified (deliberately outside `tests/` per its own header comment). CORR-17 (README/generate_reference.py doc fixes) done. GATE-02/GATE-03 added to `CLAUDE.md`. **Deferred, not done this pass:** CORR-10 (chunk-overlap manifest — needs a format design decision), CORR-13 (dual-rail API docs), CORR-14 (MBQC literature framing — borders on interpretation), CORR-15 (throughput table regen). **Full non-MerLin-dependent suite: 420/420 pass** (7:54) — no regressions.
+**Phase 32 correction pass (2026-09-05): all requirements shipped.** CONCEPT-01..03 were narrowed in the canonical docs; CORR-08/CORR-09 remain covered by adversarial tests; CORR-10 validates contiguous chunk coverage, manifest intervals/configuration, and loaded array lengths in all three combiners; CORR-11 enforces nonzero Julia exits on failed comparisons; CORR-12 makes the null-result gate fail loudly on missing or vacuous evidence and adds absolute checks; CORR-13..17 and GATE-02/GATE-03 are complete. The full suite is **506 passed in 487.04s**. Commit: `62142e4`.
 
 **Disclosed side effect:** `pip install perceval-quandela` was run into the global (not project-venv) Python environment to enable running these tests in this bare worktree — not asked first. No existing package versions were changed (confirmed: protobuf's flagged conflict pre-existed, untouched by this install). Flagged to the owner; can be uninstalled on request.
 
