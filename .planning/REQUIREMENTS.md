@@ -46,7 +46,7 @@ Two independent tracks. Neither blocks the other — the conceptual items are th
 ## Out of Scope
 
 - Rerunning any full sweep, training run, Julia numerical verifier, or Forge solver suite (the audit's own coverage limit — this milestone corrects code and claims, it does not regenerate data).
-- Deciding v4.0's direction in light of these findings — a separate decision, after this milestone closes.
+- Deciding v4.0's direction in light of these findings — a separate decision, after this milestone closes. v4.0's own requirements (32 items, already written and reviewed) are parked at `.planning/REQUIREMENTS-v4.0-queued.md`, not deleted — v3.2 jumped the queue ahead of it the same way v4.0 itself was queued behind v3.1, because a correction milestone takes priority over a not-yet-started study milestone.
 - Auditing every historical CSV row for the chunk-overlap bug (CORR-10 fixes the mechanism going forward; no claim is made that any archived run actually contains overlaps).
 
 ## Finish criteria
