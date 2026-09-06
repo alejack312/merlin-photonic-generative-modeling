@@ -257,7 +257,10 @@ def _initialize_ring_parameters(
 
 
 def train_rings(config: RingConfig) -> RingRun:
-    source_provenance = git_source_identity(Path(__file__).resolve().parents[3])
+    source_provenance = git_source_identity(
+        Path(__file__).resolve().parents[3],
+        include_paths=("src", "scripts", "pyproject.toml", "pytest.ini", "AGENTS.md"),
+    )
     if config.source_commit in {None, "working-tree", "72e8079"}:
         config = replace(config, source_commit=source_provenance.get("observed_commit"))
     dataset = load_rings_dataset(config.n)

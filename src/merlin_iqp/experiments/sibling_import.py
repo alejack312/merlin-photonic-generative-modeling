@@ -20,7 +20,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Sequence
 
 import numpy as np
 
@@ -78,7 +78,7 @@ def _git_status(root: Path) -> list[str]:
     return [] if value is None or not value else value.splitlines()
 
 
-def git_source_identity(root: str | Path) -> dict[str, Any]:
+def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None = None) -> dict[str, Any]:
     """Return the observed Git identity without changing ``root``.
 
     A requested pin is only a compatibility constraint.  The identity used for
@@ -94,6 +94,13 @@ def git_source_identity(root: str | Path) -> dict[str, Any]:
     listed = _git(checkout, "ls-files", "--cached", "--others", "--exclude-standard")
     digest = hashlib.sha256()
     listed_files = [] if listed is None else [line for line in listed.splitlines() if line]
+    prefixes = tuple(path.replace("\\", "/").rstrip("/") for path in (include_paths or ()))
+    if prefixes:
+        listed_files = [
+            line for line in listed_files
+            if line.replace("\\", "/") in prefixes
+            or any(line.replace("\\", "/").startswith(prefix + "/") for prefix in prefixes)
+        ]
     for relative in sorted(set(listed_files), key=str.lower):
         path = checkout / relative
         if not path.is_file():
@@ -555,7 +562,7 @@ def build_sibling_inventory(sibling_root: str | Path, *, pinned_commit: str = PI
         if path.suffix.lower() in _UNSAFE_SUFFIXES:
             record["safe_import_reason"] = "Python object deserialization is intentionally unsupported."
         artifact_records.append(record)
-    source_identity = git_source_identity(root)
+    source_identity = git_source_identity(root, include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"))
     observed_head = source_identity["observed_commit"]
     pinned_parent = _git(root, "show", "-s", "--format=%P", pinned_commit)
     result: dict[str, Any] = {
