@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: `ef063b1` (`codex/v4-implementation` after D1/D2/D3 decisions, implementation, tests, authorized artifacts and final handoff update).
+- Review target: current `HEAD` on `codex/v4-implementation` (record the exact commit with `git rev-parse HEAD`; this handoff is part of that final commit).
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -19,15 +19,14 @@ Run from the photonic repository root:
 
 ```powershell
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp
-venv/Scripts/python.exe -m py_compile scripts/v4_tcdp/*.py
+venv/Scripts/python.exe -m compileall -q scripts/v4_tcdp
+venv/Scripts/python.exe docs/audits/2026-09-06-v4-implementation-probes.py
 venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py
 venv/Scripts/python.exe scripts/v4_tcdp/inventory_sibling.py
-venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/sibling/training_smoke_configs_experiments_training_smoke_yaml/manifest.json
-venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke
-venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke
-venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --equal-budget-control --output results/v4_tcdp/nat/n4_seed0_primary.json
-venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 8 --seed 0 --steps 150 --output results/v4_tcdp/nat/n8_seed0_primary.json
+venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/sibling/training_smoke_configs_experiments_training_smoke_yaml/manifest.json --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --output-root results/v4_tcdp/sibling_replays
+$env:PYTHONPATH='C:/Users/cuqui/iqp-mmd-barren-plateau/src'; venv/Scripts/python.exe scripts/v4_tcdp/retrain_sibling.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --output-root results/v4_tcdp/sibling_retraining/training_smoke
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n6_seed0_main --eta 0.9 --output results/v4_tcdp/comparisons/rings_hamming_n6_seed0_eta09.json
+venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --output results/v4_tcdp/nat/n4_seed0_primary.json
 ```
 
 The required full suite is:
@@ -37,7 +36,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Observed result at head `ef063b1`: `621 passed in 320.03s`. Without the override, collection fails because Perceval cannot write its default `AppData\Local\quandela\perceval-quandela\logs\perceval.log`; this is an environment failure, not a relaxed test gate.
+Observed result after the audited repair pass: `636 passed in 394.78s (0:06:34)`. A persistent Perceval path override was used so collection could write its log; without that override, collection can fail when the default `AppData\Local\quandela\perceval-quandela\logs\perceval.log` is unavailable. This is an environment issue, not a relaxed test gate.
 
 ## Evidence locations
 
@@ -55,7 +54,7 @@ Observed result at head `ef063b1`: `621 passed in 320.03s`. Without the override
 2. Confirm that raw, compiled, and deployed vectors remain distinct and that acceptance is not conflated with conditional quality.
 3. Audit the negative optical signs, alpha-key winding, MSB bit order, Hamming kernel distance (not squared distance), and one-final-normalization composition.
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
-5. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, discrete-key NAT implementation, owner controls, missing source data, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production runs, and absent independent review against the ledger.
+5. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, discrete-key NAT implementation, owner controls, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production metric panel, and absent independent review against the ledger.
 6. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
 ## Decisions recorded from owner (2026-09-06)
@@ -64,4 +63,4 @@ Observed result at head `ef063b1`: `621 passed in 320.03s`. Without the override
 - D2: discrete `0.1*j` alpha-key neighbor search with continuous single-qubit angles and exact analytic gradients.
 - D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
 
-These decisions unlock implementation, but do not certify physical full-Fock composition, source-faithful sibling retraining, NAT efficacy, or owner interpretation.
+These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The training-smoke source trajectory is now independently retrained with the regenerated source-recipe data; other sibling rows remain separately dispositioned.

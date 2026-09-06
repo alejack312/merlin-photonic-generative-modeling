@@ -84,4 +84,4 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | COMPARE-03 | PASS | Common 20,000 accepted-sample evaluation budget, exact controls and acceptance accounting are recorded. | Add sampled uncertainty only when a sampled arm is authorized. | None for current exact scope |
 | COMPARE-04 | INCONCLUSIVE | Ring comparison artifact exists and reference-only capability is visible; sibling/substrate comparison and figures are missing. | Complete sibling/physical arms, then regenerate comparison figures and manifests. | D1; external sibling data |
 
-The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the same suite passed `609` tests. This is an environment note, not a requirement PASS for physical validation.
+The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the full suite passed `636` tests in `394.78s`. This is an environment note, not a requirement PASS for physical validation.
