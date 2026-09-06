@@ -64,3 +64,6 @@ def test_bounded_run_is_reproducible_and_serializable(tmp_path) -> None:
     assert first.budgets["pair_evaluations"] == 3
     path = write_nat_run(first, tmp_path / "nat.json")
     assert json.loads(path.read_text(encoding="utf-8")) == first.to_dict()
+    assert first.provenance["replication"]["deterministic_initialization"] is True
+    assert first.provenance["replication"]["independent_replica"] is False
+    assert first.provenance["replication"]["n_unique_parameterizations_observed"] == 1

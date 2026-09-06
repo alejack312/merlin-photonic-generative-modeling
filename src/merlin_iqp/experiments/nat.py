@@ -408,6 +408,21 @@ def run_nat(
         loss_history.append(float(loss))
 
     target_provenance = getattr(target, "provenance", {})
+    initial_parameter_hash = hash_json(
+        {
+            "singles": initial_singles.tolist(),
+            "pair_keys": list(initial_keys),
+            "pair_windings": list(initial_windings),
+        }
+    )
+    final_parameter_hash = hash_json(
+        {
+            "singles": current_singles.tolist(),
+            "pair_keys": list(current_keys),
+            "pair_windings": list(current_windings),
+        }
+    )
+    deterministic_initialization = config.initialization == "data_dependent" and config.initialization_method == "parity"
     provenance = {
         "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
         "single_update": "objective_and_gradient_exact plus deterministic SGD/Adam update on first n coordinates",
@@ -424,6 +439,15 @@ def run_nat(
             "std": float(config.initialization_std),
             "target_hash": str(getattr(target, "hash", "unavailable")),
             "target_split": target_provenance.get("split", "unspecified") if isinstance(target_provenance, Mapping) else "unspecified",
+        },
+        "initial_parameter_hash": initial_parameter_hash,
+        "final_parameter_hash": final_parameter_hash,
+        "replication": {
+            "unit": "independent RNG source or explicitly declared deterministic configuration",
+            "seed": int(config.seed),
+            "deterministic_initialization": deterministic_initialization,
+            "independent_replica": not deterministic_initialization,
+            "n_unique_parameterizations_observed": 1,
         },
         "python": platform.python_version(),
         "numpy": np.__version__,
