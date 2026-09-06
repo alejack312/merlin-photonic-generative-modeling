@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: current `HEAD` on `codex/v4-implementation` (record the exact commit with `git rev-parse HEAD`; this handoff is part of that final commit).
+- Review target: `84a71bc` (`fix(v4): close third repair contract gaps`) on `codex/v4-implementation`.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -74,4 +74,4 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 - Focused regression evidence: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_classical_core.py tests/v4_tcdp/test_rings_pipeline.py tests/v4_tcdp/test_sibling_inventory.py` — 35 passed across the three touched boundaries (the ring/inventory subset was 22 passed and classical core was 13 passed in the focused reruns; the remaining v4 tests are covered by the full gate).
 - The historical second-repair probe remains a counterexample record and is not a post-repair pass command. The new regression tests are the executable post-repair evidence for S01–S05.
-- Full-suite verification must be refreshed after this repair; the previous `652 passed, 1 skipped` result predates S01–S05.
+- Full-suite verification after this repair: `658 passed, 1 skipped in 455.60s (0:07:35)`.
