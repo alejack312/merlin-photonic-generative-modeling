@@ -11,10 +11,22 @@
     },
     {
       "acceptance_mass": 7.576528320155262e-06,
+      "backend_id": "ideal-unquantized-control",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": false,
+        "role": "compilation_control"
+      },
+      "samples": 20000,
+      "stage": "compiled"
+    },
+    {
+      "acceptance_mass": 7.534451324088452e-06,
       "backend_id": "ideal-compiled-map",
       "provenance": {
         "construction": "absolute-probability-CP-map",
-        "quantized": false
+        "quantized": true,
+        "role": "primary_compiled_reference"
       },
       "samples": 20000,
       "stage": "compiled"
@@ -28,6 +40,7 @@
         "loss": "uniform_all_photons",
         "physical_status": "reference_only",
         "quantized": true,
+        "role": "same_effective_parameters_as_compiled",
         "source_model": "fixed_photon_g2_0"
       },
       "samples": 20000,
@@ -40,6 +53,7 @@
       "accepted_samples": 20000,
       "training_steps": 300
     },
+    "compiled_deployed_same_effective_parameters": true,
     "dataset_hash": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
     "generator_hash": "2703879beb2637679d02497c3df1fc0d6f6f305eb4199d8f8d867ad19ecf3d17",
     "loss": {
@@ -50,7 +64,8 @@
     "seed": 0,
     "source_model": "fixed_photon_g2_0",
     "split": "train",
-    "theta_hash": "bd41364896042846723853856162664cbc10d9670d52c0314e77eb65b3ed2bb7"
+    "theta_hash": "bd41364896042846723853856162664cbc10d9670d52c0314e77eb65b3ed2bb7",
+    "unquantized_compilation_control": true
   },
   "hamming_kernel": {
     "distance": "Hamming",
@@ -60,9 +75,35 @@
   },
   "metrics": {
     "compiled:ideal-compiled-map": {
+      "acceptance_mass": 7.534451324088452e-06,
+      "attempts_per_accepted_sample": 132723.6658630858,
+      "backend_id": "ideal-compiled-map",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 1.0,
+      "floored_log_ratio_1e-12": 0.955301159786578,
+      "floored_log_ratio_1e-12_added_mass": 0.0,
+      "floored_log_ratio_1e-9": 0.955301159786578,
+      "floored_log_ratio_1e-9_added_mass": 0.0,
+      "hamming_mmd2": 0.005193203592862849,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": true,
+        "role": "primary_compiled_reference"
+      },
+      "sample_count": 20000,
+      "spatial_mmd2": 0.03521987545684064,
+      "stage": "compiled",
+      "support_size": 24,
+      "support_validity": 1.0,
+      "true_forward_kl": 0.955301159786578,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 0.955301159786578,
+      "tvd_to_target": 0.5544012046523867
+    },
+    "compiled:ideal-unquantized-control": {
       "acceptance_mass": 7.576528320155262e-06,
       "attempts_per_accepted_sample": 131986.57191576465,
-      "backend_id": "ideal-compiled-map",
+      "backend_id": "ideal-unquantized-control",
       "excluded_target_mass": 0.0,
       "expected_coverage": 1.0,
       "floored_log_ratio_1e-12": 0.9566398192583978,
@@ -72,7 +113,8 @@
       "hamming_mmd2": 0.005201935776145375,
       "provenance": {
         "construction": "absolute-probability-CP-map",
-        "quantized": false
+        "quantized": false,
+        "role": "compilation_control"
       },
       "sample_count": 20000,
       "spatial_mmd2": 0.03522877789302731,
@@ -80,6 +122,8 @@
       "support_size": 24,
       "support_validity": 1.0,
       "true_forward_kl": 0.9566398192583978,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 0.9566398192583978,
       "tvd_to_target": 0.5539286313328512
     },
     "deployed:ideal-deployed-map": {
@@ -99,6 +143,7 @@
         "loss": "uniform_all_photons",
         "physical_status": "reference_only",
         "quantized": true,
+        "role": "same_effective_parameters_as_compiled",
         "source_model": "fixed_photon_g2_0"
       },
       "sample_count": 20000,
@@ -107,6 +152,8 @@
       "support_size": 24,
       "support_validity": 1.0,
       "true_forward_kl": 0.955301159786578,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 0.955301159786578,
       "tvd_to_target": 0.5544012046523867
     },
     "raw:numpy-iqp": {
@@ -129,6 +176,8 @@
       "support_size": 24,
       "support_validity": 1.0,
       "true_forward_kl": 0.9566398192583978,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 0.9566398192583978,
       "tvd_to_target": 0.5539286313328513
     }
   },

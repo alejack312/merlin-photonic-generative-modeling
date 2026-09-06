@@ -10,7 +10,7 @@ import pytest
 from merlin_iqp.classical import ExactProbabilities, IQPModel, KernelSpec, generators_from_pairs
 from merlin_iqp.classical.objectives import objective_and_gradient_exact
 from merlin_iqp.deploy.compile import ALPHA_STEP
-from merlin_iqp.experiments.nat import run_nat, write_nat_run
+from merlin_iqp.experiments.nat import run_matched_continuation, run_nat, write_nat_run
 
 
 def _target_for_pair_key(key: int, *, singles: tuple[float, float] = (0.0, 0.0)) -> ExactProbabilities:
@@ -54,6 +54,56 @@ def test_single_angles_remain_continuous_and_use_exact_gradient() -> None:
     theta = np.array([*compiled.singles, compiled.pair_angles[0][1].lifted_theta])
     expected, _ = objective_and_gradient_exact(theta, run.generator, target, KernelSpec("hamming_gaussian", sigma=0.8))
     assert run.final_loss == expected
+
+
+def test_small_angle_initialization_std_is_forwarded() -> None:
+    run = run_nat(
+        _target_for_pair_key(1),
+        [(0, 1)],
+        initialization="small_angle",
+        initialization_std=0.0,
+        steps=0,
+        seed=7,
+    )
+    assert run.config.initialization_std == 0.0
+    assert np.all(run.initial_singles == 0.0)
+
+
+def test_matched_continuation_preserves_optimizer_and_ideal_trajectory() -> None:
+    target = _target_for_pair_key(3, singles=(0.23, -0.19))
+    warm = run_nat(target, [(0, 1)], steps=3, seed=4, sigma=0.8, single_lr=0.01)
+    continued = run_matched_continuation(target, [(0, 1)], warm, steps=2, pair_budget=4)
+    resumed = run_nat(
+        target,
+        [(0, 1)],
+        steps=2,
+        seed=warm.config.seed,
+        sigma=warm.config.sigma,
+        single_lr=warm.config.single_lr,
+        single_optimizer=warm.config.single_optimizer,
+        pair_budget=4,
+        topology=warm.config.topology,
+        source_commit=warm.config.source_commit,
+        initialization=warm.config.initialization,
+        initialization_method=warm.config.initialization_method,
+        initialization_scale=warm.config.initialization_scale,
+        initialization_std=warm.config.initialization_std,
+        singles=warm.final_singles,
+        pair_keys=warm.final_pair_keys,
+        pair_windings=warm.final_pair_windings,
+        initial_optimizer_state={
+            "kind": warm.config.single_optimizer,
+            "m": warm.optimizer_m,
+            "v": warm.optimizer_v,
+            "step": warm.optimizer_step,
+        },
+    )
+    assert continued.loss_history == resumed.loss_history
+    assert np.array_equal(continued.final_singles, resumed.final_singles)
+    assert continued.final_pair_keys == resumed.final_pair_keys
+    assert continued.final_pair_windings == resumed.final_pair_windings
+    assert continued.provenance["warm_start"] == warm.provenance["final_parameter_hash"]
+    assert continued.config.allow_pair_moves is True
 
 
 def test_bounded_run_is_reproducible_and_serializable(tmp_path) -> None:

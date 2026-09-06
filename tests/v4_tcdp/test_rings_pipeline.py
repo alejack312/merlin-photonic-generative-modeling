@@ -74,6 +74,8 @@ def test_both_objective_profiles_train_with_shared_iqp_model(profile: str) -> No
     assert config.initialization == "data_dependent"
     assert config.initialization_method == "parity"
     assert config.initialization_scale == 0.1
+    assert run.source_provenance["observed_commit"]
+    assert run.config.source_commit == run.source_provenance["observed_commit"]
 
 
 def test_default_data_dependent_initialization_uses_exact_train_moments_and_scale() -> None:

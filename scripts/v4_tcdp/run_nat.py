@@ -12,7 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from merlin_iqp.experiments.datasets import load_rings_dataset  # noqa: E402
-from merlin_iqp.experiments.nat import run_equal_budget_control, run_nat, write_nat_run  # noqa: E402
+from merlin_iqp.experiments.nat import run_equal_budget_control, run_matched_continuation, run_nat, write_nat_run  # noqa: E402
 
 
 def main() -> int:
@@ -24,6 +24,7 @@ def main() -> int:
     parser.add_argument("--pair-budget", type=int, default=None)
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "results" / "v4_tcdp" / "nat" / "nat.json")
     parser.add_argument("--equal-budget-control", action="store_true")
+    parser.add_argument("--matched-continuation", action="store_true", help="emit a warm-start and identical-algorithm continuation null")
     args = parser.parse_args()
     if args.n < 2:
         parser.error("--n must be at least 2")
@@ -32,6 +33,12 @@ def main() -> int:
     sigma = 0.5 * math.sqrt(args.n) if args.sigma is None else args.sigma
     run = run_nat(dataset.train_target, pairs, n=args.n, seed=args.seed, steps=args.steps, sigma=sigma, pair_budget=args.pair_budget, source_commit="working-tree")
     outputs = {"nat": str(write_nat_run(run, args.output))}
+    if args.matched_continuation:
+        continuation = run_matched_continuation(dataset.train_target, pairs, run, steps=args.steps, pair_budget=args.pair_budget)
+        warm_path = args.output.with_name(args.output.stem + "-warm-start" + args.output.suffix)
+        continuation_path = args.output.with_name(args.output.stem + "-matched-continuation" + args.output.suffix)
+        outputs["warm_start"] = str(write_nat_run(run, warm_path))
+        outputs["matched_continuation"] = str(write_nat_run(continuation, continuation_path))
     if args.equal_budget_control:
         control = run_equal_budget_control(dataset.train_target, pairs, n=args.n, seed=args.seed, steps=args.steps, sigma=sigma, pair_budget=args.pair_budget, source_commit="working-tree")
         control_path = args.output.with_name(args.output.stem + "-control" + args.output.suffix)

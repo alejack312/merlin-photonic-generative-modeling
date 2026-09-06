@@ -12,7 +12,9 @@ from merlin_iqp.experiments.sibling_import import (
     COMPATIBILITY_STATUSES,
     build_sibling_inventory,
     compatibility_record,
+    regenerate_training_smoke_data,
     safe_import_artifact,
+    write_inventory_outputs,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -74,7 +76,7 @@ def test_safe_artifact_boundary_rejects_pickle_and_reads_npz(tmp_path: Path) -> 
 
 
 @pytest.mark.skipif(not SIBLING_ROOT.exists(), reason="local sibling checkout is unavailable")
-def test_inventory_does_not_mutate_sibling() -> None:
+def test_inventory_does_not_mutate_sibling(tmp_path: Path) -> None:
     before_status = subprocess.run(
         ["git", "-C", str(SIBLING_ROOT), "status", "--short"], check=True, capture_output=True, text=True
     ).stdout
@@ -89,4 +91,24 @@ def test_inventory_does_not_mutate_sibling() -> None:
         ["git", "-C", str(SIBLING_ROOT), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
     ).stdout.strip()
     assert inventory["source"]["observed_head"] == before_head
+    assert inventory["source"]["observed_commit"] == before_head
+    assert inventory["source"]["observed_branch"]
+    assert inventory["source"]["observed_tree_identity"]
+    assert inventory["source"]["pin_status"] == "MATCH"
+    outputs = write_inventory_outputs(inventory, tmp_path / "exports")
+    exported = json.loads(outputs["training_smoke_configs_experiments_training_smoke_yaml"].read_text(encoding="utf-8"))
+    assert exported["source_commit"] == before_head
+    assert exported["source_branch"]
+    assert exported["source_tree_identity"] == inventory["source"]["observed_tree_identity"]
+    assert exported["source_pin_status"] == "MATCH"
     assert (before_status, before_head) == (after_status, after_head)
+
+
+@pytest.mark.skipif(not SIBLING_ROOT.exists(), reason="local sibling checkout is unavailable")
+def test_training_smoke_data_is_regenerated_from_recorded_recipe() -> None:
+    data, provenance = regenerate_training_smoke_data(SIBLING_ROOT)
+    assert data.shape == (256, 6)
+    assert data.dtype == np.uint8
+    assert provenance["seed"] == 1230519654
+    assert provenance["faithful_retraining"] == "not_run"
+    assert provenance["sha256"] == "dd03528a153d041bcd670204a91a2e3cfebcbbce32bad2b5fe9ab93b33bb2c53"

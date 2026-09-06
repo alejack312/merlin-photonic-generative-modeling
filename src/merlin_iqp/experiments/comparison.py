@@ -49,17 +49,24 @@ def floored_log_ratio(target: np.ndarray, candidate: np.ndarray, floor: float) -
 
 
 def expected_coverage(target: np.ndarray, candidate: np.ndarray, sample_count: int) -> dict[str, float | int]:
+    if isinstance(sample_count, (bool, np.bool_)) or not isinstance(sample_count, (int, np.integer)):
+        raise ValueError("sample_count must be an integer")
+    sample_count = int(sample_count)
     if sample_count < 0:
         raise ValueError("sample_count must be non-negative")
     p = _probability_vector(target, name="target")
     q = _probability_vector(candidate, name="candidate")
     support = p > 1e-6
     support_q = q[support]
-    terms = np.ones_like(support_q)
-    below_one = support_q < 1.0
-    terms[below_one] = -np.expm1(sample_count * np.log1p(-support_q[below_one]))
+    if sample_count == 0:
+        coverage = 0.0
+    else:
+        terms = np.ones_like(support_q)
+        below_one = support_q < 1.0
+        terms[below_one] = -np.expm1(sample_count * np.log1p(-support_q[below_one]))
+        coverage = float(np.mean(terms)) if len(terms) else 0.0
     return {
-        "expected_coverage": float(np.mean(terms)) if len(terms) else 0.0,
+        "expected_coverage": coverage,
         "support_size": int(np.count_nonzero(support)),
         "excluded_target_mass": float(p[~support].sum()),
         "sample_count": int(sample_count),
@@ -122,11 +129,18 @@ class MatchedComparison:
         for arm in self.arms:
             floor_12, added_12 = floored_log_ratio(self.target, arm.vector, 1e-12)
             floor_9, added_9 = floored_log_ratio(self.target, arm.vector, 1e-9)
+            kl = true_forward_kl(self.target, arm.vector)
+            kl_infinite = bool(np.isinf(kl))
             row: dict[str, Any] = {
                 "backend_id": arm.backend_id,
                 "stage": arm.stage,
                 "tvd_to_target": total_variation_distance(self.target, arm.vector),
-                "true_forward_kl": true_forward_kl(self.target, arm.vector),
+                # JSON has no representation for infinity. Keep the numeric
+                # field JSON-safe while carrying the exact extended-real
+                # result in an explicit status/value pair.
+                "true_forward_kl": None if kl_infinite else kl,
+                "true_forward_kl_status": "infinite" if kl_infinite else "finite",
+                "true_forward_kl_value": "inf" if kl_infinite else kl,
                 "floored_log_ratio_1e-12": floor_12,
                 "floored_log_ratio_1e-12_added_mass": added_12,
                 "floored_log_ratio_1e-9": floor_9,

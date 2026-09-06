@@ -34,6 +34,8 @@ from merlin_iqp.deploy.compile import (
     quantize_theta,
 )
 
+from .sibling_import import git_source_identity
+
 
 SCHEMA_VERSION = "v4_tcdp.nat_run.v1"
 CATALOG_SIZE = len(ALPHA_KEYS)
@@ -142,6 +144,9 @@ class NatRun:
     final_pair_windings: tuple[int, ...]
     final_compiled: CompiledCircuit
     loss_history: tuple[float, ...]
+    optimizer_m: np.ndarray
+    optimizer_v: np.ndarray
+    optimizer_step: int
     budgets: dict[str, int]
     provenance: dict[str, Any]
 
@@ -166,6 +171,12 @@ class NatRun:
             "final_pair_windings": list(self.final_pair_windings),
             "final_compiled": self.final_compiled.as_metadata(),
             "loss_history": list(self.loss_history),
+            "optimizer_state": {
+                "kind": self.config.single_optimizer,
+                "m": self.optimizer_m.tolist(),
+                "v": self.optimizer_v.tolist(),
+                "step": self.optimizer_step,
+            },
             "final_loss": self.final_loss,
             "pair_moves": self.pair_moves,
             "budgets": dict(self.budgets),
@@ -299,18 +310,25 @@ def run_nat(
     initialization_method: str = "parity",
     initialization_scale: float = 0.1,
     initialization_std: float = 0.1,
+    warm_start: NatRun | None = None,
+    initial_optimizer_state: Mapping[str, Any] | None = None,
 ) -> NatRun:
     """Run bounded NAT on an exact target using the Hamming Gaussian MMD.
 
     Each outer step performs at most two objective evaluations per pair (the
     circular ``key - 1`` and ``key + 1`` neighbors), subject to ``pair_budget``.
     It then performs one exact analytic gradient update on the continuous
-    singles.  ``allow_pair_moves=False`` provides a labeled fixed-pair,
-    equal-budget continuation control; it still evaluates the same neighbors
-    but deliberately does not commit their keys.
+    singles.  ``allow_pair_moves=False`` provides a labeled fixed-pair
+    ablation; it still evaluates the same neighbors but deliberately does not
+    commit their keys. ``warm_start`` and ``initial_optimizer_state`` preserve
+    the complete optimizer state for matched continuation controls.
     """
 
     resolved_n = _infer_n(target, n)
+    source_identity = git_source_identity(Path(__file__).resolve().parents[3])
+    resolved_source_commit = source_commit
+    if source_commit in {None, "working-tree"}:
+        resolved_source_commit = source_identity.get("observed_commit")
     config = NatConfig(
         n=resolved_n,
         pairs=tuple((int(pair[0]), int(pair[1])) for pair in pairs),
@@ -321,22 +339,38 @@ def run_nat(
         single_optimizer=single_optimizer,
         pair_budget=pair_budget,
         topology=topology,
-        source_commit=source_commit,
+        source_commit=resolved_source_commit,
         allow_pair_moves=allow_pair_moves,
         run_kind=run_kind,
         initialization=initialization,
         initialization_method=initialization_method,
         initialization_scale=initialization_scale,
+        initialization_std=initialization_std,
     )
     generator = generators_from_pairs(config.n, config.pairs)
-    current_singles, current_keys, current_windings = _initial_state(
-        config,
-        singles=singles,
-        pair_keys=pair_keys,
-        pair_thetas=pair_thetas,
-        pair_windings=pair_windings,
-        target=target,
-    )
+    if warm_start is not None:
+        if any(value is not None for value in (singles, pair_keys, pair_thetas, pair_windings, initial_optimizer_state)):
+            raise ValueError("warm_start cannot be combined with explicit initial parameters or optimizer state")
+        if warm_start.config.n != config.n or warm_start.config.pairs != config.pairs:
+            raise ValueError("warm_start topology does not match continuation configuration")
+        current_singles = warm_start.final_singles.copy()
+        current_keys = tuple(warm_start.final_pair_keys)
+        current_windings = tuple(warm_start.final_pair_windings)
+        initial_optimizer_state = {
+            "kind": warm_start.config.single_optimizer,
+            "m": warm_start.optimizer_m.copy(),
+            "v": warm_start.optimizer_v.copy(),
+            "step": warm_start.optimizer_step,
+        }
+    else:
+        current_singles, current_keys, current_windings = _initial_state(
+            config,
+            singles=singles,
+            pair_keys=pair_keys,
+            pair_thetas=pair_thetas,
+            pair_windings=pair_windings,
+            target=target,
+        )
     initial_singles = current_singles.copy()
     initial_keys = current_keys
     initial_windings = current_windings
@@ -352,6 +386,14 @@ def run_nat(
     adam_m = np.zeros(config.n, dtype=np.float64)
     adam_v = np.zeros(config.n, dtype=np.float64)
     adam_t = 0
+    if initial_optimizer_state is not None:
+        if str(initial_optimizer_state.get("kind", config.single_optimizer)).lower() != config.single_optimizer:
+            raise ValueError("initial optimizer state does not match single_optimizer")
+        adam_m = np.asarray(initial_optimizer_state.get("m"), dtype=np.float64).copy()
+        adam_v = np.asarray(initial_optimizer_state.get("v"), dtype=np.float64).copy()
+        adam_t = int(initial_optimizer_state.get("step", 0))
+        if adam_m.shape != (config.n,) or adam_v.shape != (config.n,) or adam_t < 0 or not np.all(np.isfinite(adam_m)) or not np.all(np.isfinite(adam_v)):
+            raise ValueError("initial optimizer state has invalid shape, step, or values")
 
     for _step in range(config.steps):
         for pair_index in range(len(config.pairs)):
@@ -431,6 +473,7 @@ def run_nat(
         "compiler": {"module": "merlin_iqp.deploy.compile", "catalog_step": ALPHA_STEP, "catalog_keys": CATALOG_SIZE, "quantize": True, "winding_and_lift_preserved": True},
         "forbidden_methods": ["finite_difference_through_quantization", "straight_through_gradient", "interpolation"],
         "control": "fixed_pair_equal_budget" if not allow_pair_moves else None,
+        "warm_start": warm_start.provenance.get("final_parameter_hash") if warm_start is not None else None,
         "seed": int(config.seed),
         "initialization": {
             "scheme": config.initialization,
@@ -452,7 +495,8 @@ def run_nat(
         "python": platform.python_version(),
         "numpy": np.__version__,
         "generator_hash": hash_array(generator),
-        "source_commit": source_commit,
+        "source_commit": resolved_source_commit,
+        "source_provenance": source_identity,
     }
     budgets = {
         "requested_steps": config.steps,
@@ -474,17 +518,59 @@ def run_nat(
         final_pair_windings=current_windings,
         final_compiled=compiled,
         loss_history=tuple(loss_history),
+        optimizer_m=adam_m.copy(),
+        optimizer_v=adam_v.copy(),
+        optimizer_step=adam_t,
         budgets=budgets,
         provenance=provenance,
     )
 
 
 def run_equal_budget_control(target: object, pairs: Sequence[Sequence[int]], **kwargs: Any) -> NatRun:
-    """Run the fixed-pair continuation control with NAT's same budget rules."""
+    """Run the fixed-pair procedure as a separately labeled ablation."""
 
     kwargs["allow_pair_moves"] = False
     kwargs["run_kind"] = "fixed_pair_equal_budget_control"
     return run_nat(target, pairs, **kwargs)
+
+
+def run_matched_continuation(
+    target: object,
+    pairs: Sequence[Sequence[int]],
+    warm_start: NatRun,
+    *,
+    steps: int,
+    pair_budget: int | None = None,
+) -> NatRun:
+    """Continue one frozen state with the identical ideal NAT optimizer.
+
+    Pair moves remain enabled, and the final singles, pair windings, and Adam
+    moments/step are inherited from ``warm_start``. This is the plan's
+    equal-algorithm ideal null; the fixed-pair procedure remains a separate
+    ablation exposed by :func:`run_equal_budget_control`.
+    """
+
+    config = warm_start.config
+    return run_nat(
+        target,
+        pairs,
+        n=config.n,
+        steps=steps,
+        seed=config.seed,
+        sigma=config.sigma,
+        single_lr=config.single_lr,
+        single_optimizer=config.single_optimizer,
+        pair_budget=pair_budget if pair_budget is not None else steps * len(config.pairs) * 2,
+        topology=config.topology,
+        source_commit=config.source_commit,
+        allow_pair_moves=True,
+        run_kind="matched_continued_ideal",
+        initialization=config.initialization,
+        initialization_method=config.initialization_method,
+        initialization_scale=config.initialization_scale,
+        initialization_std=config.initialization_std,
+        warm_start=warm_start,
+    )
 
 
 def write_nat_run(run: NatRun, path: str | Path) -> Path:
@@ -496,4 +582,4 @@ def write_nat_run(run: NatRun, path: str | Path) -> Path:
     return destination
 
 
-__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "run_equal_budget_control", "run_nat", "write_nat_run"]
+__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "run_equal_budget_control", "run_matched_continuation", "run_nat", "write_nat_run"]

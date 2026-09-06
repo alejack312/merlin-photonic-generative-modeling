@@ -6,7 +6,7 @@ import builtins
 import json
 import platform
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -17,6 +17,7 @@ from merlin_iqp.classical._validation import hash_array, hash_json
 from merlin_iqp.classical.objectives import hamming_mmd2, spatial_mmd2
 
 from .datasets import RingsDataset, load_rings_dataset
+from .sibling_import import git_source_identity
 
 
 SCHEMA_VERSION = "v4_tcdp.rings_run.v2"
@@ -56,7 +57,7 @@ class RingConfig:
     initialization_scale: float = 0.1
     initialization_std: float = 0.1
     generator_family: str = "chain_1d"
-    source_commit: str = "72e8079"
+    source_commit: str | None = None
     run_kind: str = "smoke"
 
     @property
@@ -81,6 +82,7 @@ class RingRun:
     metrics: dict[str, float]
     photonic_evaluation: dict[str, str]
     initialization_metadata: dict[str, Any]
+    source_provenance: dict[str, Any]
 
 
 def available_profiles() -> dict[str, dict[str, Any]]:
@@ -255,6 +257,9 @@ def _initialize_ring_parameters(
 
 
 def train_rings(config: RingConfig) -> RingRun:
+    source_provenance = git_source_identity(Path(__file__).resolve().parents[3])
+    if config.source_commit in {None, "working-tree", "72e8079"}:
+        config = replace(config, source_commit=source_provenance.get("observed_commit"))
     dataset = load_rings_dataset(config.n)
     generator = chain_1d(config.n, config.n - 1)
     initial_theta, initialization_metadata = _initialize_ring_parameters(config, dataset, generator)
@@ -279,6 +284,7 @@ def train_rings(config: RingConfig) -> RingRun:
         metrics=_metric_panel(dataset, probabilities),
         photonic_evaluation=dict(PHOTONIC_EVALUATION),
         initialization_metadata=initialization_metadata,
+        source_provenance=source_provenance,
     )
 
 
@@ -360,6 +366,7 @@ def _manifest(run: RingRun, replication_identity: dict[str, Any]) -> dict[str, A
         "metrics": run.metrics,
         "selection_rule": "fixed_last_step",
         "photonic_evaluation": run.photonic_evaluation,
+        "source_provenance": run.source_provenance,
         "legacy_v1_context": {
             "status": "context_only",
             "ansatz": "QuantumLayer.simple",

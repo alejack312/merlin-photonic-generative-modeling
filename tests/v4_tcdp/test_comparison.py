@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import pytest
 
@@ -37,11 +39,29 @@ def test_true_kl_and_floor_are_distinct() -> None:
     assert value > 0 and added_mass > 0
 
 
+def test_infinite_true_kl_is_json_safe_and_explicit() -> None:
+    comparison = MatchedComparison(
+        "support-mismatch",
+        np.array([0.5, 0.5]),
+        (DistributionArm("identity", np.array([1.0, 0.0]), "raw"),),
+        1.0,
+    )
+    manifest = comparison.manifest()
+    json.dumps(manifest, allow_nan=False)
+    row = manifest["metrics"]["raw:identity"]
+    assert row["true_forward_kl"] is None
+    assert row["true_forward_kl_status"] == "infinite"
+    assert row["true_forward_kl_value"] == "inf"
+
+
 def test_coverage_uses_target_support_and_handles_q_one() -> None:
     result = expected_coverage(np.array([1.0, 0.0]), np.array([1.0, 0.0]), 20_000)
     assert result["support_size"] == 1
     assert result["excluded_target_mass"] == 0.0
     assert result["expected_coverage"] == 1.0
+    assert expected_coverage(np.array([1.0, 0.0]), np.array([1.0, 0.0]), 0)["expected_coverage"] == 0.0
+    with pytest.raises(ValueError, match="must be an integer"):
+        expected_coverage(np.array([1.0, 0.0]), np.array([1.0, 0.0]), 1.5)
 
 
 def test_distribution_rejects_unnormalized_or_invalid_stage() -> None:
@@ -56,6 +76,10 @@ def test_ring_smoke_comparison_keeps_raw_compiled_and_deployed_distinct() -> Non
         __import__("pathlib").Path("results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke")
     )
     rows = comparison.metrics()
-    assert rows["raw:numpy-iqp"]["tvd_to_target"] == pytest.approx(rows["compiled:ideal-compiled-map"]["tvd_to_target"], abs=1e-12)
+    assert rows["raw:numpy-iqp"]["stage"] == "raw"
+    assert rows["compiled:ideal-compiled-map"]["stage"] == "compiled"
     assert rows["deployed:ideal-deployed-map"]["stage"] == "deployed"
     assert rows["deployed:ideal-deployed-map"]["acceptance_mass"] < 1.0
+    assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] != pytest.approx(rows["compiled:ideal-unquantized-control"]["tvd_to_target"], abs=1e-12)
+    assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] == pytest.approx(rows["deployed:ideal-deployed-map"]["tvd_to_target"], abs=1e-12)
+    assert rows["compiled:ideal-compiled-map"]["acceptance_mass"] == pytest.approx(rows["deployed:ideal-deployed-map"]["acceptance_mass"], abs=1e-18)

@@ -34,6 +34,7 @@ from merlin_iqp.classical.gradients import finite_difference_gradient, gradient_
 from merlin_iqp.classical.expectation import expectation_gradient_exact
 from merlin_iqp.classical.kernel import spatial_walsh_matrix
 from merlin_iqp.classical.objectives import objective_and_gradient_exact
+from merlin_iqp.experiments.datasets import load_rings_dataset
 
 
 def _target() -> ExactProbabilities:
@@ -111,6 +112,14 @@ def test_invalid_inputs_are_rejected_without_silent_casting() -> None:
         DatasetBundle("1", "leaky", 2, "samples", np.zeros((2, 2), dtype=np.uint8), np.zeros((2, 2), dtype=np.uint8))
 
 
+def test_typed_ring_targets_construct_a_dataset_bundle() -> None:
+    bundle = load_rings_dataset(4).bundle()
+    assert bundle.n == 4
+    assert bundle.train.hash
+    assert bundle.test is not None and bundle.test.hash
+    assert bundle.dataset_hash
+
+
 def test_classical_import_has_no_sibling_or_photonic_dependency() -> None:
     script = """
 import sys
@@ -154,3 +163,14 @@ def test_adam_checkpoint_resume_is_equivalent(tmp_path) -> None:
     assert loaded.step == 2
     with pytest.raises(ValueError):
         load_checkpoint(checkpoint_path, expected_kernel_hash="stale")
+
+
+def test_checkpoint_resume_rejects_changed_learning_rate(tmp_path) -> None:
+    G = chain_1d(3, 1)
+    target = _target()
+    kernel = KernelSpec("hamming_gaussian", sigma=0.6)
+    checkpoint_path = tmp_path / "lr-mismatch.npz"
+    Trainer(IQPModel(G, [0.17, -0.09, 0.13, 0.05]), target, kernel, optimizer="adam", lr=0.03, seed=9).run(1, checkpoint_path=checkpoint_path)
+    resumed = Trainer(IQPModel(G, np.zeros(G.shape[0])), target, kernel, optimizer="adam", lr=0.2, seed=9)
+    with pytest.raises(ValueError, match="checkpoint learning rate mismatch"):
+        resumed.resume(checkpoint_path)

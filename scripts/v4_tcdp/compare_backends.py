@@ -43,10 +43,21 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
         else:
             raise ValueError("comparison supports only the ring weight-1/2 generator")
 
-    compiled = compile_generators(generator, theta, quantize=False)
+    # The primary compiled and deployed arms must share the exact effective
+    # compiled parameters.  Otherwise quantization is incorrectly included in
+    # the compiled-to-deployed gap.  Keep the unquantized result as an explicit
+    # compilation control rather than silently folding it into that gap.
+    unquantized = compile_generators(generator, theta, quantize=False)
+    unquantized_mapping, unquantized_success = apply_compiled_density(unquantized)
+    compiled = compile_generators(generator, theta, quantize=True)
     compiled_mapping, compiled_success = apply_compiled_density(compiled)
-    quantized = compile_generators(generator, theta, quantize=True)
-    deployed_mapping, deployed_success = apply_compiled_density(quantized, eta=eta)
+    deployed_mapping, deployed_success = apply_compiled_density(compiled, eta=eta)
+    if eta == 1.0 and (
+        not np.allclose(list(compiled_mapping.values()), list(deployed_mapping.values()), atol=1e-12, rtol=1e-12)
+        or not np.isclose(compiled_success, deployed_success, atol=1e-12, rtol=1e-12)
+    ):
+        raise AssertionError("ideal eta=1 compiled and deployed arms must be identical")
+    unquantized_vector = _vector_from_mapping(unquantized_mapping)
     compiled_vector = _vector_from_mapping(compiled_mapping)
     deployed_vector = _vector_from_mapping(deployed_mapping)
     if not np.allclose(raw.sum(), compiled_vector.sum()):
@@ -57,8 +68,9 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
         target=target,
         arms=(
             DistributionArm("numpy-iqp", raw, "raw", samples=20_000, provenance={"model_hash": manifest["model"]["final_theta_hash"]}),
-            DistributionArm("ideal-compiled-map", compiled_vector, "compiled", acceptance_mass=compiled_success, samples=20_000, provenance={"quantized": False, "construction": "absolute-probability-CP-map"}),
-            DistributionArm("ideal-deployed-map", deployed_vector, "deployed", acceptance_mass=deployed_success, samples=20_000, provenance={"quantized": True, "construction": "absolute-probability-CP-map", "physical_status": "reference_only", "source_model": "fixed_photon_g2_0", "eta": eta, "loss": "uniform_all_photons"}),
+            DistributionArm("ideal-unquantized-control", unquantized_vector, "compiled", acceptance_mass=unquantized_success, samples=20_000, provenance={"quantized": False, "role": "compilation_control", "construction": "absolute-probability-CP-map"}),
+            DistributionArm("ideal-compiled-map", compiled_vector, "compiled", acceptance_mass=compiled_success, samples=20_000, provenance={"quantized": True, "role": "primary_compiled_reference", "construction": "absolute-probability-CP-map"}),
+            DistributionArm("ideal-deployed-map", deployed_vector, "deployed", acceptance_mass=deployed_success, samples=20_000, provenance={"quantized": True, "role": "same_effective_parameters_as_compiled", "construction": "absolute-probability-CP-map", "physical_status": "reference_only", "source_model": "fixed_photon_g2_0", "eta": eta, "loss": "uniform_all_photons"}),
         ),
         hamming_sigma=0.5 * np.sqrt(n),
         spatial_centers=np.asarray(dataset["centers"], dtype=np.float64),
@@ -71,6 +83,8 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
             "seed": manifest["config"]["seed"],
             "budget": {"training_steps": manifest["config"]["steps"], "accepted_samples": 20_000},
             "raw_compiled_deployed_distinct": True,
+            "compiled_deployed_same_effective_parameters": True,
+            "unquantized_compilation_control": True,
             "source_model": "fixed_photon_g2_0",
             "loss": {"eta": eta, "acceptance_rule": "eta**n * model_success"},
         },

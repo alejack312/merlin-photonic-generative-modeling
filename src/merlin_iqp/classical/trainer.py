@@ -96,6 +96,14 @@ class Trainer:
         checkpoint = load_checkpoint(path, expected_spec_hash=self.spec_hash, expected_dataset_hash=self.dataset_hash, expected_kernel_hash=self.kernel.hash)
         if checkpoint.optimizer != self.optimizer or len(checkpoint.theta) != self.model.m:
             raise ValueError("checkpoint optimizer or theta shape is incompatible")
+        saved_lr = checkpoint.optimizer_state.get("lr")
+        if saved_lr is None or not np.isfinite(saved_lr) or saved_lr <= 0:
+            raise ValueError("checkpoint is missing a valid optimizer learning rate")
+        if not np.isclose(float(saved_lr), self.lr, rtol=0.0, atol=0.0):
+            raise ValueError(
+                "checkpoint learning rate mismatch: "
+                f"checkpoint={float(saved_lr):.17g}, trainer={self.lr:.17g}"
+            )
         self.model.theta = checkpoint.theta.copy()
         self.step = checkpoint.step
         self.loss_history = list(checkpoint.loss_history)
@@ -111,6 +119,19 @@ class Trainer:
     def from_checkpoint(cls, path: str | Path, target: object, kernel: KernelSpec | str = "hamming_gaussian", **kwargs: Any) -> "Trainer":
         checkpoint = load_checkpoint(path)
         model = IQPModel(checkpoint_generator(path), checkpoint.theta)
-        trainer = cls(model, target, kernel, optimizer=checkpoint.optimizer, lr=float(checkpoint.optimizer_state.get("lr", kwargs.pop("lr", 0.05))), **kwargs)
+        requested_lr = kwargs.pop("lr", None)
+        saved_lr = checkpoint.optimizer_state.get("lr")
+        if saved_lr is None:
+            if requested_lr is None:
+                raise ValueError("checkpoint is missing a valid optimizer learning rate")
+            initial_lr = float(requested_lr)
+        else:
+            initial_lr = float(saved_lr)
+            if requested_lr is not None and not np.isclose(float(requested_lr), initial_lr, rtol=0.0, atol=0.0):
+                raise ValueError(
+                    "checkpoint learning rate mismatch: "
+                    f"checkpoint={initial_lr:.17g}, trainer={float(requested_lr):.17g}"
+                )
+        trainer = cls(model, target, kernel, optimizer=checkpoint.optimizer, lr=initial_lr, **kwargs)
         trainer.resume(path)
         return trainer

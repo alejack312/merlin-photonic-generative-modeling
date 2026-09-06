@@ -100,7 +100,10 @@ class DatasetBundle:
             width = int(value.n) if hasattr(value, "n") else int(binary_matrix(value, name=name, width=self.n).shape[1])
             if width != self.n:
                 raise ValueError(f"{name} width does not match n")
-            split_hash = str(getattr(value, "hash", hash_array(binary_matrix(value, name=name, width=self.n))))
+            value_hash = getattr(value, "hash", None)
+            if value_hash is None:
+                value_hash = hash_array(binary_matrix(value, name=name, width=self.n))
+            split_hash = str(value_hash)
             split_hashes[name] = split_hash
         if len(split_hashes) > 1 and len(set(split_hashes.values())) != len(split_hashes):
             raise ValueError("dataset splits must not be identical; possible split leakage")

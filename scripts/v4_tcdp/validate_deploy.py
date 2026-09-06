@@ -31,18 +31,34 @@ def run(with_perceval: bool = False) -> dict[str, object]:
     probabilities, model_success = apply_compiled_density(compiled)
     gate = reconstruct_cp_map(np.pi / 3, use_perceval=with_perceval)
     physicality = validate_gate_map(gate)
-    ideal = ideal_cp_map(np.pi / 3)
+    compiled_pair_successes = [ideal_cp_map(angle.wrapped_alpha).success for _, angle in compiled.pair_angles]
+    expected_success = float(np.prod(compiled_pair_successes))
+    analytic_status = "PASS" if (
+        physicality.passed
+        and np.isclose(sum(probabilities.values()), 1.0, atol=1e-12, rtol=1e-12)
+        and np.isclose(model_success, expected_success, atol=1e-12, rtol=1e-12)
+    ) else "FAIL"
+    physical_status = "SKIPPED"
+    if with_perceval:
+        physical_status = str(gate.metadata.get("perceval", {}).get("status", "INCONCLUSIVE"))
+        if physical_status not in {"PASS", "FAIL", "INCONCLUSIVE"}:
+            physical_status = "INCONCLUSIVE"
+    overall_status = analytic_status if not with_perceval else ("PASS" if analytic_status == "PASS" and physical_status == "PASS" else "INCONCLUSIVE" if analytic_status == "PASS" else "FAIL")
     U = np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
     result: dict[str, object] = {
-        "status": "PASS" if physicality.passed and np.isclose(sum(probabilities.values()), 1.0) else "FAIL",
+        "status": overall_status,
+        "analytic_status": analytic_status,
+        "physical_status": physical_status,
         "compiler": compiled.as_metadata(),
         "probability_sum": float(sum(probabilities.values())),
         "model_success": float(model_success),
-        "ideal_success_product": float(ideal.success**2),
+        "expected_success_from_compiled_pairs": expected_success,
+        "compiled_pair_successes": [float(value) for value in compiled_pair_successes],
+        "success_reference_error": float(model_success - expected_success),
         "map_physicality": physicality.__dict__,
         "haar_fidelity": float(success_weighted_haar_fidelity(gate, U)),
         "throughput_fixed_n": float(fixed_photon_attempts_per_sample(0.9, 3, model_success)),
-        "perceval": gate.metadata["perceval"],
+        "perceval": gate.metadata.get("perceval_probe", {"status": "INCONCLUSIVE", "reason": "probe metadata unavailable"}),
         "elapsed_seconds": float(time.perf_counter() - started),
     }
     if with_perceval:

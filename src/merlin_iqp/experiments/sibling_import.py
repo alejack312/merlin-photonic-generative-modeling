@@ -78,6 +78,113 @@ def _git_status(root: Path) -> list[str]:
     return [] if value is None or not value else value.splitlines()
 
 
+def git_source_identity(root: str | Path) -> dict[str, Any]:
+    """Return the observed Git identity without changing ``root``.
+
+    A requested pin is only a compatibility constraint.  The identity used for
+    replay is the checkout that was actually observed, including a deterministic
+    content digest when the checkout is dirty.  ``git ls-files`` includes tracked
+    files and standard untracked files, so the digest also distinguishes a dirty
+    source file that is not yet in the index.
+    """
+    checkout = Path(root).expanduser().resolve()
+    commit = _git(checkout, "rev-parse", "HEAD")
+    branch = _git(checkout, "symbolic-ref", "--short", "-q", "HEAD") or "detached"
+    status = _git_status(checkout)
+    listed = _git(checkout, "ls-files", "--cached", "--others", "--exclude-standard")
+    digest = hashlib.sha256()
+    listed_files = [] if listed is None else [line for line in listed.splitlines() if line]
+    for relative in sorted(set(listed_files), key=str.lower):
+        path = checkout / relative
+        if not path.is_file():
+            continue
+        digest.update(relative.replace("\\", "/").encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    digest.update("\n".join(status).encode("utf-8"))
+    clean_tree = not status
+    tree_identity = _git(checkout, "rev-parse", "HEAD^{tree}") if clean_tree else digest.hexdigest()
+    return {
+        "root": _path_string(checkout),
+        "observed_commit": commit,
+        "observed_branch": branch,
+        "dirty": bool(status),
+        "git_status": status,
+        "tree_identity": tree_identity,
+        "tree_identity_kind": "git_tree" if clean_tree and tree_identity else "working_tree_content_sha256",
+    }
+
+
+TRAINING_SMOKE_DATA_SEED = 1230519654
+
+
+def regenerate_training_smoke_data(
+    sibling_root: str | Path,
+    *,
+    config_path: str | Path | None = None,
+    results_path: str | Path | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Regenerate the sibling synthetic ``training_smoke`` input exactly.
+
+    This follows the pinned sibling's recorded ``product_bernoulli`` recipe:
+    ``default_rng(seed).integers(0, 2, (n_samples, n), dtype=uint8)``.  It is
+    deliberately separate from optimizer replay; matching these input bytes is
+    evidence for data regeneration only, not faithful source retraining.
+    """
+    root = Path(sibling_root).expanduser().resolve()
+    config = Path(config_path) if config_path is not None else root / "configs" / "experiments" / "training_smoke.yaml"
+    results = Path(results_path) if results_path is not None else root / "results" / "training_smoke" / "results.jsonl"
+    status, parsed, error = _safe_yaml(config)
+    if parsed is None or not isinstance(parsed, dict):
+        raise ValueError(f"training_smoke config could not be parsed ({status}): {error}")
+    experiment = parsed.get("experiment", {})
+    dataset = parsed.get("dataset", {})
+    circuits = parsed.get("circuit", {}).get("n_qubits", [])
+    if experiment.get("name") != "training_smoke":
+        raise ValueError("config is not the sibling training_smoke experiment")
+    if dataset.get("type") != "product_bernoulli":
+        raise ValueError(f"unsupported training_smoke dataset type: {dataset.get('type')!r}")
+    n_samples = int(dataset.get("n_samples", 0))
+    if n_samples != 256 or circuits != [6]:
+        raise ValueError(f"unexpected training_smoke recipe: n_samples={n_samples}, n_qubits={circuits!r}")
+
+    recorded: dict[str, Any] | None = None
+    if results.exists():
+        for raw_line in results.read_text(encoding="utf-8").splitlines():
+            if not raw_line.strip():
+                continue
+            candidate = json.loads(raw_line)
+            metadata = candidate.get("dataset_metadata", {})
+            if candidate.get("n") == 6 and metadata.get("type") == "product_bernoulli":
+                recorded = candidate
+                break
+    if recorded is None:
+        raise FileNotFoundError(f"recorded training_smoke result is missing: {results}")
+    metadata = recorded.get("dataset_metadata", {})
+    seed = int(metadata.get("seed", -1))
+    if seed != TRAINING_SMOKE_DATA_SEED or int(metadata.get("n_samples", -1)) != n_samples:
+        raise ValueError(f"unexpected recorded training_smoke dataset metadata: {metadata!r}")
+
+    data = np.random.default_rng(seed).integers(0, 2, size=(n_samples, 6), dtype=np.uint8)
+    digest = hashlib.sha256(np.ascontiguousarray(data).tobytes()).hexdigest()
+    provenance = {
+        "status": "regenerated",
+        "source": "iqp_bp.experiments.data_factory.make_dataset",
+        "recipe": "default_rng(seed).integers(0, 2, size=(n_samples, n), dtype=uint8)",
+        "config_path": _path_string(config),
+        "config_sha256": _sha256(config),
+        "recorded_results_path": _path_string(results),
+        "recorded_dataset_metadata": metadata,
+        "seed": seed,
+        "shape": list(data.shape),
+        "dtype": str(data.dtype),
+        "sha256": digest,
+        "faithful_retraining": "not_run",
+    }
+    return data, provenance
+
+
 def _iter_files(root: Path) -> list[Path]:
     if not root.exists():
         return []
@@ -448,7 +555,8 @@ def build_sibling_inventory(sibling_root: str | Path, *, pinned_commit: str = PI
         if path.suffix.lower() in _UNSAFE_SUFFIXES:
             record["safe_import_reason"] = "Python object deserialization is intentionally unsupported."
         artifact_records.append(record)
-    observed_head = _git(root, "rev-parse", "HEAD")
+    source_identity = git_source_identity(root)
+    observed_head = source_identity["observed_commit"]
     pinned_parent = _git(root, "show", "-s", "--format=%P", pinned_commit)
     result: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -462,10 +570,16 @@ def build_sibling_inventory(sibling_root: str | Path, *, pinned_commit: str = PI
             "root": _path_string(root),
             "pinned_commit": pinned_commit,
             "observed_head": observed_head,
+            "observed_commit": source_identity["observed_commit"],
+            "observed_branch": source_identity["observed_branch"],
+            "observed_tree_identity": source_identity["tree_identity"],
+            "observed_tree_identity_kind": source_identity["tree_identity_kind"],
+            "observed_dirty": source_identity["dirty"],
             "head_matches_pinned": observed_head == pinned_commit,
+            "pin_status": "MATCH" if observed_head == pinned_commit and not source_identity["dirty"] else "MISMATCH",
             "pinned_parent": pinned_parent,
-            "git_status": _git_status(root),
-            "status_observation": "clean" if not _git_status(root) else "dirty",
+            "git_status": source_identity["git_status"],
+            "status_observation": "clean" if not source_identity["dirty"] else "dirty",
         },
         "environment": _environment(),
         "packages": {
@@ -489,7 +603,7 @@ def build_sibling_inventory(sibling_root: str | Path, *, pinned_commit: str = PI
             "allowed_import_suffixes": sorted(_SAFE_IMPORT_SUFFIXES),
             "rejected_suffixes": sorted(_UNSAFE_SUFFIXES),
             "np_load_allow_pickle": False,
-            "missing_data_policy": "record blocked and preserve reference; never synthesize a replacement",
+            "missing_data_policy": "external inputs remain blocked; recorded synthetic inputs may be regenerated from their source recipe",
         },
     }
     result["source_rows"] = _source_rows(configs, artifact_records, root)
@@ -548,10 +662,17 @@ def write_inventory_outputs(inventory: dict[str, Any], destination: str | Path) 
     manifest_paths: dict[str, Path] = {}
     for row in validated["source_rows"]:
         safe_id = "".join(character if character.isalnum() or character in "-_" else "_" for character in row["source_id"])
+        source = validated["source"]
         manifest = {
             "schema_version": "v4_tcdp.sibling_export_manifest.v1",
             "source_id": row["source_id"],
-            "source_commit": validated["source"]["pinned_commit"],
+            "source_commit": source["observed_commit"],
+            "source_branch": source["observed_branch"],
+            "source_dirty": source["observed_dirty"],
+            "source_tree_identity": source["observed_tree_identity"],
+            "source_tree_identity_kind": source["observed_tree_identity_kind"],
+            "requested_pinned_commit": source["pinned_commit"],
+            "source_pin_status": source["pin_status"],
             "disposition": row["disposition"],
             "reason": row["reason"],
             "changed_fields": row["changed_fields"],
