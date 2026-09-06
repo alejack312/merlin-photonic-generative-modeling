@@ -327,7 +327,7 @@ def run_nat(
     resolved_n = _infer_n(target, n)
     source_identity = git_source_identity(
         Path(__file__).resolve().parents[3],
-        include_paths=("src", "scripts", "pyproject.toml", "pytest.ini", "AGENTS.md"),
+        include_paths=("src/merlin_iqp", "scripts/v4_tcdp/run_nat.py", "pyproject.toml", "pytest.ini"),
     )
     resolved_source_commit = source_commit
     if source_commit in {None, "working-tree"}:
