@@ -398,6 +398,285 @@ def _execute_source_training(
         return summaries, str(Path(origin).resolve()), _environment()
 
 
+def _load_registered_export(config_path: Path, sibling_root: Path) -> dict[str, Any]:
+    """Load the inventory export that admits exactly ``config_path``."""
+
+    relative = config_path.relative_to(sibling_root).as_posix()
+    expected_suffix = f":{relative}"
+    export_root = REPO_ROOT / "results" / "v4_tcdp" / "sibling"
+    matches: list[dict[str, Any]] = []
+    for path in sorted(export_root.glob("*/manifest.json")):
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            isinstance(value, dict)
+            and value.get("source_id", "").endswith(expected_suffix)
+            and value.get("config", {}).get("path")
+        ):
+            config_record = value["config"]
+            if config_record.get("path") == str(config_path):
+                matches.append(value)
+    if len(matches) != 1:
+        raise ValueError(
+            f"expected one exported sibling manifest for {config_path}, got {len(matches)}"
+        )
+    return matches[0]
+
+
+def _load_resolved_source_config(exported: dict[str, Any], sibling_root: Path) -> tuple[dict[str, Any], Path]:
+    """Load the source runner's own merged config without parsing executable YAML."""
+
+    candidates = [
+        sibling_root / Path(value)
+        for value in exported.get("result_evidence", [])
+        if str(value).replace("\\", "/").endswith("/config.json")
+    ]
+    if len(candidates) != 1 or not candidates[0].is_file():
+        raise FileNotFoundError(
+            "registered source row requires exactly one available resolved config.json; "
+            f"found {[str(path) for path in candidates]}"
+        )
+    path = candidates[0].resolve()
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"resolved source config is not an object: {path}")
+    output_dir = value.get("experiment", {}).get("output_dir")
+    if not isinstance(output_dir, str):
+        raise ValueError(f"resolved source config has no experiment.output_dir: {path}")
+    resolved_output = _resolve_source_path(sibling_root, output_dir).resolve()
+    if not _is_within(resolved_output, sibling_root):
+        raise ValueError(f"resolved source output is outside sibling checkout: {resolved_output}")
+    return value, path
+
+
+def _source_results_path(config: dict[str, Any], sibling_root: Path) -> Path:
+    output_value = config["experiment"]["output_dir"]
+    output_dir = _resolve_source_path(sibling_root, str(output_value)).resolve()
+    path = output_dir / "results.jsonl"
+    if not _is_within(path, sibling_root) or not path.is_file():
+        raise FileNotFoundError(f"source result ledger is missing: {path}")
+    return path
+
+
+def _execute_source_dataset(
+    sibling_root: Path, config: dict[str, Any], *, n: int, seed: int
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Regenerate one source dataset through the source package's factory."""
+
+    with _isolated_source_import(sibling_root):
+        module = importlib.import_module("iqp_bp.experiments.data_factory")
+        make_dataset = getattr(module, "make_dataset", None)
+        if not callable(make_dataset):
+            raise ValueError("source data factory has no callable make_dataset")
+        data, metadata = make_dataset(config["dataset"], n=n, seed=seed)
+    data = np.asarray(data)
+    if data.ndim != 2 or data.shape != (int(config["dataset"]["n_samples"]), n):
+        raise ValueError(f"source data has unexpected shape: {data.shape}")
+    if data.dtype.kind not in "biu" or not np.all(np.isin(data, (0, 1))):
+        raise ValueError("source data factory returned a non-binary dataset")
+    if not isinstance(metadata, dict):
+        raise ValueError("source data factory returned invalid metadata")
+    return data.astype(np.uint8, copy=False), metadata
+
+
+def _source_cell_key(summary: dict[str, Any]) -> tuple[object, ...]:
+    """Return the resolved setting identity used by source and retrained rows."""
+
+    return tuple(
+        (key, summary.get(key))
+        for key in ("family", "kernel", "init", "n", "dataset_type", "bandwidth", "er_p_edge")
+        if key in summary
+    )
+
+
+def _resolve_trajectory(root: Path, value: object, *, label: str, sibling_root: Path) -> Path:
+    if not isinstance(value, str):
+        raise ValueError(f"{label} summary is missing trajectory_path")
+    path = Path(value)
+    if not path.is_absolute():
+        path = root / path
+    path = path.resolve()
+    if not _is_within(path, root) or _is_within(path, sibling_root) or not path.is_file():
+        raise ValueError(f"{label} trajectory is missing or outside its output: {path}")
+    return path
+
+
+def run_registered_retraining(
+    config_path: Path, sibling_root: Path, output_root: Path
+) -> dict[str, object]:
+    """Faithfully rerun a registered learned-distribution source config.
+
+    The source package, data recipe, estimator mode, optimizer and all resolved
+    settings are retained. Only the source runner's output directory changes so
+    the sibling checkout remains read-only and historical results are untouched.
+    """
+
+    sibling_root = sibling_root.resolve()
+    config_path = config_path.resolve()
+    output_root = output_root.resolve()
+    _require_outside_sibling(output_root, sibling_root)
+    exported = _load_registered_export(config_path, sibling_root)
+    config_record = exported.get("config")
+    if not isinstance(config_record, dict):
+        raise ValueError("registered export has no config record")
+    config_hash = config_record.get("sha256")
+    if not isinstance(config_hash, str) or _sha256(config_path) != config_hash:
+        raise ValueError("requested source config hash does not match its inventory export")
+    source_identity_before = git_source_identity(
+        sibling_root,
+        include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"),
+    )
+    if source_identity_before.get("dirty"):
+        raise ValueError("sibling source checkout is dirty; refusing source retraining")
+    if exported.get("source_commit") != source_identity_before.get("observed_commit"):
+        raise ValueError("registered source commit does not match observed sibling HEAD")
+    if exported.get("source_tree_identity") != source_identity_before.get("tree_identity"):
+        raise ValueError("registered source tree identity does not match observed sibling tree")
+
+    source_config, resolved_config_path = _load_resolved_source_config(exported, sibling_root)
+    source_results_path = _source_results_path(source_config, sibling_root)
+    source_summaries = _read_jsonl(source_results_path)
+    if not source_summaries:
+        raise ValueError("source result ledger is empty")
+    executed_config = copy.deepcopy(source_config)
+    executed_config["experiment"] = copy.deepcopy(source_config["experiment"])
+    executed_config["experiment"]["output_dir"] = str(output_root)
+    if output_root.exists() and any(output_root.iterdir()):
+        raise FileExistsError(f"retraining output already contains an artifact: {output_root}")
+    summaries, module_origin, source_environment = _execute_source_training(
+        sibling_root, executed_config
+    )
+    source_identity_after = git_source_identity(
+        sibling_root,
+        include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"),
+    )
+    if source_identity_before != source_identity_after:
+        raise ValueError("sibling source identity changed during retraining")
+    retrained_by_key = {_source_cell_key(summary): summary for summary in summaries}
+    if len(retrained_by_key) != len(summaries):
+        raise ValueError("retrained source runner returned duplicate cell identities")
+
+    source_code_hash = _hash_tree(sibling_root / "src" / "iqp_bp")
+    cell_reports: list[dict[str, Any]] = []
+    for source_summary in source_summaries:
+        key = _source_cell_key(source_summary)
+        retrained_summary = retrained_by_key.get(key)
+        if retrained_summary is None:
+            raise ValueError(f"source cell is missing from retrained output: {key!r}")
+        n = int(source_summary["n"])
+        source_trajectory = _resolve_trajectory(
+            sibling_root, source_summary.get("trajectory_path"), label="source", sibling_root=sibling_root
+        )
+        retrained_trajectory = _resolve_trajectory(
+            output_root, retrained_summary.get("trajectory_path"), label="retrained", sibling_root=sibling_root
+        )
+        written_steps = source_summary.get("written_steps")
+        if not isinstance(written_steps, list) or not written_steps:
+            raise ValueError(f"source cell has no complete written_steps: {key!r}")
+        source_rows = _read_jsonl(source_trajectory)
+        expected_shape = tuple(np.asarray(source_rows[0]["theta"], dtype=np.float64).shape)
+        retrained_rows = _read_jsonl(retrained_trajectory)
+        comparison = _compare_trajectories(
+            source_rows,
+            retrained_rows,
+            expected_step_ids=tuple(int(step) for step in written_steps),
+            expected_theta_shape=expected_shape,
+        )
+        metadata = source_summary.get("dataset_metadata")
+        if not isinstance(metadata, dict) or not isinstance(metadata.get("seed"), int):
+            raise ValueError(f"source cell has incomplete dataset metadata: {key!r}")
+        data, regenerated_metadata = _execute_source_dataset(
+            sibling_root, source_config, n=n, seed=int(metadata["seed"])
+        )
+        if regenerated_metadata != metadata:
+            raise ValueError(f"source dataset metadata changed on regeneration: {key!r}")
+        cell_slug = _slug("__".join(f"{name}_{value}" for name, value in key))
+        cell_dir = output_root / "cells" / cell_slug
+        cell_dir.mkdir(parents=True, exist_ok=True)
+        data_path = cell_dir / "source_data.npy"
+        np.save(data_path, data)
+        cell_report = {
+            **comparison,
+            "command": [
+                "venv/Scripts/python.exe",
+                "scripts/v4_tcdp/retrain_sibling.py",
+                "--sibling-root",
+                str(sibling_root),
+                "--config",
+                str(config_path),
+                "--output-root",
+                str(output_root),
+            ],
+            "source_cell": {name: value for name, value in key},
+            "source_summary_sha256": hashlib.sha256(
+                json.dumps(source_summary, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest(),
+            "source_trajectory": str(source_trajectory),
+            "retrained_trajectory": str(retrained_trajectory),
+            "source_trajectory_sha256": _sha256(source_trajectory),
+            "retrained_trajectory_sha256": _sha256(retrained_trajectory),
+            "dataset_metadata": metadata,
+            "dataset_sha256": hashlib.sha256(np.ascontiguousarray(data).tobytes()).hexdigest(),
+            "dataset_artifact": str(data_path),
+            "source_settings": {
+                "optimizer": source_config["training"]["optimizer"],
+                "learning_rate": source_config["training"]["lr"],
+                "steps": source_config["training"]["num_steps"],
+                "checkpoint_every": source_config["training"]["checkpoint_every"],
+                "loss_mode": source_config["training"]["loss_mode"],
+                "diagnostics": source_config["training"].get("diagnostics", {}),
+            },
+        }
+        (cell_dir / "retraining_evidence.json").write_text(
+            json.dumps(cell_report, indent=2, sort_keys=True, allow_nan=False) + "\n",
+            encoding="utf-8",
+        )
+        cell_reports.append(cell_report)
+
+    status = "PASS" if all(report["status"] == "PASS" for report in cell_reports) else "FAIL"
+    report = {
+        "schema_version": "v4_tcdp.sibling_retraining.v3",
+        "status": status,
+        "reproduction_kind": "faithful_source_retraining",
+        "command": [
+            "venv/Scripts/python.exe",
+            "scripts/v4_tcdp/retrain_sibling.py",
+            "--sibling-root",
+            str(sibling_root),
+            "--config",
+            str(config_path),
+            "--output-root",
+            str(output_root),
+        ],
+        "source_id": exported.get("source_id"),
+        "source_config": str(config_path),
+        "source_config_sha256": config_hash,
+        "resolved_source_config": str(resolved_config_path),
+        "resolved_source_config_sha256": _sha256(resolved_config_path),
+        "executed_output": str(output_root),
+        "adaptation": {
+            "changed_fields": ["experiment.output_dir"],
+            "reason": "source runner output redirected outside the read-only sibling checkout",
+        },
+        "source_identity_before": source_identity_before,
+        "source_identity_after": source_identity_after,
+        "source_code_sha256": source_code_hash,
+        "source_results": str(source_results_path),
+        "source_results_sha256": _sha256(source_results_path),
+        "imported_module_origin": module_origin,
+        "environment": source_environment,
+        "adapter_environment": _environment(),
+        "unsafe_serialization_loaded": False,
+        "cells": cell_reports,
+    }
+    output_root.mkdir(parents=True, exist_ok=True)
+    report_path = output_root / "retraining_evidence.json"
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
+    )
+    report["report_path"] = str(report_path)
+    return report
+
+
 def run_retraining(config_path: Path, sibling_root: Path, output_root: Path) -> dict[str, object]:
     sibling_root = sibling_root.resolve()
     config_path = config_path.resolve()
@@ -572,7 +851,10 @@ def main() -> int:
         default=REPO_ROOT / "results" / "v4_tcdp" / "sibling_retraining" / "training_smoke",
     )
     args = parser.parse_args()
-    report = run_retraining(args.config, args.sibling_root, args.output_root)
+    if args.config.resolve().name == "training_smoke.yaml":
+        report = run_retraining(args.config, args.sibling_root, args.output_root)
+    else:
+        report = run_registered_retraining(args.config, args.sibling_root, args.output_root)
     print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
     return 0 if report["status"] == "PASS" else 1
 
