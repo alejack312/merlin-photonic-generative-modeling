@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from merlin_iqp.classical import IQPModel  # noqa: E402
+from merlin_iqp.classical._validation import binary_matrix, finite_vector, hash_array, hash_json  # noqa: E402
 from merlin_iqp.deploy import apply_compiled_density, compile_generators  # noqa: E402
 from merlin_iqp.experiments.comparison import DistributionArm, MatchedComparison  # noqa: E402
 
@@ -21,12 +22,90 @@ def _vector_from_mapping(mapping: dict[str, float]) -> np.ndarray:
     return np.array([mapping[key] for key in sorted(mapping)], dtype=np.float64)
 
 
-def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedComparison:
-    run = np.load(run_directory / "run.npz")
-    dataset = np.load(run_directory / "dataset.npz")
+def _require_hash(actual: str, expected: str, *, name: str) -> None:
+    if not expected or actual != expected:
+        raise ValueError(f"{name} hash does not match manifest")
+
+
+def _actual_dataset_hash(dataset: dict[str, np.ndarray], manifest_dataset: dict[str, object], n: int) -> str:
+    codec_manifest = manifest_dataset["codec"]
+    assert isinstance(codec_manifest, dict)
+    return hash_json(
+        {
+            "dataset_id": manifest_dataset["dataset_id"],
+            "n": n,
+            "raw_train": hash_array(dataset["raw_train"]),
+            "raw_test": hash_array(dataset["raw_test"]),
+            "normalized_train": hash_array(dataset["normalized_train"]),
+            "normalized_test": hash_array(dataset["normalized_test"]),
+            "train_ids": hash_array(dataset["train_ids"]),
+            "test_ids": hash_array(dataset["test_ids"]),
+            "transform": {
+                # The dataset hash is defined by load_rings_dataset before
+                # these values are ravelled into the portable artifact.
+                "min": np.asarray(dataset["min_values"]).reshape(1, -1).tolist(),
+                "max": np.asarray(dataset["max_values"]).reshape(1, -1).tolist(),
+                "scale": np.asarray(dataset["scale"]).reshape(1, -1).tolist(),
+            },
+            "codec": {
+                "centers": hash_array(dataset["centers"]),
+                "n": n,
+                "lo": codec_manifest["lo"],
+                "hi": codec_manifest["hi"],
+            },
+            "train_histogram": hash_array(dataset["train_histogram"]),
+            "test_histogram": hash_array(dataset["test_histogram"]),
+        }
+    )
+
+
+def _load_and_validate(run_directory: Path) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, object], np.ndarray, np.ndarray, np.ndarray, str, str, str]:
+    with np.load(run_directory / "run.npz", allow_pickle=False) as run_archive:
+        run = {key: np.asarray(run_archive[key]) for key in run_archive.files}
+    with np.load(run_directory / "dataset.npz", allow_pickle=False) as dataset_archive:
+        dataset = {key: np.asarray(dataset_archive[key]) for key in dataset_archive.files}
     manifest = json.loads((run_directory / "manifest.json").read_text(encoding="utf-8"))
-    generator = np.asarray(run["generator"], dtype=np.uint8)
-    theta = np.asarray(run["final_theta"], dtype=np.float64)
+    model_manifest = manifest["model"]
+    dataset_manifest = manifest["dataset"]
+    config_manifest = manifest["config"]
+    n = int(config_manifest["n"])
+    if int(dataset_manifest["n"]) != n or int(dataset_manifest["codec"]["n"]) != n:
+        raise ValueError("manifest dataset and model dimensions do not match")
+
+    loaded_generator = np.asarray(run["generator"])
+    loaded_theta = np.asarray(run["final_theta"])
+    loaded_centers = np.asarray(dataset["centers"])
+    loaded_target = np.asarray(dataset["train_histogram"])
+    _require_hash(hash_array(loaded_generator), model_manifest["generator_hash"], name="generator")
+    _require_hash(hash_array(loaded_theta), model_manifest["final_theta_hash"], name="theta")
+    _require_hash(hash_array(loaded_centers), dataset_manifest["codec"]["centers_hash"], name="centers")
+    _require_hash(hash_array(loaded_target), dataset_manifest["histograms"]["train_hash"], name="train dataset")
+
+    required_dataset_arrays = {
+        "raw_train": dataset_manifest["raw_train_hash"],
+        "raw_test": dataset_manifest["raw_test_hash"],
+        "normalized_train": dataset_manifest["normalized_train_hash"],
+        "normalized_test": dataset_manifest["normalized_test_hash"],
+        "train_ids": dataset_manifest["train_ids_hash"],
+        "test_ids": dataset_manifest["test_ids_hash"],
+    }
+    for name, expected in required_dataset_arrays.items():
+        _require_hash(hash_array(dataset[name]), expected, name=name)
+    actual_dataset_hash = _actual_dataset_hash(dataset, dataset_manifest, n)
+    _require_hash(actual_dataset_hash, dataset_manifest["dataset_hash"], name="dataset")
+
+    generator = binary_matrix(loaded_generator, name="generator", width=n)
+    theta = finite_vector(loaded_theta, name="theta", length=len(generator))
+    centers = np.asarray(loaded_centers, dtype=np.float64)
+    if centers.shape != (2**n, 2) or not np.all(np.isfinite(centers)):
+        raise ValueError("centers must be finite and have shape (2**n, 2)")
+    if "decoded_centers" in run and not np.array_equal(run["decoded_centers"], centers):
+        raise ValueError("decoded centers do not match the evaluated codec centers")
+    return run, dataset, manifest, generator, theta, centers, actual_dataset_hash, hash_array(generator), hash_array(theta)
+
+
+def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedComparison:
+    run, dataset, manifest, generator, theta, centers, actual_dataset_hash, evaluated_generator_hash, evaluated_theta_hash = _load_and_validate(run_directory)
     n = int(manifest["config"]["n"])
     target = np.asarray(dataset["train_histogram"], dtype=np.float64)
 
@@ -73,12 +152,19 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
             DistributionArm("ideal-deployed-map", deployed_vector, "deployed", acceptance_mass=deployed_success, samples=20_000, provenance={"quantized": True, "role": "same_effective_parameters_as_compiled", "construction": "absolute-probability-CP-map", "physical_status": "reference_only", "source_model": "fixed_photon_g2_0", "eta": eta, "loss": "uniform_all_photons"}),
         ),
         hamming_sigma=0.5 * np.sqrt(n),
-        spatial_centers=np.asarray(dataset["centers"], dtype=np.float64),
+        spatial_centers=centers,
         spatial_sigma=0.1,
         common_manifest={
-            "dataset_hash": manifest["dataset"]["dataset_hash"],
-            "generator_hash": manifest["model"]["generator_hash"],
-            "theta_hash": manifest["model"]["final_theta_hash"],
+            "dataset_hash": actual_dataset_hash,
+            "generator_hash": evaluated_generator_hash,
+            "theta_hash": evaluated_theta_hash,
+            "evaluated_hashes": {
+                "dataset": actual_dataset_hash,
+                "generator": evaluated_generator_hash,
+                "theta": evaluated_theta_hash,
+                "centers": hash_array(centers),
+                "train_histogram": hash_array(target),
+            },
             "split": "train",
             "seed": manifest["config"]["seed"],
             "budget": {"training_steps": manifest["config"]["steps"], "accepted_samples": 20_000},

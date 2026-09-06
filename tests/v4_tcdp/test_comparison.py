@@ -1,4 +1,5 @@
 import json
+import shutil
 
 import numpy as np
 import pytest
@@ -83,3 +84,31 @@ def test_ring_smoke_comparison_keeps_raw_compiled_and_deployed_distinct() -> Non
     assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] != pytest.approx(rows["compiled:ideal-unquantized-control"]["tvd_to_target"], abs=1e-12)
     assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] == pytest.approx(rows["deployed:ideal-deployed-map"]["tvd_to_target"], abs=1e-12)
     assert rows["compiled:ideal-compiled-map"]["acceptance_mass"] == pytest.approx(rows["deployed:ideal-deployed-map"]["acceptance_mass"], abs=1e-18)
+
+
+@pytest.mark.parametrize("array_name", ["generator", "final_theta"])
+def test_comparison_rejects_modified_model_arrays(tmp_path, array_name: str) -> None:
+    source = __import__("pathlib").Path("results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke")
+    fixture = tmp_path / "comparison"
+    shutil.copytree(source, fixture)
+    with np.load(fixture / "run.npz", allow_pickle=False) as archive:
+        arrays = {key: archive[key].copy() for key in archive.files}
+    if array_name == "generator":
+        arrays[array_name][0, 0] = 1 - arrays[array_name][0, 0]
+    else:
+        arrays[array_name].flat[0] += 0.02
+    np.savez(fixture / "run.npz", **arrays)
+    with pytest.raises(ValueError, match=f"{('theta' if array_name == 'final_theta' else 'generator')} hash"):
+        build_comparison(fixture)
+
+
+def test_comparison_rejects_modified_dataset_array(tmp_path) -> None:
+    source = __import__("pathlib").Path("results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke")
+    fixture = tmp_path / "comparison"
+    shutil.copytree(source, fixture)
+    with np.load(fixture / "dataset.npz", allow_pickle=False) as archive:
+        arrays = {key: archive[key].copy() for key in archive.files}
+    arrays["train_histogram"][0] += 0.01
+    np.savez(fixture / "dataset.npz", **arrays)
+    with pytest.raises(ValueError, match="train dataset hash"):
+        build_comparison(fixture)

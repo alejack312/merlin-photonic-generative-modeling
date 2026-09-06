@@ -27,3 +27,11 @@ Date: 2026-09-06 · Scope: project · Recurs when: a scientific implementation p
 ## Next time
 - Do test public adapters and real artifact writers, not just isolated numerical helpers.
 - Don't treat missing scientific evidence and a reproducibly incorrect result as the same status.
+
+## Follow-up: repair-integration checks (2026-09-06)
+- If errors accumulate with Python max, inject NaNs and empty trajectories before accepting a numerical equality gate.
+- If a CLI reports a config hash, vary that file and confirm execution uses it or rejects the mismatch.
+- If run identity omits ablation settings, write two configurations into a temporary output root and check for overwrite.
+- If a comparison copies manifest hashes, mutate a valid-shaped numerical artifact and require rejection before evaluation.
+- If a continuation helper passes, inspect caller artifacts: treatment and control must branch from the same start, not form a sequential chain.
+- Verified on b7ed7e8: 129 focused and 636 full tests passed; new independent failure probes still exposed these integration defects. No fixes were made in the review.

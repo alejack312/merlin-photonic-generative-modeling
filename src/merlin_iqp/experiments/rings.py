@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import builtins
 import json
+import os
 import platform
+import shutil
+import tempfile
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
@@ -305,6 +308,24 @@ def _replication_key(run: RingRun) -> str:
     )
 
 
+def _artifact_config_payload(run: RingRun) -> dict[str, Any]:
+    config = asdict(run.config)
+    # The seed is already part of the cell id.  Excluding it keeps all seeds
+    # for one experimental configuration in the same replication namespace.
+    config.pop("seed", None)
+    return {
+        "config": config,
+        "sigma": run.config.sigma,
+        "profile_kernel_kind": PROFILE_REGISTRY[run.config.profile_id].kernel_kind,
+        "dataset_hash": run.dataset.dataset_hash,
+        "generator_hash": hash_array(run.generator),
+    }
+
+
+def _artifact_config_id(run: RingRun) -> str:
+    return hash_json(_artifact_config_payload(run))[:16]
+
+
 def _replication_identity(run: RingRun, destination: Path) -> dict[str, Any]:
     key = _replication_key(run)
     manifest_path = destination / "manifest.json"
@@ -349,10 +370,16 @@ def _manifest(run: RingRun, replication_identity: dict[str, Any]) -> dict[str, A
     config = asdict(run.config)
     config["sigma"] = run.config.sigma
     config["profile_kernel_kind"] = PROFILE_REGISTRY[run.config.profile_id].kernel_kind
+    artifact_config_id = _artifact_config_id(run)
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": f"{run.config.profile_id}/{run.config.cell_id}",
         "config": config,
+        "artifact_identity": {
+            "config_id": artifact_config_id,
+            "config_payload": _artifact_config_payload(run),
+            "namespace": f"{run.config.profile_id}/config-{artifact_config_id}/{run.config.cell_id}",
+        },
         "profile_registry": available_profiles(),
         "dataset": run.dataset.manifest(),
         "initialization": run.initialization_metadata,
@@ -384,6 +411,7 @@ def _manifest(run: RingRun, replication_identity: dict[str, Any]) -> dict[str, A
                 "config": config,
                 "initialization": run.initialization_metadata,
                 "replication_key": replication_identity["equivalence_key"],
+                "artifact_config_id": artifact_config_id,
                 "theta": hash_array(run.final_theta),
             }
         ),
@@ -391,51 +419,83 @@ def _manifest(run: RingRun, replication_identity: dict[str, Any]) -> dict[str, A
 
 
 def write_run_artifacts(run: RingRun, output_root: str | Path) -> dict[str, Path]:
-    destination = Path(output_root) / run.config.profile_id / run.config.cell_id
-    destination.mkdir(parents=True, exist_ok=True)
+    output_root = Path(output_root)
+    artifact_config_id = _artifact_config_id(run)
+    destination = output_root / run.config.profile_id / f"config-{artifact_config_id}" / run.config.cell_id
     dataset_path = destination / "dataset.npz"
     run_path = destination / "run.npz"
     manifest_path = destination / "manifest.json"
     summary_path = destination / "summary.json"
-    np.savez_compressed(
-        dataset_path,
-        raw_train=run.dataset.raw_train,
-        raw_test=run.dataset.raw_test,
-        normalized_train=run.dataset.normalized_train,
-        normalized_test=run.dataset.normalized_test,
-        train_ids=run.dataset.train_ids,
-        test_ids=run.dataset.test_ids,
-        min_values=run.dataset.min_values,
-        max_values=run.dataset.max_values,
-        scale=run.dataset.scale,
-        centers=run.dataset.codec.centers,
-        train_indices=run.dataset.train_indices,
-        test_indices=run.dataset.test_indices,
-        train_counts=run.dataset.train_counts,
-        test_counts=run.dataset.test_counts,
-        train_histogram=run.dataset.train_histogram,
-        test_histogram=run.dataset.test_histogram,
-    )
     decoded_centers = run.dataset.codec.decode(np.arange(2**run.config.n))
-    np.savez_compressed(run_path, generator=run.generator, initial_theta=run.initial_theta, final_theta=run.final_theta, output_probabilities=run.output_probabilities, loss_history=np.asarray(run.loss_history), decoded_centers=decoded_centers)
     replication_identity = _replication_identity(run, destination)
     payload = _manifest(run, replication_identity)
-    manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    summary_path.write_text(
-        json.dumps(
-            {
-                "run_id": payload["run_id"],
-                "initialization": run.initialization_metadata,
-                "replication_identity": replication_identity,
-                "metrics": run.metrics,
-                "photonic_evaluation": run.photonic_evaluation,
-            },
-            indent=2,
-            sort_keys=True,
+    if destination.exists():
+        if not destination.is_dir() or not manifest_path.is_file():
+            raise FileExistsError(f"ring artifact destination is non-empty or incomplete: {destination}")
+        try:
+            existing_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise FileExistsError(f"ring artifact destination has an unreadable manifest: {destination}") from error
+        if existing_payload != payload:
+            raise FileExistsError(f"incompatible ring artifact already exists at {destination}")
+        # A matching run is deterministic and already owns any dependent
+        # comparison artifact in this namespace; leave it intact.
+        return {"dataset": dataset_path, "run": run_path, "manifest": manifest_path, "summary": summary_path}
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_directory = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=destination.parent))
+    try:
+        np.savez_compressed(
+            temporary_directory / "dataset.npz",
+            raw_train=run.dataset.raw_train,
+            raw_test=run.dataset.raw_test,
+            normalized_train=run.dataset.normalized_train,
+            normalized_test=run.dataset.normalized_test,
+            train_ids=run.dataset.train_ids,
+            test_ids=run.dataset.test_ids,
+            min_values=run.dataset.min_values,
+            max_values=run.dataset.max_values,
+            scale=run.dataset.scale,
+            centers=run.dataset.codec.centers,
+            train_indices=run.dataset.train_indices,
+            test_indices=run.dataset.test_indices,
+            train_counts=run.dataset.train_counts,
+            test_counts=run.dataset.test_counts,
+            train_histogram=run.dataset.train_histogram,
+            test_histogram=run.dataset.test_histogram,
         )
-        + "\n",
-        encoding="utf-8",
-    )
+        np.savez_compressed(
+            temporary_directory / "run.npz",
+            generator=run.generator,
+            initial_theta=run.initial_theta,
+            final_theta=run.final_theta,
+            output_probabilities=run.output_probabilities,
+            loss_history=np.asarray(run.loss_history),
+            decoded_centers=decoded_centers,
+        )
+        (temporary_directory / "manifest.json").write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        (temporary_directory / "summary.json").write_text(
+            json.dumps(
+                {
+                    "run_id": payload["run_id"],
+                    "initialization": run.initialization_metadata,
+                    "replication_identity": replication_identity,
+                    "metrics": run.metrics,
+                    "photonic_evaluation": run.photonic_evaluation,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        os.rename(temporary_directory, destination)
+    except Exception:
+        if temporary_directory.exists():
+            shutil.rmtree(temporary_directory)
+        raise
     return {"dataset": dataset_path, "run": run_path, "manifest": manifest_path, "summary": summary_path}
 
 

@@ -186,6 +186,24 @@ class NatRun:
         return payload
 
 
+def nat_state_hash(run: NatRun) -> str:
+    """Hash the complete frozen state used to branch a continuation arm."""
+
+    return hash_json(
+        {
+            "singles": run.final_singles.tolist(),
+            "pair_keys": list(run.final_pair_keys),
+            "pair_windings": list(run.final_pair_windings),
+            "optimizer": {
+                "kind": run.config.single_optimizer,
+                "m": run.optimizer_m.tolist(),
+                "v": run.optimizer_v.tolist(),
+                "step": run.optimizer_step,
+            },
+        }
+    )
+
+
 def _infer_n(target: object, n: int | None) -> int:
     if n is not None:
         return int(n)
@@ -544,6 +562,7 @@ def run_matched_continuation(
     *,
     steps: int,
     pair_budget: int | None = None,
+    run_kind: str = "matched_continued_ideal",
 ) -> NatRun:
     """Continue one frozen state with the identical ideal NAT optimizer.
 
@@ -567,7 +586,7 @@ def run_matched_continuation(
         topology=config.topology,
         source_commit=config.source_commit,
         allow_pair_moves=True,
-        run_kind="matched_continued_ideal",
+        run_kind=run_kind,
         initialization=config.initialization,
         initialization_method=config.initialization_method,
         initialization_scale=config.initialization_scale,
@@ -576,13 +595,16 @@ def run_matched_continuation(
     )
 
 
-def write_nat_run(run: NatRun, path: str | Path) -> Path:
+def write_nat_run(run: NatRun, path: str | Path, *, artifact_metadata: Mapping[str, Any] | None = None) -> Path:
     """Write deterministic JSON suitable for replay and provenance review."""
 
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(run.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = run.to_dict()
+    if artifact_metadata is not None:
+        payload["artifact"] = dict(artifact_metadata)
+    destination.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return destination
 
 
-__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "run_equal_budget_control", "run_matched_continuation", "run_nat", "write_nat_run"]
+__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "nat_state_hash", "run_equal_budget_control", "run_matched_continuation", "run_nat", "write_nat_run"]

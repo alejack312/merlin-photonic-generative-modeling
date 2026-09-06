@@ -29,6 +29,20 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | F13 replay overwrite | PASS | Replay namespace includes source identity, checkpoint hash, config hash and step; incompatible non-empty reuse is rejected and tested. | None for this repair. | None |
 | zero-shot coverage | PASS | `sample_count=0` reports coverage `0.0` and non-integer counts are rejected. | None for this repair. | None |
 
+## 2026-09-06 second repair review disposition
+
+| Finding | Status | Evidence | Remaining action | Owner dependency |
+|---|---|---|---|---|
+| R01 retraining trajectory gate | PASS | Empty, non-finite, missing-step, shape-mismatch and finite-mismatch cases are covered; finite mismatch is `FAIL`, and a valid trajectory remains `PASS`. | None for the repaired gate. | None |
+| R02 requested retraining config | PASS | The smoke-only adapter validates the requested path and SHA-256 against the exported manifest before execution; mismatched configs are rejected. | Add other source configs only as separately specified adapters. | None for current smoke scope |
+| R03 source retraining provenance | PASS | Git/source identity, module origin, source hashes, environment, before/after state and output isolation are enforced; compatibility shims are scoped and restored. | Run the explicit sibling integration command when source inputs are available. | External sibling checkout for integration |
+| R04 ring artifact namespace | PASS | Stable config identity includes initialization, optimizer, learning rate, steps and source/data/generator inputs; atomic writes reject incompatible reuse. | Regenerate canonical artifacts only when a registered profile is intentionally rerun. | None |
+| R05 comparison stale artifacts | PASS | Loaded generator, theta, dataset arrays, codec centers and binary/finite contracts are validated against manifest hashes before evaluation; evaluated hashes are recorded. | None for the repaired gate. | None |
+| R06 spatial Trainer shorthand | PASS | Spatial string shorthand now requires explicit finite centers; a nontrivial centered target-fit regression passes through the public constructor. | None for the repaired API. | None |
+| R07 matched NAT arms | PASS | CLI now writes one frozen warm start and two arms with identical common-start state hashes and equal per-arm budgets; the fixed-pair path remains an ablation. | Interpret efficacy only after the NAT metric panel is artifacted. | None for ideal null |
+| R08 full-Fock aggregation | PASS | Aggregate status is computed after the requested full-Fock call and propagates injected `FAIL`/`INCONCLUSIVE` results. | Physical/full-Fock evidence remains limited by the existing capability boundary. | D1/Perceval evidence |
+| R09 default-suite portability | PASS | Normal tests no longer require a hard-coded sibling checkout; source retraining is an explicit environment-gated integration test with portable contract tests. | Run optional integration explicitly for source-faithful evidence. | External sibling checkout |
+
 | ID | Status | Evidence / missing implementation or evidence | Next concrete action | Owner dependency |
 |---|---|---|---|---|
 | TRAIN-01 | PASS | NumPy core, contracts, provenance, and sibling export boundary exist; focused tests pass. | None for bounded scope. | None |

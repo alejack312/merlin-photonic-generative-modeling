@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 import json
+import sys
 
 import numpy as np
 import pytest
 
-from merlin_iqp.classical import ExactProbabilities, IQPModel, KernelSpec, generators_from_pairs
+from merlin_iqp.classical import ExactProbabilities, IQPModel, KernelSpec, Trainer, generators_from_pairs
 from merlin_iqp.classical.objectives import objective_and_gradient_exact
 from merlin_iqp.deploy.compile import ALPHA_STEP
 from merlin_iqp.experiments.nat import run_matched_continuation, run_nat, write_nat_run
+import scripts.v4_tcdp.run_nat as run_nat_cli
 
 
 def _target_for_pair_key(key: int, *, singles: tuple[float, float] = (0.0, 0.0)) -> ExactProbabilities:
@@ -117,3 +119,34 @@ def test_bounded_run_is_reproducible_and_serializable(tmp_path) -> None:
     assert first.provenance["replication"]["deterministic_initialization"] is True
     assert first.provenance["replication"]["independent_replica"] is False
     assert first.provenance["replication"]["n_unique_parameterizations_observed"] == 1
+
+
+def test_public_spatial_trainer_requires_geometry_and_fits_nontrivial_target() -> None:
+    generator = generators_from_pairs(2, [(0, 1)])
+    target_model = IQPModel(generator, np.array([0.7, 0.2, 0.1]))
+    target = ExactProbabilities(target_model.probability_vector_exact())
+    centers = np.array([[0.0, 0.0], [0.0, 1.0], [2.0, 0.0], [2.0, 3.0]])
+    with pytest.raises(ValueError, match="requires centers"):
+        Trainer(IQPModel(generator, np.zeros(3)), target, kernel="spatial_gaussian")
+    trainer = Trainer(IQPModel(generator, np.array([0.2, 0.1, 0.05])), target, kernel="spatial_gaussian", centers=centers, optimizer="sgd", lr=0.1)
+    result = trainer.run(5)
+    assert result["loss_history"][0] > result["final_loss"]
+    assert result["final_loss"] > 0.0
+
+
+def test_nat_cli_emits_two_arms_from_one_frozen_warm_start(tmp_path, monkeypatch) -> None:
+    output = tmp_path / "nat.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["run_nat.py", "--n", "4", "--seed", "0", "--steps", "1", "--matched-continuation", "--output", str(output)],
+    )
+    assert run_nat_cli.main() == 0
+    warm = json.loads(output.with_name("nat-warm-start.json").read_text(encoding="utf-8"))
+    arm_a = json.loads(output.with_name("nat-matched-arm-a.json").read_text(encoding="utf-8"))
+    arm_b = json.loads(output.with_name("nat-matched-arm-b.json").read_text(encoding="utf-8"))
+    assert warm["artifact"]["role"] == "frozen_warm_start"
+    assert arm_a["artifact"]["common_start_hash"] == warm["artifact"]["state_hash"]
+    assert arm_b["artifact"]["common_start_hash"] == warm["artifact"]["state_hash"]
+    assert arm_a["artifact"]["evaluation_budget"] == arm_b["artifact"]["evaluation_budget"]
+    assert arm_a["provenance"]["initial_parameter_hash"] == arm_b["provenance"]["initial_parameter_hash"]

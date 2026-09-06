@@ -25,6 +25,19 @@ from merlin_iqp.deploy import (
 )
 
 
+def _aggregate_statuses(*statuses: str) -> str:
+    """Collapse executed checks while retaining the strongest failure state."""
+
+    normalized = {status.upper() for status in statuses}
+    if not normalized.issubset({"PASS", "FAIL", "INCONCLUSIVE", "SKIPPED"}):
+        return "INCONCLUSIVE"
+    if "FAIL" in normalized:
+        return "FAIL"
+    if "INCONCLUSIVE" in normalized:
+        return "INCONCLUSIVE"
+    return "PASS"
+
+
 def run(with_perceval: bool = False) -> dict[str, object]:
     started = time.perf_counter()
     compiled = compile_iqp(3, [0.2, -0.1, 0.31], [(0, 2, 0.311), (1, 2, -0.2)])
@@ -43,7 +56,7 @@ def run(with_perceval: bool = False) -> dict[str, object]:
         physical_status = str(gate.metadata.get("perceval", {}).get("status", "INCONCLUSIVE"))
         if physical_status not in {"PASS", "FAIL", "INCONCLUSIVE"}:
             physical_status = "INCONCLUSIVE"
-    overall_status = analytic_status if not with_perceval else ("PASS" if analytic_status == "PASS" and physical_status == "PASS" else "INCONCLUSIVE" if analytic_status == "PASS" else "FAIL")
+    overall_status = analytic_status
     U = np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
     result: dict[str, object] = {
         "status": overall_status,
@@ -69,6 +82,10 @@ def run(with_perceval: bool = False) -> dict[str, object]:
             "rejected_mass": fock.rejected_mass,
             "diagnostics": fock.diagnostics,
         }
+        overall_status = _aggregate_statuses(analytic_status, physical_status, fock.status)
+    else:
+        overall_status = analytic_status
+    result["status"] = overall_status
     return result
 
 

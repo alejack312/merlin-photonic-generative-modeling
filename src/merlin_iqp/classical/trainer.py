@@ -16,12 +16,23 @@ from ._validation import hash_json
 
 
 class Trainer:
-    def __init__(self, model: IQPModel, target: object, kernel: KernelSpec | str = "hamming_gaussian", *, sigma: float = 1.0, optimizer: str = "adam", lr: float = 0.05, seed: int = 0, source_commit: str | None = None) -> None:
+    def __init__(self, model: IQPModel, target: object, kernel: KernelSpec | str = "hamming_gaussian", *, sigma: float = 1.0, centers: np.ndarray | None = None, optimizer: str = "adam", lr: float = 0.05, seed: int = 0, source_commit: str | None = None) -> None:
         if not isinstance(model, IQPModel):
             raise TypeError("model must be an IQPModel")
         self.model = model
         self.target = target
-        self.kernel = kernel if isinstance(kernel, KernelSpec) else KernelSpec(kind="hamming_gaussian" if kernel in {"gaussian", "hamming_gaussian"} else "spatial_gaussian", sigma=sigma, centers=np.zeros((2**model.n, 1)) if kernel == "spatial_gaussian" else None)
+        if isinstance(kernel, KernelSpec):
+            if centers is not None:
+                raise ValueError("centers must be supplied by the KernelSpec when kernel is a KernelSpec")
+            self.kernel = kernel
+        elif kernel in {"gaussian", "hamming_gaussian"}:
+            if centers is not None:
+                raise ValueError("centers are only valid for the spatial_gaussian kernel")
+            self.kernel = KernelSpec(kind="hamming_gaussian", sigma=sigma)
+        elif kernel == "spatial_gaussian":
+            self.kernel = KernelSpec(kind="spatial_gaussian", sigma=sigma, centers=centers)
+        else:
+            raise ValueError(f"unsupported kernel {kernel!r}")
         self.optimizer = optimizer.lower()
         if self.optimizer not in {"sgd", "adam"}:
             raise ValueError("optimizer must be 'sgd' or 'adam'")

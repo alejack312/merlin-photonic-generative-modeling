@@ -1,27 +1,82 @@
 """Run the sibling training-smoke source trainer into an isolated output tree.
 
-The sibling checkout is read-only input.  This adapter imports its trainer and
-configuration from the inspected source tree, redirects all generated output
-to the photonic repository's artifact namespace, and compares every recorded
-theta/loss row with the source trajectory before assigning faithful status.
+The sibling checkout is read-only input. This deliberately smoke-only adapter
+admits one exact, exported source configuration, imports the trainer in an
+isolated context, redirects generated output outside the sibling checkout, and
+compares every recorded theta/loss row with the source trajectory.
 """
 
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
+import importlib
+import importlib.metadata
 import json
+import platform
 import sys
 import types
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Iterator
 
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from merlin_iqp.experiments.sibling_import import git_source_identity  # noqa: E402
+
+EXPORT_MANIFEST_PATH = (
+    REPO_ROOT
+    / "results"
+    / "v4_tcdp"
+    / "sibling"
+    / "training_smoke_configs_experiments_training_smoke_yaml"
+    / "manifest.json"
+)
+SUPPORTED_SOURCE_ID = "training_smoke:configs/experiments/training_smoke.yaml"
+SUPPORTED_CONFIG_RELATIVE = Path("configs/experiments/training_smoke.yaml")
+TRAJECTORY_TOLERANCE = 1e-12
+
+
+def _parse_json_object(line: str, path: Path) -> dict[str, object]:
+    value = json.loads(line)
+    if not isinstance(value, dict):
+        raise ValueError(f"JSONL row in {path} is not an object")
+    return value
 
 
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [
+        _parse_json_object(line, path)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _hash_tree(root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(
+        path
+        for path in root.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    ):
+        digest.update(path.relative_to(root).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _resolve_source_path(source_root: Path, value: str) -> Path:
@@ -29,77 +84,496 @@ def _resolve_source_path(source_root: Path, value: str) -> Path:
     return candidate if candidate.is_absolute() else source_root / candidate
 
 
+def _is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def _require_outside_sibling(output_root: Path, sibling_root: Path) -> None:
+    if _is_within(output_root, sibling_root):
+        raise ValueError(
+            f"retraining output must be outside sibling checkout: {output_root}"
+        )
+
+
+def _load_export_manifest() -> dict[str, Any]:
+    try:
+        value = json.loads(EXPORT_MANIFEST_PATH.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"exported training_smoke manifest is missing: {EXPORT_MANIFEST_PATH}"
+        ) from exc
+    if not isinstance(value, dict):
+        raise ValueError("exported training_smoke manifest is not an object")
+    return value
+
+
+def _validate_supported_config(
+    config_path: Path,
+    sibling_root: Path,
+    exported: dict[str, Any],
+) -> tuple[dict[str, Any], str]:
+    """Admit only the exact config represented by the exported smoke manifest."""
+
+    if exported.get("source_id") != SUPPORTED_SOURCE_ID:
+        raise ValueError(
+            "exported manifest is not the supported training_smoke source: "
+            f"{exported.get('source_id')!r}"
+        )
+    config_record = exported.get("config")
+    if not isinstance(config_record, dict):
+        raise ValueError("exported training_smoke manifest has no config record")
+    expected_hash = config_record.get("sha256")
+    expected_path = (sibling_root / SUPPORTED_CONFIG_RELATIVE).resolve()
+    if config_path != expected_path:
+        raise ValueError(
+            "unsupported config for this smoke-only adapter; expected the exact "
+            f"source config {expected_path}, got {config_path}"
+        )
+    if not config_path.is_file():
+        raise FileNotFoundError(f"source config is missing: {config_path}")
+    observed_hash = _sha256(config_path)
+    if not isinstance(expected_hash, str) or observed_hash != expected_hash:
+        raise ValueError(
+            "source config hash does not match the exported training_smoke "
+            f"manifest: expected {expected_hash!r}, observed {observed_hash}"
+        )
+    content = config_record.get("content")
+    if not isinstance(content, dict):
+        raise ValueError("exported training_smoke manifest has no resolved config content")
+    required = {
+        ("experiment", "name"): "training_smoke",
+        ("circuit", "family"): "product_state",
+        ("circuit", "n_qubits"): [6],
+        ("kernel", "type"): "gaussian",
+        ("dataset", "type"): "product_bernoulli",
+        ("dataset", "n_samples"): 256,
+        ("training", "optimizer"): "sgd",
+        ("training", "lr"): 0.05,
+        ("training", "num_steps"): 4,
+    }
+    for path, expected in required.items():
+        current: Any = content
+        for key in path:
+            if not isinstance(current, dict) or key not in current:
+                raise ValueError(f"exported config is missing required field {'.'.join(path)}")
+            current = current[key]
+        if current != expected:
+            raise ValueError(
+                f"unsupported training_smoke config field {'.'.join(path)}: "
+                f"expected {expected!r}, got {current!r}"
+            )
+    return copy.deepcopy(content), observed_hash
+
+
+def _require_source_identity(identity: dict[str, Any], exported: dict[str, Any]) -> None:
+    required_keys = ("observed_commit", "tree_identity", "dirty", "tree_identity_kind")
+    missing = [key for key in required_keys if key not in identity]
+    if missing or not identity.get("observed_commit") or not identity.get("tree_identity"):
+        raise ValueError(
+            "sibling source identity could not be verified; missing Git/source "
+            f"verification fields: {missing or ['commit_or_tree_identity']}"
+        )
+    if identity.get("dirty"):
+        raise ValueError("sibling source checkout is dirty; refusing retraining")
+    if exported.get("source_commit") != identity.get("observed_commit"):
+        raise ValueError("sibling source commit does not match the exported manifest")
+    if exported.get("source_tree_identity") != identity.get("tree_identity"):
+        raise ValueError("sibling source tree identity does not match the exported manifest")
+    if exported.get("source_dirty") is not False:
+        raise ValueError("exported training_smoke manifest does not certify a clean source")
+
+
+def _environment() -> dict[str, Any]:
+    versions: dict[str, str | None] = {}
+    for package in ("numpy", "scipy", "torch", "pyyaml"):
+        try:
+            versions[package] = importlib.metadata.version(package)
+        except importlib.metadata.PackageNotFoundError:
+            versions[package] = None
+    return {
+        "python": sys.version,
+        "executable": sys.executable,
+        "platform": platform.platform(),
+        "numpy_runtime": np.__version__,
+        "packages": versions,
+    }
+
+
+def _training_smoke_dataset_hash(metadata: dict[str, Any]) -> str:
+    expected = {"type": "product_bernoulli", "n_samples": 256, "seed": 1230519654}
+    if metadata != expected:
+        raise ValueError(f"unexpected training_smoke dataset metadata: {metadata!r}")
+    data = np.random.default_rng(metadata["seed"]).integers(
+        0, 2, size=(metadata["n_samples"], 6), dtype=np.uint8
+    )
+    return hashlib.sha256(np.ascontiguousarray(data).tobytes()).hexdigest()
+
+
+def _trajectory_values(
+    rows: list[dict[str, object]],
+    *,
+    label: str,
+    expected_step_ids: tuple[int, ...],
+    expected_theta_shape: tuple[int, ...],
+) -> list[tuple[int, np.ndarray, float]]:
+    if not rows:
+        raise ValueError(f"{label} trajectory is empty")
+    values: list[tuple[int, np.ndarray, float]] = []
+    observed_steps: list[int] = []
+    for index, row in enumerate(rows):
+        if "step" not in row or "theta" not in row or "loss" not in row:
+            raise ValueError(f"{label} trajectory row {index} is missing step/theta/loss")
+        step = row["step"]
+        if isinstance(step, bool) or not isinstance(step, int):
+            raise ValueError(f"{label} trajectory row {index} has a non-integer step: {step!r}")
+        try:
+            theta = np.asarray(row["theta"], dtype=np.float64)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{label} trajectory row {index} theta is not numeric") from exc
+        if theta.shape != expected_theta_shape:
+            raise ValueError(
+                f"{label} trajectory row {index} theta shape mismatch: "
+                f"expected {expected_theta_shape}, got {theta.shape}"
+            )
+        try:
+            loss = float(row["loss"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{label} trajectory row {index} loss is not numeric") from exc
+        if not np.all(np.isfinite(theta)) or not np.isfinite(loss):
+            raise ValueError(f"{label} trajectory row {index} contains NaN or infinity")
+        observed_steps.append(step)
+        values.append((step, theta, loss))
+    if tuple(observed_steps) != expected_step_ids:
+        raise ValueError(
+            f"{label} trajectory step IDs mismatch: expected {list(expected_step_ids)}, "
+            f"got {observed_steps}"
+        )
+    return values
+
+
+def _compare_trajectories(
+    source_rows: list[dict[str, object]],
+    replay_rows: list[dict[str, object]],
+    *,
+    expected_step_ids: tuple[int, ...],
+    expected_theta_shape: tuple[int, ...],
+) -> dict[str, object]:
+    source = _trajectory_values(
+        source_rows,
+        label="source",
+        expected_step_ids=expected_step_ids,
+        expected_theta_shape=expected_theta_shape,
+    )
+    replay = _trajectory_values(
+        replay_rows,
+        label="retrained",
+        expected_step_ids=expected_step_ids,
+        expected_theta_shape=expected_theta_shape,
+    )
+    if len(source) != len(replay):
+        raise ValueError(
+            f"trajectory length mismatch: source={len(source)}, retrained={len(replay)}"
+        )
+    max_theta_error = 0.0
+    max_loss_error = 0.0
+    for (source_step, source_theta, source_loss), (
+        replay_step,
+        replay_theta,
+        replay_loss,
+    ) in zip(source, replay, strict=True):
+        if source_step != replay_step:
+            raise ValueError(f"trajectory step mismatch: {source_step} != {replay_step}")
+        theta_error = float(np.max(np.abs(source_theta - replay_theta)))
+        loss_error = abs(source_loss - replay_loss)
+        max_theta_error = max(max_theta_error, theta_error)
+        max_loss_error = max(max_loss_error, loss_error)
+    status = (
+        "PASS"
+        if max_theta_error <= TRAJECTORY_TOLERANCE
+        and max_loss_error <= TRAJECTORY_TOLERANCE
+        else "FAIL"
+    )
+    interpretation = (
+        "Source and retrained trajectories matched within fixed 1e-12 tolerance."
+        if status == "PASS"
+        else "Source and retrained trajectories differed beyond fixed 1e-12 tolerance."
+    )
+    return {
+        "status": status,
+        "trajectory_rows": len(source),
+        "max_theta_abs_error": max_theta_error,
+        "max_loss_abs_error": max_loss_error,
+        "interpretation": interpretation,
+    }
+
+
+def _validate_summary_contract(
+    summary: dict[str, object], config: dict[str, Any], *, label: str
+) -> None:
+    expected = {
+        "family": config["circuit"]["family"],
+        "kernel": config["kernel"]["type"],
+        "init": config["init"]["scheme"],
+        "n": config["circuit"]["n_qubits"][0],
+        "dataset_type": config["dataset"]["type"],
+        "bandwidth": config["kernel"]["bandwidth"][0],
+        "small_angle_std": config["init"]["small_angle"]["std"][0],
+    }
+    for key, value in expected.items():
+        if summary.get(key) != value:
+            raise ValueError(
+                f"{label} summary model contract mismatch for {key}: "
+                f"expected {value!r}, got {summary.get(key)!r}"
+            )
+    metadata = summary.get("dataset_metadata")
+    if not isinstance(metadata, dict):
+        raise ValueError(f"{label} summary is missing dataset metadata")
+    _training_smoke_dataset_hash(metadata)
+
+
+@contextmanager
+def _isolated_source_import(sibling_root: Path) -> Iterator[None]:
+    """Temporarily expose only the sibling source package to the importer."""
+
+    source_root = (sibling_root / "src").resolve()
+    if not source_root.is_dir():
+        raise FileNotFoundError(f"sibling source directory is missing: {source_root}")
+    for name, module in list(sys.modules.items()):
+        if name == "iqp_bp" or name.startswith("iqp_bp."):
+            origin = getattr(module, "__file__", None)
+            if origin and not _is_within(Path(origin), source_root):
+                raise ValueError(
+                    f"already imported sibling module has the wrong origin: {name} -> {origin}"
+                )
+
+    saved_path = list(sys.path)
+    saved_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == "iqp_bp" or name.startswith("iqp_bp.") or name == "yaml"
+    }
+    for name in list(saved_modules):
+        sys.modules.pop(name, None)
+    sys.path.insert(0, str(source_root))
+    yaml_stub: types.ModuleType | None = None
+    if "yaml" not in saved_modules:
+        yaml_stub = types.ModuleType("yaml")
+        yaml_stub.safe_load = lambda _stream: {}
+        sys.modules["yaml"] = yaml_stub
+    try:
+        yield
+    finally:
+        sys.path[:] = saved_path
+        for name in list(sys.modules):
+            if name == "iqp_bp" or name.startswith("iqp_bp.") or (
+                yaml_stub is not None and name == "yaml"
+            ):
+                sys.modules.pop(name, None)
+        sys.modules.update(saved_modules)
+
+
+def _execute_source_training(
+    sibling_root: Path, config: dict[str, Any]
+) -> tuple[list[dict[str, Any]], str, dict[str, Any]]:
+    with _isolated_source_import(sibling_root):
+        module = importlib.import_module("iqp_bp.experiments.run_training")
+        origin = getattr(module, "__file__", None)
+        if not origin or not _is_within(Path(origin), sibling_root / "src"):
+            raise ValueError(
+                "imported sibling trainer has the wrong module origin: "
+                f"{origin!r}"
+            )
+        run = getattr(module, "run", None)
+        if not callable(run):
+            raise ValueError("imported sibling trainer has no callable run")
+        summaries = run(config)
+        if not isinstance(summaries, list) or not all(
+            isinstance(summary, dict) for summary in summaries
+        ):
+            raise ValueError("sibling trainer returned an invalid summary collection")
+        return summaries, str(Path(origin).resolve()), _environment()
+
+
 def run_retraining(config_path: Path, sibling_root: Path, output_root: Path) -> dict[str, object]:
     sibling_root = sibling_root.resolve()
     config_path = config_path.resolve()
     output_root = output_root.resolve()
-    sys.path.insert(0, str(sibling_root / "src"))
-    # The sibling's YAML dependency is intentionally not installed in this
-    # repository environment.  Use its already-exported resolved config JSON;
-    # the stub only lets source modules import their config helpers, which do
-    # not parse YAML during ``run``.
-    yaml_stub = types.ModuleType("yaml")
-    yaml_stub.safe_load = lambda _stream: {}
-    sys.modules.setdefault("yaml", yaml_stub)
-    from iqp_bp.experiments.run_training import run  # type: ignore
+    _require_outside_sibling(output_root, sibling_root)
+    exported = _load_export_manifest()
+    source_config, source_config_hash = _validate_supported_config(
+        config_path, sibling_root, exported
+    )
 
-    exported = json.loads((REPO_ROOT / "results" / "v4_tcdp" / "sibling" / "training_smoke_configs_experiments_training_smoke_yaml" / "manifest.json").read_text(encoding="utf-8"))
-    config = exported["config"]["content"]
-    config["circuit"]["n_generators"] = "n"
-    config["experiment"]["output_dir"] = str(output_root)
-    summaries = run(config)
+    source_identity_before = git_source_identity(
+        sibling_root,
+        include_paths=("src/iqp_bp", "configs/experiments/training_smoke.yaml"),
+    )
+    _require_source_identity(source_identity_before, exported)
+    source_results_path = sibling_root / "results" / "training_smoke" / "results.jsonl"
+    if not source_results_path.is_file():
+        raise FileNotFoundError(f"source training_smoke results are missing: {source_results_path}")
+    source_summaries = _read_jsonl(source_results_path)
+    matching = [summary for summary in source_summaries if summary.get("n") == 6]
+    if len(matching) != 1:
+        raise ValueError(
+            f"training_smoke expected one n=6 source summary, got {len(matching)}"
+        )
+    source_summary = matching[0]
+    _validate_summary_contract(source_summary, source_config, label="source")
+    source_trajectory_value = source_summary.get("trajectory_path")
+    if not isinstance(source_trajectory_value, str):
+        raise ValueError("source summary is missing trajectory_path")
+    source_trajectory = _resolve_source_path(sibling_root, source_trajectory_value).resolve()
+    if not _is_within(source_trajectory, sibling_root):
+        raise ValueError("source trajectory resolves outside the sibling checkout")
+    if not source_trajectory.is_file():
+        raise FileNotFoundError(f"source trajectory is missing: {source_trajectory}")
+    source_rows = _read_jsonl(source_trajectory)
+
+    written_steps = source_summary.get("written_steps")
+    num_steps = source_config["training"]["num_steps"]
+    if not isinstance(written_steps, list) or written_steps != list(range(num_steps + 1)):
+        raise ValueError(
+            "source summary has an unexpected step contract: "
+            f"expected {list(range(num_steps + 1))}, got {written_steps!r}"
+        )
+    expected_step_ids = tuple(written_steps)
+    expected_theta_shape = (int(source_config["circuit"]["n_qubits"][0]),)
+    _trajectory_values(
+        source_rows,
+        label="source",
+        expected_step_ids=expected_step_ids,
+        expected_theta_shape=expected_theta_shape,
+    )
+
+    executed_config = copy.deepcopy(source_config)
+    executed_config["circuit"]["n_generators"] = "n"
+    executed_config["experiment"]["output_dir"] = str(output_root)
+    summaries, module_origin, source_environment = _execute_source_training(
+        sibling_root, executed_config
+    )
+    source_identity_after = git_source_identity(
+        sibling_root,
+        include_paths=("src/iqp_bp", "configs/experiments/training_smoke.yaml"),
+    )
+    sibling_unchanged = source_identity_before == source_identity_after
+    if not sibling_unchanged:
+        raise ValueError("sibling source identity changed during retraining")
     if len(summaries) != 1:
         raise ValueError(f"training_smoke expected one resolved run, got {len(summaries)}")
-
-    source_summary_path = sibling_root / "results" / "training_smoke" / "results.jsonl"
-    source_summary = next(row for row in _read_jsonl(source_summary_path) if row.get("n") == 6)
-    source_trajectory = _resolve_source_path(sibling_root, str(source_summary["trajectory_path"]))
-    replay_trajectory = Path(str(summaries[0]["trajectory_path"]))
-    source_rows = _read_jsonl(source_trajectory)
+    retrained_summary = summaries[0]
+    _validate_summary_contract(retrained_summary, source_config, label="retrained")
+    if retrained_summary.get("dataset_metadata") != source_summary.get("dataset_metadata"):
+        raise ValueError("source and retrained dataset metadata do not match")
+    replay_trajectory_value = retrained_summary.get("trajectory_path")
+    if not isinstance(replay_trajectory_value, str):
+        raise ValueError("retrained summary is missing trajectory_path")
+    replay_trajectory = Path(replay_trajectory_value)
+    if not replay_trajectory.is_absolute():
+        replay_trajectory = output_root / replay_trajectory
+    replay_trajectory = replay_trajectory.resolve()
+    if not _is_within(replay_trajectory, output_root):
+        raise ValueError("retrained trajectory resolves outside the requested output")
+    if _is_within(replay_trajectory, sibling_root):
+        raise ValueError("retrained trajectory resolves inside the sibling checkout")
+    if not replay_trajectory.is_file():
+        raise FileNotFoundError(f"retrained trajectory is missing: {replay_trajectory}")
     replay_rows = _read_jsonl(replay_trajectory)
-    if len(source_rows) != len(replay_rows):
-        raise ValueError(f"trajectory length mismatch: source={len(source_rows)}, retrained={len(replay_rows)}")
+    comparison = _compare_trajectories(
+        source_rows,
+        replay_rows,
+        expected_step_ids=expected_step_ids,
+        expected_theta_shape=expected_theta_shape,
+    )
 
-    max_theta_error = 0.0
-    max_loss_error = 0.0
-    for source_row, replay_row in zip(source_rows, replay_rows, strict=True):
-        if source_row["step"] != replay_row["step"]:
-            raise ValueError(f"trajectory step mismatch: {source_row['step']} != {replay_row['step']}")
-        max_theta_error = max(max_theta_error, float(np.max(np.abs(np.asarray(source_row["theta"]) - np.asarray(replay_row["theta"])))) )
-        max_loss_error = max(max_loss_error, abs(float(source_row["loss"]) - float(replay_row["loss"])))
-
+    dataset_metadata = source_summary["dataset_metadata"]
+    if not isinstance(dataset_metadata, dict):
+        raise ValueError("source summary dataset metadata is not an object")
+    dataset_hash = _training_smoke_dataset_hash(dataset_metadata)
+    source_code_hash = _hash_tree(sibling_root / "src" / "iqp_bp")
     report = {
-        "schema_version": "v4_tcdp.sibling_retraining.v1",
-        "status": "PASS" if max_theta_error <= 1e-12 and max_loss_error <= 1e-12 else "INCONCLUSIVE",
-        "source_id": "training_smoke:configs/experiments/training_smoke.yaml",
+        "schema_version": "v4_tcdp.sibling_retraining.v2",
+        **comparison,
+        "source_id": SUPPORTED_SOURCE_ID,
         "source_config": str(config_path),
-        "source_config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
-        "source_results": str(source_summary_path),
+        "source_config_sha256": source_config_hash,
+        "resolved_config": {
+            "path": str(config_path),
+            "sha256": source_config_hash,
+            "content": source_config,
+        },
+        "executed_config": executed_config,
+        "adaptation": {
+            "n_generators": "n",
+            "output_dir": str(output_root),
+            "reason": "source runner requires the symbolic generator-count formula and output redirection",
+        },
+        "source_results": str(source_results_path),
         "source_trajectory": str(source_trajectory),
         "retrained_output": str(output_root),
+        "retrained_trajectory": str(replay_trajectory),
         "source_dataset_metadata": source_summary.get("dataset_metadata"),
-        "retrained_dataset_metadata": summaries[0].get("dataset_metadata"),
-        "trajectory_rows": len(source_rows),
-        "max_theta_abs_error": max_theta_error,
-        "max_loss_abs_error": max_loss_error,
-        "optimizer": {"name": config["training"]["optimizer"], "lr": config["training"]["lr"], "steps": config["training"]["num_steps"]},
-        "sibling_unchanged_by_adapter": True,
-        "interpretation": "Source trainer/data/config trajectory matched within fixed 1e-12 tolerance; this is retraining evidence, separate from photonic checkpoint replay.",
+        "retrained_dataset_metadata": retrained_summary.get("dataset_metadata"),
+        "expected_step_ids": list(expected_step_ids),
+        "expected_theta_shape": list(expected_theta_shape),
+        "optimizer": {
+            "name": source_config["training"]["optimizer"],
+            "lr": source_config["training"]["lr"],
+            "steps": source_config["training"]["num_steps"],
+        },
+        "source_identity_before": source_identity_before,
+        "source_identity_after": source_identity_after,
+        "sibling_unchanged_by_adapter": sibling_unchanged,
+        "imported_module_origin": module_origin,
+        "environment": source_environment,
+        "numerical_library_provenance": {
+            "adapter": _environment(),
+            "source_trainer": source_environment,
+        },
+        "source_hashes": {
+            "source_code_sha256": source_code_hash,
+            "config_sha256": source_config_hash,
+            "dataset_sha256": dataset_hash,
+            "results_sha256": _sha256(source_results_path),
+            "trajectory_sha256": _sha256(source_trajectory),
+        },
+        "source_code_sha256": source_code_hash,
+        "source_dataset_sha256": dataset_hash,
+        "source_trajectory_sha256": _sha256(source_trajectory),
+        "retrained_trajectory_sha256": _sha256(replay_trajectory),
     }
+    output_root.mkdir(parents=True, exist_ok=True)
     report_path = output_root / "retraining_evidence.json"
-    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(
+        json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
     report["report_path"] = str(report_path)
     return report
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sibling-root", type=Path, default=Path(r"C:\Users\cuqui\iqp-mmd-barren-plateau"))
-    parser.add_argument("--config", type=Path, default=Path(r"C:\Users\cuqui\iqp-mmd-barren-plateau\configs\experiments\training_smoke.yaml"))
-    parser.add_argument("--output-root", type=Path, default=REPO_ROOT / "results" / "v4_tcdp" / "sibling_retraining" / "training_smoke")
+    parser.add_argument(
+        "--sibling-root", type=Path, default=Path(r"C:\Users\cuqui\iqp-mmd-barren-plateau")
+    )
+    parser.add_argument(
+        "--config",
+        type=Path,
+        default=Path(r"C:\Users\cuqui\iqp-mmd-barren-plateau\configs\experiments\training_smoke.yaml"),
+    )
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=REPO_ROOT / "results" / "v4_tcdp" / "sibling_retraining" / "training_smoke",
+    )
     args = parser.parse_args()
     report = run_retraining(args.config, args.sibling_root, args.output_root)
-    print(json.dumps(report, indent=2, sort_keys=True))
+    print(json.dumps(report, indent=2, sort_keys=True, allow_nan=False))
     return 0 if report["status"] == "PASS" else 1
 
 

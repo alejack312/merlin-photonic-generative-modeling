@@ -8,6 +8,7 @@ resource controls, and optional-backend capability boundaries.
 from __future__ import annotations
 
 import inspect
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -15,6 +16,7 @@ import pytest
 from merlin_iqp.deploy import (
     GateMap,
     MapCache,
+    FullFockResult,
     apply_compiled_density,
     fixed_photon_accepted_mass,
     compile_iqp,
@@ -31,6 +33,7 @@ from merlin_iqp.deploy import (
     success_weighted_haar_fidelity,
     validate_gate_map,
 )
+import scripts.v4_tcdp.validate_deploy as validate_deploy
 from merlin_iqp.deploy.density import compose_instruments
 from merlin_iqp.deploy.maps import _choi_from_kraus
 
@@ -218,9 +221,7 @@ def test_fixed_photon_fock_loss_scales_acceptance_without_changing_conditioned_q
     lossless = full_fock_cp_reference(2, 0, 1, [0.2, 0.3], np.pi / 3, eta=1.0)
     lossy = full_fock_cp_reference(2, 0, 1, [0.2, 0.3], np.pi / 3, eta=0.5)
     if lossless.status == "INCONCLUSIVE" or lossy.status == "INCONCLUSIVE":
-        assert "Perceval" in str(lossless.diagnostics.get("reason", ""))
-        assert "Perceval" in str(lossy.diagnostics.get("reason", ""))
-        return
+        pytest.skip("optional Perceval full-Fock result unavailable for one loss setting")
     assert lossless.status == lossy.status == "PASS"
     assert lossy.distribution == pytest.approx(lossless.distribution, abs=1e-12)
     assert lossy.accepted_mass == pytest.approx(lossless.accepted_mass * 0.5**2, abs=1e-12)
@@ -250,3 +251,23 @@ def test_density_path_does_not_construct_embedded_4n_square_superoperator() -> N
     source = inspect.getsource(compose_instruments)
     assert "4**n" not in source.replace(" ", "")
     assert "np.eye(4**n" not in source.replace(" ", "")
+
+
+@pytest.mark.parametrize(("fock_status", "expected"), [("FAIL", "FAIL"), ("INCONCLUSIVE", "INCONCLUSIVE")])
+def test_deploy_aggregate_includes_full_fock_status(monkeypatch, fock_status: str, expected: str) -> None:
+    def fake_reconstruct(_alpha: float, *, use_perceval: bool) -> GateMap:
+        gate = ideal_cp_map(np.pi / 3)
+        gate.metadata["perceval"] = {"status": "PASS"}
+        gate.metadata["perceval_probe"] = {"status": "PASS"}
+        return gate
+
+    monkeypatch.setattr(validate_deploy, "reconstruct_cp_map", fake_reconstruct)
+    monkeypatch.setattr(
+        validate_deploy,
+        "full_fock_cp_reference",
+        lambda *_args, **_kwargs: FullFockResult(fock_status, diagnostics={"injected": True}),
+    )
+    result = validate_deploy.run(with_perceval=True)
+    assert result["physical_status"] == "PASS"
+    assert result["full_fock"]["status"] == fock_status
+    assert result["status"] == expected

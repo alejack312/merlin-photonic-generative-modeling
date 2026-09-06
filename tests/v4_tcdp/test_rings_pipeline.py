@@ -142,6 +142,19 @@ def test_duplicate_deterministic_data_dependent_replicas_are_labeled(tmp_path) -
     assert identity["n_unique_parameterizations_observed"] == 1
 
 
+def test_ring_artifacts_namespace_initialization_and_step_ablations(tmp_path) -> None:
+    primary = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True))
+    uniform = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True, initialization="uniform"))
+    longer = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=1, main=True))
+    primary_path = write_run_artifacts(primary, tmp_path)["run"]
+    uniform_path = write_run_artifacts(uniform, tmp_path)["run"]
+    longer_path = write_run_artifacts(longer, tmp_path)["run"]
+    assert primary_path != uniform_path
+    assert primary_path != longer_path
+    assert primary_path.parent != uniform_path.parent
+    assert primary_path.parent != longer_path.parent
+
+
 def test_legacy_grid_shapes_remain_contextually_unchanged() -> None:
     from merlin_iqp.generator.bin_centers import make_bin_centers
     from merlin_iqp.generator.natural_grid import make_natural_bin_centers
