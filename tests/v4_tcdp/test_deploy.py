@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from merlin_iqp.deploy import (
+    GateMap,
     MapCache,
     apply_compiled_density,
     fixed_photon_accepted_mass,
@@ -31,6 +32,7 @@ from merlin_iqp.deploy import (
     validate_gate_map,
 )
 from merlin_iqp.deploy.density import compose_instruments
+from merlin_iqp.deploy.maps import _choi_from_kraus
 
 
 def _tvd(left: dict[str, float], right: dict[str, float]) -> float:
@@ -90,8 +92,14 @@ def test_reconstructed_tomography_retains_zero_outcomes_and_is_physical() -> Non
     assert reconstructed.metadata["tomography"]["heldout_input_error"] < 1e-9
     assert reconstructed.metadata["tomography"]["heldout_readout_error"] < 1e-9
     assert reconstructed.metadata["raw_outcomes_included"] is True
-    assert reconstructed.metadata["global_perf_retained"] is True
-    assert validate_gate_map(reconstructed).passed
+    assert reconstructed.metadata["raw_outcomes_source"] == "analytic_projective_projection"
+    assert reconstructed.metadata["tomography_source"] == "ideal_cp_map.apply"
+    assert reconstructed.metadata["physical_tomography"] is False
+    assert reconstructed.metadata["global_perf_used_in_reconstruction"] is False
+    assert reconstructed.metadata["perceval_probe"]["status"] == "SKIPPED"
+    report = validate_gate_map(reconstructed)
+    assert report.passed
+    assert report.choi_consistency_error < 1e-9
     assert success_weighted_haar_fidelity(
         reconstructed, np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
     ) == pytest.approx(1.0, abs=1e-9)
@@ -144,6 +152,56 @@ def test_composition_tracks_unnormalized_model_success() -> None:
     normalized, success = compose_instruments(2, rho, [((0, 1), ideal_cp_map(np.pi))])
     assert success == pytest.approx(1 / 9, abs=1e-12)
     assert np.trace(normalized) == pytest.approx(1.0, abs=1e-12)
+
+
+def _asymmetric_x_on_local_msb() -> GateMap:
+    x = np.array([[0, 1], [1, 0]], complex)
+    operator = np.kron(x, np.eye(2))
+    return GateMap(4, 1.0, _choi_from_kraus((operator,)), "asymmetric-test", kraus=(operator,))
+
+
+@pytest.mark.parametrize(
+    ("qubits", "expected"),
+    [
+        ((0, 1), "100"),
+        ((1, 2), "010"),
+        ((0, 2), "100"),
+        ((2, 0), "001"),
+    ],
+)
+def test_density_composition_preserves_declared_local_msb_order(
+    qubits: tuple[int, int], expected: str
+) -> None:
+    state = np.zeros((8, 8), complex)
+    state[0, 0] = 1.0
+    observed, success = compose_instruments(3, state, [(qubits, _asymmetric_x_on_local_msb())])
+    assert success == pytest.approx(1.0)
+    assert format(int(np.argmax(np.real(np.diag(observed)))), "03b") == expected
+
+
+def test_density_composition_preserves_order_on_entangled_nonadjacent_input() -> None:
+    state_vector = np.zeros(8, complex)
+    state_vector[0] = 1.0 / np.sqrt(2.0)
+    state_vector[7] = 1.0 / np.sqrt(2.0)
+    state = np.outer(state_vector, state_vector.conj())
+    observed, success = compose_instruments(3, state, [((0, 2), _asymmetric_x_on_local_msb())])
+    expected_vector = np.zeros(8, complex)
+    expected_vector[3] = 1.0 / np.sqrt(2.0)
+    expected_vector[4] = 1.0 / np.sqrt(2.0)
+    expected = np.outer(expected_vector, expected_vector.conj())
+    assert success == pytest.approx(1.0)
+    assert observed == pytest.approx(expected, abs=1e-12)
+
+
+def test_physicality_rejects_inconsistent_supplied_choi() -> None:
+    transpose = np.zeros((4, 4))
+    for i in range(2):
+        for j in range(2):
+            transpose[j + 2 * i, i + 2 * j] = 1
+    inconsistent = GateMap(2, 1.0, np.eye(4), "inconsistent-test", superoperator=transpose)
+    report = validate_gate_map(inconsistent)
+    assert report.passed is False
+    assert report.choi_consistency_error > 1e-9
 
 
 def test_capability_failures_are_explicit() -> None:

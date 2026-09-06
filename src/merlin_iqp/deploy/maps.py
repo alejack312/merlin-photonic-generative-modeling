@@ -41,6 +41,7 @@ class MapPhysicality:
     hermiticity_error: float
     trace_choi: float
     passed: bool
+    choi_consistency_error: float = 0.0
 
 
 def _cp_success(alpha: float) -> float:
@@ -90,7 +91,23 @@ def ideal_cp_map(alpha: float) -> GateMap:
 
 
 def _matrix_units(d: int) -> list[np.ndarray]:
-    return [np.eye(d, dtype=complex)[:, i : i + 1] @ np.eye(d, dtype=complex)[j : j + 1, :] for j in range(d) for i in range(d)]
+    """Return E_ij in row-major (i,j) order."""
+
+    eye = np.eye(d, dtype=complex)
+    return [eye[:, i : i + 1] @ eye[j : j + 1, :] for i in range(d) for j in range(d)]
+
+
+def _choi_from_map(map_obj: GateMap) -> np.ndarray:
+    """Derive the Choi matrix from the operative map representation."""
+
+    d = map_obj.dimension
+    choi = np.zeros((d * d, d * d), dtype=complex)
+    for i in range(d):
+        for j in range(d):
+            unit = np.zeros((d, d), dtype=complex)
+            unit[i, j] = 1.0
+            choi += np.kron(unit, map_obj.apply(unit))
+    return choi
 
 
 def _paulis() -> dict[str, np.ndarray]:
@@ -211,7 +228,17 @@ def _perceval_probe(alpha: float) -> dict[str, Any]:
         output = simulator.probs(input_state)
         distribution = getattr(output, "items", lambda: [])()
         accepted = sum(float(value) for state, value in distribution if all(state[index] == 0 for index in range(4, 8)))
-        return {"status": "PASS", "perceval_version": getattr(pcvl, "__version__", "unknown"), "accepted_probe": accepted}
+        analytic_success = _cp_success(alpha)
+        accepted_error = abs(accepted - analytic_success)
+        status = "PASS" if np.isclose(accepted, analytic_success, rtol=1e-8, atol=1e-10) else "INCONCLUSIVE"
+        return {
+            "status": status,
+            "scope": "single bare CP circuit accepted-mass probe; not process tomography",
+            "perceval_version": getattr(pcvl, "__version__", "unknown"),
+            "accepted_probe": accepted,
+            "analytic_success_reference": analytic_success,
+            "accepted_probe_error": accepted_error,
+        }
     except Exception as exc:  # optional environment/circuit API is a capability state
         return {"status": "INCONCLUSIVE", "reason": f"Perceval probe unavailable: {type(exc).__name__}: {exc}"}
 
@@ -233,12 +260,19 @@ def reconstruct_cp_map(alpha: float, *, use_perceval: bool = True) -> GateMap:
         dimension=4,
         success=ideal.success,
         choi=choi,
-        implementation="perceval-tomography" if probe.get("status") == "PASS" else "analytic-tomography",
+        implementation="analytic-tomography",
         metadata={
             "alpha": float(alpha),
             "raw_outcomes_included": True,
-            "global_perf_retained": True,
+            "raw_outcomes_source": "analytic_projective_projection",
+            "tomography_source": "ideal_cp_map.apply",
+            "physical_tomography": False,
+            "global_perf_source": "analytic_success",
+            "global_perf_used_in_reconstruction": False,
             "tomography": tomography,
+            "perceval_probe": probe,
+            # Backward-compatible alias for existing validators; this remains
+            # a probe record and is never the tomography implementation.
             "perceval": probe,
             "source_model": "bare_CP_v1.2.4_when_available",
             "noise": "ideal",
@@ -260,18 +294,46 @@ def _edagger_identity(map_obj: GateMap) -> np.ndarray:
 
 
 def validate_gate_map(map_obj: GateMap, *, tolerance: float = 1e-9) -> MapPhysicality:
+    if not np.isfinite(tolerance) or tolerance < 0.0:
+        raise ValueError("tolerance must be finite and non-negative")
     choi = np.asarray(map_obj.choi, dtype=complex)
+    d = map_obj.dimension
+    expected_shape = (d * d, d * d)
+    if choi.shape != expected_shape:
+        raise ValueError(f"choi must have shape {expected_shape}")
+    if not np.all(np.isfinite(choi)):
+        raise ValueError("choi must contain only finite values")
+    derived_choi = _choi_from_map(map_obj)
+    if not np.all(np.isfinite(derived_choi)):
+        raise ValueError("operative map produces non-finite Choi values")
+    choi_consistency_error = float(np.max(np.abs(choi - derived_choi)))
+    supplied_hermiticity_error = float(np.max(np.abs(choi - choi.conj().T)))
+    derived_hermiticity_error = float(np.max(np.abs(derived_choi - derived_choi.conj().T)))
     min_choi = float(np.min(np.linalg.eigvalsh((choi + choi.conj().T) / 2.0)).real)
     edagger = _edagger_identity(map_obj)
     max_edagger = float(np.max(np.linalg.eigvalsh((edagger + edagger.conj().T) / 2.0)).real)
-    d = map_obj.dimension
-    hermiticity_error = 0.0
+    hermiticity_error = max(supplied_hermiticity_error, derived_hermiticity_error)
     units = _matrix_units(d)
     for a in range(d):
         for b in range(d):
-            hermiticity_error = max(hermiticity_error, float(np.max(np.abs(map_obj.apply(units[a * d + b]) .conj().T - map_obj.apply(units[b * d + a])))))
-    passed = min_choi >= -tolerance and max_edagger <= 1.0 + tolerance and hermiticity_error <= tolerance
-    return MapPhysicality(min_choi, max_edagger, hermiticity_error, float(np.trace(choi).real), passed)
+            hermiticity_error = max(
+                hermiticity_error,
+                float(np.max(np.abs(map_obj.apply(units[a * d + b]).conj().T - map_obj.apply(units[b * d + a])))),
+            )
+    passed = (
+        min_choi >= -tolerance
+        and max_edagger <= 1.0 + tolerance
+        and hermiticity_error <= tolerance
+        and choi_consistency_error <= tolerance
+    )
+    return MapPhysicality(
+        min_choi_eigenvalue=min_choi,
+        max_edagger_i_eigenvalue=max_edagger,
+        hermiticity_error=hermiticity_error,
+        trace_choi=float(np.trace(choi).real),
+        passed=passed,
+        choi_consistency_error=choi_consistency_error,
+    )
 
 
 def success_weighted_haar_fidelity(map_obj: GateMap, unitary: np.ndarray) -> float:

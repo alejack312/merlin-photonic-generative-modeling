@@ -18,17 +18,23 @@ def _validate_eta(eta: float) -> float:
 
 
 def _index(local_bits: int, rest_bits: int, qubits: tuple[int, ...], n: int) -> int:
+    """Map local/rest basis integers to the global MSB-first basis index.
+
+    The declared ``qubits`` tuple is the local tensor-product order: its
+    first element is the local MSB and its last element is the local LSB.
+    The remaining global qubits retain the global MSB-first order.  Keeping
+    these two orders explicit is important for asymmetric maps such as
+    ``X tensor I``; sorting the selected qubits changes the map being applied.
+    """
+
     selected = set(qubits)
-    local_cursor = len(qubits) - 1
-    rest_cursor = n - len(qubits) - 1
+    rest_qubits = [qubit for qubit in range(n) if qubit not in selected]
     value = 0
-    for qubit in range(n - 1, -1, -1):
-        if qubit in selected:
-            bit = (local_bits >> local_cursor) & 1
-            local_cursor -= 1
-        else:
-            bit = (rest_bits >> rest_cursor) & 1
-            rest_cursor -= 1
+    for local_position, qubit in enumerate(qubits):
+        bit = (local_bits >> (len(qubits) - 1 - local_position)) & 1
+        value |= bit << (n - 1 - qubit)
+    for rest_position, qubit in enumerate(rest_qubits):
+        bit = (rest_bits >> (len(rest_qubits) - 1 - rest_position)) & 1
         value |= bit << (n - 1 - qubit)
     return value
 
@@ -65,8 +71,12 @@ def compose_instruments(
         raise ValueError(f"rho must have shape {(d, d)}")
     current = state.copy()
     for qubits, gate_map in operations:
-        qubits = tuple(sorted(int(q) for q in qubits))
-        if len(qubits) not in (1, 2) or any(q < 0 or q >= n for q in qubits):
+        qubits = tuple(int(q) for q in qubits)
+        if (
+            len(qubits) not in (1, 2)
+            or len(set(qubits)) != len(qubits)
+            or any(q < 0 or q >= n for q in qubits)
+        ):
             raise ValueError(f"unsupported local operation on {qubits}")
         expected_dim = 2 ** len(qubits)
         if gate_map.dimension != expected_dim:
