@@ -1,60 +1,68 @@
 # v4.0 requirement evidence ledger
 
-Statuses are strict: `PASS` means the bounded implementation criterion has direct evidence; `INCONCLUSIVE` means a required physical, source, owner or review input is absent; `FAIL` means a required acceptance condition was not met. A PASS here never upgrades a dependent scientific claim.
+Updated 2026-09-06. Statuses are strict:
 
-| ID | Status | Evidence / remaining gate |
-|---|---|---|
-| TRAIN-01 | PASS | `src/merlin_iqp/classical/PROVENANCE.md`, focused core tests |
-| TRAIN-02 | PASS | `test_classical_core.py`, chain generator validation |
-| TRAIN-03 | PASS | classical round-trip and separate deploy compiler tests |
-| TRAIN-04 | PASS | `test_classical_core.py` exact gradients/objectives/update |
-| CHAN-01 | INCONCLUSIVE | D1 source/detection model not selected |
-| CHAN-02 | PASS | `test_deploy.py` Choi, E†I, Hermiticity, tomography fixtures |
-| CHAN-03 | INCONCLUSIVE | key/cache boundaries pass; representative map-cost gate not run |
-| CHAN-04 | INCONCLUSIVE | formula fixture passes; independent physical/tomography validation remains |
-| DEPLOY-01 | INCONCLUSIVE | composition/sign/winding tests pass; n=10 RSS gate not measured |
-| DEPLOY-02 | PASS | direct compiled equality, k=0/nonadjacent/winding fixtures |
-| DEPLOY-03 | INCONCLUSIVE | one-gate ideal reference only; g2/loss is explicitly D1-gated |
-| DEPLOY-04 | INCONCLUSIVE | projection/full-Fock discrepancy study not completed |
-| DEPLOY-05 | INCONCLUSIVE | formulas tested; actual source acceptance model is open |
-| REFRAME-03 | INCONCLUSIVE | conditional erasure helper passes; no unconditional Fock output |
-| NULL-03 | INCONCLUSIVE | owner prediction required |
-| NULL-04 | INCONCLUSIVE | owner explanation/prediction required |
-| NULL-05 | INCONCLUSIVE | owner loss prediction and D1 required |
-| NULL-06 | INCONCLUSIVE | owner throughput prediction required |
-| NULL-07 | INCONCLUSIVE | owner gap hypothesis required |
-| NULL-08 | INCONCLUSIVE | owner NAT interpretation required |
-| NULL-09 | INCONCLUSIVE | ideal equality fixture exists; full control/mutation panel not complete |
-| SWEEP-01 | PASS | isolated ring/sibling/comparison manifests; no calibration count substitution |
-| SWEEP-02 | PASS | NPZ/JSON namespaces, hashes, dispositions and cache rejection tests |
-| SWEEP-03 | INCONCLUSIVE | core metrics pass; marginal/source-AC panel is not complete |
-| SWEEP-04 | INCONCLUSIVE | matched n=4 ring smoke only; no sibling/noisy arm |
-| SWEEP-05 | PASS | reports distinguish delivered, reference-only and blocked work |
-| NAT-01 | INCONCLUSIVE | D2 optimizer decision not selected |
-| NAT-02 | INCONCLUSIVE | no approved noise model/budgeted continuation run |
-| NAT-03 | INCONCLUSIVE | stop-rule run not attempted |
-| WRITE-07 | INCONCLUSIVE | owner-authored explanation is required |
-| WRITE-08 | PASS | rings, sibling, backend and synthesis reports exist with artifact links |
-| WRITE-09 | INCONCLUSIVE | final README/technical-findings mirror awaits review |
-| REVIEW-02 | INCONCLUSIVE | required Fable/Opus and Codex review not run |
-| COMM-02 | INCONCLUSIVE | Gibbs offer recorded; owner journal/Vincent note not authored |
-| ADD-01 | PASS | additive paths and legacy tree preserved; existing paths untouched |
-| MOD-01 | PASS | typed contracts and focused validation tests |
-| MOD-02 | PASS | rings use shared target/objective/trainer/checkpoint boundaries |
-| MOD-03 | PASS | spatial/Hamming objectives and Walsh/direct tests |
-| MOD-04 | PASS | checkpoint/resume/hash/cache tests and NPZ/JSON artifacts |
-| RING-01 | PASS | exact loader equivalence and frozen dataset/codec manifests |
-| RING-02 | PASS | both ring profiles use NumPy IQP model with backend import guard |
-| RING-03 | PASS | both n=4 smoke profiles and registered n=6/8 budgets |
-| RING-04 | INCONCLUSIVE | validated photonic ring adapter is not available |
-| REPRO-01 | PASS | sibling inventory: both packages, configs, artifacts and dispositions |
-| REPRO-02 | PASS | pinned clean state plus separately hashed local artifacts; sibling unchanged |
-| REPRO-03 | INCONCLUSIVE | frozen `training_smoke` checkpoint replay passes as adapted; source SGD/data trajectory and bandwidth/Ghosh–Kim retraining remain unavailable |
-| REPRO-04 | PASS | inventory preserves unsupported topology/weights and source fields |
-| REPRO-05 | PASS | every inventoried row has explicit disposition; no reproduction claim |
-| COMPARE-01 | INCONCLUSIVE | raw/qubit-like and ideal map control exists; supported physical arm absent |
-| COMPARE-02 | PASS | raw/compiled/deployed plus target/acceptance metrics are separate |
-| COMPARE-03 | PASS | common 20,000 accepted-sample budget is recorded; exact controls used |
-| COMPARE-04 | PASS | artifact-backed ring comparison and visible reference-only arm |
+- `PASS`: the bounded criterion has direct implementation and verification evidence.
+- `FAIL`: an attempted acceptance check produced a contrary result.
+- `INCONCLUSIVE`: implementation/evidence exists but does not establish the full criterion.
+- `NOT IMPLEMENTED`: the required implementation or run does not exist.
+- `BLOCKED`: the next action cannot safely proceed until a named owner decision or external input is supplied.
 
-The ledger is intentionally not a checkbox rewrite of the queued requirements. Missing inputs remain visible.
+An incomplete row includes the missing item, next concrete action, and owner dependency. A PASS is limited to the stated bounded evidence and never upgrades a dependent scientific claim.
+
+| ID | Status | Evidence / missing implementation or evidence | Next concrete action | Owner dependency |
+|---|---|---|---|---|
+| TRAIN-01 | PASS | NumPy core, contracts, provenance, and sibling export boundary exist; focused tests pass. | None for bounded scope. | None |
+| TRAIN-02 | PASS | `chain_1d` and strict generator validation are tested. | None. | None |
+| TRAIN-03 | PASS | Classical round-trip and separate signed/winding deployment compiler tests pass. | None for supported weight 1/2 scope. | None |
+| TRAIN-04 | PASS | Exact gradients, spatial/Hamming objectives, optimizer update, initialization and checkpoint tests pass. | None for explicit ring profiles. | None |
+| CHAN-01 | BLOCKED | Joint source/detection assumptions are not selected; only ideal analytic controls exist. | Select D1, then implement and validate the corresponding absolute-probability source model before noisy maps. | D1 |
+| CHAN-02 | PASS | Choi positivity, `E†I <= I`, Hermiticity, non-diagonal reconstruction and held-out fixtures pass. | None for ideal analytic map. | None |
+| CHAN-03 | INCONCLUSIVE | Key/winding/cache tests pass, but representative maximum map-cost and RSS measurements were not run. | Run isolated representative timing/RSS pilots before any cache sweep. | D1 only if noisy maps are included |
+| CHAN-04 | INCONCLUSIVE | Success-weighted Haar formula and ideal fidelity fixture pass; no independent physical tomography integration is established. | Run the prescribed Perceval absolute-outcome reconstruction and independent Kraus/Haar check. | D1 for noisy scope |
+| DEPLOY-01 | INCONCLUSIVE | Signs, winding, topology rejection, unnormalized composition and no-`4^n` allocation pass; n=10 RSS gate is missing. | Run the isolated n=10 memory pilot and record peak RSS. | None for ideal map; D1 for noise |
+| DEPLOY-02 | PASS | Ideal compiled-map equality, k=0, nonadjacent/asymmetric, sign/scale/winding and probability fixtures pass. | None for implemented ideal weight 1/2 maps. | None |
+| DEPLOY-03 | BLOCKED | Full-Fock n=2/3 multi-gate, bystander, shared-gate and joint g2/loss controls are not implemented; D1 is open. | Select D1; implement source-once number-sector controls and run all prescribed fixtures. | D1 |
+| DEPLOY-04 | NOT IMPLEMENTED | No chain-specific final-only versus intermediate-projection proof or hidden-label discrepancy study exists. | Prove restricted no-return conditions, or reject the topology and record the unsupported boundary. | D1 if hidden-label/noise cases are included |
+| DEPLOY-05 | INCONCLUSIVE | Fixed-photon and heralded formula helpers pass; actual source acceptance under the selected model is not measured. | Compute attempts per accepted sample from the selected source/acceptance instrument. | D1 |
+| REFRAME-03 | BLOCKED | Conditional synthetic erasure exists, but unconditional non-post-selected Fock output and complete failure categories do not. | Select D1 and implement either the qualified synthetic scope or full small-n Fock output with mass reconciliation. | D1 |
+| NULL-03 | BLOCKED | Owner k=0 prediction is absent. | Owner records prediction before the k=0 control is interpreted. | Owner decision |
+| NULL-04 | BLOCKED | Owner same-parameter ideal-map prediction is absent. | Owner records raw-versus-compiled prediction before comparison claims. | Owner decision |
+| NULL-05 | BLOCKED | Owner loss prediction and photon-number assumptions are absent. | Owner records the prediction after D1 selection. | D1 + owner |
+| NULL-06 | BLOCKED | Owner throughput predictions are absent. | Owner records separate CP and heralded-model predictions. | D1 + owner |
+| NULL-07 | BLOCKED | Owner falsifiable gap hypothesis is absent. | Owner records the hypothesis and success/failure interpretation rule. | Owner decision |
+| NULL-08 | BLOCKED | Owner NAT equality and equal-budget continuation explanation is absent. | Owner records the prediction after D2/D3 selection. | D2 + D3 + owner |
+| NULL-09 | NOT IMPLEMENTED | Equality fixtures exist, but every-cell mass-preserving mutation/control panel is not implemented. | Add explicit ideal equality, metric-specific mass mutation, and independent map/success mutation controls. | D1 for selected physical arm |
+| SWEEP-01 | PASS | Separate ring, sibling and comparison manifests preserve source settings and distinct seed/budget fields. | None for bounded artifacts. | None |
+| SWEEP-02 | PASS | Isolated namespaces, NPZ/JSON artifacts, hashes, compatibility dispositions and stale-cache tests pass. | None for bounded artifacts. | None |
+| SWEEP-03 | NOT IMPLEMENTED | Marginal/source-AC panel, occupancy artifact and independent hand fixtures are not complete. | Implement the remaining metrics without fabricating exact vectors from moments. | D1 only for noisy arm |
+| SWEEP-04 | NOT IMPLEMENTED | Only n=4 ring smoke comparisons exist; no sibling matched arm, sampled uncertainty or noisy comparison exists. | Complete sibling data closure and selected physical model, then run paired profiles within budget. | D1; D3 for replication |
+| SWEEP-05 | PASS | Reports distinguish delivered, adapted, reference-only, blocked and unperformed work. | None. | None |
+| NAT-01 | BLOCKED | No NAT optimizer has been selected or validated for quantized pair keys. | Select D2, implement the approved optimizer/model, and verify pair-key movement. | D2 |
+| NAT-02 | BLOCKED | No approved noisy model, D3 initialization, or equal-budget continuation run exists. | After D1–D3, freeze a profile and run matched 150-step continuation/control. | D1 + D2 + D3 |
+| NAT-03 | NOT IMPLEMENTED | The 20-minute n=8/two-day n=4 stop-rule run was not attempted. | Run only after NAT prerequisites are satisfied; record attempted/stopped if the rule fires. | D1 + D2 + D3 |
+| WRITE-07 | BLOCKED | Owner explanation of signs, source/gate noise, projection, loss, NAT and conditioning is absent. | Owner writes the explanation before interpretive synthesis. | Owner decision |
+| WRITE-08 | PASS | Rings, sibling, deployment, backend-comparison and v4 synthesis reports link canonical artifacts and limits. | None for current evidence. | None |
+| WRITE-09 | INCONCLUSIVE | AGENTS was updated, but README and legacy technical findings have not been mirrored after review. | Mirror only verified v4 conclusions after the owner/reviewer pass. | Owner/reviewer approval |
+| REVIEW-02 | NOT IMPLEMENTED | Independent Fable/Opus and Codex review of implementation evidence has not been run. | Give the reviewer handoff to an independent reviewer and record finding dispositions. | None, but required review gate |
+| COMM-02 | BLOCKED | Gibbs offer is made; owner journal/Vincent note is not authored and nothing was sent. | Owner authors or records hold; sending remains separately authorized. | Owner decision |
+| ADD-01 | PASS | Legacy suite passes; v4 paths are isolated and existing source/result paths were not modified. | None. | None |
+| MOD-01 | PASS | Dataset/spec/kernel/checkpoint/backend/compatibility contracts and validation tests exist. | None for bounded scope. | None |
+| MOD-02 | PASS | Rings share target moments, objectives, training and checkpoint boundaries; no plugin framework added. | None for bounded scope. | None |
+| MOD-03 | PASS | Spatial/direct and Hamming/Walsh routes, mixtures and identities are tested. | None for bounded scope. | None |
+| MOD-04 | PASS | Portable NPZ/JSON state, resume/hash rejection and safe source metadata export are tested. | None for bounded scope. | None |
+| RING-01 | PASS | 400-point/320–80 loader equivalence, train-only normalization and row-major MSB codec are artifact-backed. | None for bounded n=4 smoke. | None |
+| RING-02 | PASS | Both ring profiles run through the NumPy IQP model and backend import guard; v1 462-bin path remains separate. | None. | None |
+| RING-03 | PASS | Both n=4 three-step smoke profiles ran; n=6/8 main budgets are registered but not launched. | Run approved n=6/8 main cells if milestone completion requires them. | D3 only if data-dependent init is added |
+| RING-04 | NOT IMPLEMENTED | No validated ideal photonic ring adapter or decoded photonic ring samples exist. | Complete physical support and deploy frozen ring checkpoints with matched qubit reference. | D1 for physical source; topology/projection evidence |
+| REPRO-01 | PASS | Both sibling packages, configs, artifact families and row dispositions are inventoried and hashed. | None. | None |
+| REPRO-02 | PASS | Pinned sibling state and local artifact hashes are recorded; sibling remained unchanged; unsafe serialization was not loaded. | None for inventory scope. | None |
+| REPRO-03 | BLOCKED | `training_smoke` frozen checkpoint replay is adapted; source target data is absent, so faithful SGD/data retraining and bandwidth/Ghosh–Kim replay cannot run. | Obtain/validate the missing source target/checkpoint closure, then rerun source SGD and registered replays. | External source inputs |
+| REPRO-04 | PASS | Inventory preserves high-weight/topology/estimator fields and records unsupported cases rather than coercing them. | None for inventory scope. | None |
+| REPRO-05 | PASS | Every inventoried source row has exact/adapted/reference-only/blocked disposition; no unperformed reproduction is claimed. | None. | None |
+| COMPARE-01 | INCONCLUSIVE | Ring raw/qubit-like/ideal-map control exists, but a supported physical photonic realization and sibling matched arm are absent. | Add the selected supported photonic arm and sibling target/model after prerequisite closure. | D1; external sibling data |
+| COMPARE-02 | PASS | Raw, compiled and deployed vectors, targets, metrics and acceptance are separate in canonical JSON artifacts. | None for bounded comparison. | None |
+| COMPARE-03 | PASS | Common 20,000 accepted-sample evaluation budget, exact controls and acceptance accounting are recorded. | Add sampled uncertainty only when a sampled arm is authorized. | None for current exact scope |
+| COMPARE-04 | INCONCLUSIVE | Ring comparison artifact exists and reference-only capability is visible; sibling/substrate comparison and figures are missing. | Complete sibling/physical arms, then regenerate comparison figures and manifests. | D1; external sibling data |
+
+The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the same suite passed `609` tests. This is an environment note, not a requirement PASS for physical validation.
