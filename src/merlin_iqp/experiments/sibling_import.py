@@ -78,6 +78,18 @@ def _git_status(root: Path) -> list[str]:
     return [] if value is None or not value else value.splitlines()
 
 
+def _status_is_in_scope(line: str, prefixes: tuple[str, ...]) -> bool:
+    """Match Git status paths against the source scope, including renames."""
+
+    path_text = line[3:] if len(line) >= 3 else line
+    candidates = path_text.split(" -> ")
+    return any(
+        candidate.replace("\\", "/") in prefixes
+        or any(candidate.replace("\\", "/").startswith(prefix + "/") for prefix in prefixes)
+        for candidate in candidates
+    )
+
+
 def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None = None) -> dict[str, Any]:
     """Return the observed Git identity without changing ``root``.
 
@@ -90,7 +102,7 @@ def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None
     checkout = Path(root).expanduser().resolve()
     commit = _git(checkout, "rev-parse", "HEAD")
     branch = _git(checkout, "symbolic-ref", "--short", "-q", "HEAD") or "detached"
-    status = _git_status(checkout)
+    all_status = _git_status(checkout)
     listed = _git(checkout, "ls-files", "--cached", "--others", "--exclude-standard")
     digest = hashlib.sha256()
     listed_files = [] if listed is None else [line for line in listed.splitlines() if line]
@@ -101,6 +113,9 @@ def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None
             if line.replace("\\", "/") in prefixes
             or any(line.replace("\\", "/").startswith(prefix + "/") for prefix in prefixes)
         ]
+        status = [line for line in all_status if _status_is_in_scope(line, prefixes)]
+    else:
+        status = all_status
     for relative in sorted(set(listed_files), key=str.lower):
         path = checkout / relative
         if not path.is_file():
@@ -118,6 +133,7 @@ def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None
         "observed_branch": branch,
         "dirty": bool(status),
         "git_status": status,
+        "workspace_git_status": all_status,
         "tree_identity": tree_identity,
         "tree_identity_kind": "git_tree" if clean_tree and tree_identity else "working_tree_content_sha256",
     }
