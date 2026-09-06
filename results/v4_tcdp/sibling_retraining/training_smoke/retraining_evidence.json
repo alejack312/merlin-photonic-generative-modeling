@@ -1,11 +1,198 @@
 {
-  "interpretation": "Source trainer/data/config trajectory matched within fixed 1e-12 tolerance; this is retraining evidence, separate from photonic checkpoint replay.",
+  "adaptation": {
+    "n_generators": "n",
+    "output_dir": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\training_smoke",
+    "reason": "source runner requires the symbolic generator-count formula and output redirection"
+  },
+  "environment": {
+    "executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+    "numpy_runtime": "2.5.1",
+    "packages": {
+      "numpy": "2.5.1",
+      "pyyaml": null,
+      "scipy": "1.18.0",
+      "torch": "2.12.1"
+    },
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
+  },
+  "executed_config": {
+    "circuit": {
+      "family": "product_state",
+      "n_generators": "n",
+      "n_qubits": [
+        6
+      ]
+    },
+    "dataset": {
+      "n_samples": 256,
+      "type": "product_bernoulli"
+    },
+    "estimation": {
+      "batch_size": 32,
+      "num_a_samples": 64,
+      "num_z_samples": 128
+    },
+    "experiment": {
+      "description": "Small exact learned-distribution smoke test",
+      "name": "training_smoke",
+      "output_dir": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\training_smoke",
+      "seed": 11
+    },
+    "init": {
+      "scheme": "small_angle",
+      "small_angle": {
+        "std": [
+          0.15
+        ]
+      }
+    },
+    "kernel": {
+      "bandwidth": [
+        4.0
+      ],
+      "type": "gaussian"
+    },
+    "training": {
+      "checkpoint_every": 1,
+      "diagnostics": {
+        "anti_concentration": {
+          "alphas": [
+            0.5,
+            1.0,
+            2.0
+          ],
+          "beta_min": 0.25,
+          "primary_alpha": 1.0,
+          "second_moment_threshold": 1.0
+        },
+        "distribution_mode": "exact",
+        "enabled": true,
+        "exact_probability_max_n": 8,
+        "max_order": 3,
+        "max_subsets_per_order": 20,
+        "sample_count": 2048,
+        "sample_from_exact_probability_max_n": 8
+      },
+      "exact_loss_max_n": 8,
+      "loss_mode": "exact_small_n",
+      "lr": 0.05,
+      "num_steps": 4,
+      "optimizer": "sgd"
+    }
+  },
+  "expected_step_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "expected_theta_shape": [
+    6
+  ],
+  "imported_module_origin": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\src\\iqp_bp\\experiments\\run_training.py",
+  "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
   "max_loss_abs_error": 0.0,
   "max_theta_abs_error": 0.0,
+  "numerical_library_provenance": {
+    "adapter": {
+      "executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "numpy_runtime": "2.5.1",
+      "packages": {
+        "numpy": "2.5.1",
+        "pyyaml": null,
+        "scipy": "1.18.0",
+        "torch": "2.12.1"
+      },
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
+    },
+    "source_trainer": {
+      "executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "numpy_runtime": "2.5.1",
+      "packages": {
+        "numpy": "2.5.1",
+        "pyyaml": null,
+        "scipy": "1.18.0",
+        "torch": "2.12.1"
+      },
+      "platform": "Windows-11-10.0.26200-SP0",
+      "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
+    }
+  },
   "optimizer": {
     "lr": 0.05,
     "name": "sgd",
     "steps": 4
+  },
+  "resolved_config": {
+    "content": {
+      "circuit": {
+        "family": "product_state",
+        "n_qubits": [
+          6
+        ]
+      },
+      "dataset": {
+        "n_samples": 256,
+        "type": "product_bernoulli"
+      },
+      "estimation": {
+        "batch_size": 32,
+        "num_a_samples": 64,
+        "num_z_samples": 128
+      },
+      "experiment": {
+        "description": "Small exact learned-distribution smoke test",
+        "name": "training_smoke",
+        "output_dir": "results/training_smoke",
+        "seed": 11
+      },
+      "init": {
+        "scheme": "small_angle",
+        "small_angle": {
+          "std": [
+            0.15
+          ]
+        }
+      },
+      "kernel": {
+        "bandwidth": [
+          4.0
+        ],
+        "type": "gaussian"
+      },
+      "training": {
+        "checkpoint_every": 1,
+        "diagnostics": {
+          "anti_concentration": {
+            "alphas": [
+              0.5,
+              1.0,
+              2.0
+            ],
+            "beta_min": 0.25,
+            "primary_alpha": 1.0,
+            "second_moment_threshold": 1.0
+          },
+          "distribution_mode": "exact",
+          "enabled": true,
+          "exact_probability_max_n": 8,
+          "max_order": 3,
+          "max_subsets_per_order": 20,
+          "sample_count": 2048,
+          "sample_from_exact_probability_max_n": 8
+        },
+        "exact_loss_max_n": 8,
+        "loss_mode": "exact_small_n",
+        "lr": 0.05,
+        "num_steps": 4,
+        "optimizer": "sgd"
+      }
+    },
+    "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\training_smoke.yaml",
+    "sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab"
   },
   "retrained_dataset_metadata": {
     "n_samples": 256,
@@ -13,8 +200,11 @@
     "type": "product_bernoulli"
   },
   "retrained_output": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\training_smoke",
-  "schema_version": "v4_tcdp.sibling_retraining.v1",
+  "retrained_trajectory": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\training_smoke\\runs\\product_state__n6__gaussian__small_angle__product_bernoulli__sigma4p0__theta0p15\\trajectory.jsonl",
+  "retrained_trajectory_sha256": "aeded34a97b01b48662ec5f3c24973e5f784d398eae17e1bc5093cc7d17922ea",
+  "schema_version": "v4_tcdp.sibling_retraining.v2",
   "sibling_unchanged_by_adapter": true,
+  "source_code_sha256": "eadf388099f93caaf5bc0943d56d66f47d1939803fdea26a278f2798e7e0a101",
   "source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\training_smoke.yaml",
   "source_config_sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab",
   "source_dataset_metadata": {
@@ -22,9 +212,38 @@
     "seed": 1230519654,
     "type": "product_bernoulli"
   },
+  "source_dataset_sha256": "dd03528a153d041bcd670204a91a2e3cfebcbbce32bad2b5fe9ab93b33bb2c53",
+  "source_hashes": {
+    "config_sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab",
+    "dataset_sha256": "dd03528a153d041bcd670204a91a2e3cfebcbbce32bad2b5fe9ab93b33bb2c53",
+    "results_sha256": "5a2b079ab7bfd690064649a8ae9e15cf0acf408cfd2d3a3d46f40fe18d523805",
+    "source_code_sha256": "eadf388099f93caaf5bc0943d56d66f47d1939803fdea26a278f2798e7e0a101",
+    "trajectory_sha256": "9f29e6b1687e60ec655687f146f3b4b595cf64b232ae932f0f763d739db02dc5"
+  },
   "source_id": "training_smoke:configs/experiments/training_smoke.yaml",
+  "source_identity_after": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "source_identity_before": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
   "source_results": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\results.jsonl",
   "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\runs\\product_state__n6__gaussian__small_angle__product_bernoulli__sigma4p0__theta0p15\\trajectory.jsonl",
+  "source_trajectory_sha256": "9f29e6b1687e60ec655687f146f3b4b595cf64b232ae932f0f763d739db02dc5",
   "status": "PASS",
   "trajectory_rows": 5
 }
