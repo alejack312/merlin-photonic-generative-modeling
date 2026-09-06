@@ -27,7 +27,7 @@
   "replication_identity": {
     "deterministic_initialization": true,
     "duplicate_of": "rings_spatial_exact/n8_seed0_main",
-    "equivalence_key": "ec1dac789be26d75477683dfb5d65ade828c4353d641487507456998af469744",
+    "equivalence_key": "d5feea88a5bcaa400614a1c7372937336c7f7ec81cdf2047361b40df95ce5c82",
     "final_parameter_hash": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
     "independent_replica": false,
     "initial_parameter_hash": "f098b876526c382f724a8f1a763f7a8a853168cbdc8a6eb833393cb74e636317",

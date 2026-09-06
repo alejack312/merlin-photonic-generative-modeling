@@ -13,7 +13,7 @@
     "run_kind": "main",
     "seed": 4,
     "sigma": 0.1,
-    "source_commit": "72e8079",
+    "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
     "steps": 300
   },
   "dataset": {
@@ -882,7 +882,7 @@
     "output_bins": 462,
     "status": "context_only"
   },
-  "manifest_hash": "5e686a6dad4f8f767ea2011c7e7071c2dcd43813a2dca6571dd3737fc7900b32",
+  "manifest_hash": "ec59794d2c73f2692414642060a23b6e36255cce3b884c3dbe471c584b867209",
   "metrics": {
     "quantization_floor_rms": 0.0705800271431736,
     "test_hamming_mmd2_sigma_primary": 0.011494748674344395,
@@ -963,7 +963,7 @@
   "replication_identity": {
     "deterministic_initialization": true,
     "duplicate_of": "rings_spatial_exact/n6_seed0_main",
-    "equivalence_key": "945baceb8a49d5db01df6fa48d2113d67eaf9d9cdf964cd1680b257f60e66e5e",
+    "equivalence_key": "c039a1a7f7d4cc04e8f26d643c75ea958d46e464ac57f1730d2bb29e6b49a65b",
     "final_parameter_hash": "f2471835e6518eca0a62a19c0eee73881636a9352f4643fdfb962688fc3a2c79",
     "independent_replica": false,
     "initial_parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
@@ -977,5 +977,24 @@
   },
   "run_id": "rings_spatial_exact/n6_seed4_main",
   "schema_version": "v4_tcdp.rings_run.v2",
-  "selection_rule": "fixed_last_step"
+  "selection_rule": "fixed_last_step",
+  "source_provenance": {
+    "dirty": true,
+    "git_status": [
+      "M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/summary.json",
+      "?? results/v4_tcdp/sibling_replays/training_smoke_configs_experiments_training_smoke_yaml__f6d6ebe87e4ee1de__12843f05ea590fae/"
+    ],
+    "observed_branch": "codex/v4-implementation",
+    "observed_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+    "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+    "tree_identity": "09706335a5f3bdc35fccdf10e50fce1a9644f06315b9028ff58593b2263c7db8",
+    "tree_identity_kind": "working_tree_content_sha256"
+  }
 }

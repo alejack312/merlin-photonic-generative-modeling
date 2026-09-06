@@ -13,7 +13,7 @@
     "run_kind": "main",
     "seed": 4,
     "sigma": 1.224744871391589,
-    "source_commit": "72e8079",
+    "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
     "steps": 300
   },
   "dataset": {
@@ -882,7 +882,7 @@
     "output_bins": 462,
     "status": "context_only"
   },
-  "manifest_hash": "21f32548db5f49e4c29a2ba2f97d1e2de35b5f884bb596da8b5786e8ee23005e",
+  "manifest_hash": "0d531dd4fecfe05c2a51bc9b042f4c8068876262b9bb07f439ed7d2fdc067b85",
   "metrics": {
     "quantization_floor_rms": 0.0705800271431736,
     "test_hamming_mmd2_sigma_primary": 0.00891419098411555,
@@ -963,7 +963,7 @@
   "replication_identity": {
     "deterministic_initialization": true,
     "duplicate_of": "rings_hamming/n6_seed0_main",
-    "equivalence_key": "f64d68a52aa5b413d86925266f7edd6e829862d89bd08e01fe5f5097cf704171",
+    "equivalence_key": "dcb72f063e72f3e3c4edf749e15ef8d85b7d7ba38435f27be8fadee381f38032",
     "final_parameter_hash": "bd41364896042846723853856162664cbc10d9670d52c0314e77eb65b3ed2bb7",
     "independent_replica": false,
     "initial_parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
@@ -977,5 +977,44 @@
   },
   "run_id": "rings_hamming/n6_seed4_main",
   "schema_version": "v4_tcdp.rings_run.v2",
-  "selection_rule": "fixed_last_step"
+  "selection_rule": "fixed_last_step",
+  "source_provenance": {
+    "dirty": true,
+    "git_status": [
+      "M results/v4_tcdp/rings/rings_hamming/n6_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_hamming/n6_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed4_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed4_main/summary.json",
+      "?? results/v4_tcdp/sibling_replays/training_smoke_configs_experiments_training_smoke_yaml__f6d6ebe87e4ee1de__12843f05ea590fae/"
+    ],
+    "observed_branch": "codex/v4-implementation",
+    "observed_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+    "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+    "tree_identity": "e7891b2f21d97ccc6e7a9b7b163db90be433c1e5e441e1dddd7bdb655213bf1d",
+    "tree_identity_kind": "working_tree_content_sha256"
+  }
 }

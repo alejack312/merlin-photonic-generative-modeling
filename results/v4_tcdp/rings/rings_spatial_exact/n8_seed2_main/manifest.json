@@ -13,7 +13,7 @@
     "run_kind": "main",
     "seed": 2,
     "sigma": 0.1,
-    "source_commit": "72e8079",
+    "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
     "steps": 300
   },
   "dataset": {
@@ -3186,7 +3186,7 @@
     "output_bins": 462,
     "status": "context_only"
   },
-  "manifest_hash": "4e87ecdf112709dd33b0e776373693a492f6f4da94ebf66c0a639ab4506519b9",
+  "manifest_hash": "f2f83174ec4872fcd0fe5dc8a92e70e3b1d4c05ad806276b671cb6f9406a7ad7",
   "metrics": {
     "quantization_floor_rms": 0.03495680723779961,
     "test_hamming_mmd2_sigma_primary": 0.010255699016223554,
@@ -3267,12 +3267,12 @@
   "replication_identity": {
     "deterministic_initialization": true,
     "duplicate_of": "rings_spatial_exact/n8_seed0_main",
-    "equivalence_key": "ec1dac789be26d75477683dfb5d65ade828c4353d641487507456998af469744",
+    "equivalence_key": "d5feea88a5bcaa400614a1c7372937336c7f7ec81cdf2047361b40df95ce5c82",
     "final_parameter_hash": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
     "independent_replica": false,
     "initial_parameter_hash": "f098b876526c382f724a8f1a763f7a8a853168cbdc8a6eb833393cb74e636317",
-    "n_unique_parameterizations_observed": 1,
-    "observed_replica_count": 3,
+    "n_unique_parameterizations_observed": 2,
+    "observed_replica_count": 5,
     "randomness_source": "none; exact train target moments",
     "replica_id": "rings_spatial_exact/n8_seed2_main",
     "replication_group": "rings_spatial_exact/n8/main",
@@ -3281,5 +3281,30 @@
   },
   "run_id": "rings_spatial_exact/n8_seed2_main",
   "schema_version": "v4_tcdp.rings_run.v2",
-  "selection_rule": "fixed_last_step"
+  "selection_rule": "fixed_last_step",
+  "source_provenance": {
+    "dirty": true,
+    "git_status": [
+      "M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/summary.json",
+      "?? results/v4_tcdp/sibling_replays/training_smoke_configs_experiments_training_smoke_yaml__f6d6ebe87e4ee1de__12843f05ea590fae/"
+    ],
+    "observed_branch": "codex/v4-implementation",
+    "observed_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+    "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+    "tree_identity": "668f7b19d3399f6e237a02d957c3d803516a8802fc426b631ddc7b415155557c",
+    "tree_identity_kind": "working_tree_content_sha256"
+  }
 }
