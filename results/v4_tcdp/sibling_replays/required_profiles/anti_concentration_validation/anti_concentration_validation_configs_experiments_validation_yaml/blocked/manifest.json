@@ -1,0 +1,42 @@
+{
+  "available_result_evidence": [
+    "results/validation/complete_graph_n6_seed7.json",
+    "results/validation/complete_graph_n6_seed7_diagnostics.png",
+    "results/validation/complete_graph_n6_seed7_threshold_curve.png",
+    "results/validation/complete_graph_n6_seed7_thresholds.csv",
+    "results/validation_from_checkpoint/complete_graph_n4_checkpoint.json",
+    "results/validation_from_checkpoint/complete_graph_n4_checkpoint_thresholds.csv"
+  ],
+  "command": [
+    "venv/Scripts/python.exe",
+    "scripts/v4_tcdp/replay_sibling.py",
+    "results\\v4_tcdp\\sibling\\anti_concentration_validation_configs_experiments_validation_yaml\\manifest.json"
+  ],
+  "input_hashes": {
+    "checkpoint": null
+  },
+  "missing_input_paths": [
+    "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\validation\\checkpoints\\*.npz"
+  ],
+  "missing_inputs": [
+    "safe NPZ checkpoint containing G, theta, step and loss"
+  ],
+  "namespace": {
+    "destination": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_replays\\required_profiles\\anti_concentration_validation\\anti_concentration_validation_configs_experiments_validation_yaml\\blocked"
+  },
+  "output_files": [
+    "manifest.json"
+  ],
+  "reason": "No safe NPZ checkpoint with G/theta/step/loss is present in the registered result evidence.",
+  "reproduction_kind": "checkpoint_replay",
+  "schema_version": "v4_tcdp.sibling_replay.v2",
+  "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "source_config_sha256": "79a2cda0ba2406ac10ebdba0442b153ec9b314c03f3449f4679dda4a764053f1",
+  "source_dirty": false,
+  "source_id": "anti_concentration_validation:configs/experiments/validation.yaml",
+  "source_manifest": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling\\anti_concentration_validation_configs_experiments_validation_yaml\\manifest.json",
+  "source_manifest_sha256": "6c42757ae4b8e7f0b44a04d242ddeaee42ea05701fcaa5afa0bd7c1f9f9d199f",
+  "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+  "status": "blocked",
+  "unsafe_serialization_loaded": false
+}

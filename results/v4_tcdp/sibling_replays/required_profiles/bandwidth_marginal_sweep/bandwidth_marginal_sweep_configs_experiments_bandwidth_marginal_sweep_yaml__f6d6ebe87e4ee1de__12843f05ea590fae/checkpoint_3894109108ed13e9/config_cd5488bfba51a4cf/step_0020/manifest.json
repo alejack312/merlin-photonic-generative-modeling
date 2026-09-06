@@ -1,0 +1,32 @@
+{
+  "schema_version": "v4_tcdp.sibling_replay.v3",
+  "status": "stopped",
+  "reproduction_kind": "checkpoint_replay_partial_raw",
+  "source_id": "bandwidth_marginal_sweep:configs/experiments/bandwidth_marginal_sweep.yaml",
+  "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+  "source_config_sha256": "38d685e7036d82243ce09d39314fdd662060567e8617a3a9d44ae226041fa2a4",
+  "source_manifest_sha256": "f29e1a97821dc86c9719575913433d6021c64696ed8c1ce63e5b1f64208cdc53",
+  "checkpoint": {
+    "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\bandwidth_marginal_sweep\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma9p0\\checkpoints\\step_0020.npz",
+    "sha256": "3894109108ed13e97c839a35ef2cb496a1a73bbcdfa8e5462cbb05d4c4ac17e3",
+    "step": 20
+  },
+  "input_hashes": {"checkpoint": "3894109108ed13e97c839a35ef2cb496a1a73bbcdfa8e5462cbb05d4c4ac17e3"},
+  "output_files": ["raw.npy", "manifest.json"],
+  "partial_artifact": {
+    "path": "raw.npy",
+    "sha256": "68ecf0f712e5cec954c46221960d0d99c8596345f01e05f397d8908c5b732c44"
+  },
+  "reason": "Raw exact replay was written, then the bounded small-n run was stopped before compiled/deployed outputs and the adapter manifest were completed.",
+  "attempted_command": [
+    "venv/Scripts/python.exe",
+    "scripts/v4_tcdp/replay_sibling.py",
+    "results/v4_tcdp/sibling/bandwidth_marginal_sweep_configs_experiments_bandwidth_marginal_sweep_yaml/manifest.json",
+    "--sibling-root",
+    "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "--output-root",
+    "results/v4_tcdp/sibling_replays/required_profiles/bandwidth_marginal_sweep"
+  ],
+  "unsafe_serialization_loaded": false
+}

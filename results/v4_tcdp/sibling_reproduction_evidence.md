@@ -22,12 +22,18 @@ Result: `4 passed in 66.96s`.
 
 The regression was caused by requiring a `checkpoints` directory before validating a registered `step_*.npz`. The adapter now accepts any registered safe `step_*.npz`, then performs strict `G`, `theta`, `step`, and finite-loss validation. This preserves rejection of malformed checkpoints while supporting the portable fixture and registered evidence contract.
 
-The all-registered replay command was started but stopped before completion because the large-`n` exact raw replay remained CPU-bound. Its partial output is not used as completed row evidence. No faithful source retraining or matched comparison is claimed by this bounded repair note.
+Required REPRO-03 profile coverage:
+
+- `bandwidth_marginal_sweep`: stopped after raw exact output for the registered `sigma9`, step-20 checkpoint; the stopped manifest records the source checkpoint path/hash, source config/manifest hashes, attempted command, and partial `raw.npy` hash.
+- `ghosh_kim_small_n`: completed bounded adapted checkpoint replay for the registered `sigma9`, step-20 checkpoint; the manifest records raw/compiled/deployed outputs, source checkpoint/config/manifest hashes, `raw_compiled_tvd=0.021421552593069916`, and `deployed_acceptance_mass=8.360199399249953e-13`.
+- Unavailable checkpoint inputs: blocked manifests exist for `anti_concentration_validation` and `qiskit_validation_report_smoke`. Each names the exact expected sibling checkpoint glob, available non-checkpoint evidence, and attempted command.
+
+The all-registered replay command was stopped before completion because exact replay remained CPU-bound. The required profiles are therefore represented by one completed adapted replay and one stopped partial artifact, not by a completed sweep. No faithful source retraining or matched comparison is claimed by this bounded repair note.
 
 ## Changed evidence surface
 
 - `scripts/v4_tcdp/replay_sibling.py`: registered checkpoint selection and manifest provenance/output inventories.
 - `scripts/v4_tcdp/retrain_sibling.py`: command provenance in aggregate and per-cell faithful-retraining manifests.
-- `results/v4_tcdp/sibling_replays/registered/`: partial blocked-row output from the interrupted sweep; not a complete batch result.
+- `results/v4_tcdp/sibling_replays/required_profiles/`: stopped partial manifests for both required REPRO-03 profiles and blocked manifests for unavailable checkpoint inputs.
 
 Open external inputs remain the registered rows without safe NPZ checkpoints. Physical/source validation prerequisites for matched comparisons remain un evidenced, so no comparison extension is recorded here.

@@ -118,6 +118,22 @@ def _write_blocked_manifest(
         "source_tree_identity": source_identity.get("tree_identity"),
         "source_dirty": source_identity.get("dirty"),
         "missing_inputs": ["safe NPZ checkpoint containing G, theta, step and loss"],
+        "missing_input_paths": [
+            str(
+                Path(
+                    next(
+                        (
+                            item.get("resolved")
+                            for item in manifest.get("config", {}).get("declared_paths", [])
+                            if isinstance(item, dict) and item.get("field") == "output_dir"
+                        ),
+                        sibling_root / "results",
+                    )
+                )
+                / "checkpoints"
+                / "*.npz"
+            )
+        ],
         "available_result_evidence": manifest.get("result_evidence", []),
         "input_hashes": {"checkpoint": None},
         "output_files": ["manifest.json"],
