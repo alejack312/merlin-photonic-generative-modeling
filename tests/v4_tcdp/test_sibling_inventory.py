@@ -14,6 +14,7 @@ from merlin_iqp.experiments.sibling_import import (
     compatibility_record,
     regenerate_training_smoke_data,
     safe_import_artifact,
+    git_source_identity,
     write_inventory_outputs,
 )
 
@@ -73,6 +74,26 @@ def test_safe_artifact_boundary_rejects_pickle_and_reads_npz(tmp_path: Path) -> 
     metadata = safe_import_artifact(npz_path)
     assert metadata["keys"] == ["G", "theta"]
     assert metadata["arrays"]["G"]["dtype"] == "uint8"
+
+
+def test_scoped_source_identity_detects_first_worktree_edit(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    scoped = source / "src" / "iqp_bp"
+    scoped.mkdir(parents=True)
+    model = scoped / "model.py"
+    model.write_text("original = 1\n", encoding="utf-8")
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(source), *args], check=True, capture_output=True, text=True
+        ).stdout
+    git("init")
+    git("add", ".")
+    git("-c", "user.name=Audit", "-c", "user.email=audit@example.invalid", "commit", "-m", "fixture")
+    model.write_text("modified = 2\n", encoding="utf-8")
+    identity = git_source_identity(source, include_paths=("src/iqp_bp",))
+    assert git("status", "--short").startswith(" M ")
+    assert identity["dirty"] is True
+    assert identity["git_status"] == [" M src/iqp_bp/model.py"]
 
 
 @pytest.mark.skipif(not SIBLING_ROOT.exists(), reason="local sibling checkout is unavailable")

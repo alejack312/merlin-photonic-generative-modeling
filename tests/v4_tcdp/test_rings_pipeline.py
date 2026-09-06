@@ -142,6 +142,33 @@ def test_duplicate_deterministic_data_dependent_replicas_are_labeled(tmp_path) -
     assert identity["n_unique_parameterizations_observed"] == 1
 
 
+def test_idempotent_ring_rewrite_survives_another_seed(tmp_path) -> None:
+    first = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0))
+    second = train_rings(resolve_config("rings_hamming", n=4, seed=1, steps=0))
+    first_paths = write_run_artifacts(first, tmp_path)
+    write_run_artifacts(second, tmp_path)
+    assert write_run_artifacts(first, tmp_path) == first_paths
+
+
+def test_idempotent_ring_rewrite_rejects_missing_promised_artifact(tmp_path) -> None:
+    run = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0))
+    paths = write_run_artifacts(run, tmp_path)
+    paths["run"].unlink()
+    with pytest.raises(FileExistsError, match="missing"):
+        write_run_artifacts(run, tmp_path)
+
+
+def test_idempotent_ring_rewrite_rejects_corrupt_promised_artifact(tmp_path) -> None:
+    run = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0))
+    paths = write_run_artifacts(run, tmp_path)
+    with np.load(paths["run"], allow_pickle=False) as archive:
+        arrays = {name: archive[name] for name in archive.files}
+    arrays["final_theta"][0] += 1.0
+    np.savez_compressed(paths["run"], **arrays)
+    with pytest.raises(FileExistsError, match="integrity validation"):
+        write_run_artifacts(run, tmp_path)
+
+
 def test_ring_artifacts_namespace_initialization_and_step_ablations(tmp_path) -> None:
     primary = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True))
     uniform = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True, initialization="uniform"))

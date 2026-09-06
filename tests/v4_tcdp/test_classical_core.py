@@ -11,6 +11,7 @@ import pytest
 
 from merlin_iqp.classical import (
     BinarySamples,
+    DatasetBundle,
     ExactProbabilities,
     IQPModel,
     IQPSpec,
@@ -120,6 +121,14 @@ def test_typed_ring_targets_construct_a_dataset_bundle() -> None:
     assert bundle.dataset_hash
 
 
+def test_raw_dataset_bundle_hash_uses_full_array_content() -> None:
+    first = np.zeros((256, 6), dtype=np.uint8)
+    second = first.copy()
+    second[100, 2] = 1
+    kwargs = {"schema_version": "v1", "dataset_id": "fixture", "n": 6, "representation": "samples"}
+    assert DatasetBundle(train=first, **kwargs).dataset_hash != DatasetBundle(train=second, **kwargs).dataset_hash
+
+
 def test_classical_import_has_no_sibling_or_photonic_dependency() -> None:
     script = """
 import sys
@@ -174,3 +183,22 @@ def test_checkpoint_resume_rejects_changed_learning_rate(tmp_path) -> None:
     resumed = Trainer(IQPModel(G, np.zeros(G.shape[0])), target, kernel, optimizer="adam", lr=0.2, seed=9)
     with pytest.raises(ValueError, match="checkpoint learning rate mismatch"):
         resumed.resume(checkpoint_path)
+
+
+def test_adam_resume_rejects_incomplete_state_and_nonfinite_history(tmp_path) -> None:
+    G = chain_1d(3, 1)
+    target = _target()
+    kernel = KernelSpec("hamming_gaussian", sigma=0.6)
+    source = Trainer(IQPModel(G, [0.17, -0.09, 0.13, 0.05]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    source.run(2)
+    checkpoint = source.checkpoint()
+    missing_path = tmp_path / "missing-state.npz"
+    from dataclasses import replace
+    from merlin_iqp.classical.checkpoint import save_checkpoint
+
+    save_checkpoint(replace(checkpoint, optimizer_state={"lr": 0.03}), missing_path, generator=G)
+    resumed = Trainer(IQPModel(G, np.zeros(G.shape[0])), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    with pytest.raises(ValueError, match="missing Adam optimizer state"):
+        resumed.resume(missing_path)
+    with pytest.raises(ValueError, match="loss_history must contain only finite"):
+        replace(checkpoint, loss_history=(float("nan"),) * 3)

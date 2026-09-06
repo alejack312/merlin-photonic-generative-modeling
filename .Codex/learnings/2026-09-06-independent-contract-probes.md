@@ -35,3 +35,17 @@ Date: 2026-09-06 · Scope: project · Recurs when: a scientific implementation p
 - If a comparison copies manifest hashes, mutate a valid-shaped numerical artifact and require rejection before evaluation.
 - If a continuation helper passes, inspect caller artifacts: treatment and control must branch from the same start, not form a sequential chain.
 - Verified on b7ed7e8: 129 focused and 636 full tests passed; new independent failure probes still exposed these integration defects. No fixes were made in the review.
+
+## Follow-up: identity and artifact reuse (2026-09-06, d16d9cc)
+- If parsing Git porcelain, preserve leading whitespace; test the first unstaged modification in a real temporary repository.
+- If hashing raw arrays, mutate an element hidden by NumPy's abbreviated display; identity must cover bytes, not repr.
+- If resuming Adam, remove moments/counters and require rejection before state changes; matching learning rates alone are insufficient.
+- If reusing artifacts, test both a missing array and a repeat after adding another seed. Keep run identity separate from changing group statistics.
+- Verified: five counterexamples; full suite 652 passed/1 skipped; explicit sibling integration 8 passed. Saved ring model hashes matched in 22 manifests. No fixes or scientific closure were claimed.
+
+## Follow-up: third-repair contract closure (2026-09-06)
+- Preserve the two Git porcelain columns when scoping dirty paths; trimming the first status line can certify an edited source tree as clean.
+- Derive composite dataset identities from named full-content hashes, never abbreviated array representations.
+- Require complete Adam moments and step counters at resume, reject non-finite histories, and fail non-finite training trajectories before writing checkpoints.
+- Compare immutable run identity separately from replica-group observations, then validate every promised serialized array before idempotent reuse.
+- Verified: focused boundary regressions 35 passed; full suite 658 passed/1 skipped; sibling HEAD remained `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336` and clean. Canonical v4 result files were not regenerated.

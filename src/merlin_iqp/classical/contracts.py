@@ -108,7 +108,7 @@ class DatasetBundle:
         if len(split_hashes) > 1 and len(set(split_hashes.values())) != len(split_hashes):
             raise ValueError("dataset splits must not be identical; possible split leakage")
         if not self.dataset_hash:
-            hashes = [getattr(x, "hash", repr(x)) for x in (self.train, self.test, self.validation) if x is not None]
+            hashes = {name: split_hashes[name] for name in ("train", "test", "validation") if name in split_hashes}
             object.__setattr__(self, "dataset_hash", hash_json({"id": self.dataset_id, "n": self.n, "representation": self.representation, "splits": hashes, "preprocessing": self.preprocessing, "feature_order": self.feature_order}))
 
 
@@ -134,7 +134,10 @@ class Checkpoint:
         if self.step < 0 or not self.spec_hash or not self.dataset_hash or not self.kernel_hash:
             raise ValueError("checkpoint hashes and non-negative step are required")
         object.__setattr__(self, "theta", theta)
-        object.__setattr__(self, "loss_history", tuple(float(x) for x in self.loss_history))
+        loss_history = tuple(float(x) for x in self.loss_history)
+        if not all(np.isfinite(value) for value in loss_history):
+            raise ValueError("checkpoint loss_history must contain only finite values")
+        object.__setattr__(self, "loss_history", loss_history)
 
 
 @dataclass(frozen=True)

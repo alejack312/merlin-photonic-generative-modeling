@@ -418,6 +418,62 @@ def _manifest(run: RingRun, replication_identity: dict[str, Any]) -> dict[str, A
     }
 
 
+def _stable_manifest_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Exclude replica-group observations from immutable run identity."""
+
+    stable = dict(payload)
+    stable.pop("replication_identity", None)
+    return stable
+
+
+def _validate_existing_artifacts(
+    paths: dict[str, Path], manifest: dict[str, Any], run: RingRun, decoded_centers: np.ndarray
+) -> None:
+    missing = [str(path) for path in paths.values() if not path.is_file()]
+    if missing:
+        raise FileExistsError(f"ring artifact destination is incomplete; missing: {', '.join(missing)}")
+    try:
+        with np.load(paths["dataset"], allow_pickle=False) as dataset_archive:
+            expected_dataset = {
+                "raw_train": run.dataset.raw_train,
+                "raw_test": run.dataset.raw_test,
+                "normalized_train": run.dataset.normalized_train,
+                "normalized_test": run.dataset.normalized_test,
+                "train_ids": run.dataset.train_ids,
+                "test_ids": run.dataset.test_ids,
+                "min_values": run.dataset.min_values,
+                "max_values": run.dataset.max_values,
+                "scale": run.dataset.scale,
+                "centers": run.dataset.codec.centers,
+                "train_indices": run.dataset.train_indices,
+                "test_indices": run.dataset.test_indices,
+                "train_counts": run.dataset.train_counts,
+                "test_counts": run.dataset.test_counts,
+                "train_histogram": run.dataset.train_histogram,
+                "test_histogram": run.dataset.test_histogram,
+            }
+            for name, expected in expected_dataset.items():
+                if name not in dataset_archive or hash_array(dataset_archive[name]) != hash_array(expected):
+                    raise ValueError(f"ring dataset artifact hash mismatch for {name}")
+        with np.load(paths["run"], allow_pickle=False) as run_archive:
+            expected_run = {
+                "generator": run.generator,
+                "initial_theta": run.initial_theta,
+                "final_theta": run.final_theta,
+                "output_probabilities": run.output_probabilities,
+                "loss_history": np.asarray(run.loss_history),
+                "decoded_centers": decoded_centers,
+            }
+            for name, expected in expected_run.items():
+                if name not in run_archive or hash_array(run_archive[name]) != hash_array(expected):
+                    raise ValueError(f"ring run artifact hash mismatch for {name}")
+        summary = json.loads(paths["summary"].read_text(encoding="utf-8"))
+        if summary.get("run_id") != manifest.get("run_id"):
+            raise ValueError("ring summary does not match manifest")
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise FileExistsError(f"ring artifact destination failed integrity validation: {paths['manifest'].parent}") from error
+
+
 def write_run_artifacts(run: RingRun, output_root: str | Path) -> dict[str, Path]:
     output_root = Path(output_root)
     artifact_config_id = _artifact_config_id(run)
@@ -426,6 +482,7 @@ def write_run_artifacts(run: RingRun, output_root: str | Path) -> dict[str, Path
     run_path = destination / "run.npz"
     manifest_path = destination / "manifest.json"
     summary_path = destination / "summary.json"
+    paths = {"dataset": dataset_path, "run": run_path, "manifest": manifest_path, "summary": summary_path}
     decoded_centers = run.dataset.codec.decode(np.arange(2**run.config.n))
     replication_identity = _replication_identity(run, destination)
     payload = _manifest(run, replication_identity)
@@ -436,11 +493,12 @@ def write_run_artifacts(run: RingRun, output_root: str | Path) -> dict[str, Path
             existing_payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as error:
             raise FileExistsError(f"ring artifact destination has an unreadable manifest: {destination}") from error
-        if existing_payload != payload:
+        if _stable_manifest_payload(existing_payload) != _stable_manifest_payload(payload):
             raise FileExistsError(f"incompatible ring artifact already exists at {destination}")
+        _validate_existing_artifacts(paths, existing_payload, run, decoded_centers)
         # A matching run is deterministic and already owns any dependent
         # comparison artifact in this namespace; leave it intact.
-        return {"dataset": dataset_path, "run": run_path, "manifest": manifest_path, "summary": summary_path}
+        return paths
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary_directory = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=destination.parent))

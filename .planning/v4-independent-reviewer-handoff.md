@@ -49,6 +49,7 @@ Observed result after the second repair pass: focused v4 suite `144 passed, 2 sk
 - [docs/v4-deployment-study.md](../docs/v4-deployment-study.md) — compiler/map/full-Fock limits.
 - [docs/v4-backend-comparison.md](../docs/v4-backend-comparison.md) — matched raw/compiled/deployed artifacts.
 - [docs/audits/2026-09-06-v4-repair-review.md](../docs/audits/2026-09-06-v4-repair-review.md) — nine-finding independent repair review.
+- [docs/audits/2026-09-06-v4-second-repair-review.md](../docs/audits/2026-09-06-v4-second-repair-review.md) — five-finding second repair review.
 - `results/v4_tcdp/` — canonical JSON/NPZ/NPY artifacts and hashes.
 
 ## Review focus and remaining gaps
@@ -57,7 +58,7 @@ Observed result after the second repair pass: focused v4 suite `144 passed, 2 sk
 2. Confirm that raw, compiled, and deployed vectors remain distinct and that acceptance is not conflated with conditional quality.
 3. Audit the negative optical signs, alpha-key winding, MSB bit order, Hamming kernel distance (not squared distance), and one-final-normalization composition.
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
-5. Check the repaired R01–R09 contracts: finite/complete retraining trajectories, exact requested config, scoped source identity, ring namespaces, stale-array rejection, explicit spatial geometry, two matched NAT arms, full-Fock aggregation, and optional sibling integration.
+5. Check the repaired R01–R09 and S01–S05 contracts: finite/complete retraining trajectories, exact requested config, scoped source identity, raw-content dataset hashes, complete Adam continuation, ring namespaces, multi-seed idempotence, full artifact integrity, stale-array rejection, explicit spatial geometry, two matched NAT arms, full-Fock aggregation, and optional sibling integration.
 6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production metric panel, and absent independent review against the ledger.
 7. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
@@ -68,3 +69,9 @@ Observed result after the second repair pass: focused v4 suite `144 passed, 2 sk
 - D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
 
 These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The training-smoke source trajectory is independently retrained with the regenerated source-recipe data; other sibling rows remain separately dispositioned.
+
+## Latest repair evidence (2026-09-06)
+
+- Focused regression evidence: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_classical_core.py tests/v4_tcdp/test_rings_pipeline.py tests/v4_tcdp/test_sibling_inventory.py` — 35 passed across the three touched boundaries (the ring/inventory subset was 22 passed and classical core was 13 passed in the focused reruns; the remaining v4 tests are covered by the full gate).
+- The historical second-repair probe remains a counterexample record and is not a post-repair pass command. The new regression tests are the executable post-repair evidence for S01–S05.
+- Full-suite verification must be refreshed after this repair; the previous `652 passed, 1 skipped` result predates S01–S05.

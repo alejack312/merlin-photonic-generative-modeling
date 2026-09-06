@@ -74,8 +74,19 @@ def _git(root: Path, *args: str) -> str | None:
 
 
 def _git_status(root: Path) -> list[str]:
-    value = _git(root, "status", "--short")
-    return [] if value is None or not value else value.splitlines()
+    # Preserve Git's two porcelain status columns.  Calling ``_git`` here
+    # would strip the leading work-tree column from the first record, turning
+    # `` M path`` into ``M path`` and breaking the scoped path slice below.
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "status", "--short"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return [line for line in completed.stdout.splitlines() if line]
 
 
 def _status_is_in_scope(line: str, prefixes: tuple[str, ...]) -> bool:

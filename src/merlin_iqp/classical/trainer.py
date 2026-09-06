@@ -61,12 +61,18 @@ class Trainer:
             raise ValueError("steps must be non-negative")
         if not self.loss_history:
             initial, _ = objective_and_gradient_exact(self.model.theta, self.model.G, self.target, self.kernel)
+            if not np.isfinite(initial):
+                raise FloatingPointError("initial objective is not finite")
             self.loss_history.append(float(initial))
         for _ in range(steps):
             loss, gradient = objective_and_gradient_exact(self.model.theta, self.model.G, self.target, self.kernel)
+            if not np.isfinite(loss) or not np.all(np.isfinite(gradient)):
+                raise FloatingPointError("training objective or gradient is not finite")
             self._apply(gradient)
             self.step += 1
             next_loss, _ = objective_and_gradient_exact(self.model.theta, self.model.G, self.target, self.kernel)
+            if not np.isfinite(next_loss) or not np.all(np.isfinite(self.model.theta)):
+                raise FloatingPointError("training trajectory is not finite")
             self.loss_history.append(float(next_loss))
         if checkpoint_path is not None:
             save_checkpoint(self.checkpoint(), checkpoint_path, generator=self.model.G)
@@ -119,9 +125,26 @@ class Trainer:
         self.step = checkpoint.step
         self.loss_history = list(checkpoint.loss_history)
         state = checkpoint.optimizer_state
-        self._m = np.asarray(state.get("m", np.zeros(self.model.m)), dtype=np.float64)
-        self._v = np.asarray(state.get("v", np.zeros(self.model.m)), dtype=np.float64)
-        self._adam_t = int(state.get("adam_t", 0))
+        if self.optimizer == "adam":
+            missing = [key for key in ("m", "v", "adam_t") if key not in state]
+            if missing:
+                raise ValueError(f"checkpoint is missing Adam optimizer state: {', '.join(missing)}")
+            self._m = np.asarray(state["m"], dtype=np.float64)
+            self._v = np.asarray(state["v"], dtype=np.float64)
+            if self._m.shape != (self.model.m,) or self._v.shape != (self.model.m,):
+                raise ValueError("checkpoint Adam moments have incompatible shape")
+            if not np.all(np.isfinite(self._m)) or not np.all(np.isfinite(self._v)):
+                raise ValueError("checkpoint Adam moments must be finite")
+            try:
+                self._adam_t = int(state["adam_t"])
+            except (TypeError, ValueError) as error:
+                raise ValueError("checkpoint Adam step is invalid") from error
+            if self._adam_t != checkpoint.step or self._adam_t < 0:
+                raise ValueError("checkpoint Adam step does not match checkpoint step")
+        else:
+            self._m = np.zeros(self.model.m, dtype=np.float64)
+            self._v = np.zeros(self.model.m, dtype=np.float64)
+            self._adam_t = 0
         self._rng = np.random.default_rng()
         if checkpoint.rng_state:
             self._rng.bit_generator.state = checkpoint.rng_state

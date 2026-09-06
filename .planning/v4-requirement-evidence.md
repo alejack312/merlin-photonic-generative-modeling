@@ -43,6 +43,16 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | R08 full-Fock aggregation | PASS | Aggregate status is computed after the requested full-Fock call and propagates injected `FAIL`/`INCONCLUSIVE` results. | Physical/full-Fock evidence remains limited by the existing capability boundary. | D1/Perceval evidence |
 | R09 default-suite portability | PASS | Normal tests no longer require a hard-coded sibling checkout; source retraining is an explicit environment-gated integration test with portable contract tests. | Run optional integration explicitly for source-faithful evidence. | External sibling checkout |
 
+## 2026-09-06 third repair review disposition
+
+| Finding | Status | Evidence | Remaining action | Owner dependency |
+|---|---|---|---|---|
+| S01 scoped Git source identity | PASS | `_git_status` preserves both porcelain status columns; a first-record ` M src/iqp_bp/model.py` fixture is reported dirty by `git_source_identity`. | None for the repaired boundary. | None |
+| S02 raw DatasetBundle identity | PASS | DatasetBundle hashes named full-content split hashes; a mutation at `[100, 2]` changes the bundle hash and does not depend on NumPy display settings. | None for the repaired boundary. | None |
+| S03 checkpoint continuation | PASS | Adam resume rejects missing, malformed, non-finite, and step-inconsistent state; Checkpoint rejects non-finite loss histories; training rejects non-finite objective trajectories. | None for the repaired boundary. | None |
+| S04 multi-seed ring reuse | PASS | Rewriting an unchanged seed-0 run after adding seed 1 succeeds; mutable replica observations are excluded from immutable run identity. | None for the repaired boundary. | None |
+| S05 ring artifact integrity | PASS | Existing-output reuse requires all four promised files and validates every serialized dataset/run array plus summary identity against the requested run. Missing and corrupted artifacts are rejected. | None for the repaired boundary. | None |
+
 | ID | Status | Evidence / missing implementation or evidence | Next concrete action | Owner dependency |
 |---|---|---|---|---|
 | TRAIN-01 | PASS | NumPy core, contracts, provenance, and sibling export boundary exist; focused tests pass. | None for bounded scope. | None |
@@ -98,4 +108,4 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | COMPARE-03 | PASS | Common 20,000 accepted-sample evaluation budget, exact controls and acceptance accounting are recorded. | Add sampled uncertainty only when a sampled arm is authorized. | None for current exact scope |
 | COMPARE-04 | INCONCLUSIVE | Ring comparison artifact exists and reference-only capability is visible; sibling/substrate comparison and figures are missing. | Complete sibling/physical arms, then regenerate comparison figures and manifests. | D1; external sibling data |
 
-The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the full suite passed `652` tests with one optional source-integration skip in `362.20s`. This is an environment note, not a requirement PASS for physical validation.
+The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the post-third-repair full suite passed `658` tests with one optional source-integration skip in `455.60s`. This is an environment note, not a requirement PASS for physical validation.
