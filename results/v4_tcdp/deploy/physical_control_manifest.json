@@ -1,142 +1,356 @@
 {
   "backend": "Perceval SLOS direct full-Fock",
-  "fixtures": [
+  "controls": [
     {
-      "accepted_mass_eta_0_9": 0.81,
-      "analytic_success": 1.0000000000000002,
-      "conditional_tvd_direct_vs_analytic": 6.418476861114186e-17,
-      "diagnostics": {
-        "accepted_state_count": 4,
-        "backend": "Perceval SLOS direct full-Fock",
-        "conditional_distribution": true,
-        "distribution_hash": "219de67dd53956bd38b49993e5459e24729260e2a85ba68be893a4719a7bd9e8",
-        "eta": 1.0,
-        "folded_single_angles": [
-          0.17,
-          -0.29
-        ],
-        "full_fock_state_count": 4,
-        "g2": 0.0,
-        "gate_ancilla_input": "vacuum",
-        "gate_count": 0,
-        "loss": "uniform_all_data_photons_once",
-        "mass_reconciliation_error": 0.0,
-        "perceval_version": "1.2.4",
-        "projection": "final_only",
-        "raw_source_acceptance": 1.0,
-        "source_input_photons": 2,
-        "source_model": "fixed_photon_g2_0",
-        "source_once": true
+      "analytic": {
+        "00": 0.89194909529782,
+        "01": 0.07942823746635323,
+        "10": 0.026282229659773594,
+        "11": 0.0023404375760532597
       },
-      "direct": {
-        "00": 0.8919490952978198,
-        "01": 0.07942823746635333,
-        "10": 0.02628222965977362,
-        "11": 0.0023404375760532666
+      "conditional_tvd_direct_final_vs_analytic": 1.196959198423997e-16,
+      "eta": 0.9,
+      "final_only": {
+        "accepted_mass": 0.81,
+        "diagnostics": {
+          "accepted_state_count": 4,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "219de67dd53956bd38b49993e5459e24729260e2a85ba68be893a4719a7bd9e8",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.17,
+            -0.29
+          ],
+          "full_fock_state_count": 4,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 0,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "final_only",
+          "raw_source_acceptance": 1.0,
+          "source_input_photons": 2,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "00": 0.8919490952978198,
+          "01": 0.07942823746635333,
+          "10": 0.02628222965977362,
+          "11": 0.0023404375760532666
+        },
+        "rejected_mass": 0.18999999999999995,
+        "status": "PASS"
       },
-      "direct_status": "PASS",
       "id": "no_gate_n2",
-      "raw_source_acceptance": 1.0,
-      "status": "PASS",
-      "throughput_eta_0_9": 1.2345679012345678
+      "intermediate": {
+        "accepted_mass": 0.81,
+        "diagnostics": {
+          "accepted_state_count": 4,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "219de67dd53956bd38b49993e5459e24729260e2a85ba68be893a4719a7bd9e8",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.17,
+            -0.29
+          ],
+          "full_fock_state_count": 4,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 0,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "intermediate",
+          "raw_source_acceptance": 1.0,
+          "source_input_photons": 2,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "00": 0.8919490952978198,
+          "01": 0.07942823746635333,
+          "10": 0.02628222965977362,
+          "11": 0.0023404375760532666
+        },
+        "rejected_mass": 0.18999999999999995,
+        "status": "PASS"
+      },
+      "n": 2,
+      "pairs": [],
+      "projection_comparison": {
+        "absolute_mass_valid": true,
+        "accepted_mass_delta": 0.0,
+        "conditional_distribution_valid": true,
+        "conditional_tvd_final_vs_intermediate": 0.0,
+        "eta": 0.9,
+        "raw_source_acceptance_delta": 0.0,
+        "reason": "both direct projections completed with matching logical support and eta-scaled mass",
+        "valid": true
+      },
+      "singles": [
+        0.17,
+        -0.29
+      ],
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true,
+      "status": "PASS"
     },
     {
-      "accepted_mass_eta_0_9": 0.07484622976679384,
-      "analytic_success": 0.10266972533167873,
-      "conditional_tvd_direct_vs_analytic": 0.60070872508387,
-      "diagnostics": {
-        "accepted_state_count": 8,
-        "backend": "Perceval SLOS direct full-Fock",
-        "conditional_distribution": true,
-        "distribution_hash": "0f53062ead52277c944f80e4884f801294ad3cdc0a1da86f176c2ac4fe97743f",
-        "eta": 1.0,
-        "folded_single_angles": [
-          0.47,
-          -0.29,
-          0.61
-        ],
-        "full_fock_state_count": 68,
-        "g2": 0.0,
-        "gate_ancilla_input": "vacuum",
-        "gate_count": 1,
-        "loss": "uniform_all_data_photons_once",
-        "mass_reconciliation_error": 0.0,
-        "perceval_version": "1.2.4",
-        "projection": "final_only",
-        "raw_source_acceptance": 0.10266972533167879,
-        "source_input_photons": 3,
-        "source_model": "fixed_photon_g2_0",
-        "source_once": true
+      "analytic": {
+        "000": 0.7385104048225584,
+        "001": 0.07783810508539357,
+        "010": 0.06576449274387444,
+        "011": 0.006931498139576291,
+        "100": 0.029003751098710062,
+        "101": 0.0728790639509313,
+        "110": 0.002582789580513164,
+        "111": 0.006489894578442631
       },
-      "direct": {
-        "000": 0.18692083627520992,
-        "001": 0.28386246467489923,
-        "010": 0.016645336207353208,
-        "011": 0.02527800675043448,
-        "100": 0.17873979958876762,
-        "101": 0.2687082244187166,
-        "110": 0.01591681332630838,
-        "111": 0.02392851875831053
+      "conditional_tvd_direct_final_vs_analytic": 0.6007087250838697,
+      "eta": 0.9,
+      "final_only": {
+        "accepted_mass": 0.07484622976679384,
+        "diagnostics": {
+          "accepted_state_count": 8,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "0f53062ead52277c944f80e4884f801294ad3cdc0a1da86f176c2ac4fe97743f",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.47,
+            -0.29,
+            0.61
+          ],
+          "full_fock_state_count": 68,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 1,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "final_only",
+          "raw_source_acceptance": 0.10266972533167879,
+          "source_input_photons": 3,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "000": 0.18692083627520992,
+          "001": 0.28386246467489923,
+          "010": 0.016645336207353208,
+          "011": 0.02527800675043448,
+          "100": 0.17873979958876762,
+          "101": 0.2687082244187166,
+          "110": 0.01591681332630838,
+          "111": 0.02392851875831053
+        },
+        "rejected_mass": 0.9251537702332062,
+        "status": "PASS"
       },
-      "direct_status": "PASS",
       "id": "single_gate_bystander_n3",
-      "raw_source_acceptance": 0.10266972533167879,
-      "status": "FAIL",
-      "throughput_eta_0_9": 13.360726426912935
+      "intermediate": {
+        "accepted_mass": 0.07484622976679384,
+        "diagnostics": {
+          "accepted_state_count": 8,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "0f53062ead52277c944f80e4884f801294ad3cdc0a1da86f176c2ac4fe97743f",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.47,
+            -0.29,
+            0.61
+          ],
+          "full_fock_state_count": 68,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 1,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "intermediate",
+          "raw_source_acceptance": 0.10266972533167879,
+          "source_input_photons": 3,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "000": 0.18692083627520992,
+          "001": 0.28386246467489923,
+          "010": 0.016645336207353208,
+          "011": 0.02527800675043448,
+          "100": 0.17873979958876762,
+          "101": 0.2687082244187166,
+          "110": 0.01591681332630838,
+          "111": 0.02392851875831053
+        },
+        "rejected_mass": 0.9251537702332062,
+        "status": "PASS"
+      },
+      "n": 3,
+      "pairs": [
+        {
+          "i": 0,
+          "j": 2,
+          "theta": 0.3
+        }
+      ],
+      "projection_comparison": {
+        "absolute_mass_valid": true,
+        "accepted_mass_delta": 0.0,
+        "conditional_distribution_valid": true,
+        "conditional_tvd_final_vs_intermediate": 0.0,
+        "eta": 0.9,
+        "raw_source_acceptance_delta": 0.0,
+        "reason": "both direct projections completed with matching logical support and eta-scaled mass",
+        "valid": true
+      },
+      "singles": [
+        0.17,
+        -0.29,
+        0.31
+      ],
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true,
+      "status": "FAIL"
     },
     {
-      "accepted_mass_eta_0_9": 0.009122143858209357,
-      "analytic_success": 0.012513228886432574,
-      "conditional_tvd_direct_vs_analytic": 0.5541109141490421,
-      "diagnostics": {
-        "accepted_state_count": 8,
-        "backend": "Perceval SLOS direct full-Fock",
-        "conditional_distribution": true,
-        "distribution_hash": "d6850cba4cc687d6b4214743aedb6e9e719e67c1933adbdb6b0fb6aa60fc5dd2",
-        "eta": 1.0,
-        "folded_single_angles": [
-          0.37,
-          0.26,
-          0.6599999999999999
-        ],
-        "full_fock_state_count": 434,
-        "g2": 0.0,
-        "gate_ancilla_input": "vacuum",
-        "gate_count": 2,
-        "loss": "uniform_all_data_photons_once",
-        "mass_reconciliation_error": 0.0,
-        "perceval_version": "1.2.4",
-        "projection": "final_only",
-        "raw_source_acceptance": 0.012513228886432587,
-        "source_input_photons": 3,
-        "source_model": "fixed_photon_g2_0",
-        "source_once": true
+      "analytic": {
+        "000": 0.7104118452718614,
+        "001": 0.0977819756050541,
+        "010": 0.058581288556449486,
+        "011": 0.06739216523283309,
+        "100": 0.0168329900107595,
+        "101": 0.012113059262782383,
+        "110": 0.024419898037489507,
+        "111": 0.0124667780227706
       },
-      "direct": {
-        "000": 0.13853992766717577,
-        "001": 0.19502823513517828,
-        "010": 0.14398151829484798,
-        "011": 0.21476532335581155,
-        "100": 0.02468312592934244,
-        "101": 0.12442453861669933,
-        "110": 0.02672970067373773,
-        "111": 0.13184763032720692
+      "conditional_tvd_direct_final_vs_analytic": 0.5586365277873628,
+      "eta": 0.9,
+      "final_only": {
+        "accepted_mass": 0.009867766972454449,
+        "diagnostics": {
+          "accepted_state_count": 8,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "ba83632ed6d1c81a153f07da4b7d8fd0ded579cb2b6b89de5cc94dbce9154e30",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.37,
+            0.26,
+            0.6599999999999999
+          ],
+          "full_fock_state_count": 434,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 2,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "final_only",
+          "raw_source_acceptance": 0.013536031512283192,
+          "source_input_photons": 3,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "000": 0.15177531748449863,
+          "001": 0.20840660596887714,
+          "010": 0.14356483514949683,
+          "011": 0.18856824585014123,
+          "100": 0.033276826054051925,
+          "101": 0.12584023723741875,
+          "110": 0.030188874950073746,
+          "111": 0.11837905730544179
+        },
+        "rejected_mass": 0.9901322330275456,
+        "status": "PASS"
       },
-      "direct_status": "PASS",
       "id": "shared_gate_n3",
-      "raw_source_acceptance": 0.012513228886432587,
-      "status": "FAIL",
-      "throughput_eta_0_9": 109.62335340722157
+      "intermediate": {
+        "accepted_mass": 0.009867766972454449,
+        "diagnostics": {
+          "accepted_state_count": 64,
+          "backend": "Perceval SLOS direct full-Fock",
+          "conditional_distribution": true,
+          "distribution_hash": "c4b545a3a44dfe30d082f13321fbce080c491f858f9f392e0c6d836c2fe46bca",
+          "eta": 0.9,
+          "folded_single_angles": [
+            0.37,
+            0.26,
+            0.6599999999999999
+          ],
+          "full_fock_state_count": 560,
+          "g2": 0.0,
+          "gate_ancilla_input": "vacuum",
+          "gate_count": 2,
+          "loss": "uniform_all_data_photons_once",
+          "mass_reconciliation_error": 0.0,
+          "perceval_version": "1.2.4",
+          "projection": "intermediate",
+          "raw_source_acceptance": 0.013536031512283192,
+          "source_input_photons": 3,
+          "source_model": "fixed_photon_g2_0",
+          "source_once": true
+        },
+        "distribution": {
+          "000": 0.125,
+          "001": 0.125,
+          "010": 0.125,
+          "011": 0.125,
+          "100": 0.125,
+          "101": 0.125,
+          "110": 0.125,
+          "111": 0.125
+        },
+        "rejected_mass": 0.9901322330275456,
+        "status": "PASS"
+      },
+      "n": 3,
+      "pairs": [
+        {
+          "i": 0,
+          "j": 1,
+          "theta": 0.2
+        },
+        {
+          "i": 1,
+          "j": 2,
+          "theta": 0.3
+        }
+      ],
+      "projection_comparison": {
+        "absolute_mass_valid": true,
+        "accepted_mass_delta": 0.0,
+        "conditional_distribution_valid": true,
+        "conditional_tvd_final_vs_intermediate": 0.19315524169043255,
+        "eta": 0.9,
+        "raw_source_acceptance_delta": 0.0,
+        "reason": "both direct projections completed with matching logical support and eta-scaled mass",
+        "valid": true
+      },
+      "singles": [
+        0.17,
+        -0.24,
+        0.36
+      ],
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true,
+      "status": "FAIL"
     }
   ],
+  "payload_sha256": "7d2ddc6df012324afc92c7c3594d1fc5c8de0499cd331c5e1d6e8c206df637dd",
   "provenance": {
-    "numpy": "2.5.1",
-    "perceval": "1.2.4",
+    "pcvl_persistent_path": "C:\\Users\\cuqui\\AppData\\Local\\Temp\\merlin-v4-physical",
+    "platform": "Windows-11-10.0.26200-SP0",
     "python": "3.12.1",
-    "repo_commit": "12abdb3966d561e80882b103f61c3f5b7f349dc7"
+    "repo_commit": "17a2dad694f9a7c00e0aab40c092eb5f164f659b"
   },
-  "schema_version": "v4_tcdp.physical_controls.v1",
-  "sha256": "df4fd964ea22a6fd6790843276e4d0169dcdf104555888c8c848c2892ebbbc78",
+  "schema_version": "v4_tcdp.physical_controls.v2",
   "source_model": "fixed_photon_g2_0",
   "status": "FAIL"
 }

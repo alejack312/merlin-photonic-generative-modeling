@@ -8,6 +8,8 @@ resource controls, and optional-backend capability boundaries.
 from __future__ import annotations
 
 import inspect
+import json
+from pathlib import Path
 from dataclasses import replace
 
 import numpy as np
@@ -244,6 +246,46 @@ def test_direct_no_gate_single_angle_matches_independent_reference() -> None:
         pytest.skip(result.diagnostics.get("reason", "Perceval unavailable"))
     reference = ideal_iqp_distribution(1, [0.2])
     assert result.distribution == pytest.approx(reference, abs=1e-12)
+
+
+def test_direct_intermediate_projection_tracks_absolute_acceptance() -> None:
+    pairs = [(0, 1, 0.20), (1, 2, 0.30)]
+    final = direct_fock_cp_reference(3, [0.17, -0.24, 0.36], pairs, projection="final_only")
+    intermediate = direct_fock_cp_reference(3, [0.17, -0.24, 0.36], pairs, projection="intermediate")
+    if final.status == "INCONCLUSIVE" or intermediate.status == "INCONCLUSIVE":
+        pytest.skip(final.diagnostics.get("reason") or intermediate.diagnostics.get("reason", "Perceval unavailable"))
+    assert final.status == intermediate.status == "PASS"
+    assert final.diagnostics["projection"] == "final_only"
+    assert intermediate.diagnostics["projection"] == "intermediate"
+    assert intermediate.diagnostics["raw_source_acceptance"] <= 1.0 + 1e-12
+    assert intermediate.accepted_mass == pytest.approx(final.accepted_mass, abs=1e-12)
+    assert intermediate.diagnostics["raw_source_acceptance"] == pytest.approx(
+        final.diagnostics["raw_source_acceptance"], abs=1e-12
+    )
+
+
+def test_physical_control_manifest_records_projection_evidence() -> None:
+    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["schema_version"] == "v4_tcdp.physical_controls.v2"
+    assert manifest["status"] == "FAIL"
+    assert [control["id"] for control in manifest["controls"]] == [
+        "no_gate_n2",
+        "single_gate_bystander_n3",
+        "shared_gate_n3",
+    ]
+    assert [control["status"] for control in manifest["controls"]] == ["PASS", "FAIL", "FAIL"]
+    assert manifest["controls"][1]["conditional_tvd_direct_final_vs_analytic"] > 1e-3
+    assert manifest["controls"][2]["conditional_tvd_direct_final_vs_analytic"] > 1e-3
+    for control in manifest["controls"]:
+        assert control["final_only"]["diagnostics"]["projection"] == "final_only"
+        assert control["intermediate"]["diagnostics"]["projection"] == "intermediate"
+        comparison = control["projection_comparison"]
+        assert comparison["valid"] is True
+        assert comparison["conditional_distribution_valid"] is True
+        assert comparison["absolute_mass_valid"] is True
+        assert comparison["eta"] == pytest.approx(control["eta"])
+        assert comparison["accepted_mass_delta"] <= 1e-12
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:

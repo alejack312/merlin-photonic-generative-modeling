@@ -206,8 +206,8 @@ def _intermediate_distribution(n: int, singles: Sequence[float], pair_specs: Seq
         for state, amplitude in amplitudes.items()
         if abs(amplitude) > 1e-14
     }
+    initial_mass = float(sum(abs(amplitude) ** 2 for amplitude in amplitudes.values()))
     for gate_index in range(len(pair_specs)):
-        transition_processor, _, _ = _build_direct_processor(n, singles, pair_specs, count=gate_index + 1)
         # Remove preparation/diagonal components by constructing the gate-only
         # circuit from the same CP core.  Rebuilding it avoids relying on
         # private Processor component internals.
@@ -229,27 +229,25 @@ def _intermediate_distribution(n: int, singles: Sequence[float], pair_specs: Seq
             and abs(amplitude) > 1e-14
         }
 
-    final_processor, _, _ = _build_final_readout_processor(n, pair_specs)
+    final_processor = _build_final_readout_processor(n, pair_specs)
     final_sim = Simulator(SLOSBackend())
     final_sim.set_circuit(final_processor.linear_circuit())
     accepted: dict[str, float] = {}
-    total = 0.0
     accepted_count = 0
     for input_value, input_amplitude in amplitudes.items():
         for output_state in states:
             transition = final_sim.prob_amplitude(input_value, output_state)
             amplitude = input_amplitude * transition
             mass = float(abs(amplitude) ** 2)
-            total += mass
             bits = _accepted_state(output_state, n, ancilla_groups)
             if bits is not None:
                 accepted[bits] = accepted.get(bits, 0.0) + mass
                 accepted_count += 1
-    if total <= 0.0:
-        return {}, 0.0, len(states), accepted_count
-    raw_acceptance = float(sum(accepted.values()) / total)
     accepted_total = sum(accepted.values())
-    return ({key: value / accepted_total for key, value in accepted.items()} if accepted_total > 0 else {}), raw_acceptance, len(states), accepted_count
+    if initial_mass <= 0.0 or accepted_total <= 0.0:
+        return {}, 0.0, len(states), accepted_count
+    raw_acceptance = float(accepted_total / initial_mass)
+    return {key: value / accepted_total for key, value in accepted.items()}, raw_acceptance, len(states), accepted_count
 
 
 def _build_gate_only_processor(n: int, pair_specs: Sequence[PairSpec], gate_index: int) -> Any:

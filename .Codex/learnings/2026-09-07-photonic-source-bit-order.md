@@ -32,6 +32,11 @@ Date: 2026-09-07 · Scope: project · Recurs when: a direct full-Fock photonic a
 - Do: establish identity, source state, decoder, and backend ordering in a one-qubit fixture first.
 - Don't: change D1/D2/D3 or claim ring deployment to make a physical mismatch disappear.
 
+## Addendum: intermediate projection accounting
+- IF a diagnostic filters amplitudes after each successful instrument, THEN retain the squared norm relative to the original source norm; do not normalize the surviving branch before reporting absolute acceptance.
+- IF final-only and intermediate runs use the same eta, THEN compare conditional distributions separately from eta-scaled accepted mass.
+
 ## Changed files
 - `src/merlin_iqp/deploy/fock.py` — corrected the direct source state and added full-Fock controls.
 - `tests/v4_tcdp/test_deploy.py` — added independent no-gate identity and bit-order fixtures.
+- `scripts/v4_tcdp/validate_physical_controls.py` — records final/intermediate projection and eta-consistency evidence.
