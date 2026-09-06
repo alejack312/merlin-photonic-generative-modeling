@@ -1,0 +1,268 @@
+{
+  "budgets": {
+    "checkpoint_selection_rule": "fixed_last_step",
+    "completed_steps": 1,
+    "objective_evaluations": 9,
+    "pair_budget": 6,
+    "pair_evaluations": 6,
+    "pair_moves": 0,
+    "requested_steps": 1,
+    "single_gradient_evaluations": 1,
+    "status": "completed",
+    "stop_reason": null,
+    "time_limit_seconds": null
+  },
+  "config": {
+    "allow_pair_moves": false,
+    "initialization": "data_dependent",
+    "initialization_method": "parity",
+    "initialization_scale": 0.1,
+    "initialization_std": 0.1,
+    "n": 4,
+    "pair_budget": null,
+    "pairs": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "resolved_pair_budget": 6,
+    "run_kind": "fixed_pair_equal_budget_control",
+    "seed": 0,
+    "sigma": 1.0,
+    "single_lr": 0.05,
+    "single_optimizer": "adam",
+    "source_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+    "steps": 1,
+    "topology": "arbitrary_weight2"
+  },
+  "final_compiled": {
+    "alpha_keys": 63,
+    "alpha_step": 0.1,
+    "compiler": "merlin_iqp.deploy.compile",
+    "n": 4,
+    "pair_angles": [
+      {
+        "i": 0,
+        "j": 1,
+        "key": 61,
+        "lifted_alpha": -0.1831853071795857,
+        "lifted_theta": -0.045796326794896425,
+        "raw_alpha": -0.1831853071795857,
+        "raw_theta": -0.045796326794896425,
+        "winding": -1,
+        "wrapped_alpha": 6.1000000000000005
+      },
+      {
+        "i": 1,
+        "j": 2,
+        "key": 0,
+        "lifted_alpha": 0.0,
+        "lifted_theta": 0.0,
+        "raw_alpha": 0.0,
+        "raw_theta": 0.0,
+        "winding": 0,
+        "wrapped_alpha": 0.0
+      },
+      {
+        "i": 2,
+        "j": 3,
+        "key": 60,
+        "lifted_alpha": -0.28318530717958623,
+        "lifted_theta": -0.07079632679489656,
+        "raw_alpha": -0.28318530717958623,
+        "raw_theta": -0.07079632679489656,
+        "winding": -1,
+        "wrapped_alpha": 6.0
+      }
+    ],
+    "quantized": true,
+    "topology": "arbitrary_weight2"
+  },
+  "final_loss": 0.6407542277973013,
+  "final_pair_keys": [
+    61,
+    0,
+    60
+  ],
+  "final_pair_windings": [
+    -1,
+    0,
+    -1
+  ],
+  "final_singles": [
+    0.05374991896989713,
+    -0.053124905012603606,
+    0.051874837340259224,
+    -0.05187484180847649
+  ],
+  "generator": [
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1
+    ]
+  ],
+  "initial_pair_keys": [
+    61,
+    0,
+    60
+  ],
+  "initial_pair_windings": [
+    -1,
+    0,
+    -1
+  ],
+  "initial_singles": [
+    0.00375,
+    -0.0031250000000000023,
+    0.0018749999999999934,
+    -0.0018750000000000045
+  ],
+  "loss_history": [
+    0.6498948563771259,
+    0.6407542277973013
+  ],
+  "optimizer_state": {
+    "kind": "adam",
+    "m": [
+      -0.0006170536278914105,
+      0.0005263846245123937,
+      -0.00030738913692207853,
+      0.0003160715611415212
+    ],
+    "step": 1,
+    "v": [
+      3.807551796939513e-08,
+      2.770807729230537e-08,
+      9.448808149770034e-09,
+      9.990123176243836e-09
+    ]
+  },
+  "pair_moves": 0,
+  "pairs_changed": 0,
+  "provenance": {
+    "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
+    "compiler": {
+      "catalog_keys": 63,
+      "catalog_step": 0.1,
+      "module": "merlin_iqp.deploy.compile",
+      "quantize": true,
+      "winding_and_lift_preserved": true
+    },
+    "control": "fixed_pair_equal_budget",
+    "final_parameter_hash": "a33db3d591fb6391e09226a7fc95e22fcece98efccd14f53d817163b2f9e09a4",
+    "forbidden_methods": [
+      "finite_difference_through_quantization",
+      "straight_through_gradient",
+      "interpolation"
+    ],
+    "generator_hash": "9f4c4ba8abb1416a673c5c82dfa891736d3a827f52a4995c8382f5e0f04fd7f2",
+    "initial_parameter_hash": "e1468b3c8b834763c47d4fd6ae387b260d7ce52f4801046ad0ed8ba3ea5105eb",
+    "initialization": {
+      "method": "parity",
+      "scale": 0.1,
+      "scheme": "data_dependent",
+      "std": 0.1,
+      "target_hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26",
+      "target_split": "train"
+    },
+    "numpy": "2.5.1",
+    "objective": {
+      "exact": true,
+      "kind": "hamming_gaussian",
+      "normalization": "mmd2",
+      "sigma": 1.0
+    },
+    "pair_update": "circular key neighbors (key-1, key+1) with strict-improvement acceptance",
+    "python": "3.12.1",
+    "replication": {
+      "deterministic_initialization": true,
+      "independent_replica": false,
+      "n_unique_parameterizations_observed": 1,
+      "seed": 0,
+      "unit": "independent RNG source or explicitly declared deterministic configuration"
+    },
+    "seed": 0,
+    "single_update": "objective_and_gradient_exact plus deterministic SGD/Adam update on first n coordinates",
+    "source_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+    "source_provenance": {
+      "dirty": true,
+      "git_status": [
+        " M scripts/v4_tcdp/run_nat.py",
+        " M src/merlin_iqp/deploy/__init__.py",
+        " M src/merlin_iqp/deploy/fock.py",
+        " M src/merlin_iqp/experiments/comparison.py",
+        " M src/merlin_iqp/experiments/nat.py"
+      ],
+      "observed_branch": "codex/v4-implementation",
+      "observed_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+      "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+      "tree_identity": "7a14e7f22805b5b9cbe64a09fe5d01dc1134c9584d8521e487163e7f308db72b",
+      "tree_identity_kind": "working_tree_content_sha256",
+      "workspace_git_status": [
+        " M results/v4_tcdp/deploy/validation_manifest.json",
+        " M scripts/v4_tcdp/compare_backends.py",
+        " M scripts/v4_tcdp/replay_sibling.py",
+        " M scripts/v4_tcdp/retrain_sibling.py",
+        " M scripts/v4_tcdp/run_nat.py",
+        " M src/merlin_iqp/deploy/__init__.py",
+        " M src/merlin_iqp/deploy/fock.py",
+        " M src/merlin_iqp/experiments/comparison.py",
+        " M src/merlin_iqp/experiments/nat.py",
+        " M tests/v4_tcdp/test_comparison.py",
+        " M tests/v4_tcdp/test_nat.py",
+        "?? results/v4_tcdp/metrics/",
+        "?? results/v4_tcdp/nat/metrics/"
+      ]
+    },
+    "warm_start": null
+  },
+  "run_hash": "e17ebb25c303a2f4a385a61a7aa6e313bb03d37a5239fe5de29935887c22a5d3",
+  "schema_version": "v4_tcdp.nat_run.v1"
+}

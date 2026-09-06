@@ -1,0 +1,130 @@
+{
+  "arms": {
+    "a": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 82.58402937160561,
+        "eta": 1.0,
+        "model_success": 0.012108878770013421,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 1,
+        "objective_evaluations": 9,
+        "pair_budget": 6,
+        "pair_evaluations": 6,
+        "pair_moves": 3,
+        "requested_steps": 1,
+        "single_gradient_evaluations": 1,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.03269082898687833,
+      "parameter_hash": "cace8a103a0e9729425f1cc8f32b7fbd29b57abfd36c0cf181416a634ad76899",
+      "run_kind": "matched_arm_a",
+      "same_parameter_reference_success": 0.023083611138351345,
+      "status": "PASS",
+      "target_improvement": 0.03141956333907814,
+      "target_improvement_relative": 0.04977015892382979,
+      "target_loss_after": 0.599873645653159,
+      "target_loss_before": 0.6312932089922372,
+      "warm_start_state_hash": "802d257df8db58533c08711f90a4ea762b9cc7108199b4c8e467cd90af65894d"
+    },
+    "b": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 82.58402937160561,
+        "eta": 1.0,
+        "model_success": 0.012108878770013421,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 1,
+        "objective_evaluations": 9,
+        "pair_budget": 6,
+        "pair_evaluations": 6,
+        "pair_moves": 3,
+        "requested_steps": 1,
+        "single_gradient_evaluations": 1,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.03269082898687833,
+      "parameter_hash": "cace8a103a0e9729425f1cc8f32b7fbd29b57abfd36c0cf181416a634ad76899",
+      "run_kind": "matched_arm_b",
+      "same_parameter_reference_success": 0.023083611138351345,
+      "status": "PASS",
+      "target_improvement": 0.03141956333907814,
+      "target_improvement_relative": 0.04977015892382979,
+      "target_loss_after": 0.599873645653159,
+      "target_loss_before": 0.6312932089922372,
+      "warm_start_state_hash": "802d257df8db58533c08711f90a4ea762b9cc7108199b4c8e467cd90af65894d"
+    }
+  },
+  "fixed_pair_ablation": {
+    "attempts_per_accepted_sample": 12.118466831813269,
+    "budget": {
+      "checkpoint_selection_rule": "fixed_last_step",
+      "completed_steps": 1,
+      "objective_evaluations": 9,
+      "pair_budget": 6,
+      "pair_evaluations": 6,
+      "pair_moves": 0,
+      "requested_steps": 1,
+      "single_gradient_evaluations": 1,
+      "status": "completed",
+      "stop_reason": null,
+      "time_limit_seconds": null
+    },
+    "fixed_reference_tvd": 0.007609542413231809,
+    "label": "fixed_pair_equal_budget_control",
+    "model_success": 0.08251868935885609,
+    "status": "ablation_only",
+    "target_improvement": 0.009140628579824561,
+    "target_loss_after": 0.6407542277973013
+  },
+  "fixed_reference": {
+    "eta": 1.0,
+    "kind": "warm_start_final_compiled_distribution",
+    "model_success": 0.023083611138351345
+  },
+  "matching": {
+    "common_start_state_hash": "802d257df8db58533c08711f90a4ea762b9cc7108199b4c8e467cd90af65894d",
+    "identical_budgets": true,
+    "identical_checkpoint_selection": true,
+    "identical_initial_parameterization": true,
+    "identical_optimizer": true,
+    "rng_policy": "deterministic_parameter-only; seed recorded per run"
+  },
+  "profile": {
+    "learning_rate": 0.05,
+    "n": 4,
+    "optimizer": "adam",
+    "pairs": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "sigma": 1.0,
+    "steps": 1
+  },
+  "schema_version": "v4_tcdp.nat_report.v1",
+  "status": "PASS",
+  "target": {
+    "hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26",
+    "reference": "frozen_warm_start_final_state"
+  }
+}

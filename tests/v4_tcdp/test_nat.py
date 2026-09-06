@@ -11,7 +11,7 @@ import pytest
 from merlin_iqp.classical import ExactProbabilities, IQPModel, KernelSpec, Trainer, generators_from_pairs
 from merlin_iqp.classical.objectives import objective_and_gradient_exact
 from merlin_iqp.deploy.compile import ALPHA_STEP
-from merlin_iqp.experiments.nat import run_matched_continuation, run_nat, write_nat_run
+from merlin_iqp.experiments.nat import nat_report, run_matched_continuation, run_nat, write_nat_run
 import scripts.v4_tcdp.run_nat as run_nat_cli
 
 
@@ -189,3 +189,22 @@ def test_nat_cli_emits_two_arms_from_one_frozen_warm_start(tmp_path, monkeypatch
     assert arm_b["artifact"]["common_start_hash"] == warm["artifact"]["state_hash"]
     assert arm_a["artifact"]["evaluation_budget"] == arm_b["artifact"]["evaluation_budget"]
     assert arm_a["provenance"]["initial_parameter_hash"] == arm_b["provenance"]["initial_parameter_hash"]
+
+
+def test_nat_report_separates_target_reference_and_acceptance() -> None:
+    target = _target_for_pair_key(2)
+    warm = run_nat(target, [(0, 1)], steps=1, seed=12, sigma=0.8)
+    arm_a = run_matched_continuation(target, [(0, 1)], warm, steps=1, pair_budget=2, run_kind="matched_arm_a")
+    arm_b = run_matched_continuation(target, [(0, 1)], warm, steps=1, pair_budget=2, run_kind="matched_arm_b")
+    report = nat_report(target, warm, {"a": arm_a, "b": arm_b})
+    assert report["status"] == "PASS"
+    assert report["matching"]["common_start_state_hash"]
+    assert report["arms"]["a"]["target_improvement"] >= 0.0
+    assert report["arms"]["a"]["fixed_reference_tvd"] >= 0.0
+    assert report["arms"]["a"]["acceptance"]["attempts_per_accepted_sample"] >= 1.0
+
+
+def test_nat_time_limit_records_attempted_stop() -> None:
+    run = run_nat(_target_for_pair_key(1), [(0, 1)], steps=2, time_limit_seconds=1e-12)
+    assert run.budgets["status"] == "attempted/stopped"
+    assert run.budgets["completed_steps"] == 0

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -15,11 +16,15 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from merlin_iqp.classical import IQPModel  # noqa: E402
 from merlin_iqp.classical._validation import binary_matrix, finite_vector, hash_array, hash_json  # noqa: E402
 from merlin_iqp.deploy import apply_compiled_density, compile_generators  # noqa: E402
-from merlin_iqp.experiments.comparison import DistributionArm, MatchedComparison  # noqa: E402
+from merlin_iqp.experiments.comparison import DistributionArm, MatchedComparison, process_rss_bytes  # noqa: E402
 
 
 def _vector_from_mapping(mapping: dict[str, float]) -> np.ndarray:
     return np.array([mapping[key] for key in sorted(mapping)], dtype=np.float64)
+
+
+def manifest_slug(value: str) -> str:
+    return value.replace("/", "__").replace("\\", "__")
 
 
 def _require_hash(actual: str, expected: str, *, name: str) -> None:
@@ -105,12 +110,19 @@ def _load_and_validate(run_directory: Path) -> tuple[dict[str, np.ndarray], dict
 
 
 def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedComparison:
+    started = time.perf_counter()
+    rss_before = process_rss_bytes()
+    stage_started = started
     run, dataset, manifest, generator, theta, centers, actual_dataset_hash, evaluated_generator_hash, evaluated_theta_hash = _load_and_validate(run_directory)
+    validation_seconds = time.perf_counter() - stage_started
+    stage_started = time.perf_counter()
     n = int(manifest["config"]["n"])
     target = np.asarray(dataset["train_histogram"], dtype=np.float64)
 
     model = IQPModel(generator, theta, provenance={"source": "rings_smoke_manifest", "run_id": manifest["run_id"]})
     raw = model.probability_vector_exact()
+    raw_seconds = time.perf_counter() - stage_started
+    stage_started = time.perf_counter()
     singles = np.zeros(n, dtype=np.float64)
     pairs: list[tuple[int, int, float]] = []
     for row, value in zip(generator, theta, strict=True):
@@ -128,9 +140,14 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
     # compilation control rather than silently folding it into that gap.
     unquantized = compile_generators(generator, theta, quantize=False)
     unquantized_mapping, unquantized_success = apply_compiled_density(unquantized)
+    unquantized_seconds = time.perf_counter() - stage_started
+    stage_started = time.perf_counter()
     compiled = compile_generators(generator, theta, quantize=True)
     compiled_mapping, compiled_success = apply_compiled_density(compiled)
+    compiled_seconds = time.perf_counter() - stage_started
+    stage_started = time.perf_counter()
     deployed_mapping, deployed_success = apply_compiled_density(compiled, eta=eta)
+    deployed_seconds = time.perf_counter() - stage_started
     if eta == 1.0 and (
         not np.allclose(list(compiled_mapping.values()), list(deployed_mapping.values()), atol=1e-12, rtol=1e-12)
         or not np.isclose(compiled_success, deployed_success, atol=1e-12, rtol=1e-12)
@@ -142,6 +159,22 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
     if not np.allclose(raw.sum(), compiled_vector.sum()):
         raise ValueError("raw/compiled vectors are not normalized")
 
+    rss_after = process_rss_bytes()
+    resource_report = {
+        "status": "measured" if rss_before is not None and rss_after is not None else "rss_unavailable",
+        "rss_before_bytes": rss_before,
+        "rss_after_bytes": rss_after,
+        "rss_delta_bytes": None if rss_before is None or rss_after is None else rss_after - rss_before,
+        "elapsed_seconds": float(time.perf_counter() - started),
+        "timing_seconds": {
+            "validation_and_load": float(validation_seconds),
+            "raw_exact": float(raw_seconds),
+            "compiled_unquantized": float(unquantized_seconds),
+            "compiled_quantized": float(compiled_seconds),
+            "deployed_fixed_photon": float(deployed_seconds),
+        },
+        "memory_policy": "current-process RSS; no embedded 4^n-square superoperator",
+    }
     return MatchedComparison(
         cell_id=f"{manifest['run_id']}/matched_backends",
         target=target,
@@ -174,6 +207,7 @@ def build_comparison(run_directory: Path, *, eta: float = 1.0) -> MatchedCompari
             "source_model": "fixed_photon_g2_0",
             "loss": {"eta": eta, "acceptance_rule": "eta**n * model_success"},
         },
+        resource_report=resource_report,
     )
 
 
@@ -184,7 +218,7 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
     comparison = build_comparison(args.run_directory, eta=args.eta)
-    output = args.output or (args.run_directory / "backend_comparison.json")
+    output = args.output or (REPO_ROOT / "results" / "v4_tcdp" / "metrics" / manifest_slug(comparison.cell_id) / "backend_comparison.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(comparison.manifest(), indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     print(json.dumps({"output": str(output), "cell_id": comparison.cell_id, "metrics": comparison.metrics()}, indent=2, sort_keys=True, allow_nan=False))

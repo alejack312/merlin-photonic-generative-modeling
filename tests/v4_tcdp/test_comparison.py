@@ -8,7 +8,11 @@ from merlin_iqp.experiments.comparison import (
     DistributionArm,
     MatchedComparison,
     expected_coverage,
+    expected_occupancy,
     floored_log_ratio,
+    hamming_mmd2_crosscheck,
+    marginal_tvd_panel,
+    metric_specific_mutation,
     true_forward_kl,
 )
 from scripts.v4_tcdp.compare_backends import build_comparison
@@ -65,6 +69,29 @@ def test_coverage_uses_target_support_and_handles_q_one() -> None:
         expected_coverage(np.array([1.0, 0.0]), np.array([1.0, 0.0]), 1.5)
 
 
+def test_occupancy_and_direct_hamming_crosscheck_are_population_metrics() -> None:
+    target = np.array([0.4, 0.3, 0.2, 0.1])
+    candidate = np.array([0.3, 0.4, 0.2, 0.1])
+    occupancy = expected_occupancy(candidate, 100)
+    assert 0.0 < occupancy["expected_occupancy"] <= 4.0
+    crosscheck = hamming_mmd2_crosscheck(target, candidate, sigma=0.8)
+    assert crosscheck["status"] == "PASS"
+    assert crosscheck["direct"] == pytest.approx(crosscheck["trainer_objective"])
+    assert crosscheck["direct"] == pytest.approx(crosscheck["walsh"])
+
+
+def test_marginal_panel_is_labeled_msb_first_and_mutations_preserve_mass() -> None:
+    target = np.full(8, 1 / 8)
+    candidate = target.copy()
+    panel = marginal_tvd_panel(target, candidate)
+    assert panel["marginal_tvd_order1_mean"] == pytest.approx(0.0)
+    assert panel["marginal_tvd_order2_count"] == 3
+    assert panel["marginal_bit_order"] == "msb_first"
+    mutation = metric_specific_mutation(candidate, "marginal_tvd_order2")
+    assert mutation["mass_before"] == pytest.approx(mutation["mass_after"])
+    assert mutation["vector"].sum() == pytest.approx(1.0)
+
+
 def test_distribution_rejects_unnormalized_or_invalid_stage() -> None:
     with pytest.raises(ValueError):
         DistributionArm("x", [0.2, 0.2, 0.2, 0.2], "raw", acceptance_mass=0)
@@ -84,6 +111,9 @@ def test_ring_smoke_comparison_keeps_raw_compiled_and_deployed_distinct() -> Non
     assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] != pytest.approx(rows["compiled:ideal-unquantized-control"]["tvd_to_target"], abs=1e-12)
     assert rows["compiled:ideal-compiled-map"]["tvd_to_target"] == pytest.approx(rows["deployed:ideal-deployed-map"]["tvd_to_target"], abs=1e-12)
     assert rows["compiled:ideal-compiled-map"]["acceptance_mass"] == pytest.approx(rows["deployed:ideal-deployed-map"]["acceptance_mass"], abs=1e-18)
+    manifest = comparison.manifest()
+    assert manifest["controls"]["success_mutation"]["deployed:ideal-deployed-map"]["conditional_vector_hash_equal"] is True
+    assert manifest["resource_report"]["elapsed_seconds"] >= 0.0
 
 
 @pytest.mark.parametrize("array_name", ["generator", "final_theta"])

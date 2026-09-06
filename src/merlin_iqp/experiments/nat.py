@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import json
 import math
 import platform
+import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -33,6 +34,8 @@ from merlin_iqp.deploy.compile import (
     compile_iqp,
     quantize_theta,
 )
+from merlin_iqp.deploy.density import apply_compiled_density
+from merlin_iqp.classical.targets import target_probability_vector
 
 from .sibling_import import git_source_identity
 
@@ -358,6 +361,7 @@ def run_nat(
     initialization_std: float = 0.1,
     warm_start: NatRun | None = None,
     initial_optimizer_state: Mapping[str, Any] | None = None,
+    time_limit_seconds: float | None = None,
 ) -> NatRun:
     """Run bounded NAT on an exact target using the Hamming Gaussian MMD.
 
@@ -370,6 +374,9 @@ def run_nat(
     the complete optimizer state for matched continuation controls.
     """
 
+    if time_limit_seconds is not None and (not np.isfinite(time_limit_seconds) or time_limit_seconds <= 0):
+        raise ValueError("time_limit_seconds must be positive and finite when supplied")
+    started = time.perf_counter()
     resolved_n = _infer_n(target, n)
     source_identity = git_source_identity(
         Path(__file__).resolve().parents[3],
@@ -441,13 +448,23 @@ def run_nat(
     if initial_optimizer_state is not None:
         if str(initial_optimizer_state.get("kind", config.single_optimizer)).lower() != config.single_optimizer:
             raise ValueError("initial optimizer state does not match single_optimizer")
-        adam_m = np.asarray(initial_optimizer_state.get("m"), dtype=np.float64).copy()
-        adam_v = np.asarray(initial_optimizer_state.get("v"), dtype=np.float64).copy()
-        adam_t = int(initial_optimizer_state.get("step", 0))
-        if adam_m.shape != (config.n,) or adam_v.shape != (config.n,) or adam_t < 0 or not np.all(np.isfinite(adam_m)) or not np.all(np.isfinite(adam_v)):
+        if not {"m", "v", "step"}.issubset(initial_optimizer_state):
+            raise ValueError("initial optimizer state is missing Adam fields")
+        adam_m = np.asarray(initial_optimizer_state["m"], dtype=np.float64).copy()
+        adam_v = np.asarray(initial_optimizer_state["v"], dtype=np.float64).copy()
+        raw_step = initial_optimizer_state["step"]
+        if not np.isfinite(raw_step) or int(raw_step) != raw_step:
+            raise ValueError("initial optimizer state step must be an integer")
+        adam_t = int(raw_step)
+        if adam_m.shape != (config.n,) or adam_v.shape != (config.n,) or adam_t < 0 or not np.all(np.isfinite(adam_m)) or not np.all(np.isfinite(adam_v)) or np.any(adam_v < 0):
             raise ValueError("initial optimizer state has invalid shape, step, or values")
 
+    stopped = False
+    completed_steps = 0
     for _step in range(config.steps):
+        if time_limit_seconds is not None and time.perf_counter() - started >= time_limit_seconds:
+            stopped = True
+            break
         for pair_index in range(len(config.pairs)):
             if pair_evaluations >= config.resolved_pair_budget:
                 break
@@ -500,6 +517,7 @@ def run_nat(
         loss, _ = _compiled_objective(compiled, generator, target, kernel)
         objective_evaluations += 1
         loss_history.append(float(loss))
+        completed_steps += 1
 
     target_provenance = getattr(target, "provenance", {})
     initial_parameter_hash = hash_json(
@@ -552,12 +570,16 @@ def run_nat(
     }
     budgets = {
         "requested_steps": config.steps,
-        "completed_steps": config.steps,
+        "completed_steps": completed_steps,
+        "status": "attempted/stopped" if stopped else "completed",
+        "stop_reason": "time_limit_seconds" if stopped else None,
+        "time_limit_seconds": time_limit_seconds,
         "pair_budget": config.resolved_pair_budget,
         "pair_evaluations": pair_evaluations,
         "single_gradient_evaluations": single_gradient_evaluations,
         "objective_evaluations": objective_evaluations,
         "pair_moves": pair_moves,
+        "checkpoint_selection_rule": "fixed_last_step",
     }
     return NatRun(
         config=config,
@@ -638,4 +660,95 @@ def write_nat_run(run: NatRun, path: str | Path, *, artifact_metadata: Mapping[s
     return destination
 
 
-__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "nat_state_hash", "run_equal_budget_control", "run_matched_continuation", "run_nat", "write_nat_run"]
+def _compiled_vector(run: NatRun, *, eta: float = 1.0) -> tuple[np.ndarray, float]:
+    mapping, success = apply_compiled_density(run.final_compiled, eta=eta)
+    return np.array([mapping[key] for key in sorted(mapping)], dtype=np.float64), float(success)
+
+
+def nat_acceptance(run: NatRun, *, eta: float = 1.0) -> dict[str, Any]:
+    """Report fixed-photon acceptance separately from conditional fit quality."""
+
+    _, success = _compiled_vector(run, eta=eta)
+    return {
+        "eta": float(eta),
+        "model_success": success,
+        "attempts_per_accepted_sample": float(1.0 / success),
+        "conditioning": "conditional logical distribution; fixed_photon_g2_0 uniform_loss",
+        "status": "model_derived_reference_only",
+    }
+
+
+def nat_report(
+    target: object,
+    warm_start: NatRun,
+    arms: Mapping[str, NatRun],
+    *,
+    fixed_pair_ablation: NatRun | None = None,
+    eta: float = 1.0,
+) -> dict[str, Any]:
+    """Build the NAT target/reference/acceptance report for matched arms."""
+
+    if not arms:
+        raise ValueError("nat_report requires at least one continuation arm")
+    reference_vector, reference_success = _compiled_vector(warm_start, eta=eta)
+    target_vector = target_probability_vector(target, warm_start.config.n)
+    common_hash = nat_state_hash(warm_start)
+    rows: dict[str, dict[str, Any]] = {}
+    for arm_id, arm in arms.items():
+        if arm.config.n != warm_start.config.n or arm.config.pairs != warm_start.config.pairs:
+            raise ValueError("matched NAT arms must preserve the warm-start parameterization")
+        if arm.config.single_optimizer != warm_start.config.single_optimizer or not np.isclose(arm.config.single_lr, warm_start.config.single_lr):
+            raise ValueError("matched NAT arms must preserve optimizer and learning rate")
+        vector, success = _compiled_vector(arm, eta=eta)
+        if nat_state_hash(warm_start) != common_hash:
+            raise AssertionError("warm-start state changed while building NAT report")
+        rows[arm_id] = {
+            "run_kind": arm.config.run_kind,
+            "status": "PASS" if arm.budgets.get("status") == "completed" else "attempted/stopped",
+            "warm_start_state_hash": common_hash,
+            "target_loss_before": float(arm.loss_history[0]),
+            "target_loss_after": float(arm.final_loss),
+            "target_improvement": float(arm.loss_history[0] - arm.final_loss),
+            "target_improvement_relative": float((arm.loss_history[0] - arm.final_loss) / max(abs(arm.loss_history[0]), 1e-300)),
+            "fixed_reference_tvd": float(0.5 * np.abs(vector - reference_vector).sum()),
+            "same_parameter_reference_success": reference_success,
+            "acceptance": {"eta": float(eta), "model_success": success, "attempts_per_accepted_sample": float(1.0 / success), "status": "model_derived_reference_only"},
+            "budget": dict(arm.budgets),
+            "checkpoint_selection_rule": "fixed_last_step",
+            "parameter_hash": arm.provenance.get("final_parameter_hash"),
+        }
+    pair_match = len({json.dumps(dict(arm.budgets), sort_keys=True) for arm in arms.values()}) == 1
+    parameter_match = len({str(arm.provenance.get("initial_parameter_hash")) for arm in arms.values()}) == 1
+    report: dict[str, Any] = {
+        "schema_version": "v4_tcdp.nat_report.v1",
+        "status": "PASS" if pair_match and parameter_match else "FAIL",
+        "profile": {"n": warm_start.config.n, "pairs": [list(pair) for pair in warm_start.config.pairs], "steps": warm_start.config.steps, "optimizer": warm_start.config.single_optimizer, "learning_rate": warm_start.config.single_lr, "sigma": warm_start.config.sigma},
+        "target": {"hash": getattr(target, "hash", hash_array(target_vector)), "reference": "frozen_warm_start_final_state"},
+        "matching": {"common_start_state_hash": common_hash, "identical_initial_parameterization": parameter_match, "identical_budgets": pair_match, "identical_optimizer": True, "identical_checkpoint_selection": True, "rng_policy": "deterministic_parameter-only; seed recorded per run"},
+        "arms": rows,
+        "fixed_reference": {"kind": "warm_start_final_compiled_distribution", "eta": float(eta), "model_success": reference_success},
+        "fixed_pair_ablation": None,
+    }
+    if fixed_pair_ablation is not None:
+        ablation_vector, ablation_success = _compiled_vector(fixed_pair_ablation, eta=eta)
+        report["fixed_pair_ablation"] = {
+            "label": "fixed_pair_equal_budget_control",
+            "status": "ablation_only",
+            "target_loss_after": fixed_pair_ablation.final_loss,
+            "target_improvement": float(fixed_pair_ablation.loss_history[0] - fixed_pair_ablation.final_loss),
+            "fixed_reference_tvd": float(0.5 * np.abs(ablation_vector - reference_vector).sum()),
+            "model_success": ablation_success,
+            "attempts_per_accepted_sample": float(1.0 / ablation_success),
+            "budget": dict(fixed_pair_ablation.budgets),
+        }
+    return report
+
+
+def write_nat_report(report: Mapping[str, Any], path: str | Path) -> Path:
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(dict(report), indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    return destination
+
+
+__all__ = ["CATALOG_SIZE", "NatConfig", "NatRun", "SCHEMA_VERSION", "nat_acceptance", "nat_report", "nat_state_hash", "run_equal_budget_control", "run_matched_continuation", "run_nat", "write_nat_report", "write_nat_run"]
