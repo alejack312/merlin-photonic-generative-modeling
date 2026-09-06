@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: current `HEAD` on `codex/v4-implementation` (pin the exact commit after the fourth-repair commit).
+- Review target: `3d2be91` (`fix(v4): close paired contract gaps`) on `codex/v4-implementation`.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
