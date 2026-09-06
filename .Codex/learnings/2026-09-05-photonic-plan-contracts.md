@@ -35,6 +35,12 @@ Date: 2026-09-05 · Scope: project · Recurs when: composing noisy post-selected
 - Do: inspect actual source APIs, joint noise assumptions and reference definitions before allocating a sweep budget.
 - Don't: accept “every finding dispositioned” as evidence that revised contracts are mutually consistent.
 
+## 2026-09-06 addendum: evidence status boundary
+
+- If implementation passes focused tests but the plan requires physical, source, owner, or review evidence, mark `INCONCLUSIVE` rather than PASS.
+- If the required code or run does not exist, mark `NOT IMPLEMENTED`; if an external artifact or owner decision prevents safe execution, mark `BLOCKED`; reserve `FAIL` for an attempted acceptance check with contrary evidence.
+- For a handoff, pin the baseline and implementation head, list exact reproducible commands, link canonical artifacts, and state every missing action plus its dependency.
+
 ## 2026-09-06 addendum: implement the contract boundary
 
 ### Decision rules
