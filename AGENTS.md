@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Repo state
 
-As of 2026-09-06, branch `codex/v4-implementation` contains the additive v4.0 implementation through bounded ring smoke comparisons. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); scientific interpretation remains provisional and D1/D2/D3-dependent work is not claimed complete.
+As of 2026-09-06, branch `codex/v4-implementation` contains the additive v4.0 implementation through the second repair review: bounded ring comparisons, source-smoke retraining evidence, matched NAT arms, and repaired provenance/overwrite gates. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); scientific interpretation remains provisional and physical/full-Fock, photonic-ring, owner-control, and broader sibling requirements are not claimed complete.
 
 As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up), and was repackaged into an installable `merlin_iqp` library (src-layout) with phase scripts moved to `scripts/`. Real commands:
 
@@ -16,7 +16,7 @@ As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 enc
 - **Trainability study:** `scripts/gradient_variance_sweep.py` (raw sweep) → `scripts/trainability_analysis.py` / `scripts/trainability_analysis_1701.py` (curve-fit analysis).
 - **Hardness-under-loss study:** `scripts/loss_sweep.py` (raw sweep) → `scripts/hardness_analysis.py` (TVD-vs-η/anticoncentration analysis).
 - **ARB-01 (arbitrary-θ weight-2 gate):** `scripts/cp_alpha_sweep.py`.
-- **v4 bounded CLIs:** `scripts/v4_tcdp/train_rings.py`, `scripts/v4_tcdp/inventory_sibling.py`, and `scripts/v4_tcdp/compare_backends.py`. Results are isolated under `results/v4_tcdp/`.
+- **v4 bounded CLIs:** `scripts/v4_tcdp/train_rings.py`, `scripts/v4_tcdp/inventory_sibling.py`, `scripts/v4_tcdp/retrain_sibling.py`, `scripts/v4_tcdp/run_nat.py`, and `scripts/v4_tcdp/compare_backends.py`. Results are isolated under `results/v4_tcdp/`; source retraining is an explicit sibling-root integration, not a default-suite dependency.
 - **Julia independent verifier:** `julia --project=julia julia/verify_qubit_iqp.jl` (and the other `julia/verify_*.jl` scripts) — Julia 1.10 LTS, Yao.jl, BosonSampling.jl.
 - **Forge (ancilla mode-mapping bookkeeping check):** `forge/ancilla_mapping.frg`.
 - **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) remains the legacy canonical write-up; v4 evidence is in [docs/v4-tcdp-study.md](docs/v4-tcdp-study.md), with [docs/v4-rings-study.md](docs/v4-rings-study.md), [docs/v4-sibling-reproduction.md](docs/v4-sibling-reproduction.md), and [docs/v4-backend-comparison.md](docs/v4-backend-comparison.md).

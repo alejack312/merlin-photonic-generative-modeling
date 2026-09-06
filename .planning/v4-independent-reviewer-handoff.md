@@ -21,10 +21,12 @@ Run from the photonic repository root:
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp
 venv/Scripts/python.exe -m compileall -q scripts/v4_tcdp
 venv/Scripts/python.exe docs/audits/2026-09-06-v4-implementation-probes.py
+venv/Scripts/python.exe docs/audits/2026-09-06-v4-repair-review-probes.py  # pre-fix counterexamples; expected to raise after the repairs
 venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py
 venv/Scripts/python.exe scripts/v4_tcdp/inventory_sibling.py
 venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/sibling/training_smoke_configs_experiments_training_smoke_yaml/manifest.json --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --output-root results/v4_tcdp/sibling_replays
-$env:PYTHONPATH='C:/Users/cuqui/iqp-mmd-barren-plateau/src'; venv/Scripts/python.exe scripts/v4_tcdp/retrain_sibling.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --output-root results/v4_tcdp/sibling_retraining/training_smoke
+$env:MERLIN_SIBLING_ROOT='C:/Users/cuqui/iqp-mmd-barren-plateau'; venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py
+venv/Scripts/python.exe scripts/v4_tcdp/retrain_sibling.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --config C:/Users/cuqui/iqp-mmd-barren-plateau/configs/experiments/training_smoke.yaml --output-root results/v4_tcdp/sibling_retraining/training_smoke
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n6_seed0_main --eta 0.9 --output results/v4_tcdp/comparisons/rings_hamming_n6_seed0_eta09.json
 venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --output results/v4_tcdp/nat/n4_seed0_primary.json
 ```
@@ -36,7 +38,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Observed result after the audited repair pass: `636 passed in 394.78s (0:06:34)`. A persistent Perceval path override was used so collection could write its log; without that override, collection can fail when the default `AppData\Local\quandela\perceval-quandela\logs\perceval.log` is unavailable. This is an environment issue, not a relaxed test gate.
+Observed result after the second repair pass: focused v4 suite `144 passed, 2 skipped`; full suite `652 passed, 1 skipped in 362.20s (0:06:02)`. A persistent Perceval path override was used so collection could write its log; without that override, collection can fail when the default `AppData\Local\quandela\perceval-quandela\logs\perceval.log` is unavailable. The default suite no longer requires the sibling checkout; the source integration is explicit via `MERLIN_SIBLING_ROOT`. These are environment notes, not relaxed acceptance gates.
 
 ## Evidence locations
 
@@ -46,6 +48,7 @@ Observed result after the audited repair pass: `636 passed in 394.78s (0:06:34)`
 - [docs/v4-sibling-reproduction.md](../docs/v4-sibling-reproduction.md) — inventory and adapted checkpoint replay boundary.
 - [docs/v4-deployment-study.md](../docs/v4-deployment-study.md) — compiler/map/full-Fock limits.
 - [docs/v4-backend-comparison.md](../docs/v4-backend-comparison.md) — matched raw/compiled/deployed artifacts.
+- [docs/audits/2026-09-06-v4-repair-review.md](../docs/audits/2026-09-06-v4-repair-review.md) — nine-finding independent repair review.
 - `results/v4_tcdp/` — canonical JSON/NPZ/NPY artifacts and hashes.
 
 ## Review focus and remaining gaps
@@ -54,8 +57,9 @@ Observed result after the audited repair pass: `636 passed in 394.78s (0:06:34)`
 2. Confirm that raw, compiled, and deployed vectors remain distinct and that acceptance is not conflated with conditional quality.
 3. Audit the negative optical signs, alpha-key winding, MSB bit order, Hamming kernel distance (not squared distance), and one-final-normalization composition.
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
-5. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, discrete-key NAT implementation, owner controls, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production metric panel, and absent independent review against the ledger.
-6. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
+5. Check the repaired R01–R09 contracts: finite/complete retraining trajectories, exact requested config, scoped source identity, ring namespaces, stale-array rejection, explicit spatial geometry, two matched NAT arms, full-Fock aggregation, and optional sibling integration.
+6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production metric panel, and absent independent review against the ledger.
+7. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
 ## Decisions recorded from owner (2026-09-06)
 
@@ -63,4 +67,4 @@ Observed result after the audited repair pass: `636 passed in 394.78s (0:06:34)`
 - D2: discrete `0.1*j` alpha-key neighbor search with continuous single-qubit angles and exact analytic gradients.
 - D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
 
-These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The training-smoke source trajectory is now independently retrained with the regenerated source-recipe data; other sibling rows remain separately dispositioned.
+These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The training-smoke source trajectory is independently retrained with the regenerated source-recipe data; other sibling rows remain separately dispositioned.
