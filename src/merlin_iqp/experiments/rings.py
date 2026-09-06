@@ -468,8 +468,15 @@ def _validate_existing_artifacts(
                 if name not in run_archive or hash_array(run_archive[name]) != hash_array(expected):
                     raise ValueError(f"ring run artifact hash mismatch for {name}")
         summary = json.loads(paths["summary"].read_text(encoding="utf-8"))
-        if summary.get("run_id") != manifest.get("run_id"):
-            raise ValueError("ring summary does not match manifest")
+        expected_summary = {
+            "run_id": manifest["run_id"],
+            "initialization": manifest["initialization"],
+            "replication_identity": manifest["replication_identity"],
+            "metrics": manifest["metrics"],
+            "photonic_evaluation": manifest["photonic_evaluation"],
+        }
+        if summary != expected_summary:
+            raise ValueError("ring summary does not match the immutable manifest fields")
     except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         raise FileExistsError(f"ring artifact destination failed integrity validation: {paths['manifest'].parent}") from error
 

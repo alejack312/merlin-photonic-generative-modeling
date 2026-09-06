@@ -202,3 +202,35 @@ def test_adam_resume_rejects_incomplete_state_and_nonfinite_history(tmp_path) ->
         resumed.resume(missing_path)
     with pytest.raises(ValueError, match="loss_history must contain only finite"):
         replace(checkpoint, loss_history=(float("nan"),) * 3)
+
+
+def test_rejected_adam_resume_is_atomic_and_rejects_negative_second_moments(tmp_path) -> None:
+    from dataclasses import replace
+    from merlin_iqp.classical.checkpoint import save_checkpoint
+
+    G = chain_1d(2, 1)
+    target = ExactProbabilities(np.array([0.1, 0.2, 0.3, 0.4]))
+    kernel = KernelSpec("hamming_gaussian", sigma=0.6)
+    source = Trainer(IQPModel(G, [0.17, -0.09, 0.13]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    source.run(3)
+    checkpoint = source.checkpoint()
+    path = tmp_path / "invalid.npz"
+    save_checkpoint(replace(checkpoint, optimizer_state={"lr": 0.03}), path, generator=G)
+    resumed = Trainer(IQPModel(G, [0.7, 0.8, 0.9]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    resumed.run(1)
+    before = (resumed.model.theta.copy(), resumed.step, tuple(resumed.loss_history), resumed._m.copy(), resumed._v.copy(), resumed._adam_t)
+    with pytest.raises(ValueError, match="missing Adam optimizer state"):
+        resumed.resume(path)
+    after = (resumed.model.theta, resumed.step, tuple(resumed.loss_history), resumed._m, resumed._v, resumed._adam_t)
+    np.testing.assert_array_equal(after[0], before[0])
+    assert after[1] == before[1]
+    assert after[2] == before[2]
+    np.testing.assert_array_equal(after[3], before[3])
+    np.testing.assert_array_equal(after[4], before[4])
+    assert after[5] == before[5]
+
+    invalid_state = dict(checkpoint.optimizer_state)
+    invalid_state["v"] = [-1.0, -1.0, -1.0]
+    save_checkpoint(replace(checkpoint, optimizer_state=invalid_state), path, generator=G)
+    with pytest.raises(ValueError, match="second moments"):
+        resumed.resume(path)

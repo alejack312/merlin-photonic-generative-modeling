@@ -19,6 +19,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from merlin_iqp.classical import IQPModel  # noqa: E402
+from merlin_iqp.classical._validation import binary_matrix, finite_vector  # noqa: E402
 from merlin_iqp.deploy import apply_compiled_density, compile_generators  # noqa: E402
 from merlin_iqp.experiments.sibling_import import (  # noqa: E402
     PINNED_SIBLING_COMMIT,
@@ -50,6 +51,20 @@ def _config_hash(config: object) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _numeric_scalar(value: object, *, name: str, integer: bool = False) -> float | int:
+    array = np.asarray(value)
+    if array.ndim != 0 or not np.issubdtype(array.dtype, np.number):
+        raise ValueError(f"checkpoint {name} must be a numeric scalar")
+    scalar = float(array.item())
+    if not np.isfinite(scalar):
+        raise ValueError(f"checkpoint {name} must be finite")
+    if integer:
+        if int(scalar) != scalar or scalar < 0:
+            raise ValueError(f"checkpoint {name} must be a non-negative integer")
+        return int(scalar)
+    return scalar
+
+
 def replay_export(manifest_path: Path, sibling_root: Path, output_root: Path) -> dict[str, object]:
     manifest = load_export_manifest(manifest_path)
     source_identity = git_source_identity(sibling_root, include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"))
@@ -71,10 +86,13 @@ def replay_export(manifest_path: Path, sibling_root: Path, output_root: Path) ->
         required = {"G", "theta", "step", "loss"}
         if not required.issubset(payload.files):
             raise ValueError(f"checkpoint is missing required fields: {sorted(required - set(payload.files))}")
-        generator = np.asarray(payload["G"], dtype=np.uint8)
-        theta = np.asarray(payload["theta"], dtype=np.float64)
-        step = int(payload["step"])
-        source_loss = float(payload["loss"])
+        try:
+            generator = binary_matrix(payload["G"], name="source generator")
+            theta = finite_vector(payload["theta"], name="source theta", length=len(generator))
+            step = int(_numeric_scalar(payload["step"], name="step", integer=True))
+            source_loss = float(_numeric_scalar(payload["loss"], name="loss"))
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"invalid sibling checkpoint fields: {error}") from error
     source_config = manifest["config"].get("content", manifest["config"])
     checkpoint_hash = _sha256(checkpoint)
     config_hash = _config_hash(source_config)
@@ -135,7 +153,9 @@ def replay_export(manifest_path: Path, sibling_root: Path, output_root: Path) ->
         },
         "unsafe_serialization_loaded": False,
     }
-    (destination / "manifest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (destination / "manifest.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
+    )
     return result
 
 

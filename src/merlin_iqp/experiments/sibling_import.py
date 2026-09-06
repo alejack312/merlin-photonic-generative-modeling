@@ -74,19 +74,49 @@ def _git(root: Path, *args: str) -> str | None:
 
 
 def _git_status(root: Path) -> list[str]:
-    # Preserve Git's two porcelain status columns.  Calling ``_git`` here
-    # would strip the leading work-tree column from the first record, turning
-    # `` M path`` into ``M path`` and breaking the scoped path slice below.
+    # Preserve Git's two porcelain status columns and use NUL delimiters so
+    # Git does not quote or escape filenames.  A status failure is an
+    # unverified checkout, never evidence of a clean one.
     try:
         completed = subprocess.run(
-            ["git", "-C", str(root), "status", "--short"],
+            ["git", "-C", str(root), "status", "--short", "-z"],
             check=True,
             capture_output=True,
             text=True,
         )
-    except (OSError, subprocess.CalledProcessError):
-        return []
-    return [line for line in completed.stdout.splitlines() if line]
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise RuntimeError(f"unable to observe Git status for {root}") from error
+    records = [record for record in completed.stdout.split("\0") if record]
+    result: list[str] = []
+    index = 0
+    while index < len(records):
+        record = records[index]
+        if len(record) < 3:
+            raise RuntimeError(f"malformed Git status record for {root}")
+        code = record[:2]
+        path = record[3:]
+        if code[0] in {"R", "C"} or code[1] in {"R", "C"}:
+            if index + 1 >= len(records):
+                raise RuntimeError(f"incomplete Git rename status for {root}")
+            result.append(f"{code} {path} -> {records[index + 1]}")
+            index += 2
+        else:
+            result.append(record)
+            index += 1
+    return result
+
+
+def _git_tracked_and_untracked_files(root: Path) -> list[str]:
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise RuntimeError(f"unable to observe Git file listing for {root}") from error
+    return [record for record in completed.stdout.split("\0") if record]
 
 
 def _status_is_in_scope(line: str, prefixes: tuple[str, ...]) -> bool:
@@ -112,11 +142,12 @@ def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None
     """
     checkout = Path(root).expanduser().resolve()
     commit = _git(checkout, "rev-parse", "HEAD")
+    if commit is None:
+        raise RuntimeError(f"unable to observe Git commit for {checkout}")
     branch = _git(checkout, "symbolic-ref", "--short", "-q", "HEAD") or "detached"
     all_status = _git_status(checkout)
-    listed = _git(checkout, "ls-files", "--cached", "--others", "--exclude-standard")
+    listed_files = _git_tracked_and_untracked_files(checkout)
     digest = hashlib.sha256()
-    listed_files = [] if listed is None else [line for line in listed.splitlines() if line]
     prefixes = tuple(path.replace("\\", "/").rstrip("/") for path in (include_paths or ()))
     if prefixes:
         listed_files = [
@@ -138,6 +169,8 @@ def git_source_identity(root: str | Path, *, include_paths: Sequence[str] | None
     digest.update("\n".join(status).encode("utf-8"))
     clean_tree = not status
     tree_identity = _git(checkout, "rev-parse", "HEAD^{tree}") if clean_tree else digest.hexdigest()
+    if clean_tree and tree_identity is None:
+        raise RuntimeError(f"unable to observe Git tree for {checkout}")
     return {
         "root": _path_string(checkout),
         "observed_commit": commit,

@@ -113,41 +113,59 @@ class Trainer:
         checkpoint = load_checkpoint(path, expected_spec_hash=self.spec_hash, expected_dataset_hash=self.dataset_hash, expected_kernel_hash=self.kernel.hash)
         if checkpoint.optimizer != self.optimizer or len(checkpoint.theta) != self.model.m:
             raise ValueError("checkpoint optimizer or theta shape is incompatible")
+        if len(checkpoint.loss_history) not in {0, checkpoint.step + 1}:
+            raise ValueError("checkpoint loss history length is inconsistent with checkpoint step")
         saved_lr = checkpoint.optimizer_state.get("lr")
-        if saved_lr is None or not np.isfinite(saved_lr) or saved_lr <= 0:
+        try:
+            saved_lr_value = float(saved_lr)
+        except (TypeError, ValueError):
+            saved_lr_value = float("nan")
+        if saved_lr is None or not np.isfinite(saved_lr_value) or saved_lr_value <= 0:
             raise ValueError("checkpoint is missing a valid optimizer learning rate")
-        if not np.isclose(float(saved_lr), self.lr, rtol=0.0, atol=0.0):
+        if not np.isclose(saved_lr_value, self.lr, rtol=0.0, atol=0.0):
             raise ValueError(
                 "checkpoint learning rate mismatch: "
-                f"checkpoint={float(saved_lr):.17g}, trainer={self.lr:.17g}"
+                f"checkpoint={saved_lr_value:.17g}, trainer={self.lr:.17g}"
             )
-        self.model.theta = checkpoint.theta.copy()
-        self.step = checkpoint.step
-        self.loss_history = list(checkpoint.loss_history)
         state = checkpoint.optimizer_state
         if self.optimizer == "adam":
             missing = [key for key in ("m", "v", "adam_t") if key not in state]
             if missing:
                 raise ValueError(f"checkpoint is missing Adam optimizer state: {', '.join(missing)}")
-            self._m = np.asarray(state["m"], dtype=np.float64)
-            self._v = np.asarray(state["v"], dtype=np.float64)
-            if self._m.shape != (self.model.m,) or self._v.shape != (self.model.m,):
+            new_m = np.asarray(state["m"], dtype=np.float64)
+            new_v = np.asarray(state["v"], dtype=np.float64)
+            if new_m.shape != (self.model.m,) or new_v.shape != (self.model.m,):
                 raise ValueError("checkpoint Adam moments have incompatible shape")
-            if not np.all(np.isfinite(self._m)) or not np.all(np.isfinite(self._v)):
-                raise ValueError("checkpoint Adam moments must be finite")
+            if not np.all(np.isfinite(new_m)) or not np.all(np.isfinite(new_v)) or np.any(new_v < 0):
+                raise ValueError("checkpoint Adam moments must be finite and second moments non-negative")
             try:
-                self._adam_t = int(state["adam_t"])
+                raw_adam_t = float(state["adam_t"])
             except (TypeError, ValueError) as error:
                 raise ValueError("checkpoint Adam step is invalid") from error
-            if self._adam_t != checkpoint.step or self._adam_t < 0:
+            if not np.isfinite(raw_adam_t) or int(raw_adam_t) != raw_adam_t:
+                raise ValueError("checkpoint Adam step must be an integer")
+            new_adam_t = int(raw_adam_t)
+            if new_adam_t != checkpoint.step or new_adam_t < 0:
                 raise ValueError("checkpoint Adam step does not match checkpoint step")
         else:
-            self._m = np.zeros(self.model.m, dtype=np.float64)
-            self._v = np.zeros(self.model.m, dtype=np.float64)
-            self._adam_t = 0
-        self._rng = np.random.default_rng()
+            new_m = np.zeros(self.model.m, dtype=np.float64)
+            new_v = np.zeros(self.model.m, dtype=np.float64)
+            new_adam_t = 0
+        new_rng = np.random.default_rng()
         if checkpoint.rng_state:
-            self._rng.bit_generator.state = checkpoint.rng_state
+            try:
+                new_rng.bit_generator.state = checkpoint.rng_state
+            except (TypeError, ValueError) as error:
+                raise ValueError("checkpoint RNG state is invalid") from error
+
+        # Commit only after every checkpoint field has passed validation.
+        self.model.theta = checkpoint.theta.copy()
+        self.step = checkpoint.step
+        self.loss_history = list(checkpoint.loss_history)
+        self._m = new_m
+        self._v = new_v
+        self._adam_t = new_adam_t
+        self._rng = new_rng
 
     @classmethod
     def from_checkpoint(cls, path: str | Path, target: object, kernel: KernelSpec | str = "hamming_gaussian", **kwargs: Any) -> "Trainer":

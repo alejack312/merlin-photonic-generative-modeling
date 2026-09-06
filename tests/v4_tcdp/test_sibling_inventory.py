@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from unittest.mock import patch
 from pathlib import Path
 
 import numpy as np
@@ -94,6 +95,49 @@ def test_scoped_source_identity_detects_first_worktree_edit(tmp_path: Path) -> N
     assert git("status", "--short").startswith(" M ")
     assert identity["dirty"] is True
     assert identity["git_status"] == [" M src/iqp_bp/model.py"]
+
+
+def test_scoped_source_identity_handles_non_ascii_paths(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    scoped = source / "src" / "iqp_bp"
+    scoped.mkdir(parents=True)
+    module = scoped / "model_é.py"
+    module.write_text("original = 1\n", encoding="utf-8")
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(source), *args], check=True, capture_output=True, text=True
+        ).stdout
+    git("init")
+    git("add", ".")
+    git("-c", "user.name=Audit", "-c", "user.email=audit@example.invalid", "commit", "-m", "fixture")
+    module.write_text("modified = 2\n", encoding="utf-8")
+    identity = git_source_identity(source, include_paths=("src/iqp_bp",))
+    assert identity["dirty"] is True
+    assert identity["git_status"][0].startswith(" M src/iqp_bp/model_")
+    assert identity["git_status"][0].endswith(".py")
+
+
+def test_source_identity_fails_closed_when_status_is_unavailable(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    scoped = source / "src" / "iqp_bp"
+    scoped.mkdir(parents=True)
+    (scoped / "model.py").write_text("original = 1\n", encoding="utf-8")
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", "-C", str(source), *args], check=True, capture_output=True, text=True
+        ).stdout
+    git("init")
+    git("add", ".")
+    git("-c", "user.name=Audit", "-c", "user.email=audit@example.invalid", "commit", "-m", "fixture")
+    from merlin_iqp.experiments import sibling_import
+    real_run = sibling_import.subprocess.run
+    def failing_status(args, **kwargs):
+        if "status" in args:
+            raise subprocess.CalledProcessError(128, args)
+        return real_run(args, **kwargs)
+    with patch.object(sibling_import.subprocess, "run", side_effect=failing_status):
+        with pytest.raises(RuntimeError, match="Git status"):
+            git_source_identity(source, include_paths=("src/iqp_bp",))
 
 
 @pytest.mark.skipif(not SIBLING_ROOT.exists(), reason="local sibling checkout is unavailable")

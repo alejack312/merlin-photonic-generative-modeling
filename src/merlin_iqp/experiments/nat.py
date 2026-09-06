@@ -42,18 +42,18 @@ CATALOG_SIZE = len(ALPHA_KEYS)
 Pair = tuple[int, int]
 
 
-def _normalise_pairs(n: int, pairs: Sequence[Sequence[int]]) -> tuple[Pair, ...]:
+def _normalise_pairs(n: int, pairs: Sequence[Sequence[int]], *, sort: bool = True) -> tuple[Pair, ...]:
     pair_rows = list(pairs)
     if any(len(pair) != 2 for pair in pair_rows):
         raise ValueError("pairs must contain exactly two indices")
-    result = tuple(sorted((min(int(pair[0]), int(pair[1])), max(int(pair[0]), int(pair[1]))) for pair in pair_rows))
+    result = tuple((min(int(pair[0]), int(pair[1])), max(int(pair[0]), int(pair[1]))) for pair in pair_rows)
     if not result:
         raise ValueError("NAT requires at least one pair generator")
     if any(i == j or i < 0 or j >= n for i, j in result):
         raise ValueError(f"pairs must satisfy 0 <= i < j < n for n={n}")
     if len(set(result)) != len(result):
         raise ValueError("duplicate pairs are not supported")
-    return result
+    return tuple(sorted(result)) if sort else result
 
 
 @dataclass(frozen=True)
@@ -156,7 +156,24 @@ class NatRun:
 
     @property
     def pair_moves(self) -> int:
-        return sum(int(a != b) for a, b in zip(self.initial_pair_keys, self.final_pair_keys, strict=True))
+        """Number of accepted discrete pair moves during optimization."""
+
+        return int(self.budgets.get("pair_moves", 0))
+
+    @property
+    def pairs_changed(self) -> int:
+        """Number of pair coordinates whose key or winding changed at the endpoint."""
+
+        return sum(
+            int(initial_key != final_key or initial_winding != final_winding)
+            for initial_key, final_key, initial_winding, final_winding in zip(
+                self.initial_pair_keys,
+                self.final_pair_keys,
+                self.initial_pair_windings,
+                self.final_pair_windings,
+                strict=True,
+            )
+        )
 
     def to_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -179,6 +196,7 @@ class NatRun:
             },
             "final_loss": self.final_loss,
             "pair_moves": self.pair_moves,
+            "pairs_changed": self.pairs_changed,
             "budgets": dict(self.budgets),
             "provenance": dict(self.provenance),
         }
@@ -216,7 +234,13 @@ def _infer_n(target: object, n: int | None) -> int:
     raise ValueError("n must be supplied when target has no n attribute")
 
 
-def _values_for_pairs(value: Sequence[Any] | Mapping[Sequence[int], Any] | None, pairs: tuple[Pair, ...], *, name: str) -> list[Any] | None:
+def _values_for_pairs(
+    value: Sequence[Any] | Mapping[Sequence[int], Any] | None,
+    pairs: tuple[Pair, ...],
+    *,
+    name: str,
+    caller_pairs: tuple[Pair, ...] | None = None,
+) -> list[Any] | None:
     if value is None:
         return None
     if isinstance(value, Mapping):
@@ -227,7 +251,10 @@ def _values_for_pairs(value: Sequence[Any] | Mapping[Sequence[int], Any] | None,
     values = list(value)
     if len(values) != len(pairs):
         raise ValueError(f"{name} must contain one value per pair")
-    return values
+    if caller_pairs is None or caller_pairs == pairs:
+        return values
+    bound = dict(zip(caller_pairs, values, strict=True))
+    return [bound[pair] for pair in pairs]
 
 
 def _validate_key(value: Any, *, name: str) -> int:
@@ -269,6 +296,7 @@ def _initial_state(
     pair_thetas: Sequence[float] | Mapping[Sequence[int], float] | None,
     pair_windings: Sequence[int] | Mapping[Sequence[int], int] | None,
     target: object,
+    caller_pairs: tuple[Pair, ...],
 ) -> tuple[np.ndarray, tuple[int, ...], tuple[int, ...]]:
     if pair_keys is not None and pair_thetas is not None:
         raise ValueError("provide pair_keys or pair_thetas, not both")
@@ -287,7 +315,7 @@ def _initial_state(
     if initial_singles.shape != (config.n,) or not np.all(np.isfinite(initial_singles)):
         raise ValueError(f"singles must be a finite vector of length {config.n}")
 
-    raw_thetas = _values_for_pairs(pair_thetas, config.pairs, name="pair_thetas")
+    raw_thetas = _values_for_pairs(pair_thetas, config.pairs, name="pair_thetas", caller_pairs=caller_pairs)
     if raw_thetas is None and pair_keys is None and singles is None:
         raw_thetas = list(seeded_theta[config.n :])
     if raw_thetas is not None:
@@ -296,11 +324,11 @@ def _initial_state(
         quantized = [quantize_theta(float(theta)) for theta in raw_thetas]
         return initial_singles, tuple(angle.key for angle in quantized), tuple(angle.winding for angle in quantized)
 
-    raw_keys = _values_for_pairs(pair_keys, config.pairs, name="pair_keys")
+    raw_keys = _values_for_pairs(pair_keys, config.pairs, name="pair_keys", caller_pairs=caller_pairs)
     if raw_keys is None:
         raw_keys = [0] * len(config.pairs)
     keys = tuple(_validate_key(key, name="pair key") for key in raw_keys)
-    raw_windings = _values_for_pairs(pair_windings, config.pairs, name="pair_windings")
+    raw_windings = _values_for_pairs(pair_windings, config.pairs, name="pair_windings", caller_pairs=caller_pairs)
     windings = tuple(0 if winding is None else int(winding) for winding in (raw_windings or [0] * len(config.pairs)))
     return initial_singles, keys, windings
 
@@ -350,9 +378,11 @@ def run_nat(
     resolved_source_commit = source_commit
     if source_commit in {None, "working-tree"}:
         resolved_source_commit = source_identity.get("observed_commit")
+    pair_input = tuple(tuple(pair) for pair in pairs)
+    caller_pairs = _normalise_pairs(resolved_n, pair_input, sort=False)
     config = NatConfig(
         n=resolved_n,
-        pairs=tuple((int(pair[0]), int(pair[1])) for pair in pairs),
+        pairs=pair_input,
         steps=steps,
         seed=seed,
         sigma=sigma,
@@ -391,6 +421,7 @@ def run_nat(
             pair_thetas=pair_thetas,
             pair_windings=pair_windings,
             target=target,
+            caller_pairs=caller_pairs,
         )
     initial_singles = current_singles.copy()
     initial_keys = current_keys

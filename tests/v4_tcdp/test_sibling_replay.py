@@ -1,10 +1,59 @@
 import json
 from pathlib import Path
+import subprocess
 
 import numpy as np
 import pytest
 
 from scripts.v4_tcdp.replay_sibling import replay_export
+
+
+def _make_source_fixture(root: Path) -> tuple[Path, Path]:
+    (root / "src" / "iqp_bp").mkdir(parents=True)
+    (root / "src" / "iqp_bp" / "model.py").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(root), "init"], check=True, capture_output=True, text=True)
+    subprocess.run(["git", "-C", str(root), "add", "."], check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "-C", str(root), "-c", "user.name=Audit", "-c", "user.email=audit@example.invalid", "commit", "-m", "fixture"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    checkpoint = root / "results" / "step_0001.npz"
+    checkpoint.parent.mkdir()
+    identity = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], check=True, capture_output=True, text=True
+    ).stdout.strip()
+    manifest = root / "export.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "v4_tcdp.sibling_export_manifest.v1",
+                "copy_performed": False,
+                "source_id": "probe:config",
+                "source_commit": identity,
+                "source_tree_identity": subprocess.run(
+                    ["git", "-C", str(root), "rev-parse", "HEAD^{tree}"], check=True, capture_output=True, text=True
+                ).stdout.strip(),
+                "requested_pinned_commit": identity,
+                "result_evidence": ["results/step_0001.npz"],
+                "config": {"content": {"kernel": {"type": "gaussian", "bandwidth": [1.0]}}},
+            }
+        ),
+        encoding="utf-8",
+    )
+    return checkpoint, manifest
+
+
+def test_replay_rejects_malformed_generator_and_nonfinite_loss(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    checkpoint, manifest = _make_source_fixture(source)
+    np.savez(checkpoint, G=np.array([[1.0, 0.0], [0.0, 1.0], [1.5, 1.0]]), theta=np.array([0.1, 0.2, 0.3]), step=np.array(1), loss=np.array(0.5))
+    with pytest.raises(ValueError, match="source generator"):
+        replay_export(manifest, source, tmp_path / "replayed")
+    np.savez(checkpoint, G=np.array([[1, 0], [0, 1]], dtype=np.uint8), theta=np.array([0.1, 0.2]), step=np.array(1), loss=np.array(float("nan")))
+    with pytest.raises(ValueError, match="checkpoint loss must be finite"):
+        replay_export(manifest, source, tmp_path / "replayed")
 
 
 def test_training_smoke_checkpoint_replay_is_safe_and_explicit(tmp_path: Path) -> None:

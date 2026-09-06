@@ -330,6 +330,7 @@
     ]
   },
   "pair_moves": 0,
+  "pairs_changed": 0,
   "provenance": {
     "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
     "compiler": {

@@ -53,6 +53,17 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | S04 multi-seed ring reuse | PASS | Rewriting an unchanged seed-0 run after adding seed 1 succeeds; mutable replica observations are excluded from immutable run identity. | None for the repaired boundary. | None |
 | S05 ring artifact integrity | PASS | Existing-output reuse requires all four promised files and validates every serialized dataset/run array plus summary identity against the requested run. Missing and corrupted artifacts are rejected. | None for the repaired boundary. | None |
 
+## 2026-09-06 fourth repair review disposition
+
+| Finding | Status | Evidence | Remaining action | Owner dependency |
+|---|---|---|---|---|
+| T01 NAT positional pair binding | PASS | Positional keys and windings are bound to caller pair order before canonical sorting; equivalent sequence and mapping inputs produce the same generator, compiled state and zero-step trajectory. | None for the repaired boundary. | None |
+| T02 atomic and physical checkpoint resume | PASS | Resume validates history length, learning rate, complete Adam state, non-negative finite second moments, integral step, and RNG state before assignment; rejected resumes leave a trainer snapshot unchanged. | None for the repaired boundary. | None |
+| T03 fail-closed source verification | PASS | NUL-delimited Git status/file listing preserves non-ASCII paths; status, commit and tree observation failures raise instead of certifying clean. | None for the repaired boundary. | None |
+| T04 ring summary integrity | PASS | Existing summaries must exactly equal the manifest's initialization, replication, metrics and photonic-evaluation snapshot; altered metrics or fabricated physical PASS are rejected. | None for the repaired boundary. | None |
+| T05 sibling replay input validation | PASS | Raw generator, theta, step and source loss are validated before coercion/evaluation; nonbinary, nonfinite and non-integral checkpoint fields are rejected and JSON export disallows NaN. | None for the repaired boundary. | None |
+| T06 NAT move-count semantics | PASS | Public `pair_moves` now reports accepted discrete updates; `pairs_changed` reports endpoint key/winding changes. Existing NAT JSON artifacts were corrected without retraining. | None for the repaired reporting contract. | None |
+
 | ID | Status | Evidence / missing implementation or evidence | Next concrete action | Owner dependency |
 |---|---|---|---|---|
 | TRAIN-01 | PASS | NumPy core, contracts, provenance, and sibling export boundary exist; focused tests pass. | None for bounded scope. | None |
@@ -108,4 +119,4 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | COMPARE-03 | PASS | Common 20,000 accepted-sample evaluation budget, exact controls and acceptance accounting are recorded. | Add sampled uncertainty only when a sampled arm is authorized. | None for current exact scope |
 | COMPARE-04 | INCONCLUSIVE | Ring comparison artifact exists and reference-only capability is visible; sibling/substrate comparison and figures are missing. | Complete sibling/physical arms, then regenerate comparison figures and manifests. | D1; external sibling data |
 
-The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the post-third-repair full suite passed `658` tests with one optional source-integration skip in `455.60s`. This is an environment note, not a requirement PASS for physical validation.
+The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the post-fourth-repair full suite passed `665` tests with one optional source-integration skip in `654.64s`. The explicit sibling integration passed `8` tests in `9.50s`. This is an environment note, not a requirement PASS for physical validation.

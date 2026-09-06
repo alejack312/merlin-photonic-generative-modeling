@@ -169,6 +169,17 @@ def test_idempotent_ring_rewrite_rejects_corrupt_promised_artifact(tmp_path) -> 
         write_run_artifacts(run, tmp_path)
 
 
+def test_idempotent_ring_rewrite_rejects_corrupt_summary(tmp_path) -> None:
+    run = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0))
+    paths = write_run_artifacts(run, tmp_path)
+    summary = json.loads(paths["summary"].read_text(encoding="utf-8"))
+    summary["metrics"] = {"tvd_train": -999.0}
+    summary["photonic_evaluation"] = {"status": "PASS"}
+    paths["summary"].write_text(json.dumps(summary), encoding="utf-8")
+    with pytest.raises(FileExistsError, match="integrity validation"):
+        write_run_artifacts(run, tmp_path)
+
+
 def test_ring_artifacts_namespace_initialization_and_step_ablations(tmp_path) -> None:
     primary = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True))
     uniform = train_rings(resolve_config("rings_hamming", n=4, seed=0, steps=0, main=True, initialization="uniform"))

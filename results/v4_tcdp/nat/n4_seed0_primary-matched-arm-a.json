@@ -344,7 +344,8 @@
       0.0003471212483486973
     ]
   },
-  "pair_moves": 1,
+  "pair_moves": 2,
+  "pairs_changed": 1,
   "provenance": {
     "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
     "compiler": {

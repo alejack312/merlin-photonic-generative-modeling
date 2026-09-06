@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Repo state
 
-As of 2026-09-06, branch `codex/v4-implementation` contains the additive v4.0 implementation through the third repair review: bounded ring comparisons, source-smoke retraining evidence, matched NAT arms, repaired provenance/overwrite gates, full raw-content identities, strict Adam continuation, and complete ring artifact reuse validation. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); scientific interpretation remains provisional and physical/full-Fock, photonic-ring, owner-control, and broader sibling requirements are not claimed complete.
+As of 2026-09-06, branch `codex/v4-implementation` contains the additive v4.0 implementation through the fourth repair review: bounded ring comparisons, source-smoke retraining evidence, matched NAT arms, fail-closed provenance, full raw-content identities, strict atomic Adam continuation, complete ring artifact/summary reuse validation, paired NAT binding, and corrected move-count reporting. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); scientific interpretation remains provisional and physical/full-Fock, photonic-ring, owner-control, and broader sibling requirements are not claimed complete.
 
 As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up), and was repackaged into an installable `merlin_iqp` library (src-layout) with phase scripts moved to `scripts/`. Real commands:
 

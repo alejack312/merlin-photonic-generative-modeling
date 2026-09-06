@@ -46,6 +46,37 @@ def test_pair_keys_and_compiled_winding_stay_on_catalog() -> None:
     assert run.to_dict()["final_compiled"]["pair_angles"][0]["winding"] == 1
 
 
+def test_positional_pair_values_follow_caller_pair_order() -> None:
+    target = ExactProbabilities(np.arange(1, 9) / 36)
+    pairs = [(1, 2), (0, 1)]
+    sequence = run_nat(
+        target,
+        pairs,
+        n=3,
+        singles=[0.2, 0.3, 0.5],
+        pair_keys=[1, 20],
+        pair_windings=[0, 1],
+        steps=0,
+    )
+    mapped = run_nat(
+        target,
+        pairs,
+        n=3,
+        singles=[0.2, 0.3, 0.5],
+        pair_keys={(1, 2): 1, (0, 1): 20},
+        pair_windings={(1, 2): 0, (0, 1): 1},
+        steps=0,
+    )
+    assert sequence.config.pairs == ((0, 1), (1, 2))
+    assert sequence.initial_pair_keys == mapped.initial_pair_keys == (20, 1)
+    assert sequence.initial_pair_windings == mapped.initial_pair_windings == (1, 0)
+    np.testing.assert_array_equal(sequence.generator, mapped.generator)
+    np.testing.assert_allclose(
+        [angle.lifted_theta for _, angle in sequence.final_compiled.pair_angles],
+        [angle.lifted_theta for _, angle in mapped.final_compiled.pair_angles],
+    )
+
+
 def test_single_angles_remain_continuous_and_use_exact_gradient() -> None:
     target = _target_for_pair_key(1, singles=(0.31, -0.17))
     run = run_nat(target, [(0, 1)], pair_keys=[1], singles=[0.123456, -0.234567], steps=1, seed=3, sigma=0.8, single_optimizer="sgd", single_lr=0.01)
@@ -119,6 +150,14 @@ def test_bounded_run_is_reproducible_and_serializable(tmp_path) -> None:
     assert first.provenance["replication"]["deterministic_initialization"] is True
     assert first.provenance["replication"]["independent_replica"] is False
     assert first.provenance["replication"]["n_unique_parameterizations_observed"] == 1
+
+
+def test_pair_moves_reports_accepted_moves_and_pairs_changed_reports_endpoint_delta() -> None:
+    target = _target_for_pair_key(3)
+    run = run_nat(target, [(0, 1)], pair_keys=[0], singles=[0.0, 0.0], steps=2, seed=7, sigma=0.8)
+    payload = run.to_dict()
+    assert payload["pair_moves"] == run.budgets["pair_moves"]
+    assert payload["pairs_changed"] == run.pairs_changed
 
 
 def test_public_spatial_trainer_requires_geometry_and_fits_nontrivial_target() -> None:
