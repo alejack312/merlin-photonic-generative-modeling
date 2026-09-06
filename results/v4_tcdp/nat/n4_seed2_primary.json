@@ -324,12 +324,14 @@
       "winding_and_lift_preserved": true
     },
     "control": null,
+    "final_parameter_hash": "7a54b685eab77e15d87703aaada555ea506d5be1e779f0426b646db472ffa58f",
     "forbidden_methods": [
       "finite_difference_through_quantization",
       "straight_through_gradient",
       "interpolation"
     ],
     "generator_hash": "9f4c4ba8abb1416a673c5c82dfa891736d3a827f52a4995c8382f5e0f04fd7f2",
+    "initial_parameter_hash": "e1468b3c8b834763c47d4fd6ae387b260d7ce52f4801046ad0ed8ba3ea5105eb",
     "initialization": {
       "method": "parity",
       "scale": 0.1,
@@ -347,6 +349,13 @@
     },
     "pair_update": "circular key neighbors (key-1, key+1) with strict-improvement acceptance",
     "python": "3.12.1",
+    "replication": {
+      "deterministic_initialization": true,
+      "independent_replica": false,
+      "n_unique_parameterizations_observed": 1,
+      "seed": 2,
+      "unit": "independent RNG source or explicitly declared deterministic configuration"
+    },
     "seed": 2,
     "single_update": "objective_and_gradient_exact plus deterministic SGD/Adam update on first n coordinates",
     "source_commit": "working-tree"
