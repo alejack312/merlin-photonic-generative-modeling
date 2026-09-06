@@ -36,8 +36,25 @@
     "quantized": true,
     "topology": "arbitrary_weight2"
   },
-  "elapsed_seconds": 0.28795299999183044,
+  "elapsed_seconds": 14.593300199980149,
   "expected_success_from_compiled_pairs": 0.013726388348954031,
+  "full_fock": {
+    "accepted_mass": 0.1111113301012665,
+    "diagnostics": {
+      "conditional_distribution": true,
+      "eta": 1.0,
+      "g2": 0.0,
+      "general_agreement_claim": false,
+      "loss": "uniform_all_photons",
+      "loss_scaling": "eta**n",
+      "projection": "four CP ancilla modes vacuum",
+      "residual_out_of_logical_subspace": 0.0,
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true
+    },
+    "rejected_mass": 0.8888886698987335,
+    "status": "PASS"
+  },
   "haar_fidelity": 1.0,
   "map_physicality": {
     "choi_consistency_error": 0.0,
@@ -49,9 +66,14 @@
   },
   "model_success": 0.013726388348954028,
   "perceval": {
-    "status": "SKIPPED"
+    "accepted_probe": 0.111111111111111,
+    "accepted_probe_error": 1.3877787807814457e-16,
+    "analytic_success_reference": 0.11111111111111113,
+    "perceval_version": "1.2.4",
+    "scope": "single bare CP circuit accepted-mass probe; not process tomography",
+    "status": "PASS"
   },
-  "physical_status": "SKIPPED",
+  "physical_status": "PASS",
   "probability_sum": 1.0,
   "status": "PASS",
   "success_reference_error": -3.469446951953614e-18,

@@ -22,6 +22,7 @@ from merlin_iqp.deploy import (
     compile_iqp,
     compile_generators,
     conditional_erasure_distribution,
+    direct_fock_cp_reference,
     fixed_photon_attempts_per_sample,
     full_fock_cp_reference,
     heralded_cz_attempts_per_sample,
@@ -226,6 +227,23 @@ def test_fixed_photon_fock_loss_scales_acceptance_without_changing_conditioned_q
     assert lossy.distribution == pytest.approx(lossless.distribution, abs=1e-12)
     assert lossy.accepted_mass == pytest.approx(lossless.accepted_mass * 0.5**2, abs=1e-12)
     assert lossy.rejected_mass == pytest.approx(1.0 - lossy.accepted_mass, abs=1e-12)
+
+
+def test_direct_no_gate_zero_angle_identity_and_bit_order() -> None:
+    result = direct_fock_cp_reference(2, [0.0, 0.0], [])
+    if result.status == "INCONCLUSIVE":
+        pytest.skip(result.diagnostics.get("reason", "Perceval unavailable"))
+    assert result.distribution == pytest.approx({"00": 1.0}, abs=1e-12)
+    assert result.diagnostics["source_once"] is True
+    assert result.diagnostics["source_input_photons"] == 2
+
+
+def test_direct_no_gate_single_angle_matches_independent_reference() -> None:
+    result = direct_fock_cp_reference(1, [0.2], [])
+    if result.status == "INCONCLUSIVE":
+        pytest.skip(result.diagnostics.get("reason", "Perceval unavailable"))
+    reference = ideal_iqp_distribution(1, [0.2])
+    assert result.distribution == pytest.approx(reference, abs=1e-12)
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:

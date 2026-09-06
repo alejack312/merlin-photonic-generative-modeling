@@ -39,7 +39,12 @@ from .throughput import (
     heralded_cz_attempts_per_sample,
 )
 from .erasure import conditional_erasure_distribution
-from .fock import FullFockResult, full_fock_cp_reference
+from .fock import (
+    FullFockResult,
+    direct_fock_compiled_distribution,
+    direct_fock_cp_reference,
+    full_fock_cp_reference,
+)
 
 __all__ = [
     "ALPHA_KEYS",
@@ -68,5 +73,7 @@ __all__ = [
     "heralded_cz_attempts_per_sample",
     "conditional_erasure_distribution",
     "FullFockResult",
+    "direct_fock_compiled_distribution",
+    "direct_fock_cp_reference",
     "full_fock_cp_reference",
 ]
