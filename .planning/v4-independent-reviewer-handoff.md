@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: `0e19b40` (`codex/v4-implementation` after D1/D2/D3 decisions, implementation, tests and authorized artifacts).
+- Review target: `ef063b1` (`codex/v4-implementation` after D1/D2/D3 decisions, implementation, tests, authorized artifacts and final handoff update).
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -37,7 +37,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Observed result at head `0e19b40`: `621 passed in 320.03s`. Without the override, collection fails because Perceval cannot write its default `AppData\Local\quandela\perceval-quandela\logs\perceval.log`; this is an environment failure, not a relaxed test gate.
+Observed result at head `ef063b1`: `621 passed in 320.03s`. Without the override, collection fails because Perceval cannot write its default `AppData\Local\quandela\perceval-quandela\logs\perceval.log`; this is an environment failure, not a relaxed test gate.
 
 ## Evidence locations
 
