@@ -18,6 +18,12 @@ The prior literature search is background, not proof of novelty. Record search s
 | D2 | NAT with discrete gate keys and continuous single angles, or a validated continuous-angle noise model | Adam finite differences h=1e-4 through roughly .025-wide theta quantization as a useful pair gradient | Algorithm, gradient/neighbor validation, resolution, objective and budget. |
 | D3 | Initialization method/scale and what the five seeds vary | Unspecified sibling defaults, or deterministic duplicates treated as independent restarts | Exact target-moment recipe/configuration, stationary-point pilot and replication unit. |
 
+### Resolved owner decisions (2026-09-06)
+
+- **D1:** v4 primary physical scope is fixed photon number with `g2=0` and explicit uniform per-photon loss. Accepted conditional distributions remain separate from absolute success; joint multiphoton `g2>0` plus loss is outside this milestone.
+- **D2:** NAT uses the discrete `0.1*j` alpha catalog with deterministic circular neighbor/coordinate search for pair keys and the existing exact analytic gradient/update for continuous single-qubit angles. Quantized finite differences, interpolation and straight-through gradients are not used.
+- **D3:** primary profiles use the sibling-style data-dependent parity initialization at scale `0.1`, computed from the exact training target moments. `small_angle` and `uniform` remain explicit ablations. Deterministic duplicate parameterizations are recorded and are not counted as independent replicas.
+
 **Must:** both additive pipelines, shared modular contracts, faithful source inventory/reproduction, matched Hamming comparison, validated deployment, informative metrics/controls, NAT attempt with its existing stop rule, scoped erasure artifact and reproducible reports. **Won't:** implement during this planning turn; replace old pipelines/results; add dependencies here; assert unsupported physical equivalence; invent owner answers; publish or send messages automatically. D1 gates noisy physical scope, D2 gates NAT, D3 gates unspecified data-dependent profiles; they do not block explicitly configured classical ring or source-faithful runs.
 
 ## 1. Physical and provenance contract

@@ -33,6 +33,7 @@ from .maps import (
     validate_gate_map,
 )
 from .throughput import (
+    fixed_photon_accepted_mass,
     fixed_photon_attempts_per_sample,
     general_attempts_per_sample,
     heralded_cz_attempts_per_sample,
@@ -62,6 +63,7 @@ __all__ = [
     "ideal_cp_map",
     "ideal_single_map",
     "fixed_photon_attempts_per_sample",
+    "fixed_photon_accepted_mass",
     "general_attempts_per_sample",
     "heralded_cz_attempts_per_sample",
     "conditional_erasure_distribution",

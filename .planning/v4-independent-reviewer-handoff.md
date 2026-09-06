@@ -52,11 +52,13 @@ Observed result: `609 passed in 304.97s`. Without the override, collection fails
 2. Confirm that raw, compiled, and deployed vectors remain distinct and that acceptance is not conflated with conditional quality.
 3. Audit the negative optical signs, alpha-key winding, MSB bit order, Hamming kernel distance (not squared distance), and one-final-normalization composition.
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
-5. Check D1/D2/D3 gates, owner controls, missing source data, n=6/8 unlaunched profiles, absent photonic ring adapter, absent NAT, and absent independent review are visible in the ledger.
-6. Verify no legacy pipeline or sibling file changed, and no large sweep or merge occurred.
+5. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, discrete-key NAT implementation, owner controls, missing source data, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production runs, and absent independent review against the ledger.
+6. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
-## Decisions still requested from owner
+## Decisions recorded from owner (2026-09-06)
 
-- D1: fixed-photon `g2=0` versus joint source/number-sector `g2+loss` model.
-- D2: discrete alpha-key optimizer versus validated continuous-angle deployment model.
-- D3: data-dependent initialization recipe/scale and replication unit, or explicit exclusion from primary v4 profiles.
+- D1: fixed-photon `g2=0` with explicit uniform per-photon loss; multiphoton `g2>0` claims remain outside scope.
+- D2: discrete `0.1*j` alpha-key neighbor search with continuous single-qubit angles and exact analytic gradients.
+- D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
+
+These decisions unlock implementation, but do not certify physical full-Fock composition, source-faithful sibling retraining, NAT efficacy, or owner interpretation.

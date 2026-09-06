@@ -10,6 +10,13 @@ from .compile import CompiledCircuit
 from .maps import GateMap, ideal_cp_map, ideal_single_map
 
 
+def _validate_eta(eta: float) -> float:
+    value = float(eta)
+    if not np.isfinite(value) or not 0.0 < value <= 1.0:
+        raise ValueError("eta must be finite and in (0, 1]")
+    return value
+
+
 def _index(local_bits: int, rest_bits: int, qubits: tuple[int, ...], n: int) -> int:
     selected = set(qubits)
     local_cursor = len(qubits) - 1
@@ -79,10 +86,22 @@ def _hadamard_density(n: int) -> np.ndarray:
     return result
 
 
-def apply_compiled_density(compiled: CompiledCircuit, *, return_state: bool = False) -> tuple[dict[str, float], float] | tuple[np.ndarray, float]:
-    """Evaluate the compiled IQP model and return probabilities/model success."""
+def apply_compiled_density(
+    compiled: CompiledCircuit,
+    *,
+    return_state: bool = False,
+    eta: float = 1.0,
+) -> tuple[dict[str, float], float] | tuple[np.ndarray, float]:
+    """Evaluate the compiled IQP model under fixed-photon uniform loss.
+
+    The logical state is conditioned on acceptance and therefore has the same
+    normalized probabilities as the lossless instrument. The returned
+    success is absolute accepted mass and includes ``eta**n`` exactly once.
+    This is the restricted ``g2=0`` model.
+    """
 
     n = compiled.n
+    eta = _validate_eta(eta)
     plus = np.ones(2**n, complex) / np.sqrt(2**n)
     rho = np.outer(plus, plus.conj())
     operations: list[tuple[tuple[int, ...], GateMap]] = []
@@ -102,6 +121,7 @@ def apply_compiled_density(compiled: CompiledCircuit, *, return_state: bool = Fa
         raise ValueError("ideal compiled probability vector contains negative mass")
     probs = np.maximum(probs, 0.0)
     probs /= probs.sum()
+    success = float(success * eta**n)
     if return_state:
         return measured, success
     return {format(index, f"0{n}b"): float(value) for index, value in enumerate(probs)}, success

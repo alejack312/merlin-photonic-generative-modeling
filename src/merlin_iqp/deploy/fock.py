@@ -29,9 +29,10 @@ def full_fock_cp_reference(
 ) -> FullFockResult:
     """Run the existing small CP dual-rail reference when its scope applies.
 
-    This deliberately supports only one CP insertion and ideal source/loss
-    settings. g2/loss requests are INCONCLUSIVE rather than silently
-    approximated by a gate-local map.
+    This deliberately supports only one CP insertion. The fixed-photon
+    ``g2=0`` branch accepts uniform loss through explicit ``eta**n`` success
+    scaling; multiphoton source requests remain INCONCLUSIVE rather than being
+    silently approximated by a gate-local map.
     """
 
     if n not in (2, 3):
@@ -40,11 +41,13 @@ def full_fock_cp_reference(
         raise ValueError("invalid CP pair")
     if len(singles) != n:
         raise ValueError("single-angle count does not match n")
-    if not np.isclose(g2, 0.0) or not np.isclose(eta, 1.0):
+    if not np.isfinite(eta) or not 0.0 < eta <= 1.0:
+        raise ValueError("eta must be finite and in (0, 1]")
+    if not np.isclose(g2, 0.0):
         return FullFockResult(
             "INCONCLUSIVE",
             diagnostics={
-                "reason": "g2/loss joint source model is not implemented; D1 remains open",
+                "reason": "multiphoton g2 source model is not implemented; D1 fixed-photon scope excludes it",
                 "g2": float(g2),
                 "eta": float(eta),
                 "source_once": True,
@@ -60,18 +63,22 @@ def full_fock_cp_reference(
         )
     except Exception as exc:
         return FullFockResult("INCONCLUSIVE", diagnostics={"reason": f"Perceval reference failed: {type(exc).__name__}: {exc}"})
+    accepted_mass = float((1.0 - failure) * eta**n)
     return FullFockResult(
         "PASS",
         distribution={str(key): float(value) for key, value in distribution.items()},
-        accepted_mass=float(1.0 - failure),
-        rejected_mass=float(failure),
+        accepted_mass=accepted_mass,
+        rejected_mass=float(1.0 - accepted_mass),
         diagnostics={
             "source_once": True,
+            "source_model": "fixed_photon_g2_0",
+            "loss": "uniform_all_photons",
             "projection": "four CP ancilla modes vacuum",
             "residual_out_of_logical_subspace": float(residual),
             "conditional_distribution": True,
             "general_agreement_claim": False,
             "g2": 0.0,
-            "eta": 1.0,
+            "eta": float(eta),
+            "loss_scaling": "eta**n",
         },
     )

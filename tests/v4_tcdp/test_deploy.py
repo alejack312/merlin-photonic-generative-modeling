@@ -15,6 +15,7 @@ import pytest
 from merlin_iqp.deploy import (
     MapCache,
     apply_compiled_density,
+    fixed_photon_accepted_mass,
     compile_iqp,
     compile_generators,
     conditional_erasure_distribution,
@@ -105,6 +106,21 @@ def test_density_composition_matches_direct_ideal_compiled_reference() -> None:
     assert success == pytest.approx(expected_success, abs=1e-12)
 
 
+def test_fixed_photon_loss_preserves_conditioned_distribution_and_scales_success() -> None:
+    compiled = compile_iqp(3, [0.2, -0.1, 0.31], [(0, 2, 0.311)], quantize=False)
+    lossless, success_lossless = apply_compiled_density(compiled, eta=1.0)
+    lossy, success_lossy = apply_compiled_density(compiled, eta=0.5)
+    assert lossy == pytest.approx(lossless, abs=1e-12)
+    assert success_lossy == pytest.approx(success_lossless * 0.5**3, abs=1e-12)
+    assert success_lossy == pytest.approx(fixed_photon_accepted_mass(0.5, 3, success_lossless), abs=1e-12)
+
+
+def test_fixed_photon_loss_rejects_invalid_survival() -> None:
+    compiled = compile_iqp(2, [0.1, 0.2], [(0, 1, 0.3)], quantize=False)
+    with pytest.raises(ValueError, match="eta"):
+        apply_compiled_density(compiled, eta=0.0)
+
+
 def test_k_zero_is_a_valid_identity_instrument_control() -> None:
     compiled = compile_iqp(3, [0.2, -0.1, 0.31], [])
     observed, success = apply_compiled_density(compiled)
@@ -138,6 +154,19 @@ def test_capability_failures_are_explicit() -> None:
     result = full_fock_cp_reference(2, 0, 1, [0.0, 0.0], np.pi / 3, g2=0.025)
     assert result.status == "INCONCLUSIVE"
     assert "D1" in result.diagnostics["reason"]
+
+
+def test_fixed_photon_fock_loss_scales_acceptance_without_changing_conditioned_q() -> None:
+    lossless = full_fock_cp_reference(2, 0, 1, [0.2, 0.3], np.pi / 3, eta=1.0)
+    lossy = full_fock_cp_reference(2, 0, 1, [0.2, 0.3], np.pi / 3, eta=0.5)
+    if lossless.status == "INCONCLUSIVE" or lossy.status == "INCONCLUSIVE":
+        assert "Perceval" in str(lossless.diagnostics.get("reason", ""))
+        assert "Perceval" in str(lossy.diagnostics.get("reason", ""))
+        return
+    assert lossless.status == lossy.status == "PASS"
+    assert lossy.distribution == pytest.approx(lossless.distribution, abs=1e-12)
+    assert lossy.accepted_mass == pytest.approx(lossless.accepted_mass * 0.5**2, abs=1e-12)
+    assert lossy.rejected_mass == pytest.approx(1.0 - lossy.accepted_mass, abs=1e-12)
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:

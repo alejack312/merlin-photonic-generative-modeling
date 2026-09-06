@@ -8,6 +8,8 @@ import json
 import numpy as np
 import pytest
 
+from merlin_iqp.classical import target_moments
+from merlin_iqp.classical._validation import hash_array
 from merlin_iqp.experiments.datasets import load_rings_dataset, make_grid_codec
 from merlin_iqp.experiments.rings import (
     classical_only_import_guard,
@@ -69,6 +71,37 @@ def test_both_objective_profiles_train_with_shared_iqp_model(profile: str) -> No
     assert all(np.isfinite(value) for value in run.metrics.values())
     assert run.photonic_evaluation["status"] == "INCONCLUSIVE"
     assert config.profile_id == profile
+    assert config.initialization == "data_dependent"
+    assert config.initialization_method == "parity"
+    assert config.initialization_scale == 0.1
+
+
+def test_default_data_dependent_initialization_uses_exact_train_moments_and_scale() -> None:
+    dataset = load_rings_dataset(4)
+    first = train_rings(resolve_config("rings_spatial_exact", n=4, seed=0, steps=0))
+    second = train_rings(resolve_config("rings_spatial_exact", n=4, seed=99, steps=0))
+    assert first.initialization_metadata["scheme"] == "data_dependent"
+    assert first.initialization_metadata["method"] == "parity"
+    assert first.initialization_metadata["scale"] == 0.1
+    assert first.initialization_metadata["target_split"] == "train"
+    assert first.initialization_metadata["target_dataset_hash"] == dataset.dataset_hash
+    assert first.initialization_metadata["target_representation"] == "exact_probabilities"
+    moments = target_moments(dataset.train_target, first.generator)
+    assert first.initialization_metadata["target_moments_hash"] == hash_array(moments.values)
+    assert np.allclose(first.initial_theta, 0.1 * moments.values)
+    assert np.array_equal(first.initial_theta, second.initial_theta)
+    assert first.initialization_metadata["parameter_hash"] == second.initialization_metadata["parameter_hash"]
+
+
+@pytest.mark.parametrize("scheme", ["small_angle", "uniform"])
+def test_initialization_ablations_are_explicitly_selectable(scheme: str) -> None:
+    config = resolve_config("rings_hamming", n=4, seed=3, steps=0, initialization=scheme)
+    run = train_rings(config)
+    assert run.config.initialization == scheme
+    assert run.initialization_metadata["scheme"] == scheme
+    assert run.initialization_metadata["seed"] == 3
+    assert run.initialization_metadata["scale"] == 0.1
+    assert run.initialization_metadata["randomness_source"] == "numpy.default_rng(seed)"
 
 
 def test_artifact_schema_contains_dataset_codec_diagnostics_and_context(tmp_path) -> None:
@@ -76,16 +109,35 @@ def test_artifact_schema_contains_dataset_codec_diagnostics_and_context(tmp_path
     paths = write_run_artifacts(run, tmp_path)
     assert set(paths) == {"dataset", "run", "manifest", "summary"}
     manifest = json.loads(paths["manifest"].read_text(encoding="utf-8"))
-    assert manifest["schema_version"] == "v4_tcdp.rings_run.v1"
+    assert manifest["schema_version"] == "v4_tcdp.rings_run.v2"
     assert manifest["dataset"]["codec"]["index_order"] == "row_major"
     assert manifest["dataset"]["codec"]["mapping"][0]["bitstring"] == "0000"
     assert "train_counts" in manifest["dataset"]["histograms"]
     assert "quantization" in manifest["dataset"]
     assert manifest["legacy_v1_context"]["output_bins"] == 462
     assert manifest["photonic_evaluation"]["status"] == "INCONCLUSIVE"
+    assert manifest["initialization"]["method"] == "parity"
+    assert manifest["initialization"]["scale"] == 0.1
+    assert manifest["initialization"]["seed"] == 1
+    assert manifest["initialization"]["parameter_hash"] == manifest["model"]["initial_theta_hash"]
+    assert manifest["replication_identity"]["replica_id"] == "rings_hamming/n4_seed1_smoke"
+    assert manifest["replication_identity"]["n_unique_parameterizations_observed"] == 1
     with np.load(paths["run"], allow_pickle=False) as archive:
         assert archive["decoded_centers"].shape == (16, 2)
         assert archive["output_probabilities"].shape == (16,)
+
+
+def test_duplicate_deterministic_data_dependent_replicas_are_labeled(tmp_path) -> None:
+    first = train_rings(resolve_config("rings_spatial_exact", n=4, seed=0, steps=0))
+    second = train_rings(resolve_config("rings_spatial_exact", n=4, seed=1, steps=0))
+    write_run_artifacts(first, tmp_path)
+    second_paths = write_run_artifacts(second, tmp_path)
+    manifest = json.loads(second_paths["manifest"].read_text(encoding="utf-8"))
+    identity = manifest["replication_identity"]
+    assert identity["status"] == "duplicate_deterministic"
+    assert identity["independent_replica"] is False
+    assert identity["duplicate_of"] == "rings_spatial_exact/n4_seed0_smoke"
+    assert identity["n_unique_parameterizations_observed"] == 1
 
 
 def test_legacy_grid_shapes_remain_contextually_unchanged() -> None:

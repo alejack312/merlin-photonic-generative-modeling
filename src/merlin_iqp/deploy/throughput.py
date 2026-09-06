@@ -27,6 +27,21 @@ def fixed_photon_attempts_per_sample(eta: float, n: int, model_success: float) -
     return general_attempts_per_sample(eta**int(n) * _probability(model_success, "model_success"))
 
 
+def fixed_photon_accepted_mass(eta: float, n: int, model_success: float) -> float:
+    """Absolute accepted mass for the fixed-n, ``g2=0`` loss model.
+
+    Uniform independent survival contributes exactly ``eta**n`` when the
+    acceptance event requires all n photons.  This helper is deliberately
+    separate from conditional-distribution code so callers cannot normalize
+    the loss away before recording acceptance.
+    """
+
+    eta = _probability(eta, "eta")
+    if int(n) != n or n < 0:
+        raise ValueError("n must be a nonnegative integer")
+    return float(eta**int(n) * _probability(model_success, "model_success"))
+
+
 def heralded_cz_attempts_per_sample(eta: float, n: int, k: int) -> float:
     """Separate ideal-source heralded-CZ resource illustration."""
 
