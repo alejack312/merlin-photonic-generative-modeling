@@ -23588,7 +23588,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\base.yaml",
       "relative_path": "configs/base.yaml",
       "sha256": "350cc062eefdac04468f4664c1715d232fda70c56e96b94050f70cc2fdaede6d",
@@ -23679,7 +23679,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\bandwidth_marginal_sweep.yaml",
       "relative_path": "configs/experiments/bandwidth_marginal_sweep.yaml",
       "sha256": "38d685e7036d82243ce09d39314fdd662060567e8617a3a9d44ae226041fa2a4",
@@ -23708,12 +23708,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -23836,7 +23831,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_families.yaml",
       "relative_path": "configs/experiments/forge_f4_holdout_families.yaml",
       "sha256": "99e437e136f05ef570ee8c86da9a38840a3ad9f9a092ca4ac792964e45ba2bf0",
@@ -23865,12 +23860,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -23993,7 +23983,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_families_ablation.yaml",
       "relative_path": "configs/experiments/forge_f4_holdout_families_ablation.yaml",
       "sha256": "1541d7128b0de627e3aac4668ca972f5bbfcf77d556d0a3eb49d31fa00a92f51",
@@ -24135,7 +24125,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_n.yaml",
       "relative_path": "configs/experiments/forge_f4_holdout_n.yaml",
       "sha256": "445e9c330a6f0d579e5dd2536f4a642eb523d8ae47732fe8a25432ce54ff7b37",
@@ -24277,7 +24267,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_n_ablation.yaml",
       "relative_path": "configs/experiments/forge_f4_holdout_n_ablation.yaml",
       "sha256": "5dcf3db97ea8d52cdd09caa5462721426398c9302bf6ca7125b1f8413694e330",
@@ -24418,7 +24408,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_manifests.yaml",
       "relative_path": "configs/experiments/forge_f4_manifests.yaml",
       "sha256": "9811773f1d0e78503ca9cee71f961a45c3e3a6a98159db4d9117fc5b71369d7b",
@@ -24559,7 +24549,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_manifests_ablation.yaml",
       "relative_path": "configs/experiments/forge_f4_manifests_ablation.yaml",
       "sha256": "8ca7b7b9d8704f7e46f5675ffba8bb489ebbedd7e451aecb5fca975833534031",
@@ -24700,7 +24690,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_gradient_plateau_smoke.yaml",
       "relative_path": "configs/experiments/forge_gradient_plateau_smoke.yaml",
       "sha256": "f23b24e4dfd48f3f95c1fa51d2887a47d6f5b8c27a6685891b403a471bb46ae7",
@@ -24841,7 +24831,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_plateau.yaml",
       "relative_path": "configs/experiments/forge_plateau.yaml",
       "sha256": "9c48d8a93d7f91525122d8eddae5152ad04e5fdf6cf8a6e9f0b2d872304217c7",
@@ -24982,7 +24972,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_plateau_diverse.yaml",
       "relative_path": "configs/experiments/forge_plateau_diverse.yaml",
       "sha256": "1f4eda4daad65569f60ddcfb3b20e895c03608316010139cd5cfb105e3d09589",
@@ -25004,12 +24994,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -25114,7 +25099,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_sprint.yaml",
       "relative_path": "configs/experiments/forge_sprint.yaml",
       "sha256": "a5c8571f17b80fbb31902df5e615fe25b25464bad146a69488024215c0abc924",
@@ -25210,7 +25195,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_large_n_sampled.yaml",
       "relative_path": "configs/experiments/ghosh_kim_large_n_sampled.yaml",
       "sha256": "19d668a5e7d4482f1cb8fc07af6a19222c6be2e196ae56cecd8636221dd93748",
@@ -25305,7 +25290,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_small_n.yaml",
       "relative_path": "configs/experiments/ghosh_kim_small_n.yaml",
       "sha256": "e6e0056ea4bb0389d3557cdab512c0bd1b3baaa8c0737cee053f91d5e0ad70f3",
@@ -25346,10 +25331,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice"
-          ],
+          "family": "[product_state, lattice]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -25396,10 +25378,7 @@
             "method": "parity",
             "scale": 0.1
           },
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.1
@@ -25461,7 +25440,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\koshik_raw_repro.yaml",
       "relative_path": "configs/experiments/koshik_raw_repro.yaml",
       "sha256": "c1aa93b497df26bdcff06ee1a47911e4269140e656a39a142b9d39074d7d2f9d",
@@ -25477,10 +25456,7 @@
       ],
       "content": {
         "circuit": {
-          "family": [
-            "product_state",
-            "complete_graph"
-          ],
+          "family": "[product_state, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -25576,7 +25552,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\qiskit_validation.yaml",
       "relative_path": "configs/experiments/qiskit_validation.yaml",
       "sha256": "6920ad1f18816a6cf9512195c32d6095dc765c84ad7fe3bfeb61cb4d4e3ad994",
@@ -25591,10 +25567,7 @@
       ],
       "content": {
         "circuit": {
-          "family": [
-            "product_state",
-            "complete_graph"
-          ],
+          "family": "[product_state, complete_graph]",
           "n_generators": "n",
           "n_qubits": [
             4
@@ -25671,7 +25644,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\qiskit_validation_report_smoke.yaml",
       "relative_path": "configs/experiments/qiskit_validation_report_smoke.yaml",
       "sha256": "48fcdaf64ce7b409351cc56e64f8e685b8c66bd74a447993d65d680f690b0092",
@@ -25712,12 +25685,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "complete_graph",
-            "erdos_renyi",
-            "bounded_degree"
-          ],
+          "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -25748,10 +25716,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -25766,9 +25731,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -25804,7 +25767,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_diverse.yaml",
       "relative_path": "configs/experiments/scaling_ac_diverse.yaml",
       "sha256": "4d820504438ce9367915e221d38e3a881840bdf801927c309921ed497f5ed2fd",
@@ -25846,12 +25809,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -25885,10 +25843,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -25903,9 +25858,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -25940,7 +25893,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_holdout_families.yaml",
       "relative_path": "configs/experiments/scaling_ac_holdout_families.yaml",
       "sha256": "a766d951dc62c92e3f330f63ac47c6d754171b49437ae48b9ab7cf272f63a3cb",
@@ -25981,12 +25934,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "complete_graph",
-            "erdos_renyi",
-            "bounded_degree"
-          ],
+          "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -26016,10 +25964,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -26034,9 +25979,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -26071,7 +26014,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_holdout_n.yaml",
       "relative_path": "configs/experiments/scaling_ac_holdout_n.yaml",
       "sha256": "9d2e9687d1761e9490d2d81a780cd595605c6a3125b34809fa2526ae95ac5718",
@@ -26108,9 +26051,7 @@
               2.0
             ]
           },
-          "family": [
-            "complete_graph"
-          ],
+          "family": "[complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -26139,9 +26080,7 @@
           "seed": 11
         },
         "init": {
-          "scheme": [
-            "uniform"
-          ],
+          "scheme": "[uniform]",
           "uniform": {
             "high": 3.14159265,
             "low": -3.14159265
@@ -26151,9 +26090,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         }
       },
       "declared_paths": [
@@ -26179,7 +26116,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_smoke.yaml",
       "relative_path": "configs/experiments/scaling_ac_smoke.yaml",
       "sha256": "e560db7c13ad8e5d27ddbfbb7ba1245d142cc7e3a8c91e8f148ccee70b8d7aaf",
@@ -26201,12 +26138,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -26268,11 +26200,7 @@
           "data_dependent": {
             "dataset": "product_bernoulli"
           },
-          "scheme": [
-            "uniform",
-            "small_angle",
-            "data_dependent"
-          ],
+          "scheme": "[uniform, small_angle, data_dependent]",
           "small_angle": {
             "std": [
               0.01,
@@ -26293,9 +26221,7 @@
             2.0,
             5.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -26323,7 +26249,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_v1.yaml",
       "relative_path": "configs/experiments/scaling_v1.yaml",
       "sha256": "3224304b16a65ead5553e3f8555e9446216265fcd31a2229e573381d0b5cc9a6",
@@ -26345,12 +26271,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -26412,11 +26333,7 @@
           "data_dependent": {
             "dataset": "product_bernoulli"
           },
-          "scheme": [
-            "uniform",
-            "small_angle",
-            "data_dependent"
-          ],
+          "scheme": "[uniform, small_angle, data_dependent]",
           "small_angle": {
             "std": [
               0.01,
@@ -26445,11 +26362,7 @@
             ],
             "weights": null
           },
-          "type": [
-            "gaussian",
-            "laplacian",
-            "multi_scale_gaussian"
-          ]
+          "type": "[gaussian, laplacian, multi_scale_gaussian]"
         },
         "output": {
           "figures": {
@@ -26478,7 +26391,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_v2.yaml",
       "relative_path": "configs/experiments/scaling_v2.yaml",
       "sha256": "9d820bfead5dbeef9ec09a2dc10442f18f7eb8f556bf1b1860917ce8d1de8def",
@@ -26575,7 +26488,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\training_smoke.yaml",
       "relative_path": "configs/experiments/training_smoke.yaml",
       "sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab",
@@ -26634,7 +26547,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\validation.yaml",
       "relative_path": "configs/experiments/validation.yaml",
       "sha256": "79a2cda0ba2406ac10ebdba0442b153ec9b314c03f3449f4679dda4a764053f1",
@@ -26709,7 +26622,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\validation_from_checkpoint.yaml",
       "relative_path": "configs/experiments/validation_from_checkpoint.yaml",
       "sha256": "920f9b6ce2128c93d329a35d5d169deba64c3c607ddab42170a4fb72cebc7593",
@@ -27311,7 +27224,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\hyperparameters.yaml",
       "relative_path": "configs/hyperparameters.yaml",
       "sha256": "c1292492d55e918df0691338365f3a24ff49113b68fe9f873fe3ec7f76c1d280",
@@ -27382,7 +27295,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\pauli_estimator_datasets.yaml",
       "relative_path": "configs/pauli_estimator_datasets.yaml",
       "sha256": "a27bf39fdf97dd8d366669a96c4feef77c891e5d14b3a77725e66261a07d59a5",
@@ -27581,7 +27494,7 @@
       ],
       "kind": "config",
       "parse_error": null,
-      "parse_status": "parsed",
+      "parse_status": "parsed_without_pyyaml",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\schema.yaml",
       "relative_path": "configs/schema.yaml",
       "sha256": "1b509e666e48fa12412da2fbca4ec3c5671c543f6031a589625e2dc0f86be35b",
@@ -27594,72 +27507,6 @@
         "dataset_generation_or_loading",
         "ising_or_spin_target"
       ],
-      "content": {
-        "checkpoints": [
-          {
-            "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-            "dataset": "2D_ising",
-            "spin_sym": true
-          },
-          {
-            "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-            "dataset": "8_blobs",
-            "spin_sym": false
-          }
-        ],
-        "output": {
-          "combined_json": "results/pauli_estimator_validation_n16.json",
-          "per_seed_root": "results/pauli_estimator_validation_n16"
-        },
-        "seeds": [
-          666,
-          667,
-          668
-        ],
-        "val01": {
-          "n_expval_samples": 2000,
-          "num_pauli_samples": 2000
-        },
-        "val02": {
-          "k_values": [
-            1,
-            2,
-            4
-          ],
-          "n_expval_samples": 2000,
-          "num_subsets": {
-            "1": 16,
-            "2": 120,
-            "4": 256
-          }
-        }
-      },
-      "declared_paths": [
-        {
-          "declared": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-          "exists": true,
-          "field": "ckpt",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\ising_n16_iters1000_seed666.npz"
-        },
-        {
-          "declared": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-          "exists": true,
-          "field": "ckpt",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\spin_blobs_n16_iters1000_seed666.npz"
-        },
-        {
-          "declared": "results/pauli_estimator_validation_n16",
-          "exists": true,
-          "field": "per_seed_root",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16"
-        },
-        {
-          "declared": "results/pauli_estimator_validation_n16.json",
-          "exists": true,
-          "field": "combined_json",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16.json"
-        }
-      ],
       "gaussian_related": true,
       "keyword_hits": [
         "checkpoint",
@@ -27668,8 +27515,8 @@
         "ising"
       ],
       "kind": "config",
-      "parse_error": null,
-      "parse_status": "parsed",
+      "parse_error": "minimal YAML parser: ValueError: unsupported YAML line:     ckpt: results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
+      "parse_status": "parse_error",
       "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\validate_n16_checkpoints.yaml",
       "relative_path": "configs/validate_n16_checkpoints.yaml",
       "sha256": "7fd251f96de397e8fbb8899adf1be7058cbaea64cdf30ebcf96943e9ab1f2af2",
@@ -27678,21 +27525,21 @@
     }
   ],
   "environment": {
-    "executable": "C:\\Python313\\python.exe",
+    "executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
     "packages": {
       "exqalibur": "1.4.1",
-      "jax": "0.10.0",
-      "jaxlib": "0.10.0",
-      "merlinquantum": null,
-      "numpy": "2.2.6",
-      "pennylane": "0.44.1",
+      "jax": null,
+      "jaxlib": null,
+      "merlinquantum": "0.4.0",
+      "numpy": "2.5.1",
+      "pennylane": null,
       "perceval-quandela": "1.2.4",
-      "pyyaml": "6.0.3",
-      "scipy": "1.16.2",
-      "torch": "2.9.1"
+      "pyyaml": null,
+      "scipy": "1.18.0",
+      "torch": "2.12.1"
     },
     "platform": "Windows-11-10.0.26200-SP0",
-    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]"
+    "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
   },
   "inventory_scope": {
     "excluded_from_execution": [
@@ -30626,7 +30473,7 @@
       ".yaml",
       ".yml"
     ],
-    "missing_data_policy": "record blocked and preserve reference; never synthesize a replacement",
+    "missing_data_policy": "external inputs remain blocked; recorded synthetic inputs may be regenerated from their source recipe",
     "np_load_allow_pickle": false,
     "rejected_suffixes": [
       ".dill",
@@ -30641,7 +30488,13 @@
   "source": {
     "git_status": [],
     "head_matches_pinned": true,
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "observed_dirty": false,
     "observed_head": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "observed_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "observed_tree_identity_kind": "git_tree",
+    "pin_status": "MATCH",
     "pinned_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
     "pinned_parent": "4e5bfc43e325029d7cc760bc2c355afa2d6461e4",
     "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
@@ -30881,7 +30734,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\base.yaml",
         "relative_path": "configs/base.yaml",
         "sha256": "350cc062eefdac04468f4664c1715d232fda70c56e96b94050f70cc2fdaede6d",
@@ -31482,7 +31335,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\bandwidth_marginal_sweep.yaml",
         "relative_path": "configs/experiments/bandwidth_marginal_sweep.yaml",
         "sha256": "38d685e7036d82243ce09d39314fdd662060567e8617a3a9d44ae226041fa2a4",
@@ -31573,12 +31426,7 @@
                 2.0
               ]
             },
-            "family": [
-              "lattice",
-              "dense",
-              "community",
-              "symmetric"
-            ],
+            "family": "[lattice, dense, community, symmetric]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -31701,7 +31549,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_families.yaml",
         "relative_path": "configs/experiments/forge_f4_holdout_families.yaml",
         "sha256": "99e437e136f05ef570ee8c86da9a38840a3ad9f9a092ca4ac792964e45ba2bf0",
@@ -31868,12 +31716,7 @@
                 2.0
               ]
             },
-            "family": [
-              "lattice",
-              "dense",
-              "community",
-              "symmetric"
-            ],
+            "family": "[lattice, dense, community, symmetric]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -31996,7 +31839,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_families_ablation.yaml",
         "relative_path": "configs/experiments/forge_f4_holdout_families_ablation.yaml",
         "sha256": "1541d7128b0de627e3aac4668ca972f5bbfcf77d556d0a3eb49d31fa00a92f51",
@@ -32213,7 +32056,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_n.yaml",
         "relative_path": "configs/experiments/forge_f4_holdout_n.yaml",
         "sha256": "445e9c330a6f0d579e5dd2536f4a642eb523d8ae47732fe8a25432ce54ff7b37",
@@ -32469,7 +32312,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_holdout_n_ablation.yaml",
         "relative_path": "configs/experiments/forge_f4_holdout_n_ablation.yaml",
         "sha256": "5dcf3db97ea8d52cdd09caa5462721426398c9302bf6ca7125b1f8413694e330",
@@ -32673,7 +32516,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_manifests.yaml",
         "relative_path": "configs/experiments/forge_f4_manifests.yaml",
         "sha256": "9811773f1d0e78503ca9cee71f961a45c3e3a6a98159db4d9117fc5b71369d7b",
@@ -32980,7 +32823,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_f4_manifests_ablation.yaml",
         "relative_path": "configs/experiments/forge_f4_manifests_ablation.yaml",
         "sha256": "8ca7b7b9d8704f7e46f5675ffba8bb489ebbedd7e451aecb5fca975833534031",
@@ -33209,7 +33052,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_gradient_plateau_smoke.yaml",
         "relative_path": "configs/experiments/forge_gradient_plateau_smoke.yaml",
         "sha256": "f23b24e4dfd48f3f95c1fa51d2887a47d6f5b8c27a6685891b403a471bb46ae7",
@@ -33361,7 +33204,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_plateau.yaml",
         "relative_path": "configs/experiments/forge_plateau.yaml",
         "sha256": "9c48d8a93d7f91525122d8eddae5152ad04e5fdf6cf8a6e9f0b2d872304217c7",
@@ -33865,7 +33708,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_plateau_diverse.yaml",
         "relative_path": "configs/experiments/forge_plateau_diverse.yaml",
         "sha256": "1f4eda4daad65569f60ddcfb3b20e895c03608316010139cd5cfb105e3d09589",
@@ -34234,12 +34077,7 @@
                 4.0
               ]
             },
-            "family": [
-              "product_state",
-              "lattice",
-              "erdos_renyi",
-              "complete_graph"
-            ],
+            "family": "[product_state, lattice, erdos_renyi, complete_graph]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -34344,7 +34182,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\forge_sprint.yaml",
         "relative_path": "configs/experiments/forge_sprint.yaml",
         "sha256": "a5c8571f17b80fbb31902df5e615fe25b25464bad146a69488024215c0abc924",
@@ -34449,7 +34287,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_large_n_sampled.yaml",
         "relative_path": "configs/experiments/ghosh_kim_large_n_sampled.yaml",
         "sha256": "19d668a5e7d4482f1cb8fc07af6a19222c6be2e196ae56cecd8636221dd93748",
@@ -34581,7 +34419,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_small_n.yaml",
         "relative_path": "configs/experiments/ghosh_kim_small_n.yaml",
         "sha256": "e6e0056ea4bb0389d3557cdab512c0bd1b3baaa8c0737cee053f91d5e0ad70f3",
@@ -34673,10 +34511,7 @@
                 2.0
               ]
             },
-            "family": [
-              "product_state",
-              "lattice"
-            ],
+            "family": "[product_state, lattice]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -34723,10 +34558,7 @@
               "method": "parity",
               "scale": 0.1
             },
-            "scheme": [
-              "uniform",
-              "small_angle"
-            ],
+            "scheme": "[uniform, small_angle]",
             "small_angle": {
               "std": [
                 0.1
@@ -34788,7 +34620,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\koshik_raw_repro.yaml",
         "relative_path": "configs/experiments/koshik_raw_repro.yaml",
         "sha256": "c1aa93b497df26bdcff06ee1a47911e4269140e656a39a142b9d39074d7d2f9d",
@@ -34815,10 +34647,7 @@
         ],
         "content": {
           "circuit": {
-            "family": [
-              "product_state",
-              "complete_graph"
-            ],
+            "family": "[product_state, complete_graph]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -34914,7 +34743,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\qiskit_validation.yaml",
         "relative_path": "configs/experiments/qiskit_validation.yaml",
         "sha256": "6920ad1f18816a6cf9512195c32d6095dc765c84ad7fe3bfeb61cb4d4e3ad994",
@@ -34946,10 +34775,7 @@
         ],
         "content": {
           "circuit": {
-            "family": [
-              "product_state",
-              "complete_graph"
-            ],
+            "family": "[product_state, complete_graph]",
             "n_generators": "n",
             "n_qubits": [
               4
@@ -35026,7 +34852,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\qiskit_validation_report_smoke.yaml",
         "relative_path": "configs/experiments/qiskit_validation_report_smoke.yaml",
         "sha256": "48fcdaf64ce7b409351cc56e64f8e685b8c66bd74a447993d65d680f690b0092",
@@ -35086,12 +34912,7 @@
                 2.0
               ]
             },
-            "family": [
-              "product_state",
-              "complete_graph",
-              "erdos_renyi",
-              "bounded_degree"
-            ],
+            "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -35122,10 +34943,7 @@
             "seed": 23
           },
           "init": {
-            "scheme": [
-              "uniform",
-              "small_angle"
-            ],
+            "scheme": "[uniform, small_angle]",
             "small_angle": {
               "std": [
                 0.01
@@ -35140,9 +34958,7 @@
             "bandwidth": [
               1.0
             ],
-            "type": [
-              "gaussian"
-            ]
+            "type": "[gaussian]"
           },
           "output": {
             "figures": {
@@ -35178,7 +34994,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_diverse.yaml",
         "relative_path": "configs/experiments/scaling_ac_diverse.yaml",
         "sha256": "4d820504438ce9367915e221d38e3a881840bdf801927c309921ed497f5ed2fd",
@@ -35355,12 +35171,7 @@
                 2.0
               ]
             },
-            "family": [
-              "lattice",
-              "dense",
-              "community",
-              "symmetric"
-            ],
+            "family": "[lattice, dense, community, symmetric]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -35394,10 +35205,7 @@
             "seed": 23
           },
           "init": {
-            "scheme": [
-              "uniform",
-              "small_angle"
-            ],
+            "scheme": "[uniform, small_angle]",
             "small_angle": {
               "std": [
                 0.01
@@ -35412,9 +35220,7 @@
             "bandwidth": [
               1.0
             ],
-            "type": [
-              "gaussian"
-            ]
+            "type": "[gaussian]"
           },
           "output": {
             "figures": {
@@ -35449,7 +35255,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_holdout_families.yaml",
         "relative_path": "configs/experiments/scaling_ac_holdout_families.yaml",
         "sha256": "a766d951dc62c92e3f330f63ac47c6d754171b49437ae48b9ab7cf272f63a3cb",
@@ -35605,12 +35411,7 @@
                 2.0
               ]
             },
-            "family": [
-              "product_state",
-              "complete_graph",
-              "erdos_renyi",
-              "bounded_degree"
-            ],
+            "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -35640,10 +35441,7 @@
             "seed": 23
           },
           "init": {
-            "scheme": [
-              "uniform",
-              "small_angle"
-            ],
+            "scheme": "[uniform, small_angle]",
             "small_angle": {
               "std": [
                 0.01
@@ -35658,9 +35456,7 @@
             "bandwidth": [
               1.0
             ],
-            "type": [
-              "gaussian"
-            ]
+            "type": "[gaussian]"
           },
           "output": {
             "figures": {
@@ -35695,7 +35491,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_holdout_n.yaml",
         "relative_path": "configs/experiments/scaling_ac_holdout_n.yaml",
         "sha256": "9d2e9687d1761e9490d2d81a780cd595605c6a3125b34809fa2526ae95ac5718",
@@ -35827,9 +35623,7 @@
                 2.0
               ]
             },
-            "family": [
-              "complete_graph"
-            ],
+            "family": "[complete_graph]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -35858,9 +35652,7 @@
             "seed": 11
           },
           "init": {
-            "scheme": [
-              "uniform"
-            ],
+            "scheme": "[uniform]",
             "uniform": {
               "high": 3.14159265,
               "low": -3.14159265
@@ -35870,9 +35662,7 @@
             "bandwidth": [
               1.0
             ],
-            "type": [
-              "gaussian"
-            ]
+            "type": "[gaussian]"
           }
         },
         "declared_paths": [
@@ -35898,7 +35688,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_ac_smoke.yaml",
         "relative_path": "configs/experiments/scaling_ac_smoke.yaml",
         "sha256": "e560db7c13ad8e5d27ddbfbb7ba1245d142cc7e3a8c91e8f148ccee70b8d7aaf",
@@ -35934,12 +35724,7 @@
                 4.0
               ]
             },
-            "family": [
-              "product_state",
-              "lattice",
-              "erdos_renyi",
-              "complete_graph"
-            ],
+            "family": "[product_state, lattice, erdos_renyi, complete_graph]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -36001,11 +35786,7 @@
             "data_dependent": {
               "dataset": "product_bernoulli"
             },
-            "scheme": [
-              "uniform",
-              "small_angle",
-              "data_dependent"
-            ],
+            "scheme": "[uniform, small_angle, data_dependent]",
             "small_angle": {
               "std": [
                 0.01,
@@ -36026,9 +35807,7 @@
               2.0,
               5.0
             ],
-            "type": [
-              "gaussian"
-            ]
+            "type": "[gaussian]"
           },
           "output": {
             "figures": {
@@ -36056,7 +35835,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_v1.yaml",
         "relative_path": "configs/experiments/scaling_v1.yaml",
         "sha256": "3224304b16a65ead5553e3f8555e9446216265fcd31a2229e573381d0b5cc9a6",
@@ -36089,12 +35868,7 @@
                 4.0
               ]
             },
-            "family": [
-              "product_state",
-              "lattice",
-              "erdos_renyi",
-              "complete_graph"
-            ],
+            "family": "[product_state, lattice, erdos_renyi, complete_graph]",
             "lattice": {
               "dimension": 2,
               "range": 1
@@ -36156,11 +35930,7 @@
             "data_dependent": {
               "dataset": "product_bernoulli"
             },
-            "scheme": [
-              "uniform",
-              "small_angle",
-              "data_dependent"
-            ],
+            "scheme": "[uniform, small_angle, data_dependent]",
             "small_angle": {
               "std": [
                 0.01,
@@ -36189,11 +35959,7 @@
               ],
               "weights": null
             },
-            "type": [
-              "gaussian",
-              "laplacian",
-              "multi_scale_gaussian"
-            ]
+            "type": "[gaussian, laplacian, multi_scale_gaussian]"
           },
           "output": {
             "figures": {
@@ -36222,7 +35988,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\scaling_v2.yaml",
         "relative_path": "configs/experiments/scaling_v2.yaml",
         "sha256": "9d820bfead5dbeef9ec09a2dc10442f18f7eb8f556bf1b1860917ce8d1de8def",
@@ -36328,7 +36094,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\training_smoke.yaml",
         "relative_path": "configs/experiments/training_smoke.yaml",
         "sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab",
@@ -36411,7 +36177,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\validation.yaml",
         "relative_path": "configs/experiments/validation.yaml",
         "sha256": "79a2cda0ba2406ac10ebdba0442b153ec9b314c03f3449f4679dda4a764053f1",
@@ -36504,7 +36270,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\validation_from_checkpoint.yaml",
         "relative_path": "configs/experiments/validation_from_checkpoint.yaml",
         "sha256": "920f9b6ce2128c93d329a35d5d169deba64c3c607ddab42170a4fb72cebc7593",
@@ -37120,7 +36886,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\hyperparameters.yaml",
         "relative_path": "configs/hyperparameters.yaml",
         "sha256": "c1292492d55e918df0691338365f3a24ff49113b68fe9f873fe3ec7f76c1d280",
@@ -37703,7 +37469,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\pauli_estimator_datasets.yaml",
         "relative_path": "configs/pauli_estimator_datasets.yaml",
         "sha256": "a27bf39fdf97dd8d366669a96c4feef77c891e5d14b3a77725e66261a07d59a5",
@@ -38414,7 +38180,7 @@
         ],
         "kind": "config",
         "parse_error": null,
-        "parse_status": "parsed",
+        "parse_status": "parsed_without_pyyaml",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\schema.yaml",
         "relative_path": "configs/schema.yaml",
         "sha256": "1b509e666e48fa12412da2fbca4ec3c5671c543f6031a589625e2dc0f86be35b",
@@ -38438,72 +38204,6 @@
           "dataset_generation_or_loading",
           "ising_or_spin_target"
         ],
-        "content": {
-          "checkpoints": [
-            {
-              "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-              "dataset": "2D_ising",
-              "spin_sym": true
-            },
-            {
-              "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-              "dataset": "8_blobs",
-              "spin_sym": false
-            }
-          ],
-          "output": {
-            "combined_json": "results/pauli_estimator_validation_n16.json",
-            "per_seed_root": "results/pauli_estimator_validation_n16"
-          },
-          "seeds": [
-            666,
-            667,
-            668
-          ],
-          "val01": {
-            "n_expval_samples": 2000,
-            "num_pauli_samples": 2000
-          },
-          "val02": {
-            "k_values": [
-              1,
-              2,
-              4
-            ],
-            "n_expval_samples": 2000,
-            "num_subsets": {
-              "1": 16,
-              "2": 120,
-              "4": 256
-            }
-          }
-        },
-        "declared_paths": [
-          {
-            "declared": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-            "exists": true,
-            "field": "ckpt",
-            "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\ising_n16_iters1000_seed666.npz"
-          },
-          {
-            "declared": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-            "exists": true,
-            "field": "ckpt",
-            "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\spin_blobs_n16_iters1000_seed666.npz"
-          },
-          {
-            "declared": "results/pauli_estimator_validation_n16",
-            "exists": true,
-            "field": "per_seed_root",
-            "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16"
-          },
-          {
-            "declared": "results/pauli_estimator_validation_n16.json",
-            "exists": true,
-            "field": "combined_json",
-            "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16.json"
-          }
-        ],
         "gaussian_related": true,
         "keyword_hits": [
           "checkpoint",
@@ -38512,8 +38212,8 @@
           "ising"
         ],
         "kind": "config",
-        "parse_error": null,
-        "parse_status": "parsed",
+        "parse_error": "minimal YAML parser: ValueError: unsupported YAML line:     ckpt: results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
+        "parse_status": "parse_error",
         "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\validate_n16_checkpoints.yaml",
         "relative_path": "configs/validate_n16_checkpoints.yaml",
         "sha256": "7fd251f96de397e8fbb8899adf1be7058cbaea64cdf30ebcf96943e9ab1f2af2",

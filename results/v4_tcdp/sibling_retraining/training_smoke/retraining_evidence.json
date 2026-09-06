@@ -1,0 +1,30 @@
+{
+  "interpretation": "Source trainer/data/config trajectory matched within fixed 1e-12 tolerance; this is retraining evidence, separate from photonic checkpoint replay.",
+  "max_loss_abs_error": 0.0,
+  "max_theta_abs_error": 0.0,
+  "optimizer": {
+    "lr": 0.05,
+    "name": "sgd",
+    "steps": 4
+  },
+  "retrained_dataset_metadata": {
+    "n_samples": 256,
+    "seed": 1230519654,
+    "type": "product_bernoulli"
+  },
+  "retrained_output": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\training_smoke",
+  "schema_version": "v4_tcdp.sibling_retraining.v1",
+  "sibling_unchanged_by_adapter": true,
+  "source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\training_smoke.yaml",
+  "source_config_sha256": "ea1f03cf54f95d3686d5b39f2ba1c9d80ecd79abf5fd8757afad944f1d5708ab",
+  "source_dataset_metadata": {
+    "n_samples": 256,
+    "seed": 1230519654,
+    "type": "product_bernoulli"
+  },
+  "source_id": "training_smoke:configs/experiments/training_smoke.yaml",
+  "source_results": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\results.jsonl",
+  "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\runs\\product_state__n6__gaussian__small_angle__product_bernoulli__sigma4p0__theta0p15\\trajectory.jsonl",
+  "status": "PASS",
+  "trajectory_rows": 5
+}

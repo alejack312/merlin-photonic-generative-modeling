@@ -52,7 +52,7 @@ def _config_hash(config: object) -> str:
 
 def replay_export(manifest_path: Path, sibling_root: Path, output_root: Path) -> dict[str, object]:
     manifest = load_export_manifest(manifest_path)
-    source_identity = git_source_identity(sibling_root)
+    source_identity = git_source_identity(sibling_root, include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"))
     requested_pin = manifest.get("requested_pinned_commit", PINNED_SIBLING_COMMIT)
     if manifest.get("source_commit") != source_identity.get("observed_commit"):
         raise ValueError("export manifest source commit does not match the observed sibling checkout")

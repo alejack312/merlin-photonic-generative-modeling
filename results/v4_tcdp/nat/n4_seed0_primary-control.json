@@ -36,7 +36,7 @@
     "sigma": 1.0,
     "single_lr": 0.05,
     "single_optimizer": "adam",
-    "source_commit": "working-tree",
+    "source_commit": "83c853dfed68d0762bb6ed9f288c1da6a2e5a051",
     "steps": 150,
     "topology": "arbitrary_weight2"
   },
@@ -313,6 +313,22 @@
     0.017536614084129997,
     0.017536609024935028
   ],
+  "optimizer_state": {
+    "kind": "adam",
+    "m": [
+      -6.00885791365641e-06,
+      -2.0399331245003705e-05,
+      3.1071714724171056e-06,
+      -1.639439217343244e-05
+    ],
+    "step": 150,
+    "v": [
+      0.0009165202224128337,
+      0.0009625118603070653,
+      0.0008962596000373264,
+      0.0009609788128504619
+    ]
+  },
   "pair_moves": 0,
   "provenance": {
     "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
@@ -358,8 +374,39 @@
     },
     "seed": 0,
     "single_update": "objective_and_gradient_exact plus deterministic SGD/Adam update on first n coordinates",
-    "source_commit": "working-tree"
+    "source_commit": "83c853dfed68d0762bb6ed9f288c1da6a2e5a051",
+    "source_provenance": {
+      "dirty": true,
+      "git_status": [
+        "M results/v4_tcdp/nat/n4_seed0_primary-control.json",
+        " M results/v4_tcdp/nat/n4_seed0_primary.json",
+        " M results/v4_tcdp/nat/n4_seed1_primary.json",
+        " M results/v4_tcdp/nat/n4_seed2_primary.json",
+        " M results/v4_tcdp/nat/n4_seed3_primary.json",
+        " M results/v4_tcdp/nat/n4_seed4_primary.json",
+        " M results/v4_tcdp/nat/n6_seed0_primary.json",
+        " M results/v4_tcdp/nat/n6_seed1_primary.json",
+        " M results/v4_tcdp/nat/n6_seed2_primary.json",
+        " M results/v4_tcdp/nat/n6_seed3_primary.json",
+        " M results/v4_tcdp/nat/n6_seed4_primary.json",
+        " M results/v4_tcdp/nat/n8_seed0_primary.json",
+        " M results/v4_tcdp/nat/n8_seed1_primary.json",
+        " M results/v4_tcdp/nat/n8_seed2_primary.json",
+        " M results/v4_tcdp/nat/n8_seed3_primary.json",
+        " M results/v4_tcdp/nat/n8_seed4_primary.json",
+        " M scripts/v4_tcdp/replay_sibling.py",
+        "?? results/v4_tcdp/nat/n4_seed0_primary-matched-continuation.json",
+        "?? results/v4_tcdp/nat/n4_seed0_primary-warm-start.json",
+        "?? results/v4_tcdp/sibling_retraining/"
+      ],
+      "observed_branch": "codex/v4-implementation",
+      "observed_commit": "83c853dfed68d0762bb6ed9f288c1da6a2e5a051",
+      "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+      "tree_identity": "429ef497fd87ecb39ad5022aab09b5d754a56e3d10c44ca6f5d971148f859067",
+      "tree_identity_kind": "working_tree_content_sha256"
+    },
+    "warm_start": null
   },
-  "run_hash": "17aea20e79cce150f8c2799f93f69a3ecc562e66ab248cc02329a084fc59abab",
+  "run_hash": "d62e96f15c61a3688c29f22fe8cc34d156b5e014f8d58a9ffc9955bde557be82",
   "schema_version": "v4_tcdp.nat_run.v1"
 }

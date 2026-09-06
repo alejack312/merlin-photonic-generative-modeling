@@ -1,0 +1,38 @@
+{
+  "max_order": 3,
+  "n": 6,
+  "orders": [
+    {
+      "max_power": 0.006103515625,
+      "mean_power": 0.002899169921875,
+      "median_power": 0.003448486328125,
+      "order": 1,
+      "subset_count": 6,
+      "tau_power": 0.015623728558408866,
+      "total_subsets": 6,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.0087890625,
+      "mean_power": 0.0017130533854166667,
+      "median_power": 0.000244140625,
+      "order": 2,
+      "subset_count": 15,
+      "tau_power": 0.00024410089406684077,
+      "total_subsets": 15,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.02203369140625,
+      "mean_power": 0.003228759765625,
+      "median_power": 0.002197265625,
+      "order": 3,
+      "subset_count": 20,
+      "tau_power": 3.8137661097652375e-06,
+      "total_subsets": 20,
+      "used_all_subsets": true
+    }
+  ],
+  "sigma": 4.0,
+  "tau": 0.015623728558408866
+}

@@ -306,12 +306,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -445,12 +440,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -1442,12 +1432,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -1730,10 +1715,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice"
-          ],
+          "family": "[product_state, lattice]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -1780,10 +1762,7 @@
             "method": "parity",
             "scale": 0.1
           },
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.1
@@ -1844,10 +1823,7 @@
       ],
       "content": {
         "circuit": {
-          "family": [
-            "product_state",
-            "complete_graph"
-          ],
+          "family": "[product_state, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -1943,10 +1919,7 @@
       "changed_fields": [],
       "content": {
         "circuit": {
-          "family": [
-            "product_state",
-            "complete_graph"
-          ],
+          "family": "[product_state, complete_graph]",
           "n_generators": "n",
           "n_qubits": [
             4
@@ -2048,12 +2021,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "complete_graph",
-            "erdos_renyi",
-            "bounded_degree"
-          ],
+          "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2084,10 +2052,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -2102,9 +2067,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -2166,12 +2129,7 @@
               2.0
             ]
           },
-          "family": [
-            "lattice",
-            "dense",
-            "community",
-            "symmetric"
-          ],
+          "family": "[lattice, dense, community, symmetric]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2205,10 +2163,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -2223,9 +2178,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -2285,12 +2238,7 @@
               2.0
             ]
           },
-          "family": [
-            "product_state",
-            "complete_graph",
-            "erdos_renyi",
-            "bounded_degree"
-          ],
+          "family": "[product_state, complete_graph, erdos_renyi, bounded_degree]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2320,10 +2268,7 @@
           "seed": 23
         },
         "init": {
-          "scheme": [
-            "uniform",
-            "small_angle"
-          ],
+          "scheme": "[uniform, small_angle]",
           "small_angle": {
             "std": [
               0.01
@@ -2338,9 +2283,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -2396,9 +2339,7 @@
               2.0
             ]
           },
-          "family": [
-            "complete_graph"
-          ],
+          "family": "[complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2427,9 +2368,7 @@
           "seed": 11
         },
         "init": {
-          "scheme": [
-            "uniform"
-          ],
+          "scheme": "[uniform]",
           "uniform": {
             "high": 3.14159265,
             "low": -3.14159265
@@ -2439,9 +2378,7 @@
           "bandwidth": [
             1.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         }
       },
       "declared_paths": [
@@ -2475,12 +2412,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2542,11 +2474,7 @@
           "data_dependent": {
             "dataset": "product_bernoulli"
           },
-          "scheme": [
-            "uniform",
-            "small_angle",
-            "data_dependent"
-          ],
+          "scheme": "[uniform, small_angle, data_dependent]",
           "small_angle": {
             "std": [
               0.01,
@@ -2567,9 +2495,7 @@
             2.0,
             5.0
           ],
-          "type": [
-            "gaussian"
-          ]
+          "type": "[gaussian]"
         },
         "output": {
           "figures": {
@@ -2606,12 +2532,7 @@
               4.0
             ]
           },
-          "family": [
-            "product_state",
-            "lattice",
-            "erdos_renyi",
-            "complete_graph"
-          ],
+          "family": "[product_state, lattice, erdos_renyi, complete_graph]",
           "lattice": {
             "dimension": 2,
             "range": 1
@@ -2673,11 +2594,7 @@
           "data_dependent": {
             "dataset": "product_bernoulli"
           },
-          "scheme": [
-            "uniform",
-            "small_angle",
-            "data_dependent"
-          ],
+          "scheme": "[uniform, small_angle, data_dependent]",
           "small_angle": {
             "std": [
               0.01,
@@ -2706,11 +2623,7 @@
             ],
             "weights": null
           },
-          "type": [
-            "gaussian",
-            "laplacian",
-            "multi_scale_gaussian"
-          ]
+          "type": "[gaussian, laplacian, multi_scale_gaussian]"
         },
         "output": {
           "figures": {
@@ -3747,72 +3660,8 @@
       "changed_fields": [
         "none; missing source input is preserved as blocked"
       ],
-      "content": {
-        "checkpoints": [
-          {
-            "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-            "dataset": "2D_ising",
-            "spin_sym": true
-          },
-          {
-            "ckpt": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-            "dataset": "8_blobs",
-            "spin_sym": false
-          }
-        ],
-        "output": {
-          "combined_json": "results/pauli_estimator_validation_n16.json",
-          "per_seed_root": "results/pauli_estimator_validation_n16"
-        },
-        "seeds": [
-          666,
-          667,
-          668
-        ],
-        "val01": {
-          "n_expval_samples": 2000,
-          "num_pauli_samples": 2000
-        },
-        "val02": {
-          "k_values": [
-            1,
-            2,
-            4
-          ],
-          "n_expval_samples": 2000,
-          "num_subsets": {
-            "1": 16,
-            "2": 120,
-            "4": 256
-          }
-        }
-      },
-      "declared_paths": [
-        {
-          "declared": "results/iqp_mmd_ac_investigation/checkpoints/ising_n16_iters1000_seed666.npz",
-          "exists": true,
-          "field": "ckpt",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\ising_n16_iters1000_seed666.npz"
-        },
-        {
-          "declared": "results/iqp_mmd_ac_investigation/checkpoints/spin_blobs_n16_iters1000_seed666.npz",
-          "exists": true,
-          "field": "ckpt",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\iqp_mmd_ac_investigation\\checkpoints\\spin_blobs_n16_iters1000_seed666.npz"
-        },
-        {
-          "declared": "results/pauli_estimator_validation_n16",
-          "exists": true,
-          "field": "per_seed_root",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16"
-        },
-        {
-          "declared": "results/pauli_estimator_validation_n16.json",
-          "exists": true,
-          "field": "combined_json",
-          "resolved": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\pauli_estimator_validation_n16.json"
-        }
-      ],
+      "content": null,
+      "declared_paths": [],
       "disposition": "blocked",
       "reason": "The resolved source output directory is absent.",
       "relative_path": "configs/validate_n16_checkpoints.yaml",
@@ -3820,21 +3669,21 @@
     }
   ],
   "environment": {
-    "executable": "C:\\Python313\\python.exe",
+    "executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
     "packages": {
       "exqalibur": "1.4.1",
-      "jax": "0.10.0",
-      "jaxlib": "0.10.0",
-      "merlinquantum": null,
-      "numpy": "2.2.6",
-      "pennylane": "0.44.1",
+      "jax": null,
+      "jaxlib": null,
+      "merlinquantum": "0.4.0",
+      "numpy": "2.5.1",
+      "pennylane": null,
       "perceval-quandela": "1.2.4",
-      "pyyaml": "6.0.3",
-      "scipy": "1.16.2",
-      "torch": "2.9.1"
+      "pyyaml": null,
+      "scipy": "1.18.0",
+      "torch": "2.12.1"
     },
     "platform": "Windows-11-10.0.26200-SP0",
-    "python": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]"
+    "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
   },
   "packages": {
     "iqp_bp": {
@@ -3937,7 +3786,13 @@
   "source": {
     "git_status": [],
     "head_matches_pinned": true,
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "observed_dirty": false,
     "observed_head": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "observed_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "observed_tree_identity_kind": "git_tree",
+    "pin_status": "MATCH",
     "pinned_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
     "pinned_parent": "4e5bfc43e325029d7cc760bc2c355afa2d6461e4",
     "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
