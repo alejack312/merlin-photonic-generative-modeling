@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: `a751f99` (`codex/v4-implementation` substantive implementation); later commits only clarify evidence and learning documentation.
+- Review target: `0e19b40` (`codex/v4-implementation` after D1/D2/D3 decisions, implementation, tests and authorized artifacts).
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -25,6 +25,9 @@ venv/Scripts/python.exe scripts/v4_tcdp/inventory_sibling.py
 venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/sibling/training_smoke_configs_experiments_training_smoke_yaml/manifest.json
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke
+venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --equal-budget-control --output results/v4_tcdp/nat/n4_seed0_primary.json
+venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 8 --seed 0 --steps 150 --output results/v4_tcdp/nat/n8_seed0_primary.json
+venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n6_seed0_main --eta 0.9 --output results/v4_tcdp/comparisons/rings_hamming_n6_seed0_eta09.json
 ```
 
 The required full suite is:
@@ -34,7 +37,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Observed result: `609 passed in 304.97s`. Without the override, collection fails because Perceval cannot write its default `AppData\Local\quandela\perceval-quandela\logs\perceval.log`; this is an environment failure, not a relaxed test gate.
+Observed result at head `0e19b40`: `621 passed in 320.03s`. Without the override, collection fails because Perceval cannot write its default `AppData\Local\quandela\perceval-quandela\logs\perceval.log`; this is an environment failure, not a relaxed test gate.
 
 ## Evidence locations
 
