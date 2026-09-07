@@ -45,6 +45,7 @@ from .fock import (
     direct_fock_cp_reference,
     full_fock_cp_reference,
 )
+from .ring import LoadedRingArtifact, evaluate_ring_artifact, load_ring_artifact
 
 __all__ = [
     "ALPHA_KEYS",
@@ -76,4 +77,7 @@ __all__ = [
     "direct_fock_compiled_distribution",
     "direct_fock_cp_reference",
     "full_fock_cp_reference",
+    "LoadedRingArtifact",
+    "load_ring_artifact",
+    "evaluate_ring_artifact",
 ]

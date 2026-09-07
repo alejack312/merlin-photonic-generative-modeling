@@ -98,7 +98,7 @@ def _build_direct_processor(n: int, singles: Sequence[float], pair_specs: Sequen
     # A single-sided PS(phi) is exp(i*phi/2*Z) up to a scalar, so the
     # abstract exp(i*theta*Z) angle is represented by phi=2*theta.
     for qubit, theta in enumerate(folded):
-        diagonal.add(2 * qubit, pcvl.PS(2.0 * theta))
+        diagonal.add(2 * qubit, pcvl.PS(-2.0 * theta))
     processor.add(0, diagonal)
 
     from merlin_iqp.encoding.iqp_photonic import _build_cp_insertion_core

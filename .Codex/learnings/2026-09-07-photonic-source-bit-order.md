@@ -40,3 +40,7 @@ Date: 2026-09-07 · Scope: project · Recurs when: a direct full-Fock photonic a
 - `src/merlin_iqp/deploy/fock.py` — corrected the direct source state and added full-Fock controls.
 - `tests/v4_tcdp/test_deploy.py` — added independent no-gate identity and bit-order fixtures.
 - `scripts/v4_tcdp/validate_physical_controls.py` — records final/intermediate projection and eta-consistency evidence.
+
+## Addendum: frozen ring loading
+- IF a loader builds a logical path map for `manifest`, `run`, and `dataset`, THEN use those logical keys consistently rather than mixing them with filename keys such as `run.npz`.
+- IF a frozen ring is evaluated physically, THEN verify array hashes, codec/config/source metadata, and n=4 smoke scope before compiling or simulating.
