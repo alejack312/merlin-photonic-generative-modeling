@@ -352,6 +352,7 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
         "worker_payload_valid": valid_worker,
         "stderr": stderr.strip()[-2000:],
     }
+    return report
 
 
 def rss_status(case: dict[str, Any]) -> str:
