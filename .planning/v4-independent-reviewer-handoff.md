@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target before the final post-review documentation commit: `980cfe7` (`fix(v4): return isolated resource pilot records`) on `codex/v4-implementation`.
+- Reviewed head: `3e1ae33` (`docs(v4): record final verification handoff`) on `codex/v4-implementation`; the cleanup commit containing the final default-path and stale-note repairs follows it.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -90,4 +90,4 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - Resource pilot: `resource_budget_final_v6.json`; n=4/6/8/10 all `PASS`, clean source commit `980cfe7`, n=10 RSS growth `0` bytes, timing criterion `PASS`, and a payload hash.
 - NAT: registered n=4 seeds 0–4 and n=6/n=8 seed 0 matched reports; final reports include target improvement, fixed-reference TVD, acceptance, optimizer-state equality, and fixed-pair ablation labeling.
 - Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.
-- Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. A fresh post-fix recheck must be recorded before `REVIEW-02` can be marked `PASS`.
+- Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. The fresh post-fix recheck passed the declared bounded scope; its three cleanup findings are repaired in the cleanup commit following `3e1ae33`.

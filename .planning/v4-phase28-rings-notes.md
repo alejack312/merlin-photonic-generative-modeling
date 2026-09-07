@@ -1,5 +1,7 @@
 # Phase 28 ring implementation notes
 
+Status: historical implementation notes, superseded by the registered n=6/n=8 classical runs and the n=4 fixed-photon photonic outputs under `results/v4_tcdp/deploy/registered_v2_ring_photonic_*.json`. The older `registered_not_launched` and photonic `INCONCLUSIVE` wording below is retained as provenance, not current status.
+
 Date: 2026-09-06
 
 ## Delivered

@@ -1,5 +1,7 @@
 # Phase 27–28 deployment notes
 
+Status: historical implementation notes, superseded by the final bounded v4 deployment evidence in `docs/v4-deployment-study.md`, `docs/v4-tcdp-study.md`, and `results/v4_tcdp/deploy/physical_control_manifest.json`. The older single-CP wording and `INCONCLUSIVE` labels below are retained as provenance, not current status.
+
 ## Delivered additive slice
 
 - src/merlin_iqp/deploy/compile.py: finite weight-1/2 compiler, negative PS signs, circular alpha keys, preserved winding, topology/weight rejection.

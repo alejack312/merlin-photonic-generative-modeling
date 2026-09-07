@@ -42,7 +42,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/v4_tcdp/deploy/ring_photonic_n4_seed0_smoke.json"),
+        default=Path("results/v4_tcdp/deploy/registered_v2_ring_photonic_n4_seed0_smoke.json"),
     )
     args = parser.parse_args()
     if args.pcvl_path is not None:
