@@ -387,6 +387,7 @@ def direct_fock_compiled_distribution(compiled: Any, *, eta: float = 1.0, projec
             rejected_mass=float(1.0 - accepted_mass),
             diagnostics={
                 "backend": "Perceval SLOS direct full-Fock",
+                "perceval_version": _perceval_modules()[0].__version__ if hasattr(_perceval_modules()[0], "__version__") else "unknown",
                 "source_once": True,
                 "source_model": "fixed_photon_g2_0",
                 "projection": projection,
@@ -423,6 +424,7 @@ def _direct_compiled_intermediate(compiled: Any, *, eta: float) -> FullFockResul
         rejected_mass=float(1.0 - accepted_mass),
         diagnostics={
             "backend": "Perceval SLOS direct full-Fock",
+            "perceval_version": _perceval_modules()[0].__version__ if hasattr(_perceval_modules()[0], "__version__") else "unknown",
             "source_once": True,
             "source_model": "fixed_photon_g2_0",
             "projection": "intermediate",

@@ -101,7 +101,13 @@ def _control(control_id: str, n: int, singles: list[float], pairs: list[tuple[in
             )
         )
     direct_status = _status(final.status, intermediate.status)
-    if direct_status != "PASS":
+    if not projection_valid:
+        # A completed direct call is not sufficient evidence when the two
+        # projection paths did not produce a comparable absolute instrument.
+        # Keep this aggregate fail-closed instead of allowing two weak PASS
+        # records to certify a broken projection contract.
+        pair_status = "INCONCLUSIVE" if direct_status == "INCONCLUSIVE" else "FAIL"
+    elif direct_status != "PASS":
         pair_status = direct_status
     else:
         pair_status = "PASS" if _tvd(final.distribution, analytic) <= 1e-12 else "FAIL"

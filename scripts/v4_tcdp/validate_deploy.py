@@ -52,16 +52,23 @@ def run(with_perceval: bool = False) -> dict[str, object]:
         and np.isclose(model_success, expected_success, atol=1e-12, rtol=1e-12)
     ) else "FAIL"
     physical_status = "SKIPPED"
+    perceval_probe_status = "SKIPPED"
     if with_perceval:
-        physical_status = str(gate.metadata.get("perceval", {}).get("status", "INCONCLUSIVE"))
-        if physical_status not in {"PASS", "FAIL", "INCONCLUSIVE"}:
-            physical_status = "INCONCLUSIVE"
+        perceval_probe_status = str(gate.metadata.get("perceval", {}).get("status", "INCONCLUSIVE"))
+        if perceval_probe_status not in {"PASS", "FAIL", "INCONCLUSIVE"}:
+            perceval_probe_status = "INCONCLUSIVE"
+        # The bare accepted-mass probe is useful diagnostics, but it is not
+        # process/source tomography and cannot certify the composed physical
+        # deployment contract.  The dedicated physical-control manifest is
+        # the authority for that claim.
+        physical_status = "INCONCLUSIVE"
     overall_status = analytic_status
     U = np.diag([1, 1, 1, np.exp(1j * np.pi / 3)])
     result: dict[str, object] = {
         "status": overall_status,
         "analytic_status": analytic_status,
         "physical_status": physical_status,
+        "perceval_probe_status": perceval_probe_status,
         "compiler": compiled.as_metadata(),
         "probability_sum": float(sum(probabilities.values())),
         "model_success": float(model_success),

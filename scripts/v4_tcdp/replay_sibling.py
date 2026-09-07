@@ -10,7 +10,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -198,12 +200,13 @@ def replay_export(
     if run_component:
         destination /= run_component
     destination = destination / f"checkpoint_{checkpoint_hash[:16]}" / f"config_{config_hash[:16]}" / f"step_{step:04d}"
-    if destination.exists() and any(destination.iterdir()):
+    if destination.exists():
         raise FileExistsError(f"replay destination already contains an artifact: {destination}")
     model = IQPModel(generator, theta, provenance={"source_commit": source_identity.get("observed_commit"), "source_id": manifest["source_id"]})
     raw = model.probability_vector_exact()
-    destination.mkdir(parents=True, exist_ok=True)
-    np.save(destination / "raw.npy", raw)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    staging = Path(tempfile.mkdtemp(prefix=f".{destination.name}.", dir=destination.parent))
+    np.save(staging / "raw.npy", raw)
     if model.n > MAX_COMPILED_N:
         result = {
             "schema_version": "v4_tcdp.sibling_replay.v2",
@@ -246,21 +249,22 @@ def replay_export(
             "unsafe_serialization_loaded": False,
             "command": ["venv/Scripts/python.exe", "scripts/v4_tcdp/replay_sibling.py", str(manifest_path)],
         }
-        (destination / "manifest.json").write_text(
+        (staging / "manifest.json").write_text(
             json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
         )
+        os.rename(staging, destination)
         return result
     compiled = compile_generators(generator, theta, quantize=True)
     compiled_vector = _vector(apply_compiled_density(compiled)[0])
     deployed = compiled
     deployed_mapping, acceptance = apply_compiled_density(deployed)
     deployed_vector = _vector(deployed_mapping)
-    np.save(destination / "compiled.npy", compiled_vector)
-    np.save(destination / "deployed.npy", deployed_vector)
+    np.save(staging / "compiled.npy", compiled_vector)
+    np.save(staging / "deployed.npy", deployed_vector)
     data_regeneration: dict[str, object] | None = None
     if str(manifest["source_id"]).startswith("training_smoke:"):
         data, data_regeneration = regenerate_training_smoke_data(sibling_root)
-        np.save(destination / "source_data.npy", data)
+        np.save(staging / "source_data.npy", data)
     result = {
         "schema_version": "v4_tcdp.sibling_replay.v1",
         "status": "adapted_reproduction",
@@ -317,9 +321,10 @@ def replay_export(
         "unsafe_serialization_loaded": False,
         "command": ["venv/Scripts/python.exe", "scripts/v4_tcdp/replay_sibling.py", str(manifest_path)],
     }
-    (destination / "manifest.json").write_text(
+    (staging / "manifest.json").write_text(
         json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
     )
+    os.rename(staging, destination)
     return result
 
 

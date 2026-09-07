@@ -268,15 +268,15 @@ def test_physical_control_manifest_records_projection_evidence() -> None:
     manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema_version"] == "v4_tcdp.physical_controls.v2"
-    assert manifest["status"] == "FAIL"
+    assert manifest["status"] == "PASS"
     assert [control["id"] for control in manifest["controls"]] == [
         "no_gate_n2",
         "single_gate_bystander_n3",
         "shared_gate_n3",
     ]
-    assert [control["status"] for control in manifest["controls"]] == ["PASS", "FAIL", "FAIL"]
-    assert manifest["controls"][1]["conditional_tvd_direct_final_vs_analytic"] > 1e-3
-    assert manifest["controls"][2]["conditional_tvd_direct_final_vs_analytic"] > 1e-3
+    assert [control["status"] for control in manifest["controls"]] == ["PASS", "PASS", "PASS"]
+    assert manifest["controls"][1]["conditional_tvd_direct_final_vs_analytic"] <= 1e-12
+    assert manifest["controls"][2]["conditional_tvd_direct_final_vs_analytic"] <= 1e-12
     for control in manifest["controls"]:
         assert control["final_only"]["diagnostics"]["projection"] == "final_only"
         assert control["intermediate"]["diagnostics"]["projection"] == "intermediate"
@@ -286,6 +286,7 @@ def test_physical_control_manifest_records_projection_evidence() -> None:
         assert comparison["absolute_mass_valid"] is True
         assert comparison["eta"] == pytest.approx(control["eta"])
         assert comparison["accepted_mass_delta"] <= 1e-12
+    assert manifest["controls"][2]["projection_comparison"]["conditional_tvd_final_vs_intermediate"] > 1e-3
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:
@@ -328,6 +329,7 @@ def test_deploy_aggregate_includes_full_fock_status(monkeypatch, fock_status: st
         lambda *_args, **_kwargs: FullFockResult(fock_status, diagnostics={"injected": True}),
     )
     result = validate_deploy.run(with_perceval=True)
-    assert result["physical_status"] == "PASS"
+    assert result["physical_status"] == "INCONCLUSIVE"
+    assert result["perceval_probe_status"] == "PASS"
     assert result["full_fock"]["status"] == fock_status
     assert result["status"] == expected

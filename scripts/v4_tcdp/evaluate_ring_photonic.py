@@ -27,7 +27,13 @@ def main() -> int:
         nargs="?",
         default=Path("results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke"),
     )
-    parser.add_argument("--eta", type=float, default=0.9, help="fixed-photon survival probability per data photon")
+    parser.add_argument("--eta", type=float, required=True, help="explicit fixed-photon survival probability per data photon")
+    parser.add_argument(
+        "--validation-manifest",
+        type=Path,
+        default=Path("results/v4_tcdp/deploy/physical_control_manifest.json"),
+        help="validated direct-control manifest required before deployment",
+    )
     parser.add_argument(
         "--pcvl-path",
         type=Path,
@@ -42,13 +48,12 @@ def main() -> int:
     if args.pcvl_path is not None:
         args.pcvl_path.mkdir(parents=True, exist_ok=True)
         os.environ["PCVL_PERSISTENT_PATH"] = str(args.pcvl_path.resolve())
-    from merlin_iqp.deploy.ring import evaluate_ring_artifact, load_ring_artifact
+    from merlin_iqp.deploy.ring import evaluate_ring_artifact, load_ring_artifact, write_ring_evaluation
 
     artifact = load_ring_artifact(args.run_directory)
-    result = evaluate_ring_artifact(artifact, eta=args.eta)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(args.output), "status": result["status"], "run_id": result["run_id"], "comparison": result["comparison"]}, indent=2, sort_keys=True, allow_nan=False))
+    result = evaluate_ring_artifact(artifact, eta=args.eta, validation_manifest_path=args.validation_manifest)
+    output = write_ring_evaluation(result, args.output)
+    print(json.dumps({"output": str(output), "status": result["status"], "run_id": result["run_id"], "comparison": result["comparison"], "metrics": result["comparison"]["metrics"]}, indent=2, sort_keys=True, allow_nan=False))
     return 0 if result["status"] == "PASS" else 1
 
 

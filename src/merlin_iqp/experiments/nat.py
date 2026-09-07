@@ -16,7 +16,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 import math
+import os
 import platform
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -656,8 +658,40 @@ def write_nat_run(run: NatRun, path: str | Path, *, artifact_metadata: Mapping[s
     payload = run.to_dict()
     if artifact_metadata is not None:
         payload["artifact"] = dict(artifact_metadata)
-    destination.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_immutable_json(destination, payload)
     return destination
+
+
+def _write_immutable_json(destination: Path, payload: Mapping[str, Any]) -> None:
+    """Atomically create a JSON artifact and reject incompatible reuse."""
+
+    encoded = json.dumps(dict(payload), indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if destination.exists():
+        try:
+            existing = json.loads(destination.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise FileExistsError(f"existing NAT artifact is unreadable: {destination}") from error
+        if existing != dict(payload):
+            raise FileExistsError(f"incompatible NAT artifact already exists at {destination}")
+        return
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=destination.parent, prefix=f".{destination.name}.", suffix=".tmp", delete=False
+        ) as handle:
+            handle.write(encoded)
+            temporary = Path(handle.name)
+        os.rename(temporary, destination)
+    except FileExistsError:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        if destination.is_file() and json.loads(destination.read_text(encoding="utf-8")) == dict(payload):
+            return
+        raise
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
 
 
 def _compiled_vector(run: NatRun, *, eta: float = 1.0) -> tuple[np.ndarray, float]:
@@ -747,7 +781,7 @@ def nat_report(
 def write_nat_report(report: Mapping[str, Any], path: str | Path) -> Path:
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(dict(report), indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    _write_immutable_json(destination, report)
     return destination
 
 

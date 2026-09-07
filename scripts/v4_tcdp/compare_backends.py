@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -30,6 +32,36 @@ def manifest_slug(value: str) -> str:
 def _require_hash(actual: str, expected: str, *, name: str) -> None:
     if not expected or actual != expected:
         raise ValueError(f"{name} hash does not match manifest")
+
+
+def _write_immutable_json(path: Path, payload: dict[str, object]) -> None:
+    """Atomically create a comparison artifact and reject incompatible reuse."""
+
+    encoded = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise FileExistsError(f"existing comparison artifact is unreadable: {path}") from error
+        if existing != payload:
+            raise FileExistsError(f"incompatible comparison artifact already exists at {path}")
+        return
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False) as handle:
+            handle.write(encoded)
+            temporary = Path(handle.name)
+        os.rename(temporary, path)
+    except FileExistsError:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        if path.is_file() and json.loads(path.read_text(encoding="utf-8")) == payload:
+            return
+        raise
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
 
 
 def _actual_dataset_hash(dataset: dict[str, np.ndarray], manifest_dataset: dict[str, object], n: int) -> str:
@@ -220,7 +252,7 @@ def main() -> int:
     comparison = build_comparison(args.run_directory, eta=args.eta)
     output = args.output or (REPO_ROOT / "results" / "v4_tcdp" / "metrics" / manifest_slug(comparison.cell_id) / "backend_comparison.json")
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(comparison.manifest(), indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    _write_immutable_json(output, comparison.manifest())
     print(json.dumps({"output": str(output), "cell_id": comparison.cell_id, "metrics": comparison.metrics()}, indent=2, sort_keys=True, allow_nan=False))
     return 0
 
