@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Review target: `3d2be91` (`fix(v4): close paired contract gaps`) on `codex/v4-implementation`.
+- Review target before the final post-review documentation commit: `980cfe7` (`fix(v4): return isolated resource pilot records`) on `codex/v4-implementation`.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -38,7 +38,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Observed result after the second repair pass: focused v4 suite `144 passed, 2 skipped`; full suite `652 passed, 1 skipped in 362.20s (0:06:02)`. A persistent Perceval path override was used so collection could write its log; without that override, collection can fail when the default `AppData\Local\quandela\perceval-quandela\logs\perceval.log` is unavailable. The default suite no longer requires the sibling checkout; the source integration is explicit via `MERLIN_SIBLING_ROOT`. These are environment notes, not relaxed acceptance gates.
+Final verification in this pass: focused integration `124 passed`, explicit sibling integration `21 passed`, script compilation passed, and full suite `681 passed, 1 skipped in 396.74s (0:06:36)`. A persistent Perceval path override was used so collection could write its log; without that override, collection can fail when the default `AppData\Local\quandela\perceval-quandela\logs\perceval.log` is unavailable. These are environment notes, not relaxed acceptance gates.
 
 ## Evidence locations
 
@@ -60,7 +60,7 @@ Observed result after the second repair pass: focused v4 suite `144 passed, 2 sk
 3. Audit the negative optical signs, alpha-key winding, MSB bit order, Hamming kernel distance (not squared distance), and one-final-normalization composition.
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
 5. Check the repaired R01–R09, S01–S05 and T01–T06 contracts: finite/complete retraining trajectories, exact requested config, fail-closed source identity, raw-content dataset hashes, complete/atomic Adam continuation, ring namespaces, multi-seed idempotence, full artifact and summary integrity, stale-array rejection, explicit spatial geometry, paired NAT binding/reporting, two matched NAT arms, full-Fock aggregation, and optional sibling integration.
-6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, completed n=6/8 ring main profiles, absent photonic ring adapter, incomplete NAT production metric panel, and absent independent review against the ledger.
+6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, n=6/8 ring training profiles, n=4-only photonic ring boundary, registered NAT reports, and the post-integration review disposition against the ledger.
 7. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
 ## Decisions recorded from owner (2026-09-06)
@@ -82,3 +82,12 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - Targeted T01–T06 regressions: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_classical_core.py::test_rejected_adam_resume_is_atomic_and_rejects_negative_second_moments tests/v4_tcdp/test_sibling_inventory.py::test_scoped_source_identity_handles_non_ascii_paths tests/v4_tcdp/test_sibling_inventory.py::test_source_identity_fails_closed_when_status_is_unavailable tests/v4_tcdp/test_sibling_replay.py::test_replay_rejects_malformed_generator_and_nonfinite_loss tests/v4_tcdp/test_rings_pipeline.py::test_idempotent_ring_rewrite_rejects_corrupt_summary` — 15 passed.
 - Fourth-repair full-suite verification: `665 passed, 1 skipped in 654.64s (0:10:54)`.
 - Explicit sibling integration after source/replay changes: `8 passed in 9.50s`.
+
+## Milestone-completion evidence (2026-09-07)
+
+- Physical controls: fixed-photon n=2/n=3 no-gate, bystander, and shared-gate controls `PASS`; final-only/intermediate shared conditional TVD `0.585411845271861`, so final-only is the supported boundary. The historical pre-fix `FAIL` candidate is preserved separately.
+- Registered ring outputs: `registered_v2_ring_photonic_n4_seed0_smoke.json` and its Hamming counterpart; both `PASS`, direct-vs-compiled TVD below `2e-16`, with recomputable payload hashes and matched parameters.
+- Resource pilot: `resource_budget_final_v6.json`; n=4/6/8/10 all `PASS`, clean source commit `980cfe7`, n=10 RSS growth `0` bytes, timing criterion `PASS`, and a payload hash.
+- NAT: registered n=4 seeds 0–4 and n=6/n=8 seed 0 matched reports; final reports include target improvement, fixed-reference TVD, acceptance, optimizer-state equality, and fixed-pair ablation labeling.
+- Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.
+- Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. A fresh post-fix recheck must be recorded before `REVIEW-02` can be marked `PASS`.
