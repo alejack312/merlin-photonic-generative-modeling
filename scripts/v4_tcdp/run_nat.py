@@ -6,6 +6,7 @@ import argparse
 import json
 import math
 import sys
+import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -30,6 +31,7 @@ def main() -> int:
     args = parser.parse_args()
     if args.n < 2:
         parser.error("--n must be at least 2")
+    started = time.perf_counter()
     dataset = load_rings_dataset(args.n)
     pairs = [(index, index + 1) for index in range(args.n - 1)]
     sigma = 0.5 * math.sqrt(args.n) if args.sigma is None else args.sigma
@@ -88,6 +90,11 @@ def main() -> int:
     if args.matched_continuation:
         report_path = args.output.with_name(args.output.stem + "-report" + args.output.suffix)
         report = nat_report(dataset.train_target, warm_start, arms, fixed_pair_ablation=control if args.equal_budget_control else None, eta=args.eta)
+        report["execution_timing"] = {
+            "elapsed_seconds": time.perf_counter() - started,
+            "time_limit_seconds": args.time_limit_seconds,
+            "basis": "wall_clock_cli_execution_including_warm_start_arms_and_report",
+        }
         outputs["report"] = str(write_nat_report(report, report_path))
     print(json.dumps({"artifacts": outputs, "nat": run.to_dict()}, indent=2, sort_keys=True))
     return 0

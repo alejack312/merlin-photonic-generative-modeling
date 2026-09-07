@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Reviewed head: `c01093b` (`docs(v4): mirror final bounded evidence`) on `codex/v4-implementation`; the independent post-integration review, cleanup fixes, and final documentation mirrors are included in the reachable history.
+- Reviewed baseline: `c01093b` (`docs(v4): mirror final bounded evidence`). The final reviewer must use the actual HEAD after the current bounded evidence and closure updates, not this historical baseline.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -63,6 +63,7 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, n=6/8 ring training profiles, n=4-only photonic ring boundary, registered NAT reports, and the post-integration review disposition against the ledger.
 7. Check that README and `docs/technical-findings.md` mirror the same bounded v4 conclusions and do not collapse the ledger's incomplete rows into a milestone-complete claim.
 8. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
+9. Verify the owner-learning statement and literature review are treated as prerequisites for NULL-03–08/WRITE-07, not as agent-authored predictions or retrospective interpretation.
 
 ## Decisions recorded from owner (2026-09-06)
 
@@ -90,6 +91,7 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - Registered ring outputs: `registered_v2_ring_photonic_n4_seed0_smoke.json` and its Hamming counterpart; both `PASS`, direct-vs-compiled TVD below `2e-16`, with recomputable payload hashes and matched parameters.
 - Resource pilot: `resource_budget_final_v6.json`; n=4/6/8/10 all `PASS`, clean source commit `980cfe7`, n=10 RSS growth `0` bytes, timing criterion `PASS`, and a payload hash.
 - NAT: registered n=4 seeds 0–4 and n=6/n=8 seed 0 matched reports; final reports include target improvement, fixed-reference TVD, acceptance, optimizer-state equality, and fixed-pair ablation labeling.
+- Closure checklist: [.planning/v4-closure-checklist.md](v4-closure-checklist.md) maps each incomplete requirement to the missing evidence, next action, dependency, and budget.
 - Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.
 - Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. The fresh post-fix recheck passed the declared bounded scope; its three cleanup findings are repaired in the cleanup commit following `3e1ae33`.
 
