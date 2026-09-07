@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Reviewed head: `53b541f` (`docs(v4): reconcile final review dispositions`) on `codex/v4-implementation`; the independent post-integration review and cleanup fixes are included in the reachable history.
+- Reviewed head: `c01093b` (`docs(v4): mirror final bounded evidence`) on `codex/v4-implementation`; the independent post-integration review, cleanup fixes, and final documentation mirrors are included in the reachable history.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -42,7 +42,7 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 
 ## Evidence locations
 
-- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; current final head is `53b541f`.
+- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; current final head is `c01093b`.
 - [docs/v4-tcdp-study.md](../docs/v4-tcdp-study.md) — synthesis and scope limits.
 - [docs/v4-rings-study.md](../docs/v4-rings-study.md) — n=4 ring smoke evidence.
 - [docs/v4-sibling-reproduction.md](../docs/v4-sibling-reproduction.md) — inventory and adapted checkpoint replay boundary.
