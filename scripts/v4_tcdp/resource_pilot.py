@@ -337,7 +337,7 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
     else:
         measurement_status = "PASS"
     growth = None if baseline_rss is None or peak_rss is None else max(0, peak_rss - baseline_rss)
-    return {
+    report = {
         **payload,
         "n": n,
         "command": subprocess.list2cmdline(command),
@@ -402,7 +402,7 @@ def run(timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS) -> dict[str, Any]:
     n10 = next(case for case in cases if case["n"] == 10)
     growth = n10.get("rss_growth_bytes")
     criterion_status = rss_status(n10)
-    return {
+    report = {
         "schema": "v4.resource-budget.v1",
         "generated_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "status": aggregate_status(cases),
