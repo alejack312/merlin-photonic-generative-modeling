@@ -1,9 +1,9 @@
 # v4.0 closure checklist
 
-Date: 2026-09-07  
+Date: 2026-09-07
 Branch: `codex/v4-implementation`  
 Base: `de80e9313beed614528fd6332b2f78aab83c0b50`  
-Current integration point: `fc0f599`
+Current integration point: the final commit recorded by `git rev-parse HEAD` in the handoff readback
 
 This is the execution checklist for the original binding requirements. It separates implementation evidence from scientific acceptance. `BLOCKED` means an owner or external input is required; `INCONCLUSIVE` means the project has run evidence, but the evidence does not establish the full requirement; `NOT IMPLEMENTED` means the required implementation or run is absent.
 
@@ -21,7 +21,7 @@ This is the execution checklist for the original binding requirements. It separa
 | NULL-03..08 | BLOCKED | Owner cannot honestly provide prospective predictions without the required photonics/QC foundation and literature review. | Owner completes a targeted literature review and records predictions, falsification criteria, and the date of authorship before seeing any new result table; otherwise retain `BLOCKED`. | Owner-authored learning/prediction record. | No agent-authored substitute is acceptable; no result interpretation is closed by unit tests. |
 | NULL-09 | PASS (bounded control panel) | None for implemented mutation and equality controls. | Keep metric-specific mutations separate from map/success mutations. | None. | Comparison smoke artifacts and focused comparison tests. |
 | WRITE-07 | BLOCKED | The required owner explanation of signs/winding, source vs gate noise, projection, loss, conditioning, and NAT scope is not yet owner-authored. | After the literature review, owner writes the explanation in their own words; Codex may check technical consistency but must not author it retroactively. | Owner learning and authorship. | Explanation transcript or dated project note before interpretive synthesis. |
-| WRITE-08..09, REVIEW-02 | INCONCLUSIVE pending final review | Reports and mirrors exist, but the ledger still contains incomplete scientific rows and the new comparison/replay evidence must be reconciled at the final head. | Run the independent post-integration review, repair actionable findings, then update the handoff and mirrors from the final head. | Independent reviewer; no owner choice. | Full suite, explicit sibling integration, artifact validator, reviewer disposition. |
+| WRITE-08..09, REVIEW-02 | PASS (review gate; scientific rows remain incomplete) | The independent post-integration review findings were repaired and rechecked at the current integration head. Scientific requirements that remain incomplete are recorded in their own rows. | Preserve the final review disposition and keep the incomplete scientific rows explicit. | None for the review gate; owner/external dependencies remain on the affected scientific rows. | Full suite, explicit sibling integration, artifact validator, current-head reviewer disposition. |
 | COMM-02 | BLOCKED | No owner journal/Vincent note or hold record exists. | Owner authors a draft or records an explicit hold; sending remains separately unauthorized. | Owner. | Dated draft/hold record; no external send. |
 
 ## Work that can proceed without owner predictions

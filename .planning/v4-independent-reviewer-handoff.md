@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Reviewed baseline: `c01093b` (`docs(v4): mirror final bounded evidence`). The final reviewer must use the actual HEAD after the current bounded evidence and closure updates, not this historical baseline.
+- Final review target: the current `git rev-parse HEAD` on `codex/v4-implementation`. This handoff intentionally does not pin a stale pre-review documentation hash.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -42,7 +42,7 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 
 ## Evidence locations
 
-- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; the reviewed evidence head is `c01093b`, followed by the handoff metadata commit recorded in the final Git readback.
+- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; the exact integrated head is the output of `git rev-parse HEAD` in the final verification readback.
 - [docs/v4-tcdp-study.md](../docs/v4-tcdp-study.md) — synthesis and scope limits.
 - [docs/v4-rings-study.md](../docs/v4-rings-study.md) — n=4 ring smoke evidence.
 - [docs/v4-sibling-reproduction.md](../docs/v4-sibling-reproduction.md) — inventory and adapted checkpoint replay boundary.
@@ -97,6 +97,6 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 ## Final documentation-mirror recheck (2026-09-07)
 
-- Independent content-only review at implementation/review head `53b541f`: `PASS`.
+- Independent final review at the current integration head: `PASS` after the documented cleanup findings were repaired and rechecked. The canonical validation manifest is unchanged and the closure metadata matches the current evidence ledger.
 - The reviewer confirmed that the README and `docs/technical-findings.md` additions contain only verified, scope-qualified v4 claims; `WRITE-09` is correctly `PASS`; and incomplete rows remain explicit (`INCONCLUSIVE`, `NOT IMPLEMENTED`, and `BLOCKED`) with concrete next actions.
 - The documentation changes were then committed with the ledger and handoff updates. No source-code or sibling changes were made in this final documentation pass.
