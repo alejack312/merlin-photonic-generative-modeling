@@ -14,13 +14,18 @@ Date: 2026-09-08. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528f
 Closure commands for this addendum:
 
 ```powershell
-venv/Scripts/python.exe scripts/v4_tcdp/validate_owner_controls.py --output results/v4_tcdp/controls/owner_controls_20260908.json
+venv/Scripts/python.exe scripts/v4_tcdp/validate_owner_controls.py --output results/v4_tcdp/controls/owner_controls_20260908_head.json
 $env:PCVL_PERSISTENT_PATH = Join-Path $env:TEMP 'merlin-v4-null-physical-20260908'
-venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path $env:PCVL_PERSISTENT_PATH --output results/v4_tcdp/controls/physical_controls_20260908.json
-venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py --output results/v4_tcdp/controls/deploy_controls_20260908.json
-venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --equal-budget-control --output results/v4_tcdp/nat/closure_20260908/20260908_n4_seed0_owner_null.json
+venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path $env:PCVL_PERSISTENT_PATH --output results/v4_tcdp/controls/physical_controls_20260908_head.json
+venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py --output results/v4_tcdp/controls/deploy_controls_20260908_head.json
+venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --equal-budget-control --output results/v4_tcdp/nat/closure_20260908/20260908_n4_seed0_owner_null_head.json
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
 ```
+
+The original non-suffixed physical/NAT artifacts are preserved historical
+closure outputs from the prior integration commit. The suffixed `head`
+artifacts are the reproducible current-head reruns; immutable writers reject
+silently replacing the former artifacts when the repository identity changes.
 
 ## Implementation now exercised
 

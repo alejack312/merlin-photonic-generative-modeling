@@ -1,0 +1,138 @@
+{
+  "arms": {
+    "a": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 84.81315749200017,
+        "eta": 1.0,
+        "model_success": 0.011790623407627796,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 150,
+        "objective_evaluations": 1201,
+        "pair_budget": 900,
+        "pair_evaluations": 900,
+        "pair_moves": 2,
+        "requested_steps": 150,
+        "single_gradient_evaluations": 150,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.029564463711883232,
+      "parameter_hash": "e5405484c4355338e1b3cd1687b6c54cb997b4786f27f8b4753e800ab8181df3",
+      "run_kind": "matched_arm_a",
+      "same_parameter_reference_success": 0.0036422276901968047,
+      "status": "PASS",
+      "target_improvement": 5.8088654710966705e-05,
+      "target_improvement_relative": 0.20603706153595389,
+      "target_loss_after": 0.0002238443833450537,
+      "target_loss_before": 0.0002819330380560204,
+      "warm_start_state_hash": "8e40bf4d1fd3d143f628297fe6cef9a79bed8e5f38a88c4a8cfb82a3c2e70581"
+    },
+    "b": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 84.81315749200017,
+        "eta": 1.0,
+        "model_success": 0.011790623407627796,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 150,
+        "objective_evaluations": 1201,
+        "pair_budget": 900,
+        "pair_evaluations": 900,
+        "pair_moves": 2,
+        "requested_steps": 150,
+        "single_gradient_evaluations": 150,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.029564463711883232,
+      "parameter_hash": "e5405484c4355338e1b3cd1687b6c54cb997b4786f27f8b4753e800ab8181df3",
+      "run_kind": "matched_arm_b",
+      "same_parameter_reference_success": 0.0036422276901968047,
+      "status": "PASS",
+      "target_improvement": 5.8088654710966705e-05,
+      "target_improvement_relative": 0.20603706153595389,
+      "target_loss_after": 0.0002238443833450537,
+      "target_loss_before": 0.0002819330380560204,
+      "warm_start_state_hash": "8e40bf4d1fd3d143f628297fe6cef9a79bed8e5f38a88c4a8cfb82a3c2e70581"
+    }
+  },
+  "execution_timing": {
+    "basis": "wall_clock_cli_execution_including_warm_start_arms_and_report",
+    "elapsed_seconds": 15.699208899983205,
+    "time_limit_seconds": null
+  },
+  "fixed_pair_ablation": {
+    "attempts_per_accepted_sample": 12.118466831813269,
+    "budget": {
+      "checkpoint_selection_rule": "fixed_last_step",
+      "completed_steps": 150,
+      "objective_evaluations": 1201,
+      "pair_budget": 900,
+      "pair_evaluations": 900,
+      "pair_moves": 0,
+      "requested_steps": 150,
+      "single_gradient_evaluations": 150,
+      "status": "completed",
+      "stop_reason": null,
+      "time_limit_seconds": null
+    },
+    "fixed_reference_tvd": 0.40260312273975224,
+    "label": "fixed_pair_equal_budget_control",
+    "model_success": 0.08251868935885609,
+    "status": "ablation_only",
+    "target_improvement": 0.6323582473521908,
+    "target_loss_after": 0.017536609024935028
+  },
+  "fixed_reference": {
+    "eta": 1.0,
+    "kind": "warm_start_final_compiled_distribution",
+    "model_success": 0.0036422276901968047
+  },
+  "matching": {
+    "common_start_state_hash": "8e40bf4d1fd3d143f628297fe6cef9a79bed8e5f38a88c4a8cfb82a3c2e70581",
+    "identical_budgets": true,
+    "identical_checkpoint_selection": true,
+    "identical_initial_parameterization": true,
+    "identical_optimizer": true,
+    "optimizer_state_hashes": [
+      "95890ea30c5a54dbd366fad76276d2cbb8fcb3ce11623194de7dc2ff1d35a411"
+    ],
+    "rng_policy": "deterministic_parameter-only; seed recorded per run"
+  },
+  "profile": {
+    "learning_rate": 0.05,
+    "n": 4,
+    "optimizer": "adam",
+    "pairs": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "sigma": 1.0,
+    "steps": 150
+  },
+  "schema_version": "v4_tcdp.nat_report.v1",
+  "status": "PASS",
+  "target": {
+    "hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26",
+    "reference": "frozen_warm_start_final_state"
+  }
+}
