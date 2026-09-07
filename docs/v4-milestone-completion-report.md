@@ -19,10 +19,12 @@ $env:PCVL_PERSISTENT_PATH = Join-Path $env:TEMP 'merlin-v4-null-physical-2026090
 venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path $env:PCVL_PERSISTENT_PATH --output results/v4_tcdp/controls/physical_controls_20260908_head.json
 venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py --output results/v4_tcdp/controls/deploy_controls_20260908_head.json
 venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --equal-budget-control --output results/v4_tcdp/nat/closure_20260908/20260908_n4_seed0_owner_null_head.json
+venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
 ```
 
-The original non-suffixed physical/NAT artifacts are preserved historical
+The artifact validator currently reports `242` JSON files, `30` JSONL rows,
+and `7` payload hashes with zero failures. The original non-suffixed physical/NAT artifacts are preserved historical
 closure outputs from the prior integration commit. The suffixed `head`
 artifacts are the reproducible current-head reruns; immutable writers reject
 silently replacing the former artifacts when the repository identity changes.
