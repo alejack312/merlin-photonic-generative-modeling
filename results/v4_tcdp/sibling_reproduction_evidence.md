@@ -37,3 +37,18 @@ The all-registered replay command was stopped before completion because exact re
 - `results/v4_tcdp/sibling_replays/required_profiles/`: stopped partial manifests for both required REPRO-03 profiles and blocked manifests for unavailable checkpoint inputs.
 
 Open external inputs remain the registered rows without safe NPZ checkpoints. Physical/source validation prerequisites for matched comparisons remain un evidenced, so no comparison extension is recorded here.
+
+## Exact-row audit snapshot
+
+The current inventory registers six exact-reproduction rows. Their isolated evidence/disposition is:
+
+| Source row | Registered input state | Evidence disposition |
+| --- | --- | --- |
+| `training_smoke` | five safe NPZ checkpoints; source recipe is regenerable | faithful source retraining is recorded under `results/v4_tcdp/sibling_retraining/training_smoke/` |
+| `bandwidth_marginal_sweep` | twenty safe NPZ checkpoints across four bandwidth runs | stopped partial raw replay at `sigma9`, step 20; no compiled/deployed claim |
+| `ghosh_kim_small_n` | fifteen safe NPZ checkpoints across three bandwidth runs | adapted checkpoint replay complete at `sigma9`, step 20; source target data is not exported |
+| `ghosh_kim_large_n_sampled` | nine safe NPZ checkpoints; `n=20` sampled source profile | not rerun: bounded compiled-density adapter rejects this scale before unsafe density allocation; no large exact replay was attempted in this pass |
+| `anti_concentration_validation` | no safe NPZ checkpoint; JSON/CSV/plots only | blocked manifest names `results/validation/checkpoints/*.npz` as the missing input |
+| `qiskit_validation_report_smoke` | no safe NPZ checkpoint; QASM/raw JSON/results only | blocked manifest names `results/qiskit_validation_report_smoke/checkpoints/*.npz` as the missing input |
+
+This snapshot distinguishes source retraining, adapted frozen-checkpoint replay, stopped partial output, and unavailable/scale-blocked inputs. No exact distribution is inferred from moments or non-checkpoint summaries.
