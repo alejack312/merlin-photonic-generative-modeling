@@ -95,6 +95,14 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.
 - Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. The fresh post-fix recheck passed the declared bounded scope; its three cleanup findings are repaired in the cleanup commit following `3e1ae33`.
 
+## Closure-pass handoff update (2026-09-08)
+
+- Closure-pass head before final integration is `b9c43e5e2ddb199b101b434c039a9cba1f3cf435`; the reviewer must use the final `git rev-parse HEAD` after the closure commit. Base remains `de80e9313beed614528fd6332b2f78aab83c0b50`.
+- Sibling identity remains `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`, branch `alejack312`, clean, and unmodified.
+- Reproducible closure commands now include `venv/Scripts/python.exe scripts/v4_tcdp/validate_owner_controls.py --output results/v4_tcdp/controls/owner_controls_20260908.json`, the isolated-Perceval `validate_physical_controls.py` command in the milestone report, `validate_deploy.py`, and the fresh matched n=4 NAT command in that report.
+- New evidence is at `results/v4_tcdp/controls/`, `results/v4_tcdp/nat/closure_20260908/`, `results/v4_tcdp/comparisons/closure_20260908/`, and `results/v4_tcdp/sibling_replays/closure_20260908/`. Treat the sibling closure output as a stopped partial replay/reference artifact, not faithful retraining; it has no worker report or certifying source-trajectory provenance.
+- Ledger status changes are narrow: NULL-03–06 are PASS within declared scopes; the binding NULL-08 matched continuation is PASS; NULL-07 remains INCONCLUSIVE; WRITE-07 and COMM-02 remain BLOCKED; the sibling/larger-n/complete-comparison rows remain INCONCLUSIVE. Do not promote analytic map-derived cells to physical photonic PASS.
+
 ## Final documentation-mirror recheck (2026-09-07)
 
 - Independent final review at the current integration head: `PASS` after the documented cleanup findings were repaired and rechecked. The canonical validation manifest is unchanged and the closure metadata matches the current evidence ledger.

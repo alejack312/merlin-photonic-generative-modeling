@@ -1,6 +1,26 @@
 # v4.0 milestone completion report
 
-Date: 2026-09-07. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528fd6332b2f78aab83c0b50`. The current integration point and remaining-work map are recorded in [.planning/v4-closure-checklist.md](../.planning/v4-closure-checklist.md). This report separates implementation completion from scientific acceptance.
+Date: 2026-09-08. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528fd6332b2f78aab83c0b50`. The current integration point and remaining-work map are recorded in [.planning/v4-closure-checklist.md](../.planning/v4-closure-checklist.md). This report separates implementation completion from scientific acceptance.
+
+## 2026-09-08 closure-pass addendum
+
+- Owner predictions are now recorded in [docs/v4-owner-predictions-2026-09-08.md](v4-owner-predictions-2026-09-08.md). The registered owner controls for NULL-03 through NULL-06 pass within the declared analytic/fixed-photon scopes; exact scalar residuals are recorded at the project-wide `1.0e-16` scale and probability-vector controls use the binding `1.0e-12` tolerance.
+- NULL-03’s analytic k=0 factorization residual is `2.220446049250313e-16`; the direct Perceval no-gate n=2 control has direct-vs-analytic TVD `1.0842021724855044e-16`. NULL-04’s same-parameter compiler/reference control has maximum probability residual `1.1102230246251565e-16` and success residual `1.3877787807814457e-17`. NULL-05 has conditional-shape TVD `0.0` and exact `eta**n` mass scaling. NULL-06’s CP and qualified heralded throughput residuals are `0.0`.
+- NULL-08’s binding same-algorithm matched continuation passes for the fresh n=4 seed-0 closure run: both arms share the warm-start and optimizer-state hashes, budgets, final parameter hash and loss endpoint. The owner’s separate continuous-versus-discrete objective prediction remains exploratory because the current registration does not test it.
+- A fresh direct full-Fock manifest records final-only and intermediate projections, absolute accepted mass, conditional distributions and the shared-gate discrepancy (`0.585411845271861`). The fixed-photon physical scope passes; it does not certify larger-n full-Fock behavior or multiphoton source models.
+- Eight additional n=6/n=8 comparison cells were independently inspected in the isolated closure namespace. Hamming-MMD direct/Walsh cross-checks, hashes, raw/compiled/deployed separation and fixed-loss ratios pass as analytic map-derived evidence. The worker’s sibling output is retained as a stopped partial replay/reference artifact; no faithful retraining claim is made because it lacks certifying source-trajectory provenance.
+- The authoritative ledger now marks NULL-03–06 and the binding NULL-08 control `PASS`, NULL-07 `INCONCLUSIVE`, and WRITE-07/COMM-02 `BLOCKED`. SWEEP-04, RING-04, REPRO-03, COMPARE-01 and COMPARE-04 remain `INCONCLUSIVE` because their required sibling, larger-n physical, or complete matched arms are still absent. v4.0 is therefore not fully scientifically accepted.
+
+Closure commands for this addendum:
+
+```powershell
+venv/Scripts/python.exe scripts/v4_tcdp/validate_owner_controls.py --output results/v4_tcdp/controls/owner_controls_20260908.json
+$env:PCVL_PERSISTENT_PATH = Join-Path $env:TEMP 'merlin-v4-null-physical-20260908'
+venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path $env:PCVL_PERSISTENT_PATH --output results/v4_tcdp/controls/physical_controls_20260908.json
+venv/Scripts/python.exe scripts/v4_tcdp/validate_deploy.py --output results/v4_tcdp/controls/deploy_controls_20260908.json
+venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --equal-budget-control --output results/v4_tcdp/nat/closure_20260908/20260908_n4_seed0_owner_null.json
+venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
+```
 
 ## Implementation now exercised
 
@@ -30,4 +50,4 @@ The authoritative requirement-by-requirement status is [.planning/v4-requirement
 
 Remaining scientific gaps are: multiphoton `g2>0` validation, a general chain-level final-only/intermediate composition proof, larger-n photonic deployment, faithful sibling retraining for rows whose exact inputs are absent, and a complete sibling/substrate matched comparison and figures. These are not relabeled as interpretation-only gaps; a two-day n=4 wait was not launched because registered n=4 was already green.
 
-Owner-gated rows remain blocked pending the owner's literature-grounded prospective NULL-03–08 predictions and WRITE-07 explanation. The owner has explicitly identified the needed literature review as a learning prerequisite; no agent-authored substitute will be recorded. COMM-02 remains blocked until the owner authors or records a hold for the optional communication note. No external message, merge, publication, or unapproved sweep is part of this milestone.
+Owner-gated rows are now split accurately: NULL-03–06 and the binding NULL-08 control have owner-authored notes plus registered bounded evidence; NULL-07 remains unadjudicated because its source-mutation capability is outside D1; WRITE-07 still requires the owner-authored sign/winding, source-versus-gate, projection/loss, conditioning and NAT explanation; COMM-02 still requires an owner-authored draft or hold. No external message, merge, publication, or unapproved sweep is part of this milestone.
