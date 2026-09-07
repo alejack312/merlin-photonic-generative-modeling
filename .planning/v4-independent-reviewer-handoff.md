@@ -8,7 +8,7 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Reviewed head: `3e1ae33` (`docs(v4): record final verification handoff`) on `codex/v4-implementation`; the cleanup commit containing the final default-path and stale-note repairs follows it.
+- Reviewed head: `53b541f` (`docs(v4): reconcile final review dispositions`) on `codex/v4-implementation`; the independent post-integration review and cleanup fixes are included in the reachable history.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
@@ -42,7 +42,7 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 
 ## Evidence locations
 
-- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies.
+- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; current final head is `53b541f`.
 - [docs/v4-tcdp-study.md](../docs/v4-tcdp-study.md) — synthesis and scope limits.
 - [docs/v4-rings-study.md](../docs/v4-rings-study.md) — n=4 ring smoke evidence.
 - [docs/v4-sibling-reproduction.md](../docs/v4-sibling-reproduction.md) — inventory and adapted checkpoint replay boundary.
@@ -61,7 +61,8 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 4. Check that the adapted `training_smoke` checkpoint replay is not called faithful retraining.
 5. Check the repaired R01–R09, S01–S05 and T01–T06 contracts: finite/complete retraining trajectories, exact requested config, fail-closed source identity, raw-content dataset hashes, complete/atomic Adam continuation, ring namespaces, multi-seed idempotence, full artifact and summary integrity, stale-array rejection, explicit spatial geometry, paired NAT binding/reporting, two matched NAT arms, full-Fock aggregation, and optional sibling integration.
 6. Check the recorded D1/D2/D3 choices, fixed-photon loss boundary, owner controls, n=6/8 ring training profiles, n=4-only photonic ring boundary, registered NAT reports, and the post-integration review disposition against the ledger.
-7. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
+7. Check that README and `docs/technical-findings.md` mirror the same bounded v4 conclusions and do not collapse the ledger's incomplete rows into a milestone-complete claim.
+8. Verify no legacy pipeline or sibling file changed, and no unapproved sweep or merge occurred. The 20 ring main artifacts are within the registered n=6/n=8 five-seed/300-step budget.
 
 ## Decisions recorded from owner (2026-09-06)
 
@@ -91,3 +92,9 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - NAT: registered n=4 seeds 0–4 and n=6/n=8 seed 0 matched reports; final reports include target improvement, fixed-reference TVD, acceptance, optimizer-state equality, and fixed-pair ablation labeling.
 - Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.
 - Independent review disposition: earlier reviews found physical-status, atomic-writer, provenance, and NAT matching defects; those were repaired. The fresh post-fix recheck passed the declared bounded scope; its three cleanup findings are repaired in the cleanup commit following `3e1ae33`.
+
+## Final documentation-mirror recheck (2026-09-07)
+
+- Independent content-only review at implementation/review head `53b541f`: `PASS`.
+- The reviewer confirmed that the README and `docs/technical-findings.md` additions contain only verified, scope-qualified v4 claims; `WRITE-09` is correctly `PASS`; and incomplete rows remain explicit (`INCONCLUSIVE`, `NOT IMPLEMENTED`, and `BLOCKED`) with concrete next actions.
+- The documentation changes were then committed with the ledger and handoff updates. No source-code or sibling changes were made in this final documentation pass.

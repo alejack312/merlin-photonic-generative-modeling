@@ -32,6 +32,14 @@ After the v1.0 generator above, this project extended into a v3.0 milestone that
 
 Supporting this pair of corrected findings: a continuously-tunable weight-2 gate (ARB-01/ARB-02), verified to ~1e-7 against measurement, and four independently-built Julia cross-checks against the Python results, all four GO — neither is affected by this correction.
 
+### v4.0: Additive train/classical/deploy/photonic study
+
+The v4.0 implementation adds a NumPy IQP trainer for the two-ring dataset, typed dataset and checkpoint contracts, the registered sibling inventory/replay boundary, a discrete-alpha/continuous-single-angle NAT control, Hamming-kernel metric panels, and a qualified photonic deployment path. Existing v1–v3 pipelines remain separate. The implementation and its provenance gates are exercised by the full suite (`681 passed, 1 skipped`); the exact command set, hashes, and artifact paths are recorded in the [v4 milestone report](docs/v4-milestone-completion-report.md) and the [requirement evidence ledger](.planning/v4-requirement-evidence.md).
+
+The verified v4 physical scope is deliberately bounded: fixed-photon `g2=0`, explicit uniform per-photon loss, and final-only projection. Perceval controls pass for n=2/n=3 no-gate, single-gate-with-bystander, and shared-gate cases, with absolute accepted mass reported separately from conditional output quality. Registered n=4 spatial and Hamming ring smoke evaluations match their compiled references at floating-point precision; the n=6/n=8 training profiles are recorded, while larger-n photonic deployment is not claimed. The sibling `training_smoke` row is faithfully retrained from regenerated source-recipe data; other rows retain their documented replay or unavailable-input dispositions. NAT reports are matched ideal/model-derived continuations and do not establish noisy efficacy.
+
+This milestone does not establish multiphoton `g2>0` behavior, intermediate-projection composition, larger-n photonic deployment, complete sibling retraining, a complete sibling/substrate comparison, or the unexecuted two-day n=4 stop-rule arm. Owner-authored prospective null predictions and explanatory text remain explicitly open; see the [v4 completion report](docs/v4-milestone-completion-report.md) for the acceptance boundary rather than treating these gaps as interpretation-only limitations.
+
 ## Results
 
 ### v1.0: Photonic Generative Model
