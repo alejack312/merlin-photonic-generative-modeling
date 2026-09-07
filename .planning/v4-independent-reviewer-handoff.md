@@ -42,7 +42,7 @@ Final verification in this pass: focused integration `124 passed`, explicit sibl
 
 ## Evidence locations
 
-- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; current final head is `c01093b`.
+- [.planning/v4-requirement-evidence.md](v4-requirement-evidence.md) — 52 rows, PASS/FAIL/INCONCLUSIVE/NOT IMPLEMENTED/BLOCKED, with next actions and dependencies; the reviewed evidence head is `c01093b`, followed by the handoff metadata commit recorded in the final Git readback.
 - [docs/v4-tcdp-study.md](../docs/v4-tcdp-study.md) — synthesis and scope limits.
 - [docs/v4-rings-study.md](../docs/v4-rings-study.md) — n=4 ring smoke evidence.
 - [docs/v4-sibling-reproduction.md](../docs/v4-sibling-reproduction.md) — inventory and adapted checkpoint replay boundary.
