@@ -26,8 +26,10 @@ venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/
 The artifact validator currently reports `242` JSON files, `30` JSONL rows,
 and `7` payload hashes with zero failures. The original non-suffixed physical/NAT artifacts are preserved historical
 closure outputs from the prior integration commit. The suffixed `head`
-artifacts are the reproducible current-head reruns; immutable writers reject
-silently replacing the former artifacts when the repository identity changes.
+artifacts were generated at implementation head `c1617601`; the later
+commits contain documentation and the validator only, so their numerical
+source implementation is unchanged. Immutable writers reject silently
+replacing the former artifacts when the repository identity changes.
 
 ## Implementation now exercised
 
