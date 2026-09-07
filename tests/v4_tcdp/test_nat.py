@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 import sys
 
 import numpy as np
@@ -202,6 +203,17 @@ def test_nat_report_separates_target_reference_and_acceptance() -> None:
     assert report["arms"]["a"]["target_improvement"] >= 0.0
     assert report["arms"]["a"]["fixed_reference_tvd"] >= 0.0
     assert report["arms"]["a"]["acceptance"]["attempts_per_accepted_sample"] >= 1.0
+
+
+def test_nat_report_rejects_optimizer_state_mismatch() -> None:
+    target = _target_for_pair_key(2)
+    warm = run_nat(target, [(0, 1)], steps=1, seed=12, sigma=0.8)
+    arm_a = run_matched_continuation(target, [(0, 1)], warm, steps=1, pair_budget=2, run_kind="matched_arm_a")
+    arm_b = run_matched_continuation(target, [(0, 1)], warm, steps=1, pair_budget=2, run_kind="matched_arm_b")
+    altered = replace(arm_b, optimizer_m=arm_b.optimizer_m + 1.0)
+    report = nat_report(target, warm, {"a": arm_a, "b": altered})
+    assert report["status"] == "FAIL"
+    assert report["matching"]["identical_optimizer"] is False
 
 
 def test_nat_time_limit_records_attempted_stop() -> None:

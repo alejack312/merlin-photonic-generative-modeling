@@ -1,0 +1,138 @@
+{
+  "arms": {
+    "a": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 27955.50861123041,
+        "eta": 1.0,
+        "model_success": 3.577112525143884e-05,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 150,
+        "objective_evaluations": 1801,
+        "pair_budget": 1500,
+        "pair_evaluations": 1500,
+        "pair_moves": 3,
+        "requested_steps": 150,
+        "single_gradient_evaluations": 150,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.0884550846198015,
+      "parameter_hash": "4c0ba0eee01fe9bfc35e5eff0d9daaff82ddcdc7111bc23d87e4e9aed02cb539",
+      "run_kind": "matched_arm_a",
+      "same_parameter_reference_success": 4.273469829525562e-05,
+      "status": "PASS",
+      "target_improvement": 0.000411727431780454,
+      "target_improvement_relative": 0.28830179448124443,
+      "target_loss_after": 0.0010163851906931432,
+      "target_loss_before": 0.0014281126224735972,
+      "warm_start_state_hash": "0ad93616c7f83a5ee6f4d416a0d4172214c7e31627aa6bd1a186a96ae53689bb"
+    },
+    "b": {
+      "acceptance": {
+        "attempts_per_accepted_sample": 27955.50861123041,
+        "eta": 1.0,
+        "model_success": 3.577112525143884e-05,
+        "status": "model_derived_reference_only"
+      },
+      "budget": {
+        "checkpoint_selection_rule": "fixed_last_step",
+        "completed_steps": 150,
+        "objective_evaluations": 1801,
+        "pair_budget": 1500,
+        "pair_evaluations": 1500,
+        "pair_moves": 3,
+        "requested_steps": 150,
+        "single_gradient_evaluations": 150,
+        "status": "completed",
+        "stop_reason": null,
+        "time_limit_seconds": null
+      },
+      "checkpoint_selection_rule": "fixed_last_step",
+      "fixed_reference_tvd": 0.0884550846198015,
+      "parameter_hash": "4c0ba0eee01fe9bfc35e5eff0d9daaff82ddcdc7111bc23d87e4e9aed02cb539",
+      "run_kind": "matched_arm_b",
+      "same_parameter_reference_success": 4.273469829525562e-05,
+      "status": "PASS",
+      "target_improvement": 0.000411727431780454,
+      "target_improvement_relative": 0.28830179448124443,
+      "target_loss_after": 0.0010163851906931432,
+      "target_loss_before": 0.0014281126224735972,
+      "warm_start_state_hash": "0ad93616c7f83a5ee6f4d416a0d4172214c7e31627aa6bd1a186a96ae53689bb"
+    }
+  },
+  "fixed_pair_ablation": {
+    "attempts_per_accepted_sample": 46.28160036244684,
+    "budget": {
+      "checkpoint_selection_rule": "fixed_last_step",
+      "completed_steps": 150,
+      "objective_evaluations": 1801,
+      "pair_budget": 1500,
+      "pair_evaluations": 1500,
+      "pair_moves": 0,
+      "requested_steps": 150,
+      "single_gradient_evaluations": 150,
+      "status": "completed",
+      "stop_reason": null,
+      "time_limit_seconds": null
+    },
+    "fixed_reference_tvd": 0.33489223421900605,
+    "label": "fixed_pair_equal_budget_control",
+    "model_success": 0.021606858712072668,
+    "status": "ablation_only",
+    "target_improvement": 0.6337923792600795,
+    "target_loss_after": 0.009212295310152963
+  },
+  "fixed_reference": {
+    "eta": 1.0,
+    "kind": "warm_start_final_compiled_distribution",
+    "model_success": 4.273469829525562e-05
+  },
+  "matching": {
+    "common_start_state_hash": "0ad93616c7f83a5ee6f4d416a0d4172214c7e31627aa6bd1a186a96ae53689bb",
+    "identical_budgets": true,
+    "identical_checkpoint_selection": true,
+    "identical_initial_parameterization": true,
+    "identical_optimizer": true,
+    "rng_policy": "deterministic_parameter-only; seed recorded per run"
+  },
+  "profile": {
+    "learning_rate": 0.05,
+    "n": 6,
+    "optimizer": "adam",
+    "pairs": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        4,
+        5
+      ]
+    ],
+    "sigma": 1.224744871391589,
+    "steps": 150
+  },
+  "schema_version": "v4_tcdp.nat_report.v1",
+  "status": "PASS",
+  "target": {
+    "hash": "2e54d2e9f303e46726ff62759f4c35f36c7c857cc9a765f9b57ead47916dded3",
+    "reference": "frozen_warm_start_final_state"
+  }
+}

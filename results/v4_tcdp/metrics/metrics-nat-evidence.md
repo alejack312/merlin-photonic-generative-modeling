@@ -19,7 +19,7 @@ Smoke artifacts:
 
 `run_nat.py --matched-continuation` writes one frozen warm start and two continuation arms. The report checks common starting-state hash, initial parameterization, optimizer, budget, deterministic checkpoint selection, target improvement from the warm-start target loss, distance to the frozen warm-start reference distribution, and fixed-photon model acceptance/attempts separately. `--equal-budget-control` is labeled `fixed_pair_equal_budget_control` and is an ablation only.
 
-The smoke report uses one n=4 seed and one update to keep this evidence bounded. It is a contract/control artifact, not NAT efficacy evidence for the registered n={4,6,8}, five-seed, 150-step attempts. No claim of NAT superiority or conditional noise effect is made under the fixed-photon uniform-loss model.
+The smoke report uses one n=4 seed and one update to keep this contract evidence bounded. The registered matched reports under `results/v4_tcdp/nat/registered/` add n=4 seeds 0–4 plus n=6/n=8 seed-0 150-step attempts within the approved budgets. These are ideal/model-derived continuation comparisons: no claim of NAT superiority or conditional noise effect is made under the fixed-photon uniform-loss model.
 
 ## Verification
 

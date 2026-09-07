@@ -18,6 +18,7 @@ import platform
 import queue
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 from typing import Any
@@ -33,7 +34,7 @@ from merlin_iqp.deploy.maps import GateMap, ideal_single_map, reconstruct_cp_map
 
 PILOT_SIZES = (4, 6, 8, 10)
 N10_RSS_LIMIT_BYTES = 400 * 1024 * 1024
-DEFAULT_TIMEOUT_SECONDS = 180.0
+DEFAULT_TIMEOUT_SECONDS = 3.0 * 60.0 * 60.0
 
 
 class _ProcessMemoryCountersEx(ctypes.Structure):
@@ -203,7 +204,7 @@ def _worker(n: int) -> dict[str, Any]:
     evaluation_started = time.perf_counter()
     probability_sum, model_success = _evaluate(compiled, maps)
     evaluation_elapsed = time.perf_counter() - evaluation_started
-    return {
+    report = {
         "n": n,
         "gate_count": len(compiled.gates),
         "map_count": len(maps),
@@ -218,6 +219,7 @@ def _worker(n: int) -> dict[str, Any]:
         "full_circuit_superoperator_allocated": False,
         "status": "PASS",
     }
+    return report
 
 
 def _parse_json_line(line: str) -> dict[str, Any] | None:
@@ -426,8 +428,55 @@ def run(timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS) -> dict[str, Any]:
             "observed_growth_mib": None if growth is None else growth / (1024 * 1024),
             "status": criterion_status,
         },
+        "map_build_timing_criterion": {
+            "expression": "each bounded worker completes within the approved three-hour gate",
+            "limit_seconds": DEFAULT_TIMEOUT_SECONDS,
+            "status": "PASS"
+            if all(
+                not bool(case.get("timed_out"))
+                and float(case.get("map_build_and_evaluation_elapsed_seconds", float("inf"))) <= DEFAULT_TIMEOUT_SECONDS
+                for case in cases
+            )
+            else "INCONCLUSIVE",
+        },
         "cases": cases,
     }
+    report["payload_sha256"] = hashlib.sha256(
+        json.dumps(report, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    ).hexdigest()
+    return report
+
+
+def _write_immutable_json(path: Path, report: dict[str, Any]) -> None:
+    """Create a resource report once and reject incompatible reuse."""
+
+    encoded = json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise FileExistsError(f"existing resource report is unreadable: {path}") from error
+        if existing != report:
+            raise FileExistsError(f"incompatible resource report already exists: {path}")
+        return
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as handle:
+            handle.write(encoded)
+            temporary = Path(handle.name)
+        os.rename(temporary, path)
+    except FileExistsError:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        if path.is_file() and json.loads(path.read_text(encoding="utf-8")) == report:
+            return
+        raise
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
 
 
 def main() -> None:
@@ -444,7 +493,7 @@ def main() -> None:
         return
     report = run(timeout_seconds=args.timeout_seconds)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_immutable_json(args.output, report)
     print(json.dumps({"status": report["status"], "output": str(args.output)}, sort_keys=True))
     if report["status"] == "FAIL":
         raise SystemExit(1)

@@ -354,7 +354,14 @@ def evaluate_ring_artifact(
             "repo": git_source_identity(Path(__file__).resolve().parents[3], include_paths=("src/merlin_iqp/deploy", "scripts/v4_tcdp/evaluate_ring_photonic.py")),
         },
     }
-    result["hashes"]["output_payload"] = hash_json(result)
+    # Hash the complete payload with this field set to its sentinel value.  A
+    # consumer can recompute this value without creating a self-referential
+    # hash that can never validate against the serialized result.
+    payload_for_hash = dict(result)
+    payload_hashes = dict(result["hashes"])
+    payload_hashes["output_payload"] = None
+    payload_for_hash["hashes"] = payload_hashes
+    result["hashes"]["output_payload"] = hash_json(payload_for_hash)
     return result
 
 
@@ -374,7 +381,11 @@ def write_ring_evaluation(result: dict[str, Any], output_path: str | Path) -> Pa
     temporary = Path(temporary_name)
     try:
         temporary.write_text(serialized, encoding="utf-8")
-        os.replace(temporary, destination)
+        os.rename(temporary, destination)
+    except FileExistsError:
+        if destination.is_file() and _load_json(destination) == result:
+            return destination
+        raise FileExistsError(f"incompatible ring evaluation already exists: {destination}")
     finally:
         if temporary.exists():
             temporary.unlink()

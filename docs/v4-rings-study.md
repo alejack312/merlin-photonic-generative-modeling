@@ -36,6 +36,6 @@ Artifacts:
 
 ## Backend boundary and legacy context
 
-The training step is protected by a classical-only import guard that rejects torch, Perceval, and MerLin backend imports. No photonic ring deployment adapter was available in this owned Phase 28 slice, so photonic evaluation is recorded as `INCONCLUSIVE`; no simulator output is relabeled as an independent photonic result.
+The training step is protected by a classical-only import guard that rejects torch, Perceval, and MerLin backend imports. The registered n=4 spatial and Hamming smoke checkpoints were subsequently evaluated through the fixed-photon final-only photonic adapter with matching qubit references; those two artifacts are bounded `PASS` controls, not evidence for n=6/n=8 photonic deployment or a photonic advantage. The shared-gate physical controls show a material final-only/intermediate discrepancy, so the intermediate boundary remains unsupported.
 
 The historical 462-bin `QuantumLayer.simple` ansatz remains contextual only. It has a different latent-input ansatz and output space from this `2**n` IQP model. Native MMD values from those unmatched spaces are not compared.

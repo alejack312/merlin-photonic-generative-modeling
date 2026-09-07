@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from merlin_iqp.deploy.ring import evaluate_ring_artifact, load_ring_artifact
+from merlin_iqp.classical._validation import hash_json
 
 
 RING_ROOT = Path("results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke")
@@ -39,3 +40,12 @@ def test_evaluate_ring_artifact_uses_final_only_and_fixed_photon_eta() -> None:
     assert result["comparison"]["final_only_selected_boundary"] is True
     assert result["hashes"]["generator"] == artifact.hashes["generator"]
     assert result["hashes"]["final_theta"] == artifact.hashes["final_theta"]
+
+
+def test_ring_payload_hash_is_recomputable_without_self_reference() -> None:
+    result = evaluate_ring_artifact(load_ring_artifact(RING_ROOT), eta=0.9)
+    payload = dict(result)
+    hashes = dict(result["hashes"])
+    declared = hashes.pop("output_payload")
+    payload["hashes"] = hashes | {"output_payload": None}
+    assert declared == hash_json(payload)

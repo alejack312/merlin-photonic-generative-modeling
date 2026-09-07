@@ -36,7 +36,7 @@
     "quantized": true,
     "topology": "arbitrary_weight2"
   },
-  "elapsed_seconds": 14.593300199980149,
+  "elapsed_seconds": 12.854334000003291,
   "expected_success_from_compiled_pairs": 0.013726388348954031,
   "full_fock": {
     "accepted_mass": 0.1111113301012665,
@@ -73,9 +73,10 @@
     "scope": "single bare CP circuit accepted-mass probe; not process tomography",
     "status": "PASS"
   },
-  "physical_status": "PASS",
+  "perceval_probe_status": "PASS",
+  "physical_status": "INCONCLUSIVE",
   "probability_sum": 1.0,
-  "status": "PASS",
+  "status": "INCONCLUSIVE",
   "success_reference_error": -3.469446951953614e-18,
   "throughput_fixed_n": 99.93467164196777
 }

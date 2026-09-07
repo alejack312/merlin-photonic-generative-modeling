@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+import tempfile
 from typing import Any
 
 from merlin_iqp.deploy import direct_fock_cp_reference, ideal_iqp_distribution
@@ -154,6 +155,38 @@ def build_manifest() -> dict[str, Any]:
     return manifest
 
 
+def _write_immutable_manifest(path: Path, manifest: dict[str, Any]) -> None:
+    """Publish a physical manifest once and reject incompatible reuse."""
+
+    encoded = json.dumps(manifest, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise FileExistsError(f"existing physical manifest is unreadable: {path}") from error
+        if existing != manifest:
+            raise FileExistsError(f"incompatible physical manifest already exists: {path}")
+        return
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False
+        ) as handle:
+            handle.write(encoded)
+            temporary = Path(handle.name)
+        os.rename(temporary, path)
+    except FileExistsError:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        if path.is_file() and json.loads(path.read_text(encoding="utf-8")) == manifest:
+            return
+        raise
+    except Exception:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+        raise
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -173,7 +206,7 @@ def main() -> int:
         os.environ["PCVL_PERSISTENT_PATH"] = str(args.pcvl_path.resolve())
     manifest = build_manifest()
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    _write_immutable_manifest(args.output, manifest)
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0 if manifest["status"] == "PASS" else 1
 

@@ -2,7 +2,7 @@
 
 Status: reviewable implementation branch, with scientific interpretation provisional.
 
-Owner decisions are now recorded: D1 selects fixed-photon `g2=0` with explicit uniform loss; D2 selects discrete alpha-key NAT with continuous singles; D3 selects sibling-style parity initialization from exact train-target moments at scale `0.1`. These choices unlock dependent implementation, but do not close the separate evidence gates for multi-gate full-Fock validity, main-run coverage, or owner interpretation.
+Owner decisions are now recorded: D1 selects fixed-photon `g2=0` with explicit uniform loss; D2 selects discrete alpha-key NAT with continuous singles; D3 selects sibling-style parity initialization from exact train-target moments at scale `0.1`. The implementation and bounded verification pass are complete for the declared scopes; broader scientific claims remain explicitly qualified below.
 
 The branch adds three additive boundaries: a NumPy classical IQP trainer, a read-only sibling inventory/export boundary, and a logical compiler plus qualified ideal CP-map deployment boundary. Existing generator, trainability, hardness, photonic, checkpoints, and historical result paths remain unchanged.
 
@@ -19,6 +19,8 @@ The branch adds three additive boundaries: a NumPy classical IQP trainer, a read
 
 ## Deliberately open
 
-The repository does not claim a validated multiphoton noisy source model, multi-gate full-Fock equivalence, final-only projection theorem, complete sibling reproduction across all registered rows, NAT efficacy, or an ideal photonic ring advantage. Owner null predictions, owner explanation, external review, and publication remain incomplete in the evidence ledger until their required inputs and human review exist. No merge, publish, or external communication was performed.
+The repository does not claim a validated multiphoton noisy source model, multi-gate full-Fock equivalence, or an intermediate-projection theorem. The fixed-photon n=2/n=3 physical controls pass; the shared-gate final-only/intermediate conditional TVD is `0.585411845271861`, so final-only is the supported boundary. Photonic ring evaluation is implemented and exercised for the registered n=4 spatial and Hamming smoke profiles only; n=6/n=8 photonic deployment is not extrapolated.
+
+Sibling evidence is mixed: `training_smoke` is faithfully retrained from regenerated source-recipe data, bandwidth is a stopped partial replay, and Ghosh–Kim is adapted checkpoint replay. NAT artifacts contain matched ideal/model-derived arms and controls; they do not establish noisy efficacy or superiority. Owner null predictions/explanation and the optional communication note remain blocked until authored by the owner. No merge, publish, or external communication was performed.
 
 See the [requirement evidence ledger](../.planning/v4-requirement-evidence.md) for per-ID status and commands.

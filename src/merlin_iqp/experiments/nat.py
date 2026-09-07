@@ -753,12 +753,29 @@ def nat_report(
         }
     pair_match = len({json.dumps(dict(arm.budgets), sort_keys=True) for arm in arms.values()}) == 1
     parameter_match = len({str(arm.provenance.get("initial_parameter_hash")) for arm in arms.values()}) == 1
+    optimizer_states = {
+        hash_json(
+            {
+                "kind": arm.config.single_optimizer,
+                "learning_rate": float(arm.config.single_lr),
+                "m": arm.optimizer_m.tolist(),
+                "v": arm.optimizer_v.tolist(),
+                "step": int(arm.optimizer_step),
+            }
+        )
+        for arm in arms.values()
+    }
+    optimizer_match = len(optimizer_states) == 1 and all(
+        arm.config.single_optimizer == warm_start.config.single_optimizer
+        and np.isclose(arm.config.single_lr, warm_start.config.single_lr)
+        for arm in arms.values()
+    )
     report: dict[str, Any] = {
         "schema_version": "v4_tcdp.nat_report.v1",
-        "status": "PASS" if pair_match and parameter_match else "FAIL",
+        "status": "PASS" if pair_match and parameter_match and optimizer_match else "FAIL",
         "profile": {"n": warm_start.config.n, "pairs": [list(pair) for pair in warm_start.config.pairs], "steps": warm_start.config.steps, "optimizer": warm_start.config.single_optimizer, "learning_rate": warm_start.config.single_lr, "sigma": warm_start.config.sigma},
         "target": {"hash": getattr(target, "hash", hash_array(target_vector)), "reference": "frozen_warm_start_final_state"},
-        "matching": {"common_start_state_hash": common_hash, "identical_initial_parameterization": parameter_match, "identical_budgets": pair_match, "identical_optimizer": True, "identical_checkpoint_selection": True, "rng_policy": "deterministic_parameter-only; seed recorded per run"},
+        "matching": {"common_start_state_hash": common_hash, "identical_initial_parameterization": parameter_match, "identical_budgets": pair_match, "identical_optimizer": optimizer_match, "optimizer_state_hashes": sorted(optimizer_states), "identical_checkpoint_selection": True, "rng_policy": "deterministic_parameter-only; seed recorded per run"},
         "arms": rows,
         "fixed_reference": {"kind": "warm_start_final_compiled_distribution", "eta": float(eta), "model_success": reference_success},
         "fixed_pair_ablation": None,
