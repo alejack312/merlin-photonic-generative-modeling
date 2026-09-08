@@ -1,0 +1,25 @@
+experiment:
+  name: anti_concentration_validation_v4_retrain
+  description: "Isolated faithful rerun of the pinned sibling exact small-n validation cell"
+  seed: 7
+  output_dir: C:/Users/cuqui/merlin-quantum-case-study/results/v4_tcdp/sibling_retraining/closure_20260908/validation_source_rerun
+  log_level: INFO
+
+circuit:
+  family: complete_graph
+  n_qubits: [6]
+  n_generators: 6
+
+init:
+  scheme: uniform
+  uniform:
+    low: -3.14159265
+    high: 3.14159265
+
+validation:
+  max_qubits: 12
+  alphas: [0.5, 1.0, 2.0]
+  primary_alpha: 1.0
+  beta_min: 0.25
+  second_moment_threshold: 1.0
+  output_stem: complete_graph_n6_seed7

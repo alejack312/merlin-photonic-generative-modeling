@@ -38,7 +38,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Final verification in the closure pass: the full suite passed `681 passed, 1 skipped in 728.35s (0:12:08)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; focused sibling integration passed `22 passed, 1 skipped in 116.95s`; the new validator compiled; and artifact validation passed with `292` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
+Final verification in the closure pass: the full suite passed `681 passed, 1 skipped in 728.35s (0:12:08)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; focused sibling integration passed `22 passed, 1 skipped in 116.95s`; the new validators compiled; and artifact validation passed with `294` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
 
 ## Evidence locations
 
@@ -71,7 +71,7 @@ Final verification in the closure pass: the full suite passed `681 passed, 1 ski
 - D2: discrete `0.1*j` alpha-key neighbor search with continuous single-qubit angles and exact analytic gradients.
 - D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
 
-These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The registered training-smoke, bandwidth, and Ghosh–Kim small-n source trajectories are independently retrained from the pinned source trainer; large-n and missing-input sibling rows remain separately dispositioned.
+These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. Eight registered training cells (training-smoke, bandwidth, and Ghosh–Kim small-n) are independently retrained from the pinned source trainer, and the registered exact n=6 anti-concentration validation cell has a separate PASS source-validation report; large-n, Qiskit-dependent, and missing-input sibling rows remain separately dispositioned.
 
 ## Third-repair evidence (2026-09-06)
 
@@ -99,8 +99,8 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 - Review target: record the current checkout's exact `git rev-parse HEAD` at readback; the last independently reviewed implementation/evidence head before this metadata-only handoff update was `dc60fc547b0dde6e0fc972ca4713d625899d8b1a`. Base remains `de80e9313beed614528fd6332b2f78aab83c0b50`. The current-head owner-control and physical-control manifests were generated at `d16f50794085d76b2ba829348a3e2d4ad8893017`, before the documentation/evidence commits; no numerical implementation source changed afterward.
 - Sibling identity remains `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`, branch `alejack312`, clean, and unmodified.
-- Reproducible closure commands include the current-head owner and physical controls, the seven registered NAT matched-continuation reports, and the isolated source retraining commands documented in `docs/v4-sibling-reproduction.md`. The bandwidth and Ghosh–Kim small-n closure outputs are faithful source retraining with certifying trajectory reports; older sibling checkpoint replay outputs remain replay/reference-only. The non-suffixed physical/NAT artifacts are preserved historical outputs; immutable writers reject replacing them after a commit-identity change.
-- New evidence is at `results/v4_tcdp/controls/owner_controls_20260908_current.json`, `results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json`, and `results/v4_tcdp/sibling_retraining/closure_20260908/`. Artifact integrity command: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` — current result `292` JSON files, `72` JSONL rows, `9` payload hashes, zero failures.
+- Reproducible closure commands include the current-head owner and physical controls, the seven registered NAT matched-continuation reports, and the isolated source retraining/validation commands documented in `docs/v4-sibling-reproduction.md`. The eight training cells and exact validation cell have certifying source reports; older sibling checkpoint replay outputs remain replay/reference-only. The non-suffixed physical/NAT artifacts are preserved historical outputs; immutable writers reject replacing them after a commit-identity change.
+- New evidence is at `results/v4_tcdp/controls/owner_controls_20260908_current.json`, `results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json`, and `results/v4_tcdp/sibling_retraining/closure_20260908/`. Artifact integrity command: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` — current result `294` JSON files, `72` JSONL rows, `9` payload hashes, zero failures.
 - Ledger status changes are narrow: NULL-03–06 are PASS within declared scopes; the binding NULL-08 matched continuation is PASS; NULL-07 remains INCONCLUSIVE; WRITE-07 and COMM-02 remain BLOCKED; the sibling/larger-n/complete-comparison rows remain INCONCLUSIVE. Do not promote analytic map-derived cells to physical photonic PASS.
 
 ## Final documentation-mirror recheck (2026-09-07)

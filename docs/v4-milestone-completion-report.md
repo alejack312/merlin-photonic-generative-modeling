@@ -8,7 +8,7 @@ Date: 2026-09-08. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528f
 - NULL-03’s analytic k=0 factorization residual is `2.220446049250313e-16`; the direct Perceval no-gate n=2 control has direct-vs-analytic TVD `1.0842021724855044e-16`. NULL-04’s same-parameter compiler/reference control has maximum probability residual `1.1102230246251565e-16` and success residual `1.3877787807814457e-17`. NULL-05 has conditional-shape TVD `0.0` and exact `eta**n` mass scaling. NULL-06’s CP and qualified heralded throughput residuals are `0.0`.
 - NULL-08’s binding same-algorithm matched continuation passes for the fresh n=4 seed-0 closure run: both arms share the warm-start and optimizer-state hashes, budgets, final parameter hash and loss endpoint. The owner’s separate continuous-versus-discrete objective prediction remains exploratory because the current registration does not test it.
 - A fresh direct full-Fock manifest records final-only and intermediate projections, absolute accepted mass, conditional distributions and the shared-gate discrepancy (`0.585411845271861`). The fixed-photon physical scope passes; it does not certify larger-n full-Fock behavior or multiphoton source models.
-- Eight additional n=6/n=8 comparison cells were independently inspected in the isolated closure namespace. Hamming-MMD direct/Walsh cross-checks, hashes, raw/compiled/deployed separation and fixed-loss ratios pass as analytic map-derived evidence. The registered bandwidth and Ghosh–Kim small-n source trajectories were also independently rerun from the pinned sibling trainer; all seven cells match source theta/loss rows exactly. Older checkpoint replay outputs remain separately labeled replay/reference-only.
+- Eight additional n=6/n=8 comparison cells were independently inspected in the isolated closure namespace. Hamming-MMD direct/Walsh cross-checks, hashes, raw/compiled/deployed separation and fixed-loss ratios pass as analytic map-derived evidence. The registered training-smoke, bandwidth, and Ghosh–Kim small-n source trajectories were independently rerun from the pinned sibling trainer; all eight training cells match source theta/loss rows exactly. The registered exact n=6 anti-concentration validation cell also has a PASS source-validation report with byte-identical substantive JSON/CSV outputs. Older checkpoint replay outputs remain separately labeled replay/reference-only.
 - The authoritative ledger now marks NULL-03–06, the binding NULL-08 control, and registered REPRO-03 small-n retraining `PASS`; NULL-07 is `INCONCLUSIVE`; WRITE-07/COMM-02 are `BLOCKED`; and SWEEP-04, RING-04, COMPARE-01 and COMPARE-04 remain `INCONCLUSIVE` because larger-n physical or complete matched arms are still absent. v4.0 is therefore not fully scientifically accepted.
 
 Closure commands for this addendum:
@@ -23,7 +23,7 @@ venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
 ```
 
-The artifact validator reports `292` JSON files, `72` JSONL rows, and `9`
+The artifact validator reports `294` JSON files, `72` JSONL rows, and `9`
 payload hashes with zero failures. The original non-suffixed physical/NAT
 artifacts are preserved historical closure outputs from the prior integration
 commit. The current-head owner and physical manifests were generated at
@@ -39,7 +39,7 @@ repository identity changes.
 - Registered n=4 spatial and Hamming ring checkpoints have fixed-photon final-only photonic evaluations with matched compiled qubit references. The n=6/n=8 ring training budget is complete; larger-n photonic deployment is not claimed.
 - Registered NAT reports contain two matched continuation arms from one frozen warm start with matched optimizer state and budgets for n=4 seeds 0–4 and n=6/n=8 seed 0. They are ideal/model-derived evidence, not a noisy-efficacy claim.
 - The retained NAT stop rule is now artifact-backed: a bounded n=8 matched run completed in `264.498991300003` seconds under the `1200`-second limit, while registered n=4 runs were already green, so the two-day n=4 condition was not triggered.
-- Sibling `training_smoke`, all four registered bandwidth cells, and all three registered Ghosh–Kim small-n cells are faithfully retrained from the pinned source trainer. Existing checkpoint replays, large-n sampled rows, and missing-input rows retain their separate adapted/reference-only/blocked dispositions.
+- Sibling `training_smoke`, all four registered bandwidth cells, and all three registered Ghosh–Kim small-n cells are faithfully retrained from the pinned source trainer. The registered exact n=6 anti-concentration validation cell has a separate PASS source-validation report. Existing checkpoint replays, large-n sampled, Qiskit-dependent, and missing-input rows retain their separate adapted/reference-only/blocked dispositions.
 - Bounded derived comparison artifacts now cover the registered Hamming n=6/n=8 seed cells and two spatial n=6 cells, with raw/compiled/deployed-map panels and Hamming-MMD cross-checks. They do not close the sibling-matched or larger-n physical comparison requirements.
 
 ## Evidence and commands
@@ -50,7 +50,7 @@ repository identity changes.
 - Explicit sibling integration: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_inventory.py` — 21 passed.
 - Script compilation: `venv/Scripts/python.exe -m compileall -q scripts/v4_tcdp` — passed.
 - Resource pilot: `venv/Scripts/python.exe scripts/v4_tcdp/resource_pilot.py --output results/v4_tcdp/deploy/resource_budget_final_v6.json` — n=4/6/8/10 completed within the approved three-hour timing gate, no full-circuit superoperator was allocated, and the n=10 RSS criterion passed with clean source provenance.
-- Artifact validation: 174 committed JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, and final-resource payload-hash checks all passed.
+- Artifact validation: 294 current JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, and final-resource payload-hash checks all passed.
 - Documentation mirror: README and `docs/technical-findings.md` state the same bounded v4 evidence and explicitly preserve the remaining ledger statuses; no new scientific claim is introduced there.
 - Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory. Final result is recorded in the evidence ledger and reviewer handoff after completion.
 
