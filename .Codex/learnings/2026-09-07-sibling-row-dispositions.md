@@ -31,3 +31,23 @@ Date: 2026-09-07 · Scope: project · Recurs when: registered source rows mix ch
 ## Changed files
 - `scripts/v4_tcdp/replay_sibling.py` — exact missing-input path in blocked manifests.
 - `results/v4_tcdp/sibling_reproduction_evidence.md` — row-level disposition snapshot.
+
+## 2026-09-08 addendum: sibling-to-substrate closure
+
+### Context & constraints
+- The selected closure compares the same regenerated source samples, generator, final parameters, Hamming bandwidth, MSB-first codec, and evaluation budget across sibling IQP, local IQP, compiled CP-map, and fixed-photon deployed-map arms.
+- The deployed n=9 arm is analytic absolute-probability CP-map evidence; direct Perceval full-Fock validation remains limited to the declared n=2/n=3 boundary.
+
+### Decision rules that generalize
+- IF source retraining evidence is PASS, THEN independently regenerate the dataset and compare source/local vectors before compiling; checkpoint replay alone is not enough.
+- IF multiple source profiles share `(n, sigma)`, THEN include the source config/profile in the artifact identity or outputs can overwrite each other.
+- IF uniform fixed-photon loss is applied, THEN store conditional vectors and absolute success separately and verify `success_loss = eta**n * success_ideal` at the exact tolerance.
+- IF a numerical implementation changes after an older manifest was produced, THEN retain the producer commit in that manifest and explicitly revalidate or qualify it; do not claim the old artifact is current-head evidence.
+
+### Verification
+- Canonical closure: `results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4/summary.json` contains 8 PASS cells; all JSON/NPY hashes recompute.
+- Full suite: `687 passed, 1 skipped`; explicit sibling integration/comparison: `28 passed, 1 skipped`; artifact validator: `355` JSON, `72` JSONL, `9` payload hashes, `0` failures.
+
+### Next time
+- Do: make the comparison chain and physical capability boundary explicit in the artifact schema before running all registered cells.
+- Don't: call an analytic deployed map hardware evidence, or let a successful source rerun stand in for a matched substrate comparison.
