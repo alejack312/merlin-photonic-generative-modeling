@@ -40,17 +40,39 @@ def _index(local_bits: int, rest_bits: int, qubits: tuple[int, ...], n: int) -> 
 
 
 def _apply_local_map(rho: np.ndarray, gate_map: GateMap, qubits: tuple[int, ...], n: int) -> np.ndarray:
-    local_dim = 2 ** len(qubits)
-    rest_dim = 2 ** (n - len(qubits))
-    out = np.zeros_like(rho, dtype=complex)
-    for rest_ket in range(rest_dim):
-        rows = [_index(local, rest_ket, qubits, n) for local in range(local_dim)]
-        for rest_bra in range(rest_dim):
-            cols = [_index(local, rest_bra, qubits, n) for local in range(local_dim)]
-            block = rho[np.ix_(rows, cols)]
-            mapped = gate_map.apply(block)
-            out[np.ix_(rows, cols)] = mapped
-    return out
+    """Apply a local instrument without constructing a global superoperator.
+
+    The tensor transpose keeps the declared local qubit order intact: the
+    first entry of ``qubits`` is the local MSB.  The previous implementation
+    applied every local block through nested Python loops.  That is correct
+    but makes the supported n=9/10 density path needlessly expensive; this
+    equivalent tensor form is the same operation used by the resource pilot.
+    """
+
+    selected = tuple(int(qubit) for qubit in qubits)
+    rest = tuple(qubit for qubit in range(n) if qubit not in selected)
+    local_dim = 2 ** len(selected)
+    rest_dim = 2 ** len(rest)
+    tensor = np.asarray(rho, dtype=complex).reshape((2,) * (2 * n))
+    order = list(selected) + list(rest) + [n + qubit for qubit in selected] + [n + qubit for qubit in rest]
+    inverse = np.argsort(order)
+    blocked = tensor.transpose(order).reshape(local_dim, rest_dim, local_dim, rest_dim)
+    if gate_map.kraus:
+        mapped = sum(
+            np.einsum("oa,akbl,pb->okpl", kraus, blocked, kraus.conj(), optimize=True)
+            for kraus in gate_map.kraus
+        )
+    elif gate_map.superoperator is not None:
+        vectorized = blocked.transpose(0, 2, 1, 3).reshape(
+            local_dim * local_dim, rest_dim * rest_dim, order="F"
+        )
+        mapped_vectorized = gate_map.superoperator @ vectorized
+        mapped = mapped_vectorized.reshape(
+            local_dim, local_dim, rest_dim, rest_dim, order="F"
+        ).transpose(0, 2, 1, 3)
+    else:
+        raise ValueError("GateMap has neither Kraus operators nor a superoperator")
+    return mapped.reshape((2,) * (2 * n)).transpose(inverse).reshape(rho.shape)
 
 
 def compose_instruments(

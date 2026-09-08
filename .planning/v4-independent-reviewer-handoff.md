@@ -28,6 +28,7 @@ venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/siblin
 $env:MERLIN_SIBLING_ROOT='C:/Users/cuqui/iqp-mmd-barren-plateau'; venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py
 venv/Scripts/python.exe scripts/v4_tcdp/retrain_sibling.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --config C:/Users/cuqui/iqp-mmd-barren-plateau/configs/experiments/training_smoke.yaml --output-root results/v4_tcdp/sibling_retraining/training_smoke
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n6_seed0_main --eta 0.9 --output results/v4_tcdp/comparisons/rings_hamming_n6_seed0_eta09.json
+venv/Scripts/python.exe scripts/v4_tcdp/compare_sibling_backends.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --retraining-root results/v4_tcdp/sibling_retraining/training_smoke --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/bandwidth_source_rerun --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun --output-root results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4 --eta 0.9
 venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --output results/v4_tcdp/nat/n4_seed0_primary.json
 ```
 
@@ -38,7 +39,7 @@ $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-
 venv/Scripts/python.exe -m pytest -q
 ```
 
-Final verification in the closure pass: the full suite passed `684 passed, 1 skipped in 493.13s (0:08:13)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; explicit sibling integration plus the new validation gate passed `23 passed, 1 skipped in 49.20s`; the new validators compiled; and artifact validation passed with `294` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
+Final verification in the closure pass: the full suite passed `687 passed, 1 skipped in 918.94s (0:15:18)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; explicit sibling integration plus the new comparison gate passed `28 passed, 1 skipped in 175.16s`; the new validators compiled; and artifact validation passed with `355` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
 
 ## Evidence locations
 
@@ -100,15 +101,15 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 - Review target: record the current checkout's exact `git rev-parse HEAD` at readback; the last independently reviewed implementation/evidence head before this metadata-only handoff update was `dc60fc547b0dde6e0fc972ca4713d625899d8b1a`. Base remains `de80e9313beed614528fd6332b2f78aab83c0b50`. The current-head owner-control and physical-control manifests were generated at `d16f50794085d76b2ba829348a3e2d4ad8893017`, before the documentation/evidence commits; no numerical implementation source changed afterward.
 - Sibling identity remains `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`, branch `alejack312`, clean, and unmodified.
 - Reproducible closure commands include the current-head owner and physical controls, the seven registered NAT matched-continuation reports, and the isolated source retraining/validation commands documented in `docs/v4-sibling-reproduction.md`. The eight training cells and exact validation cell have certifying source reports; older sibling checkpoint replay outputs remain replay/reference-only. The non-suffixed physical/NAT artifacts are preserved historical outputs; immutable writers reject replacing them after a commit-identity change.
-- New evidence is at `results/v4_tcdp/controls/owner_controls_20260908_current.json`, `results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json`, and `results/v4_tcdp/sibling_retraining/closure_20260908/`. Artifact integrity command: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` — current result `294` JSON files, `72` JSONL rows, `9` payload hashes, zero failures.
-- Ledger status changes are narrow: NULL-03–06 and the owner-authored NULL-07 hypothesis are PASS within declared scopes; the binding NULL-08 matched continuation is PASS; NULL-07’s experimental adjudication remains INCONCLUSIVE; WRITE-07 and COMM-02 remain BLOCKED; the sibling/larger-n/complete-comparison rows remain INCONCLUSIVE. Do not promote analytic map-derived cells to physical photonic PASS.
+- New evidence is at `results/v4_tcdp/controls/owner_controls_20260908_current.json`, `results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json`, `results/v4_tcdp/sibling_retraining/closure_20260908/`, and `results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4/`. Artifact integrity command: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` — current result `355` JSON files, `72` JSONL rows, `9` payload hashes, zero failures.
+- Ledger status changes are narrow: NULL-03–06 and the owner-authored NULL-07 hypothesis are PASS within declared scopes; the binding NULL-08 matched continuation is PASS; NULL-07’s experimental adjudication remains INCONCLUSIVE; WRITE-07 and COMM-02 remain BLOCKED; the registered sibling/substrate comparison scope is PASS while larger-n direct-physical, missing-input, and broader uncertainty rows remain INCONCLUSIVE. Do not promote analytic map-derived cells to physical photonic PASS.
 
 ## Closure validation recheck (2026-09-08)
 
-- Integrated head: record the exact current `git rev-parse HEAD` at readback; the validation implementation commit is `61b4284`.
-- Full suite: `venv/Scripts/python.exe -m pytest -q` → `684 passed, 1 skipped in 493.13s (0:08:13)` with writable `PCVL_PERSISTENT_PATH`.
-- Explicit sibling integration plus validation gate: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_inventory.py tests/v4_tcdp/test_sibling_validation_rerun.py` → `23 passed, 1 skipped in 49.20s`.
-- Artifact validator: `294` JSON files, `72` JSONL rows, `9` payload hashes, `0` failures. Independent review repaired the missing-versus-null config-diff defect and the stale `174`-artifact sentence; no scientific scope was expanded.
+- Integrated head: record the exact current `git rev-parse HEAD` at readback; the comparison implementation is pending the closure commit.
+- Full suite: `venv/Scripts/python.exe -m pytest -q` → `687 passed, 1 skipped in 918.94s (0:15:18)` with writable `PCVL_PERSISTENT_PATH`.
+- Explicit sibling integration plus comparison gate: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_inventory.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_retrain_portable.py tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_validation_rerun.py tests/v4_tcdp/test_sibling_backend_comparison.py` → `28 passed, 1 skipped in 175.16s`.
+- Artifact validator: `355` JSON files, `72` JSONL rows, `9` payload hashes, `0` failures. Independent review repaired the missing-versus-null config-diff defect and the stale `174`-artifact sentence; this closure adds the supported eight-cell sibling/substrate chain without expanding direct physical scope.
 
 ## Final documentation-mirror recheck (2026-09-07)
 

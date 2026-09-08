@@ -44,3 +44,29 @@ venv\Scripts\python.exe scripts\v4_tcdp\validate_registered_validation_rerun.py 
 ```
 
 The two training reports are `PASS`; each of their eight cells has five rows (steps 0, 5, 10, 15, 20), maximum theta/loss error `0.0`, and source identity before/after is clean. The separate validation report is also `PASS`: its substantive JSON and threshold CSV are byte-identical to the source outputs, and its source identity is clean before and after. The training validator records every resolved-config difference: output metadata is redirected, and the only other differences are explicitly checked resolver defaults (`allow_legacy_families`, inactive data-dependent-init defaults, and the diagnostics label kind); any unexpected difference fails validation. The validation rerun records its output-metadata and scalar-to-list `n_qubits` adaptations and fails on any other config difference. The training validator uses the registered trajectory tolerance `1.0e-12`; the project-wide `1.0e-16` exact tolerance remains reserved for deterministic algebraic/map identities and is not substituted for training-trajectory tolerance.
+
+## Matched sibling-to-substrate closure
+
+The registered training cells now have an explicit end-to-end comparison artifact:
+
+```text
+pinned sibling IQP model -> local equivalent IQP evaluator -> compiled CP map -> deployed fixed-photon map
+```
+
+Run the comparator from the MerLin root with the pinned sibling checkout available:
+
+```powershell
+venv\Scripts\python.exe scripts\v4_tcdp\compare_sibling_backends.py `
+  --sibling-root C:\Users\cuqui\iqp-mmd-barren-plateau `
+  --retraining-root results\v4_tcdp\sibling_retraining\training_smoke `
+  --retraining-root results\v4_tcdp\sibling_retraining\closure_20260908\bandwidth_source_rerun `
+  --retraining-root results\v4_tcdp\sibling_retraining\closure_20260908\ghosh_kim_source_rerun `
+  --output-root results\v4_tcdp\sibling_comparisons\closure_20260908_complete_v4 `
+  --eta 0.9
+```
+
+The resulting [summary](../results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4/summary.json) contains eight `PASS` cells: one training-smoke cell, four bandwidth cells, and three Ghosh–Kim cells. Each cell stores the source samples, empirical target histogram, sibling/local raw vectors, unquantized control, quantized compiled vector, deployed vector, per-arm metrics, source/checkpoint/config hashes, and acceptance provenance. Profile names are part of each cell identity so equal `(n, sigma)` values from different source experiments cannot overwrite one another.
+
+The source and local IQP vectors agree within the existing probability-vector tolerance `1.0e-12` (the largest observed residual is `1.3877787807814457e-16`); deterministic acceptance scaling uses `1.0e-16`, and source trajectory evidence remains `1.0e-12`. The same source bandwidth is used in the Hamming Gaussian kernel for each cell. For `eta=0.9`, deployed acceptance is checked as `eta**n * model_success`, while the normalized deployed vector is checked against the compiled conditional vector separately.
+
+This closes the selected sibling/substrate comparison scope, not every inventoried sibling row. The deployed arm is an analytic absolute-probability CP-map composition under fixed-photon `g2=0`, with final-only projection; it is a model-derived/reference result. It does not certify direct full-Fock behavior for n=9 or hardware performance. Large-n sampled, Qiskit-dependent, missing-input, and high-weight source rows retain their original inventory dispositions.

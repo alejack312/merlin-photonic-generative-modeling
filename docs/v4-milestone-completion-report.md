@@ -9,7 +9,7 @@ Date: 2026-09-08. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528f
 - NULL-08’s binding same-algorithm matched continuation passes for the fresh n=4 seed-0 closure run: both arms share the warm-start and optimizer-state hashes, budgets, final parameter hash and loss endpoint. The owner’s separate continuous-versus-discrete objective prediction remains exploratory because the current registration does not test it.
 - A fresh direct full-Fock manifest records final-only and intermediate projections, absolute accepted mass, conditional distributions and the shared-gate discrepancy (`0.585411845271861`). The fixed-photon physical scope passes; it does not certify larger-n full-Fock behavior or multiphoton source models.
 - Eight additional n=6/n=8 comparison cells were independently inspected in the isolated closure namespace. Hamming-MMD direct/Walsh cross-checks, hashes, raw/compiled/deployed separation and fixed-loss ratios pass as analytic map-derived evidence. The registered training-smoke, bandwidth, and Ghosh–Kim small-n source trajectories were independently rerun from the pinned sibling trainer; all eight training cells match source theta/loss rows exactly. The registered exact n=6 anti-concentration validation cell also has a PASS source-validation report with byte-identical substantive JSON/CSV outputs. Older checkpoint replay outputs remain separately labeled replay/reference-only.
-- The authoritative ledger now marks NULL-03–06, the owner-authored NULL-07 hypothesis, the binding NULL-08 control, and registered REPRO-03 small-n retraining `PASS`; NULL-07’s experimental adjudication remains `INCONCLUSIVE`; WRITE-07/COMM-02 are `BLOCKED`; and SWEEP-04, RING-04, COMPARE-01 and COMPARE-04 remain `INCONCLUSIVE` because larger-n physical or complete matched arms are still absent. v4.0 is therefore not fully scientifically accepted.
+- The authoritative ledger now marks NULL-03–06, the owner-authored NULL-07 hypothesis, the binding NULL-08 control, registered REPRO-03 small-n retraining, and the selected sibling/substrate comparison scope `PASS`; NULL-07’s experimental adjudication remains `INCONCLUSIVE`; WRITE-07/COMM-02 are `BLOCKED`; and SWEEP-04, RING-04, COMPARE-01 and COMPARE-04 remain qualified because broader physical, uncertainty, and missing-input rows are still incomplete. v4.0 is therefore not fully scientifically accepted.
 
 Closure commands for this addendum:
 
@@ -23,7 +23,7 @@ venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
 ```
 
-The artifact validator reports `294` JSON files, `72` JSONL rows, and `9`
+The artifact validator reports `355` JSON files, `72` JSONL rows, and `9`
 payload hashes with zero failures. The original non-suffixed physical/NAT
 artifacts are preserved historical closure outputs from the prior integration
 commit. The current-head owner and physical manifests were generated at
@@ -40,7 +40,7 @@ repository identity changes.
 - Registered NAT reports contain two matched continuation arms from one frozen warm start with matched optimizer state and budgets for n=4 seeds 0–4 and n=6/n=8 seed 0. They are ideal/model-derived evidence, not a noisy-efficacy claim.
 - The retained NAT stop rule is now artifact-backed: a bounded n=8 matched run completed in `264.498991300003` seconds under the `1200`-second limit, while registered n=4 runs were already green, so the two-day n=4 condition was not triggered.
 - Sibling `training_smoke`, all four registered bandwidth cells, and all three registered Ghosh–Kim small-n cells are faithfully retrained from the pinned source trainer. The registered exact n=6 anti-concentration validation cell has a separate PASS source-validation report. Existing checkpoint replays, large-n sampled, Qiskit-dependent, and missing-input rows retain their separate adapted/reference-only/blocked dispositions.
-- Bounded derived comparison artifacts now cover the registered Hamming n=6/n=8 seed cells and two spatial n=6 cells, with raw/compiled/deployed-map panels and Hamming-MMD cross-checks. They do not close the sibling-matched or larger-n physical comparison requirements.
+- Bounded derived comparison artifacts cover the registered Hamming n=6/n=8 seed cells and two spatial n=6 cells, and the eight-cell sibling/substrate closure covers training-smoke, bandwidth, and Ghosh–Kim cells with raw/compiled/deployed-map panels and Hamming-MMD cross-checks. The sibling closure is model-derived at n=9; it does not close larger-n direct physical/full-Fock comparison requirements.
 
 ## Evidence and commands
 
@@ -50,14 +50,14 @@ repository identity changes.
 - Explicit sibling integration: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_inventory.py` — 21 passed.
 - Script compilation: `venv/Scripts/python.exe -m compileall -q scripts/v4_tcdp` — passed.
 - Resource pilot: `venv/Scripts/python.exe scripts/v4_tcdp/resource_pilot.py --output results/v4_tcdp/deploy/resource_budget_final_v6.json` — n=4/6/8/10 completed within the approved three-hour timing gate, no full-circuit superoperator was allocated, and the n=10 RSS criterion passed with clean source provenance.
-- Artifact validation: 294 current JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, and final-resource payload-hash checks all passed.
+- Artifact validation: 355 current JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, sibling-comparison, and final-resource payload-hash checks all passed.
 - Documentation mirror: README and `docs/technical-findings.md` state the same bounded v4 evidence and explicitly preserve the remaining ledger statuses; no new scientific claim is introduced there.
-- Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory → `684 passed, 1 skipped in 493.13s (0:08:13)`.
+- Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory → `687 passed, 1 skipped in 918.94s (0:15:18)`.
 
 ## Acceptance status
 
 The authoritative requirement-by-requirement status is [.planning/v4-requirement-evidence.md](../.planning/v4-requirement-evidence.md). PASS rows are bounded to their stated evidence. INCONCLUSIVE rows include the missing arm or scope. NOT IMPLEMENTED is reserved for absent required work; BLOCKED is reserved for owner/external inputs.
 
-Remaining scientific gaps are: multiphoton `g2>0` validation, a general chain-level final-only/intermediate composition proof, larger-n photonic deployment, faithful sibling retraining for rows whose exact inputs are absent, and a complete sibling/substrate matched comparison and figures. These are not relabeled as interpretation-only gaps; a two-day n=4 wait was not launched because registered n=4 was already green.
+Remaining scientific gaps are: multiphoton `g2>0` validation, a general chain-level final-only/intermediate composition proof, larger-n direct photonic deployment, faithful sibling retraining for rows whose exact inputs are absent, and sampled-uncertainty/figure extensions where not registered. The selected eight-cell sibling/substrate matched comparison is complete as an analytic fixed-photon reference and is not relabeled as direct n=9 full-Fock or hardware evidence. These are not relabeled as interpretation-only gaps; a two-day n=4 wait was not launched because registered n=4 was already green.
 
 Owner-gated rows are now split accurately: NULL-03–06, the NULL-07 hypothesis, and the binding NULL-08 control have owner-authored notes plus registered bounded evidence; NULL-07 remains experimentally unadjudicated because its source-mutation capability is outside D1; WRITE-07 still requires the owner-authored sign/winding, source-versus-gate, projection/loss, conditioning and NAT explanation; COMM-02 still requires an owner-authored draft or hold. No external message, merge, publication, or unapproved sweep is part of this milestone.
