@@ -106,7 +106,7 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 ## Closure validation recheck (2026-09-08)
 
-- Integrated head: `5804c6e45b0ab3aaf693df601f207da15227fd33` (`chore(v4): preserve sibling comparison attempts`), atop comparison implementation `62ded9e` and provenance reconciliation `50fd652`. The final history-only commit adds the preserved alternate namespaces and does not alter the reviewed implementation or canonical evidence.
+- Integrated head: record the exact current `git rev-parse HEAD` in the final readback. The reviewed implementation/evidence head is `50fd652`; subsequent local commits only preserve alternate attempt artifacts and keep this handoff current.
 - Full suite: `venv/Scripts/python.exe -m pytest -q` → `687 passed, 1 skipped in 918.94s (0:15:18)` with writable `PCVL_PERSISTENT_PATH`.
 - Explicit sibling integration plus comparison gate: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_inventory.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_retrain_portable.py tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_validation_rerun.py tests/v4_tcdp/test_sibling_backend_comparison.py` → `28 passed, 1 skipped in 175.16s`.
 - Artifact validator: `355` JSON files, `72` JSONL rows, `9` payload hashes, `0` failures. Independent review repaired the missing-versus-null config-diff defect and the stale `174`-artifact sentence; this closure adds the supported eight-cell sibling/substrate chain without expanding direct physical scope.
