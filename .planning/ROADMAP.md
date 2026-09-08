@@ -160,8 +160,8 @@ Selected validated ring/sibling checkpoints or explicitly selected calibration c
 
 ### Phase 32: Synthesis, Owner Explanation & Review
 
-Requirements WRITE-07..09, REVIEW-02, COMM-02.
-Three workstream reports plus tcdp synthesis, preserved old histories and artifact-backed mirrors. Owner explains distinct ring ansatz, Walsh efficiency, reproduction/adaptation and physical conditioning before interpretations. Fable/Opus then Codex reviews; actual owner journal/note only, no automatic sending.
+Requirements WRITE-07..09, REVIEW-02.
+Three workstream reports plus tcdp synthesis, preserved old histories and artifact-backed mirrors. Owner explains distinct ring ansatz, Walsh efficiency, reproduction/adaptation and physical conditioning before interpretations. Fable/Opus then Codex reviews. The former optional communication gate was retired by the owner on 2026-09-08 after two unanswered messages to Vincent; no automatic sending is performed.
 **Done:** implementation tests and artifact checks pass; report distinguishes delivered pipelines, fully reproduced experiments, adaptations and remaining physical support. No blocked item silently counted complete.
 
 ### Phase 25: v3.2 Correction (Audit Response) — shipped 2026-09-05

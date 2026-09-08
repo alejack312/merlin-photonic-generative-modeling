@@ -27,7 +27,6 @@ This is the execution checklist for the original binding requirements. It separa
 | NULL-09 | PASS (bounded control panel) | None for implemented mutation and equality controls. | Keep metric-specific mutations separate from map/success mutations. | None. | Comparison smoke artifacts and focused comparison tests. |
 | WRITE-07 | BLOCKED | The required owner explanation of signs/winding, source vs gate noise, projection, loss, conditioning, and NAT scope is not yet owner-authored. | After the literature review, owner writes the explanation in their own words; Codex may check technical consistency but must not author it retroactively. | Owner learning and authorship. | Explanation transcript or dated project note before interpretive synthesis. |
 | WRITE-08..09, REVIEW-02 | PASS (review gate; scientific rows remain incomplete) | The independent post-integration review findings were repaired and rechecked at the current integration head. Scientific requirements that remain incomplete are recorded in their own rows. | Preserve the final review disposition and keep the incomplete scientific rows explicit. | None for the review gate; owner/external dependencies remain on the affected scientific rows. | Full suite, explicit sibling integration, artifact validator, current-head reviewer disposition. |
-| COMM-02 | BLOCKED | No owner journal/Vincent note or hold record exists. | Owner authors a draft or records an explicit hold; sending remains separately unauthorized. | Owner. | Dated draft/hold record; no external send. |
 
 ## Work that can proceed without owner predictions
 
@@ -41,4 +40,4 @@ This is the execution checklist for the original binding requirements. It separa
 
 - Do not claim `g2>0` source behavior, general final-only/intermediate equivalence, or n=6/n=8 photonic deployment.
 - Do not call checkpoint replay faithful retraining or model-derived deployed-map arms physical photonic results.
-- Do not invent NULL predictions, WRITE-07 prose, scientific explanations, or a COMM-02 communication artifact.
+- Do not invent NULL predictions or WRITE-07 prose/scientific explanations. The former COMM-02 communication gate was retired by the owner on 2026-09-08.

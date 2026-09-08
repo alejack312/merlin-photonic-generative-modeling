@@ -2,7 +2,7 @@
 
 **Updated 2026-09-05: owner ring, sibling-reproduction and matched Hamming vision integrated. Not activated; no production implementation authorized.** Source: [binding plan](../docs/v4-plan-train-classical-deploy-photonic.md), [audit](../docs/audits/2026-09-05-v4-plan-audit.md). Original revision-2 requirements are preserved in Git.
 
-[Additive pipelines design](../docs/v4-additive-pipelines-design.md) is binding for the new workstreams. D1 (noisy physical/source scope), D2 (NAT representation/optimizer), D3 (unspecified data-dependent initialization/replication) remain owner decisions for their dependent profiles; explicitly configured classical work does not wait for them. The original 34 requirements preserve existing IDs, correct the previous count of 32, and replace invalid contracts rather than declaring them completed. v3.2 requirements remain separate in REQUIREMENTS.md.
+[Additive pipelines design](../docs/v4-additive-pipelines-design.md) is binding for the new workstreams. D1 (noisy physical/source scope), D2 (NAT representation/optimizer), D3 (unspecified data-dependent initialization/replication) remain owner decisions for their dependent profiles; explicitly configured classical work does not wait for them. The original 34 identifiers preserve existing IDs, correct the previous count of 32, and replace invalid contracts rather than declaring them completed. At the owner's request on 2026-09-08, `COMM-02` is retired from the active v4 acceptance surface. v3.2 requirements remain separate in REQUIREMENTS.md.
 
 ## Classical trainer — Phase 26
 
@@ -57,7 +57,6 @@
 - [ ] **WRITE-08**: Write rings, sibling-reproduction and backend-comparison reports plus tcdp synthesis; artifact-linked values, source fidelity/read depth and physical limits are explicit.
 - [ ] **WRITE-09**: Mirror only verified workstream conclusions to README, technical findings and project instructions; preserve legacy pipelines and never conflate distinct ansatz or simulated and hardware results.
 - [ ] **REVIEW-02**: Fable/Opus then Codex review assumptions, controls, raw numbers, extrapolations and all audit findings; dispositions require evidence, not status prose.
-- [ ] **COMM-02**: Offer Gibbs reflection; owner authors journal/Vincent note. Record draft/hold; sending requires explicit authorization.
 
 
 ## Additive preservation

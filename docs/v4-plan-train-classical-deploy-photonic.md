@@ -202,7 +202,7 @@ Stop rule retained: an n=8 run over 20 minutes or two calendar days without gree
 
 Owner explains angle/sign/winding, source versus gate noise, composition/loss assumptions, small-n validation limits, NAT control and throughput conditioning before interpretive prose. Record actual answers. Offer Gibbs reflection; owner writes it.
 
-Write tcdp-study from artifacts with PASS/FAIL/INCONCLUSIVE boundaries. Mirror verified conclusions only. Fable/Opus then Codex review physical assumptions, nulls, numbers and extrapolations as well as every prior finding. A disposition row is not validation. Owner writes the Vincent note; sending needs explicit authorization.
+Write tcdp-study from artifacts with PASS/FAIL/INCONCLUSIVE boundaries. Mirror verified conclusions only. Fable/Opus then Codex review physical assumptions, nulls, numbers and extrapolations as well as every prior finding. A disposition row is not validation. The former optional Vincent communication gate was retired by the owner on 2026-09-08 after two unanswered messages; no further outreach is part of v4.
 
 ## 8. Execution and finish gates
 
