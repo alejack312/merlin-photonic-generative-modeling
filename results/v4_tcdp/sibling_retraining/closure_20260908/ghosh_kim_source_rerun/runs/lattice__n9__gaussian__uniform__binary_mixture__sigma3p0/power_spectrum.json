@@ -1,0 +1,98 @@
+{
+  "max_order": 9,
+  "n": 9,
+  "orders": [
+    {
+      "max_power": 1.0,
+      "mean_power": 0.21582200792100695,
+      "median_power": 0.13482666015625,
+      "order": 1,
+      "subset_count": 9,
+      "tau_power": 0.02777063549200968,
+      "total_subsets": 9,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.9766998291015625,
+      "mean_power": 0.1901126437717014,
+      "median_power": 0.1466827392578125,
+      "order": 2,
+      "subset_count": 36,
+      "tau_power": 0.0007712081956300678,
+      "total_subsets": 36,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 1.0,
+      "mean_power": 0.20758274623325892,
+      "median_power": 0.16034698486328125,
+      "order": 3,
+      "subset_count": 84,
+      "tau_power": 2.1416941689293105e-05,
+      "total_subsets": 84,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 1.0,
+      "mean_power": 0.20807708255828372,
+      "median_power": 0.13339996337890625,
+      "order": 4,
+      "subset_count": 126,
+      "tau_power": 5.947620810069849e-07,
+      "total_subsets": 126,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.9460601806640625,
+      "mean_power": 0.20351615784660218,
+      "median_power": 0.11285400390625,
+      "order": 5,
+      "subset_count": 126,
+      "tau_power": 1.6516920956114114e-08,
+      "total_subsets": 126,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.92340087890625,
+      "mean_power": 0.17260378882998512,
+      "median_power": 0.10895538330078125,
+      "order": 6,
+      "subset_count": 84,
+      "tau_power": 4.586853913225811e-10,
+      "total_subsets": 84,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.5566558837890625,
+      "mean_power": 0.14624532063802084,
+      "median_power": 0.0907135009765625,
+      "order": 7,
+      "subset_count": 36,
+      "tau_power": 1.2737984807929219e-11,
+      "total_subsets": 36,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.5566558837890625,
+      "mean_power": 0.1966213650173611,
+      "median_power": 0.1001129150390625,
+      "order": 8,
+      "subset_count": 9,
+      "tau_power": 3.537419330037593e-13,
+      "total_subsets": 9,
+      "used_all_subsets": true
+    },
+    {
+      "max_power": 0.0428619384765625,
+      "mean_power": 0.0428619384765625,
+      "median_power": 0.0428619384765625,
+      "order": 9,
+      "subset_count": 1,
+      "tau_power": 9.823638279686309e-15,
+      "total_subsets": 1,
+      "used_all_subsets": true
+    }
+  ],
+  "sigma": 3.0,
+  "tau": 0.02777063549200968
+}

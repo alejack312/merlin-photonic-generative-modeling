@@ -1,0 +1,32 @@
+[
+  {
+    "family": "lattice",
+    "kernel": "gaussian",
+    "init_scheme": "uniform",
+    "n": 9,
+    "bandwidth": 1.0,
+    "er_p_edge": null,
+    "small_angle_std": null,
+    "dataset_type": "binary_mixture"
+  },
+  {
+    "family": "lattice",
+    "kernel": "gaussian",
+    "init_scheme": "uniform",
+    "n": 9,
+    "bandwidth": 3.0,
+    "er_p_edge": null,
+    "small_angle_std": null,
+    "dataset_type": "binary_mixture"
+  },
+  {
+    "family": "lattice",
+    "kernel": "gaussian",
+    "init_scheme": "uniform",
+    "n": 9,
+    "bandwidth": 9.0,
+    "er_p_edge": null,
+    "small_angle_std": null,
+    "dataset_type": "binary_mixture"
+  }
+]

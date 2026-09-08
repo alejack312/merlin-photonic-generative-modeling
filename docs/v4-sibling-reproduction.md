@@ -24,6 +24,20 @@ The inventory supports faithful replay planning. It does not certify the sibling
 
 `scripts/v4_tcdp/replay_sibling.py` safely replays the available `training_smoke` step-4 NPZ checkpoint through the ideal compiler and CP-map density path. It preserves the source `G`, theta, step, source SGD loss, Gaussian bandwidth, source commit and checkpoint hash, and writes separate raw/compiled/deployed vectors under `results/v4_tcdp/sibling_replays/`. The frozen raw/compiled TVD is `3.46e-16` and the deployed acceptance mass is `1.0000000000000002`.
 
-This remains recorded as `adapted_reproduction`: the source checkpoint is replayed, while checkpoint replay is not itself faithful retraining. The registered product-Bernoulli training-smoke input was regenerated from the source recipe/seed, and [retraining_evidence.json](../results/v4_tcdp/sibling_retraining/training_smoke/retraining_evidence.json) records an isolated source-trainer rerun with exact theta/loss agreement for all five trajectory rows. Bandwidth/marginal and Ghosh–Kim checkpoint retraining remain unexecuted and are not called reproduced.
+This remains recorded as `adapted_reproduction`: the source checkpoint is replayed, while checkpoint replay is not itself faithful retraining. The registered product-Bernoulli training-smoke input was regenerated from the source recipe/seed, and [retraining_evidence.json](../results/v4_tcdp/sibling_retraining/training_smoke/retraining_evidence.json) records an isolated source-trainer rerun with exact theta/loss agreement for all five trajectory rows. The registered bandwidth cells are now covered by [bandwidth retraining evidence](../results/v4_tcdp/sibling_retraining/closure_20260908/bandwidth_source_rerun/retraining_evidence.json), and the registered Ghosh–Kim small-n cells by [Ghosh–Kim retraining evidence](../results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun/retraining_evidence.json); all seven cells matched source theta/loss rows exactly. Large-n sampled and missing-input rows remain separately dispositioned.
 
 The retraining adapter is intentionally opt-in because it imports source code. Run it with `--sibling-root`, the exact source `--config`, and an output directory outside the sibling checkout. The normal test suite exercises portable contract checks; the source trajectory comparison is run explicitly when the pinned sibling inputs are present.
+
+## Registered closure reruns
+
+The 2026-09-08 closure used the pinned sibling source at commit `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336` and redirected outputs into `results/v4_tcdp/sibling_retraining/closure_20260908/`. The source runner was invoked through `PYTHONPATH` without modifying the sibling checkout:
+
+```powershell
+$env:PYTHONPATH = 'C:\Users\cuqui\iqp-mmd-barren-plateau\src'
+venv\Scripts\python.exe -m iqp_bp.cli run-training configs\v4_sibling_bandwidth_retrain.yaml
+venv\Scripts\python.exe -m iqp_bp.cli run-training configs\v4_sibling_ghosh_kim_retrain.yaml
+venv\Scripts\python.exe scripts\v4_tcdp\validate_registered_bandwidth_rerun.py --source-root C:\Users\cuqui\iqp-mmd-barren-plateau\results\bandwidth_marginal_sweep --rerun-root results\v4_tcdp\sibling_retraining\closure_20260908\bandwidth_source_rerun --source-config C:\Users\cuqui\iqp-mmd-barren-plateau\configs\experiments\bandwidth_marginal_sweep.yaml --output results\v4_tcdp\sibling_retraining\closure_20260908\bandwidth_source_rerun\retraining_evidence.json
+venv\Scripts\python.exe scripts\v4_tcdp\validate_registered_bandwidth_rerun.py --source-root C:\Users\cuqui\iqp-mmd-barren-plateau\results\ac_ghosh_kim\small_n_exact --rerun-root results\v4_tcdp\sibling_retraining\closure_20260908\ghosh_kim_source_rerun --source-config C:\Users\cuqui\iqp-mmd-barren-plateau\configs\experiments\ghosh_kim_small_n.yaml --output results\v4_tcdp\sibling_retraining\closure_20260908\ghosh_kim_source_rerun\retraining_evidence.json
+```
+
+Both reports are `PASS`; each cell has five rows (steps 0, 5, 10, 15, 20), maximum theta/loss error `0.0`, and source identity before/after is clean. The validator uses the registered trajectory tolerance `1.0e-12`; the project-wide `1.0e-16` exact tolerance remains reserved for deterministic algebraic/map identities and is not substituted for training-trajectory tolerance.

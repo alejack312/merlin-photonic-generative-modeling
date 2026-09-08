@@ -81,3 +81,9 @@ The exploratory hypothesis concerns the continuous training objective only. It d
 **Binding falsification:** the matched arms diverge beyond the exact deterministic comparison tolerance under otherwise identical provenance. The tolerance must be fixed before the run; `1.0e-16` is reserved for exact state/equality checks.
 
 For the additional exploratory hypothesis, support requires the continuous arm's final objective to be lower by more than a separately pre-registered, scale-aware optimization tolerance; a difference within tolerance or a lower discrete objective would not support it. That extra comparison is not required to close the current binding NULL-08.
+
+## Post-prediction verification record — 2026-09-08
+
+The next available registered continuation reports were checked after the predictions above were recorded: n=4 seeds 0–4, n=6 seed 0, and n=8 seed 0. Across all seven reports, arms A and B had identical warm-start hashes, parameter hashes, budgets, target-loss fields, fixed-reference TVD, acceptance fields, and target-improvement fields. The maximum deterministic numeric difference was `0.0`, below the project-wide exact comparison tolerance `1.0e-16`. This supports the binding same-algorithm continuation prediction only. It does not test the additional continuous-versus-discrete hypothesis.
+
+The current-head owner-control artifact independently records NULL-03–06 as `PASS`, using exact deterministic tolerance `1.0e-16` and probability/map tolerance `1.0e-12`: [owner_controls_20260908_current.json](../results/v4_tcdp/controls/owner_controls_20260908_current.json). The current-head direct physical artifact records the selected fixed-photon `g2=0` n=2/n=3 controls as `PASS`, while retaining the shared-gate final-only/intermediate conditional TVD `0.585411845271861`: [physical_control_manifest_20260908_head.json](../results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json).
