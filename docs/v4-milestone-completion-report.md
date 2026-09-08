@@ -52,7 +52,7 @@ repository identity changes.
 - Resource pilot: `venv/Scripts/python.exe scripts/v4_tcdp/resource_pilot.py --output results/v4_tcdp/deploy/resource_budget_final_v6.json` — n=4/6/8/10 completed within the approved three-hour timing gate, no full-circuit superoperator was allocated, and the n=10 RSS criterion passed with clean source provenance.
 - Artifact validation: 294 current JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, and final-resource payload-hash checks all passed.
 - Documentation mirror: README and `docs/technical-findings.md` state the same bounded v4 evidence and explicitly preserve the remaining ledger statuses; no new scientific claim is introduced there.
-- Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory. Final result is recorded in the evidence ledger and reviewer handoff after completion.
+- Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory → `684 passed, 1 skipped in 493.13s (0:08:13)`.
 
 ## Acceptance status
 
