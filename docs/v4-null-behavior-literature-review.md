@@ -1,7 +1,7 @@
 # Literature review for NULL-03–08 and WRITE-07
 
 **Status:** bounded study guide; background evidence only.  
-**Prepared:** 2026-09-07  
+**Prepared:** 2026-09-08
 **Purpose:** give the owner a source-grounded foundation for writing the prospective NULL-03–08 records and the owner-authored WRITE-07 explanation.
 
 ## Boundary and use
@@ -59,7 +59,7 @@ There are three quantities that should remain separate:
 2. the success probability `s(E) = Σₓ m(x,E)`;
 3. the conditional distribution `q(x|E) = m(x,E)/s(E)`, defined only when `s(E)>0`.
 
-This is the operational content of a trace-decreasing branch: the trace is the branch probability, and normalization gives the conditional state or distribution. Knill’s analysis of postselected linear-optical gates makes the success probability explicit and bounds it for nonlinear-sign-shift constructions ([S7](#sources)). Dressel and Jordan formulate the same distinction in terms of quantum instruments, where outcome probabilities and conditional state changes are both part of the laboratory description ([S12](#sources)).
+This is the operational content of a trace-decreasing branch: the trace is the branch probability, and normalization gives the conditional state or distribution. Knill’s analysis of postselected linear-optical gates makes the success probability explicit and bounds it for nonlinear-sign-shift constructions ([S8](#sources)). Dressel and Jordan formulate the same distinction in terms of quantum instruments, where outcome probabilities and conditional state changes are both part of the laboratory description ([S12](#sources)).
 
 The fixed-photon loss control is a special case. Suppose exactly `n` photons are prepared, each independently survives a uniform transmissivity `η`, and the accepted event requires all `n` photons to be present. Then the all-survive acceptance factor is `ηⁿ`. If uniform loss commutes with the lossless interferometer and the conditional event retains the same `n`-photon sector, the conditional output distribution is unchanged by this scalar factor. That is a derivation under explicit assumptions, not a universal statement about noisy photonic circuits.
 
