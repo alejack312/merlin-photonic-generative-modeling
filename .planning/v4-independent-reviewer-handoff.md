@@ -71,7 +71,7 @@ Final verification in the closure pass: the full suite passed `681 passed, 1 ski
 - D2: discrete `0.1*j` alpha-key neighbor search with continuous single-qubit angles and exact analytic gradients.
 - D3: sibling-style data-dependent parity initialization at scale `0.1` for primary profiles; small-angle and uniform remain ablations; deterministic duplicates are not independent replicas.
 
-These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The training-smoke source trajectory is independently retrained with the regenerated source-recipe data; other sibling rows remain separately dispositioned.
+These decisions unlock implementation, but do not certify physical full-Fock composition, NAT efficacy, or owner interpretation. The registered training-smoke, bandwidth, and Ghosh–Kim small-n source trajectories are independently retrained from the pinned source trainer; large-n and missing-input sibling rows remain separately dispositioned.
 
 ## Third-repair evidence (2026-09-06)
 
@@ -97,7 +97,7 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 ## Closure-pass handoff update (2026-09-08)
 
-- Current review target is `6cc99def1c81bd39951ce1463384c8cd148975c5` on `codex/v4-implementation`; base remains `de80e9313beed614528fd6332b2f78aab83c0b50`. The current-head owner-control and physical-control manifests were generated at `d16f50794085d76b2ba829348a3e2d4ad8893017`, before the documentation/evidence commit; no implementation source changed afterward.
+- Current review target is `dc60fc547b0dde6e0fc972ca4713d625899d8b1a` on `codex/v4-implementation`; base remains `de80e9313beed614528fd6332b2f78aab83c0b50`. The current-head owner-control and physical-control manifests were generated at `d16f50794085d76b2ba829348a3e2d4ad8893017`, before the documentation/evidence commits; no numerical implementation source changed afterward.
 - Sibling identity remains `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`, branch `alejack312`, clean, and unmodified.
 - Reproducible closure commands include the current-head owner and physical controls, the seven registered NAT matched-continuation reports, and the isolated source retraining commands documented in `docs/v4-sibling-reproduction.md`. The bandwidth and Ghosh–Kim small-n closure outputs are faithful source retraining with certifying trajectory reports; older sibling checkpoint replay outputs remain replay/reference-only. The non-suffixed physical/NAT artifacts are preserved historical outputs; immutable writers reject replacing them after a commit-identity change.
 - New evidence is at `results/v4_tcdp/controls/owner_controls_20260908_current.json`, `results/v4_tcdp/deploy/physical_control_manifest_20260908_head.json`, and `results/v4_tcdp/sibling_retraining/closure_20260908/`. Artifact integrity command: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` — current result `292` JSON files, `72` JSONL rows, `9` payload hashes, zero failures.
