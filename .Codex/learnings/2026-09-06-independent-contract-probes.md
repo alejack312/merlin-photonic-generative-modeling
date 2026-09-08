@@ -49,3 +49,9 @@ Date: 2026-09-06 · Scope: project · Recurs when: a scientific implementation p
 - Require complete Adam moments and step counters at resume, reject non-finite histories, and fail non-finite training trajectories before writing checkpoints.
 - Compare immutable run identity separately from replica-group observations, then validate every promised serialized array before idempotent reuse.
 - Verified: focused boundary regressions 35 passed; full suite 658 passed/1 skipped; sibling HEAD remained `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336` and clean. Canonical v4 result files were not regenerated.
+
+## Follow-up: registered source-validation closure (2026-09-08)
+- If a recursive config diff uses `dict.get`, a missing field and an explicit `null` field can compare equal; use a per-level sentinel and add both deletion and insertion tests.
+- When a newly available sibling row is rerun, compare substantive outputs byte-for-byte where deterministic, validate only explicitly declared schema/output adaptations, and record source identity before and after execution.
+- Keep source-validation replay, faithful training, checkpoint replay, and physical deployment as separate evidence kinds even when their numerical outputs agree.
+- Verified: exact n=6 anti-concentration validation rerun passed with byte-identical substantive JSON/CSV outputs; the missing/null validator regression passed; full suite 684 passed/1 skipped; artifact validation 294 JSON/72 JSONL/9 payload hashes/0 failures; sibling remained clean at `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`.
