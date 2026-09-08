@@ -1,12 +1,4 @@
 {
-  "adaptation": {
-    "changed_fields": [
-      "experiment.output_dir",
-      "experiment.name",
-      "experiment.description"
-    ],
-    "reason": "source runner output was redirected outside the read-only sibling checkout; selected circuit, dataset, kernel and training settings were retained"
-  },
   "cells": [
     {
       "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
@@ -126,6 +118,41 @@
       "trajectory_rows": 5
     }
   ],
+  "config_comparison": {
+    "changed_fields": [
+      "experiment.description",
+      "experiment.name",
+      "experiment.output_dir",
+      "forge.plateau_agreement.label_kind"
+    ],
+    "note": "The source runner's active circuit, dataset, kernel and training settings must be identical; output metadata is redirected, and only the explicitly listed resolver defaults may be materialized in the isolated rerun.",
+    "output_redirected_fields": [
+      {
+        "field": "experiment.description",
+        "rerun": "Isolated faithful rerun of the pinned sibling Ghosh-Kim small-n cells",
+        "source": "Exact small-n learned-distribution AC cell"
+      },
+      {
+        "field": "experiment.name",
+        "rerun": "ghosh_kim_small_n_v4_retrain",
+        "source": "ghosh_kim_small_n"
+      },
+      {
+        "field": "experiment.output_dir",
+        "rerun": "results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun",
+        "source": "results/ac_ghosh_kim/small_n_exact"
+      }
+    ],
+    "resolved_default_fields": [
+      {
+        "field": "forge.plateau_agreement.label_kind",
+        "rerun": "concentration",
+        "source": "<missing>"
+      }
+    ],
+    "status": "PASS",
+    "unexpected_fields": []
+  },
   "registered_budget": {
     "bandwidths": [
       1.0,
@@ -148,6 +175,8 @@
   "rerun_output": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun",
   "rerun_results": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\results.jsonl",
   "rerun_results_sha256": "80cf55d0416e12328440cfe474d9f8bd76c830835e5c4c12b7e2f3a6e0cc7e40",
+  "resolved_rerun_config": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\config.json",
+  "resolved_rerun_config_sha256": "b6be0c73f432dcacc926040358370ff15cb78fbd0c80213e87d03ae9a7e81ae9",
   "resolved_source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\config.json",
   "resolved_source_config_sha256": "71533c0676cc627d561d34210e9bd6edb84f90d1192d8b3ea36377f8f0a86117",
   "schema_version": "v4_tcdp.sibling_bandwidth_validation.v1",

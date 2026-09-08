@@ -23,13 +23,14 @@ venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_
 venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_comparison.py
 ```
 
-The artifact validator currently reports `242` JSON files, `30` JSONL rows,
-and `7` payload hashes with zero failures. The original non-suffixed physical/NAT artifacts are preserved historical
-closure outputs from the prior integration commit. The suffixed `head`
-artifacts were generated at implementation head `c1617601`; the later
-commits contain documentation and the validator only, so their numerical
-source implementation is unchanged. Immutable writers reject silently
-replacing the former artifacts when the repository identity changes.
+The artifact validator reports `292` JSON files, `72` JSONL rows, and `9`
+payload hashes with zero failures. The original non-suffixed physical/NAT
+artifacts are preserved historical closure outputs from the prior integration
+commit. The current-head owner and physical manifests were generated at
+implementation head `d16f507`; the later commits contain documentation and
+validation-only changes, so their numerical source implementation is unchanged.
+Immutable writers reject silently replacing the former artifacts when the
+repository identity changes.
 
 ## Implementation now exercised
 

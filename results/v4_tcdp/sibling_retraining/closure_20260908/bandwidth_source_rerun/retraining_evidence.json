@@ -1,12 +1,4 @@
 {
-  "adaptation": {
-    "changed_fields": [
-      "experiment.output_dir",
-      "experiment.name",
-      "experiment.description"
-    ],
-    "reason": "source runner output was redirected outside the read-only sibling checkout; selected circuit, dataset, kernel and training settings were retained"
-  },
   "cells": [
     {
       "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
@@ -165,6 +157,65 @@
       "trajectory_rows": 5
     }
   ],
+  "config_comparison": {
+    "changed_fields": [
+      "circuit.allow_legacy_families",
+      "experiment.description",
+      "experiment.name",
+      "experiment.output_dir",
+      "forge.plateau_agreement.label_kind",
+      "init.data_dependent.fallback_std",
+      "init.data_dependent.method",
+      "init.data_dependent.scale"
+    ],
+    "note": "The source runner's active circuit, dataset, kernel and training settings must be identical; output metadata is redirected, and only the explicitly listed resolver defaults may be materialized in the isolated rerun.",
+    "output_redirected_fields": [
+      {
+        "field": "experiment.description",
+        "rerun": "Isolated faithful rerun of the pinned sibling bandwidth/marginal cells",
+        "source": "Sigma sweep for per-order marginal matching"
+      },
+      {
+        "field": "experiment.name",
+        "rerun": "bandwidth_marginal_sweep_v4_retrain",
+        "source": "bandwidth_marginal_sweep"
+      },
+      {
+        "field": "experiment.output_dir",
+        "rerun": "results/v4_tcdp/sibling_retraining/closure_20260908/bandwidth_source_rerun",
+        "source": "results/bandwidth_marginal_sweep"
+      }
+    ],
+    "resolved_default_fields": [
+      {
+        "field": "circuit.allow_legacy_families",
+        "rerun": false,
+        "source": "<missing>"
+      },
+      {
+        "field": "forge.plateau_agreement.label_kind",
+        "rerun": "concentration",
+        "source": "<missing>"
+      },
+      {
+        "field": "init.data_dependent.fallback_std",
+        "rerun": 0.1,
+        "source": "<missing>"
+      },
+      {
+        "field": "init.data_dependent.method",
+        "rerun": "parity",
+        "source": "<missing>"
+      },
+      {
+        "field": "init.data_dependent.scale",
+        "rerun": 0.1,
+        "source": "<missing>"
+      }
+    ],
+    "status": "PASS",
+    "unexpected_fields": []
+  },
   "registered_budget": {
     "bandwidths": [
       1.0,
@@ -188,6 +239,8 @@
   "rerun_output": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\bandwidth_source_rerun",
   "rerun_results": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\bandwidth_source_rerun\\results.jsonl",
   "rerun_results_sha256": "bbff177a1c77a380d546c77d21d7ecc072f1a9d3aa28c86bcc2e20d14702d9e5",
+  "resolved_rerun_config": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\bandwidth_source_rerun\\config.json",
+  "resolved_rerun_config_sha256": "f9edbf66d2526a0a437fe21c4321a4fcd8918278a66075f92b717b1fa544ae6c",
   "resolved_source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\bandwidth_marginal_sweep\\config.json",
   "resolved_source_config_sha256": "5a8c712509d82c0c3d046052898d397475a6ebe3e52a9427444d134f161a5f53",
   "schema_version": "v4_tcdp.sibling_bandwidth_validation.v1",

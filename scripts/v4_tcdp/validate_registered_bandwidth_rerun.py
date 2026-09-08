@@ -42,6 +42,83 @@ def _cell_key(summary: dict[str, Any]) -> tuple[tuple[str, object], ...]:
     return retrain._source_cell_key(summary)
 
 
+_MISSING = object()
+_OUTPUT_REDIRECT_FIELDS = {
+    "experiment.description",
+    "experiment.name",
+    "experiment.output_dir",
+}
+_RESOLVED_DEFAULTS: dict[str, object] = {
+    "circuit.allow_legacy_families": False,
+    "forge.plateau_agreement.label_kind": "concentration",
+    "init.data_dependent.fallback_std": 0.1,
+    "init.data_dependent.method": "parity",
+    "init.data_dependent.scale": 0.1,
+}
+
+
+def _config_differences(
+    source: object, rerun: object, path: str = ""
+) -> list[dict[str, object]]:
+    if isinstance(source, dict) and isinstance(rerun, dict):
+        differences: list[dict[str, object]] = []
+        for name in sorted(set(source) | set(rerun)):
+            child_path = f"{path}.{name}" if path else name
+            differences.extend(
+                _config_differences(
+                    source.get(name, _MISSING), rerun.get(name, _MISSING), child_path
+                )
+            )
+        return differences
+    if source is _MISSING or rerun is _MISSING or source != rerun:
+        return [
+            {
+                "field": path,
+                "source": "<missing>" if source is _MISSING else source,
+                "rerun": "<missing>" if rerun is _MISSING else rerun,
+            }
+        ]
+    return []
+
+
+def _compare_resolved_configs(
+    source: dict[str, Any], rerun: dict[str, Any]
+) -> dict[str, object]:
+    differences = _config_differences(source, rerun)
+    output_redirects = [
+        difference
+        for difference in differences
+        if difference["field"] in _OUTPUT_REDIRECT_FIELDS
+    ]
+    resolved_defaults = []
+    unexpected = []
+    for difference in differences:
+        field = str(difference["field"])
+        if field in _OUTPUT_REDIRECT_FIELDS:
+            continue
+        expected = _RESOLVED_DEFAULTS.get(field, _MISSING)
+        if (
+            expected is not _MISSING
+            and difference["source"] == "<missing>"
+            and difference["rerun"] == expected
+        ):
+            resolved_defaults.append(difference)
+        else:
+            unexpected.append(difference)
+    return {
+        "status": "PASS" if not unexpected else "FAIL",
+        "changed_fields": [str(difference["field"]) for difference in differences],
+        "output_redirected_fields": output_redirects,
+        "resolved_default_fields": resolved_defaults,
+        "unexpected_fields": unexpected,
+        "note": (
+            "The source runner's active circuit, dataset, kernel and training settings "
+            "must be identical; output metadata is redirected, and only the explicitly "
+            "listed resolver defaults may be materialized in the isolated rerun."
+        ),
+    }
+
+
 def validate(
     *, sibling_root: Path, source_root: Path, rerun_root: Path, source_config: Path
 ) -> dict[str, Any]:
@@ -51,8 +128,15 @@ def validate(
     source_config = source_config.resolve()
     source_results = source_root / "results.jsonl"
     source_resolved_config = source_root / "config.json"
+    rerun_config = rerun_root / "config.json"
     rerun_results = rerun_root / "results.jsonl"
-    for path in (source_config, source_results, source_resolved_config, rerun_results):
+    for path in (
+        source_config,
+        source_results,
+        source_resolved_config,
+        rerun_config,
+        rerun_results,
+    ):
         if not path.is_file():
             raise FileNotFoundError(path)
 
@@ -63,6 +147,10 @@ def validate(
     if source_identity_before.get("dirty"):
         raise ValueError("sibling checkout is dirty; refusing faithful validation")
 
+    config_comparison = _compare_resolved_configs(
+        json.loads(source_resolved_config.read_text(encoding="utf-8")),
+        json.loads(rerun_config.read_text(encoding="utf-8")),
+    )
     source_rows = retrain._read_jsonl(source_results)
     rerun_rows = retrain._read_jsonl(rerun_results)
     rerun_by_key = {_cell_key(row): row for row in rerun_rows}
@@ -109,7 +197,16 @@ def validate(
         include_paths=("src", "configs", "pyproject.toml", "setup.py", "README.md"),
     )
     unchanged = source_identity_before == source_identity_after
-    status = "PASS" if unchanged and cells and all(cell["status"] == "PASS" for cell in cells) else "FAIL"
+    status = (
+        "PASS"
+        if (
+            unchanged
+            and config_comparison["status"] == "PASS"
+            and cells
+            and all(cell["status"] == "PASS" for cell in cells)
+        )
+        else "FAIL"
+    )
     return {
         "schema_version": "v4_tcdp.sibling_bandwidth_validation.v1",
         "status": status,
@@ -127,15 +224,14 @@ def validate(
         "source_config_sha256": _sha256(source_config),
         "resolved_source_config": str(source_resolved_config),
         "resolved_source_config_sha256": _sha256(source_resolved_config),
+        "resolved_rerun_config": str(rerun_config),
+        "resolved_rerun_config_sha256": _sha256(rerun_config),
         "source_results": str(source_results),
         "source_results_sha256": _sha256(source_results),
         "rerun_results": str(rerun_results),
         "rerun_results_sha256": _sha256(rerun_results),
         "rerun_output": str(rerun_root),
-        "adaptation": {
-            "changed_fields": ["experiment.output_dir", "experiment.name", "experiment.description"],
-            "reason": "source runner output was redirected outside the read-only sibling checkout; selected circuit, dataset, kernel and training settings were retained",
-        },
+        "config_comparison": config_comparison,
         "trajectory_tolerance": 1.0e-12,
         "cells": cells,
     }
