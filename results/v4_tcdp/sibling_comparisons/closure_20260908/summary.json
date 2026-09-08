@@ -1,0 +1,23 @@
+{
+  "cells": [
+    {
+      "cell_id": "sibling/product_state/n6/sigma4_0/matched_backends",
+      "directory": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_comparisons\\closure_20260908\\sibling_product_state_n6_sigma4_0_matched_backends__eta0p9",
+      "manifest": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_comparisons\\closure_20260908\\sibling_product_state_n6_sigma4_0_matched_backends__eta0p9\\manifest.json",
+      "status": "PASS"
+    }
+  ],
+  "eta": 0.9,
+  "schema_version": "v4_tcdp.sibling_matched_comparisons.v1",
+  "source_identity": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "status": "PASS"
+}
