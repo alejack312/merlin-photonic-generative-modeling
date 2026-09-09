@@ -16,7 +16,6 @@ import importlib.metadata
 import json
 import platform
 import sys
-import types
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
@@ -203,6 +202,26 @@ def _environment() -> dict[str, Any]:
     }
 
 
+def _require_real_yaml() -> object:
+    """Require the installed PyYAML module used by the sibling source."""
+
+    try:
+        yaml = importlib.import_module("yaml")
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "source retraining requires the real PyYAML dependency; refusing a yaml stub"
+        ) from exc
+    origin = getattr(yaml, "__file__", None)
+    if not isinstance(origin, str) or not Path(origin).is_file():
+        raise RuntimeError(
+            "source retraining imported yaml without a file-backed PyYAML module; "
+            "refusing a yaml stub"
+        )
+    if not callable(getattr(yaml, "safe_load", None)):
+        raise RuntimeError("source retraining requires yaml.safe_load from PyYAML")
+    return yaml
+
+
 def _training_smoke_dataset_hash(metadata: dict[str, Any]) -> str:
     expected = {"type": "product_bernoulli", "n_samples": 256, "seed": 1230519654}
     if metadata != expected:
@@ -350,28 +369,24 @@ def _isolated_source_import(sibling_root: Path) -> Iterator[None]:
                     f"already imported sibling module has the wrong origin: {name} -> {origin}"
                 )
 
+    real_yaml = _require_real_yaml()
     saved_path = list(sys.path)
     saved_modules = {
         name: module
         for name, module in sys.modules.items()
         if name == "iqp_bp" or name.startswith("iqp_bp.") or name == "yaml"
     }
+    saved_modules.setdefault("yaml", real_yaml)
     for name in list(saved_modules):
         sys.modules.pop(name, None)
     sys.path.insert(0, str(source_root))
-    yaml_stub: types.ModuleType | None = None
-    if "yaml" not in saved_modules:
-        yaml_stub = types.ModuleType("yaml")
-        yaml_stub.safe_load = lambda _stream: {}
-        sys.modules["yaml"] = yaml_stub
+    sys.modules["yaml"] = real_yaml
     try:
         yield
     finally:
         sys.path[:] = saved_path
         for name in list(sys.modules):
-            if name == "iqp_bp" or name.startswith("iqp_bp.") or (
-                yaml_stub is not None and name == "yaml"
-            ):
+            if name == "iqp_bp" or name.startswith("iqp_bp.") or name == "yaml":
                 sys.modules.pop(name, None)
         sys.modules.update(saved_modules)
 

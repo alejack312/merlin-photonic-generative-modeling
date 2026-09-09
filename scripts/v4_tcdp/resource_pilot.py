@@ -12,6 +12,7 @@ import argparse
 import ctypes
 import hashlib
 import json
+import mmap
 import os
 from pathlib import Path
 import platform
@@ -41,8 +42,8 @@ class _ProcessMemoryCountersEx(ctypes.Structure):
     """Windows PROCESS_MEMORY_COUNTERS_EX layout, with a portable fallback."""
 
     _fields_ = [
-        ("cb", ctypes.c_ulong),
-        ("page_fault_count", ctypes.c_ulong),
+        ("cb", ctypes.c_uint32),
+        ("page_fault_count", ctypes.c_uint32),
         ("peak_working_set_size", ctypes.c_size_t),
         ("working_set_size", ctypes.c_size_t),
         ("quota_peak_paged_pool_usage", ctypes.c_size_t),
@@ -55,27 +56,53 @@ class _ProcessMemoryCountersEx(ctypes.Structure):
     ]
 
 
+def _windows_memory_counters(pid: int) -> _ProcessMemoryCountersEx | None:
+    """Read Windows PROCESS_MEMORY_COUNTERS_EX for one process."""
+
+    if os.name != "nt":
+        return None
+    kernel32 = ctypes.windll.kernel32
+    psapi = ctypes.windll.psapi
+    handle = kernel32.OpenProcess(0x0400 | 0x0010, False, int(pid))
+    if not handle:
+        return None
+    try:
+        counters = _ProcessMemoryCountersEx()
+        counters.cb = ctypes.sizeof(counters)
+        ok = psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), ctypes.sizeof(counters))
+        return counters if ok else None
+    finally:
+        kernel32.CloseHandle(handle)
+
+
 def _rss_bytes(pid: int) -> int | None:
     """Read a live process working set without adding a runtime dependency."""
 
     if os.name == "nt":
-        kernel32 = ctypes.windll.kernel32
-        psapi = ctypes.windll.psapi
-        handle = kernel32.OpenProcess(0x0400 | 0x0010, False, int(pid))
-        if not handle:
-            return None
-        try:
-            counters = _ProcessMemoryCountersEx()
-            counters.cb = ctypes.sizeof(counters)
-            ok = psapi.GetProcessMemoryInfo(handle, ctypes.byref(counters), ctypes.sizeof(counters))
-            return int(counters.working_set_size) if ok else None
-        finally:
-            kernel32.CloseHandle(handle)
+        counters = _windows_memory_counters(pid)
+        return None if counters is None else int(counters.working_set_size)
 
     status_path = Path(f"/proc/{int(pid)}/status")
     try:
         for line in status_path.read_text(encoding="utf-8").splitlines():
             if line.startswith("VmRSS:"):
+                return int(line.split()[1]) * 1024
+    except (FileNotFoundError, OSError, ValueError, IndexError):
+        return None
+    return None
+
+
+def _peak_rss_bytes(pid: int) -> int | None:
+    """Read the operating system's absolute resident-set high-water mark."""
+
+    if os.name == "nt":
+        counters = _windows_memory_counters(pid)
+        return None if counters is None else int(counters.peak_working_set_size)
+
+    status_path = Path(f"/proc/{int(pid)}/status")
+    try:
+        for line in status_path.read_text(encoding="utf-8").splitlines():
+            if line.startswith("VmHWM:"):
                 return int(line.split()[1]) * 1024
     except (FileNotFoundError, OSError, ValueError, IndexError):
         return None
@@ -181,10 +208,11 @@ def _evaluate(compiled: CompiledCircuit, maps: list[GateMap]) -> tuple[float, fl
 
 
 def _worker(n: int) -> dict[str, Any]:
-    baseline_rss = _rss_bytes(os.getpid())
+    worker_pid = os.getpid()
+    baseline_rss = _rss_bytes(worker_pid)
     print(
         json.dumps(
-            {"event": "ready", "n": n, "baseline_rss_bytes": baseline_rss},
+            {"event": "ready", "n": n, "worker_pid": worker_pid, "baseline_rss_bytes": baseline_rss},
             sort_keys=True,
         ),
         flush=True,
@@ -204,8 +232,14 @@ def _worker(n: int) -> dict[str, Any]:
     evaluation_started = time.perf_counter()
     probability_sum, model_success = _evaluate(compiled, maps)
     evaluation_elapsed = time.perf_counter() - evaluation_started
+    worker_final_rss = _rss_bytes(worker_pid)
+    worker_peak_rss = _peak_rss_bytes(worker_pid)
     report = {
         "n": n,
+        "worker_pid": worker_pid,
+        "baseline_rss_bytes": baseline_rss,
+        "worker_final_rss_bytes": worker_final_rss,
+        "worker_peak_rss_bytes": worker_peak_rss,
         "gate_count": len(compiled.gates),
         "map_count": len(maps),
         "compile_elapsed_seconds": compile_elapsed,
@@ -232,6 +266,19 @@ def _parse_json_line(line: str) -> dict[str, Any] | None:
 
 def _worker_payload_valid(payload: dict[str, Any], expected_n: int) -> bool:
     if payload.get("status") != "PASS" or payload.get("n") != expected_n:
+        return False
+    worker_pid = payload.get("worker_pid")
+    if not isinstance(worker_pid, int) or isinstance(worker_pid, bool) or worker_pid <= 0:
+        return False
+    for field in ("baseline_rss_bytes", "worker_final_rss_bytes", "worker_peak_rss_bytes"):
+        value = payload.get(field)
+        if value is not None and (
+            not isinstance(value, int) or isinstance(value, bool) or value < 0
+        ):
+            return False
+    baseline = payload.get("baseline_rss_bytes")
+    peak = payload.get("worker_peak_rss_bytes")
+    if baseline is not None and peak is not None and peak < baseline:
         return False
     if payload.get("full_circuit_superoperator_allocated") is not False:
         return False
@@ -280,14 +327,16 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
     reader = threading.Thread(target=_read_stdout, name=f"resource-pilot-stdout-{n}", daemon=True)
     reader.start()
     baseline_rss: int | None = None
-    peak_rss: int | None = None
+    sampled_peak_rss: int | None = None
+    interpreter_pid: int | None = None
     ready_payload: dict[str, Any] | None = None
     start_sent = False
     timed_out = False
     while process.poll() is None:
-        current = _rss_bytes(process.pid)
-        if current is not None:
-            peak_rss = current if peak_rss is None else max(peak_rss, current)
+        if interpreter_pid is not None:
+            current = _rss_bytes(interpreter_pid)
+            if current is not None:
+                sampled_peak_rss = current if sampled_peak_rss is None else max(sampled_peak_rss, current)
         try:
             while True:
                 line = stdout_queue.get_nowait()
@@ -298,10 +347,15 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
         except queue.Empty:
             pass
         if ready_payload is not None and not start_sent:
+            ready_pid = ready_payload.get("worker_pid")
+            if isinstance(ready_pid, int) and not isinstance(ready_pid, bool) and ready_pid > 0:
+                interpreter_pid = ready_pid
             baseline_value = ready_payload.get("baseline_rss_bytes")
             if isinstance(baseline_value, int) and baseline_value >= 0:
                 baseline_rss = baseline_value
-                peak_rss = baseline_value if peak_rss is None else max(peak_rss, baseline_value)
+                sampled_peak_rss = (
+                    baseline_value if sampled_peak_rss is None else max(sampled_peak_rss, baseline_value)
+                )
             if process.stdin is not None:
                 process.stdin.write("start\n")
                 process.stdin.flush()
@@ -330,13 +384,40 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
                 payload = parsed
                 break
     valid_worker = _worker_payload_valid(payload, n)
+    payload_pid = payload.get("worker_pid")
+    if interpreter_pid is None and isinstance(payload_pid, int) and not isinstance(payload_pid, bool) and payload_pid > 0:
+        interpreter_pid = payload_pid
+    pid_verified = (
+        valid_worker
+        and isinstance(interpreter_pid, int)
+        and interpreter_pid > 0
+        and payload_pid == interpreter_pid
+        and (
+            ready_payload is None
+            or ready_payload.get("worker_pid") == interpreter_pid
+        )
+    )
+    if baseline_rss is None:
+        baseline_value = payload.get("baseline_rss_bytes")
+        if isinstance(baseline_value, int) and not isinstance(baseline_value, bool) and baseline_value >= 0:
+            baseline_rss = baseline_value
+    worker_peak_rss = payload.get("worker_peak_rss_bytes")
+    if pid_verified and isinstance(worker_peak_rss, int) and not isinstance(worker_peak_rss, bool):
+        peak_rss = worker_peak_rss
+        peak_rss_source = "worker_os_peak"
+    elif pid_verified and sampled_peak_rss is not None:
+        peak_rss = max(baseline_rss or 0, sampled_peak_rss)
+        peak_rss_source = "verified_interpreter_sampling"
+    else:
+        peak_rss = None
+        peak_rss_source = None
     if timed_out or process.returncode != 0 or not valid_worker:
         measurement_status = "FAIL"
-    elif baseline_rss is None or peak_rss is None:
+    elif not pid_verified or baseline_rss is None or peak_rss is None:
         measurement_status = "INCONCLUSIVE"
     else:
         measurement_status = "PASS"
-    growth = None if baseline_rss is None or peak_rss is None else max(0, peak_rss - baseline_rss)
+    growth = None if baseline_rss is None or peak_rss is None else peak_rss - baseline_rss
     report = {
         **payload,
         "n": n,
@@ -345,8 +426,12 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
         "return_code": process.returncode,
         "timed_out": timed_out,
         "parent_elapsed_seconds": time.perf_counter() - started,
+        "launcher_pid": process.pid,
+        "measured_pid": interpreter_pid,
+        "measured_process": "worker_interpreter" if pid_verified else None,
         "baseline_rss_bytes": baseline_rss,
         "peak_rss_bytes": peak_rss,
+        "peak_rss_source": peak_rss_source,
         "rss_growth_bytes": growth,
         "measurement_status": measurement_status,
         "worker_payload_valid": valid_worker,
@@ -356,29 +441,53 @@ def _run_isolated(n: int, timeout_seconds: float) -> dict[str, Any]:
 
 
 def rss_status(case: dict[str, Any]) -> str:
+    measurement_status = str(case.get("measurement_status", "")).upper()
+    if measurement_status in {"FAIL", "UNKNOWN", "INCONCLUSIVE"}:
+        return measurement_status
+    if measurement_status != "PASS":
+        return "INCONCLUSIVE"
+    if case.get("n") not in PILOT_SIZES:
+        return "INCONCLUSIVE"
     growth = case.get("rss_growth_bytes")
     if case.get("n") != 10:
-        return "PASS" if case.get("peak_rss_bytes") is not None else "INCONCLUSIVE"
+        peak = case.get("peak_rss_bytes")
+        return "PASS" if isinstance(peak, int) and not isinstance(peak, bool) and peak >= 0 else "INCONCLUSIVE"
     if growth is None:
         return "INCONCLUSIVE"
-    return "PASS" if int(growth) < N10_RSS_LIMIT_BYTES else "FAIL"
+    if not isinstance(growth, int) or isinstance(growth, bool) or growth < 0:
+        return "INCONCLUSIVE"
+    return "PASS" if growth < N10_RSS_LIMIT_BYTES else "FAIL"
+
+
+def _has_exact_registered_sizes(cases: list[dict[str, Any]]) -> bool:
+    sizes = [case.get("n") for case in cases]
+    if any(not isinstance(size, int) or isinstance(size, bool) for size in sizes):
+        return False
+    return (
+        len(cases) == len(PILOT_SIZES)
+        and len(set(sizes)) == len(sizes)
+        and set(sizes) == set(PILOT_SIZES)
+    )
 
 
 def aggregate_status(cases: list[dict[str, Any]]) -> str:
-    allowed_statuses = {"PASS", "FAIL", "INCONCLUSIVE"}
-    sizes = [case.get("n") for case in cases]
+    if not _has_exact_registered_sizes(cases):
+        return "INCONCLUSIVE"
     statuses = [str(case.get("measurement_status", "")).upper() for case in cases]
+    allowed_statuses = {"PASS", "FAIL", "UNKNOWN", "INCONCLUSIVE"}
     if any(status not in allowed_statuses for status in statuses):
         return "INCONCLUSIVE"
     if "FAIL" in statuses:
         return "FAIL"
-    if len(cases) != len(PILOT_SIZES) or set(sizes) != set(PILOT_SIZES) or len(set(sizes)) != len(sizes):
-        return "INCONCLUSIVE"
+    if "UNKNOWN" in statuses:
+        return "UNKNOWN"
     if "INCONCLUSIVE" in statuses:
         return "INCONCLUSIVE"
     rss_statuses = [rss_status(case) for case in cases]
     if "FAIL" in rss_statuses:
         return "FAIL"
+    if "UNKNOWN" in rss_statuses:
+        return "UNKNOWN"
     if "INCONCLUSIVE" in rss_statuses:
         return "INCONCLUSIVE"
     return "PASS"
@@ -393,8 +502,58 @@ def _environment() -> dict[str, Any]:
         "machine": platform.machine(),
         "cpu_count": os.cpu_count(),
         "cwd": str(REPO_ROOT),
-        "rss_sampler": "Windows GetProcessMemoryInfo working set, /proc/VmRSS fallback",
+        "rss_sampler": "worker OS peak working set/high-water mark, verified interpreter sampling fallback",
     }
+
+
+def _memory_probe_worker(allocation_bytes: int) -> dict[str, Any]:
+    """Allocate and touch known memory for a cheap interpreter-identity test."""
+
+    if allocation_bytes <= 0:
+        raise ValueError("allocation_bytes must be positive")
+    worker_pid = os.getpid()
+    baseline_rss = _rss_bytes(worker_pid)
+    allocation = bytearray(allocation_bytes)
+    page_size = max(int(getattr(mmap, "PAGESIZE", 4096)), 1)
+    touched_bytes = 0
+    for offset in range(0, allocation_bytes, page_size):
+        allocation[offset] = (offset // page_size) % 251 + 1
+        touched_bytes += 1
+    allocation[-1] = 1
+    checksum = sum(allocation[::page_size])
+    current_rss = _rss_bytes(worker_pid)
+    peak_rss = _peak_rss_bytes(worker_pid)
+    return {
+        "status": "PASS",
+        "worker_pid": worker_pid,
+        "allocating_pid": worker_pid,
+        "measured_pid": worker_pid,
+        "allocation_bytes": allocation_bytes,
+        "touched_bytes": touched_bytes,
+        "checksum": checksum,
+        "baseline_rss_bytes": baseline_rss,
+        "current_rss_bytes": current_rss,
+        "peak_rss_bytes": peak_rss,
+    }
+
+
+def _timing_status(cases: list[dict[str, Any]]) -> str:
+    if not _has_exact_registered_sizes(cases):
+        return "INCONCLUSIVE"
+    statuses = [str(case.get("measurement_status", "")).upper() for case in cases]
+    if "FAIL" in statuses or any(bool(case.get("timed_out")) for case in cases):
+        return "FAIL"
+    if "UNKNOWN" in statuses:
+        return "UNKNOWN"
+    if "INCONCLUSIVE" in statuses:
+        return "INCONCLUSIVE"
+    for case in cases:
+        elapsed = case.get("map_build_and_evaluation_elapsed_seconds")
+        if not isinstance(elapsed, (int, float)) or isinstance(elapsed, bool) or not np.isfinite(elapsed):
+            return "INCONCLUSIVE"
+        if elapsed > DEFAULT_TIMEOUT_SECONDS:
+            return "FAIL"
+    return "PASS"
 
 
 def _deployment_source_hashes() -> dict[str, str]:
@@ -418,7 +577,7 @@ def run(timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS) -> dict[str, Any]:
         "status": aggregate_status(cases),
         "scope": "bounded exact compiled-map build/evaluation resource pilot",
         "sizes": list(PILOT_SIZES),
-        "commands": [case["command_argv"] for case in cases],
+        "commands": [case.get("command_argv") for case in cases],
         "code_source": {
             "commit": _git_value("rev-parse", "HEAD"),
             "branch": _git_value("branch", "--show-current"),
@@ -441,13 +600,7 @@ def run(timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS) -> dict[str, Any]:
         "map_build_timing_criterion": {
             "expression": "each bounded worker completes within the approved three-hour gate",
             "limit_seconds": DEFAULT_TIMEOUT_SECONDS,
-            "status": "PASS"
-            if all(
-                not bool(case.get("timed_out"))
-                and float(case.get("map_build_and_evaluation_elapsed_seconds", float("inf"))) <= DEFAULT_TIMEOUT_SECONDS
-                for case in cases
-            )
-            else "INCONCLUSIVE",
+            "status": _timing_status(cases),
         },
         "cases": cases,
     }
@@ -492,7 +645,9 @@ def _write_immutable_json(path: Path, report: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--memory-probe-worker", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--n", type=int, choices=PILOT_SIZES)
+    parser.add_argument("--allocation-bytes", type=int, default=16 * 1024 * 1024, help=argparse.SUPPRESS)
     parser.add_argument("--timeout-seconds", type=float, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--output", type=Path, default=REPO_ROOT / "results" / "v4_tcdp" / "deploy" / "resource_budget.json")
     args = parser.parse_args()
@@ -500,6 +655,9 @@ def main() -> None:
         if args.n is None:
             parser.error("--worker requires --n")
         print(json.dumps(_worker(args.n), sort_keys=True), flush=True)
+        return
+    if args.memory_probe_worker:
+        print(json.dumps(_memory_probe_worker(args.allocation_bytes), sort_keys=True), flush=True)
         return
     report = run(timeout_seconds=args.timeout_seconds)
     args.output.parent.mkdir(parents=True, exist_ok=True)

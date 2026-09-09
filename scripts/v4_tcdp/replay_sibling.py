@@ -93,6 +93,15 @@ def _latest_checkpoint_per_run(candidates: list[Path]) -> list[Path]:
     ]
 
 
+def _is_replay_candidate(manifest: dict[str, Any]) -> bool:
+    """Treat inventory eligibility and replay execution as separate states."""
+
+    return (
+        manifest.get("disposition") in {"exact_reproduction", "exact_reproduction_candidate"}
+        and manifest.get("execution_state", "not_run") == "not_run"
+    )
+
+
 def _write_blocked_manifest(
     *, manifest_path: Path, manifest: dict[str, Any], sibling_root: Path, output_root: Path
 ) -> dict[str, object]:
@@ -109,6 +118,8 @@ def _write_blocked_manifest(
         "schema_version": "v4_tcdp.sibling_replay.v2",
         "status": "blocked",
         "reproduction_kind": "checkpoint_replay",
+        "inventory_eligibility": "exact_reproduction_candidate",
+        "execution_state": "blocked",
         "reason": "No safe NPZ checkpoint with G/theta/step/loss is present in the registered result evidence.",
         "source_id": source_id,
         "source_manifest": str(manifest_path.resolve()),
@@ -212,6 +223,8 @@ def replay_export(
             "schema_version": "v4_tcdp.sibling_replay.v2",
             "status": "reference_only",
             "reproduction_kind": "checkpoint_replay_raw_only",
+            "inventory_eligibility": "exact_reproduction_candidate",
+            "execution_state": "executed",
             "reason": (
                 f"Raw exact replay completed at n={model.n}; the bounded compiled-density "
                 f"adapter rejects n>{MAX_COMPILED_N} before allocating a 2^n by 2^n density matrix."
@@ -238,8 +251,14 @@ def replay_export(
             "n": model.n,
             "kernel": {"source_type": source_config.get("kernel", {}).get("type"), "source_bandwidth": source_config.get("kernel", {}).get("bandwidth"), "comparison_kernel": "not computed; target data is not part of checkpoint replay"},
             "raw_compiled_tvd": None,
-            "compiled_deployed_tvd": None,
-            "deployed_acceptance_mass": None,
+            "compiled_model_reference_tvd": None,
+            "compiled_model_reference_acceptance_mass": None,
+            "deployment_evidence": {
+                "status": "not_available",
+                "label": "lossless_compiled_model_reference_only",
+                "independent": False,
+                "reason": "Raw-only replay did not construct the bounded compiled reference.",
+            },
             "artifacts": {"raw": "raw.npy", "manifest": "manifest.json"},
             "output_files": ["raw.npy", "manifest.json"],
             "dataset_regeneration": None,
@@ -256,11 +275,11 @@ def replay_export(
         return result
     compiled = compile_generators(generator, theta, quantize=True)
     compiled_vector = _vector(apply_compiled_density(compiled)[0])
-    deployed = compiled
-    deployed_mapping, acceptance = apply_compiled_density(deployed)
-    deployed_vector = _vector(deployed_mapping)
+    compiled_model_reference = compiled
+    reference_mapping, acceptance = apply_compiled_density(compiled_model_reference, eta=1.0)
+    reference_vector = _vector(reference_mapping)
     np.save(staging / "compiled.npy", compiled_vector)
-    np.save(staging / "deployed.npy", deployed_vector)
+    np.save(staging / "deployed.npy", reference_vector)
     data_regeneration: dict[str, object] | None = None
     if str(manifest["source_id"]).startswith("training_smoke:"):
         data, data_regeneration = regenerate_training_smoke_data(sibling_root)
@@ -268,6 +287,8 @@ def replay_export(
     result = {
         "schema_version": "v4_tcdp.sibling_replay.v1",
         "status": "adapted_reproduction",
+        "inventory_eligibility": "exact_reproduction_candidate",
+        "execution_state": "executed",
         "reason": "frozen source checkpoint replayed through the ideal photonic construction; source SGD/data trajectory was not rerun",
         "source_id": manifest["source_id"],
         "source_commit": source_identity.get("observed_commit"),
@@ -291,8 +312,15 @@ def replay_export(
         "n": model.n,
         "kernel": {"source_type": source_config.get("kernel", {}).get("type"), "source_bandwidth": source_config.get("kernel", {}).get("bandwidth"), "comparison_kernel": "not computed; source target data is not exported"},
         "raw_compiled_tvd": float(0.5 * np.abs(raw - compiled_vector).sum()),
-        "compiled_deployed_tvd": float(0.5 * np.abs(compiled_vector - deployed_vector).sum()),
-        "deployed_acceptance_mass": float(acceptance),
+        "compiled_model_reference_tvd": float(0.5 * np.abs(compiled_vector - reference_vector).sum()),
+        "compiled_model_reference_acceptance_mass": float(acceptance),
+        "deployment_evidence": {
+            "status": "reference_only",
+            "label": "lossless_compiled_model_reference",
+            "eta": 1.0,
+            "independent": False,
+            "reason": "The eta=1 output reuses the compiled model; it is not an independent deployment run or deployment evidence.",
+        },
         "artifacts": {
             "raw": "raw.npy",
             "compiled": "compiled.npy",
@@ -367,20 +395,20 @@ def replay_registered_manifest(
 def replay_all_registered(
     sibling_root: Path, output_root: Path
 ) -> dict[str, object]:
-    """Execute checkpoint replay or a blocked disposition for every exact row."""
+    """Execute checkpoint replay or a blocked disposition for each replay candidate."""
 
     export_root = REPO_ROOT / "results" / "v4_tcdp" / "sibling"
     manifests = []
     for path in sorted(export_root.glob("*/manifest.json")):
         value = load_export_manifest(path)
-        if value.get("disposition") == "exact_reproduction":
+        if _is_replay_candidate(value):
             manifests.append(path)
     reports = [replay_registered_manifest(path, sibling_root, output_root) for path in manifests]
     output_root.mkdir(parents=True, exist_ok=True)
     summary = {
         "schema_version": "v4_tcdp.sibling_replay_execution.v1",
         "status": "complete_with_blocked_rows" if any(report["status"] == "blocked" for report in reports) else "complete",
-        "registered_exact_row_count": len(reports),
+        "registered_replay_candidate_count": len(reports),
         "reports": reports,
         "command": ["venv/Scripts/python.exe", "scripts/v4_tcdp/replay_sibling.py", "--all-registered"],
     }

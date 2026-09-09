@@ -13,8 +13,11 @@ from merlin_iqp.experiments.comparison import (
     hamming_mmd2_crosscheck,
     marginal_tvd_panel,
     metric_specific_mutation,
+    mutation_control_report,
     true_forward_kl,
 )
+from merlin_iqp.classical.objectives import spatial_mmd2
+import merlin_iqp.experiments.comparison as comparison_module
 from scripts.v4_tcdp.compare_backends import build_comparison
 
 
@@ -34,6 +37,112 @@ def test_hamming_comparison_reports_all_stages_and_acceptance() -> None:
     assert rows["compiled:qubit"]["acceptance_mass"] == 1.0
     assert rows["deployed:photonic"]["attempts_per_accepted_sample"] == pytest.approx(4.0)
     assert comparison.manifest()["hamming_kernel"]["distance"] == "Hamming"
+
+
+def test_support_validity_uses_underlying_target_support_and_is_labeled() -> None:
+    comparison = MatchedComparison(
+        "support",
+        np.array([0.7, 0.2, 0.1, 0.0]),
+        (DistributionArm("candidate", np.array([0.6, 0.1, 0.2, 0.1]), "deployed"),),
+        hamming_sigma=1.0,
+    )
+    row = comparison.metrics()["deployed:candidate"]
+    assert row["support_validity"] == pytest.approx(0.9)
+    assert row["support_definition"] == "underlying target support where p > 1e-6"
+    assert row["support_validity_basis"] == "underlying conditional probability vector"
+    assert row["observed_empirical_support"]["status"] == "not_available"
+
+
+def test_success_and_map_mutation_controls_recompute_derived_values() -> None:
+    comparison = MatchedComparison(
+        "controls",
+        np.array([0.7, 0.2, 0.1, 0.0]),
+        (DistributionArm("candidate", np.array([0.6, 0.1, 0.2, 0.1]), "deployed", acceptance_mass=0.4),),
+        hamming_sigma=1.0,
+    )
+    report = mutation_control_report(comparison)
+    success = report["success_mutation"]["deployed:candidate"]
+    mapped = report["map_mutation"]["deployed:candidate"]
+    assert success["status"] == "PASS"
+    assert success["acceptance_mass_after"] < success["acceptance_mass_before"]
+    assert success["conditional_vector_hash_equal"] is True
+    assert success["distribution_metrics_unchanged"] is True
+    assert mapped["status"] == "PASS"
+    assert mapped["conditional_vector_changed"] is True
+    assert mapped["distribution_metrics_changed"] is True
+    assert mapped["success_independent_of_distribution_mutation"] is True
+
+
+def test_mutation_control_fails_for_injected_noop_map_mutation(monkeypatch) -> None:
+    def noop(vector: np.ndarray, metric: str, *, amount: float = 0.01) -> dict[str, object]:
+        return {
+            "kind": "noop",
+            "metric": metric,
+            "source": 0,
+            "destination": 1,
+            "amount": 0.0,
+            "mass_before": 1.0,
+            "mass_after": 1.0,
+            "vector": np.asarray(vector, dtype=float).copy(),
+        }
+
+    monkeypatch.setattr(comparison_module, "metric_specific_mutation", noop)
+    comparison = MatchedComparison(
+        "noop-control",
+        np.array([0.75, 0.25]),
+        (DistributionArm("candidate", np.array([0.5, 0.5]), "deployed"),),
+        hamming_sigma=1.0,
+    )
+    result = mutation_control_report(comparison)
+    assert result["map_mutation"]["deployed:candidate"]["status"] == "FAIL"
+    assert result["map_mutation"]["deployed:candidate"]["conditional_vector_changed"] is False
+
+
+def test_spatial_inputs_and_kernel_weights_are_validated_without_mutation() -> None:
+    target = np.array([0.4, 0.3, 0.2, 0.1])
+    candidate = np.array([0.3, 0.4, 0.2, 0.1])
+    centers = np.arange(8, dtype=float).reshape(4, 2)
+    original_centers = centers.copy()
+    sigmas = np.array([0.5, 1.0])
+    weights = np.array([0.25, 0.75])
+    original_sigmas = sigmas.copy()
+    original_weights = weights.copy()
+    score = spatial_mmd2(target, candidate, centers, sigmas=sigmas, weights=weights)
+    assert np.isfinite(score)
+    assert np.array_equal(centers, original_centers)
+    assert np.array_equal(sigmas, original_sigmas)
+    assert np.array_equal(weights, original_weights)
+    with pytest.raises(ValueError, match="weights"):
+        spatial_mmd2(target, candidate, centers, sigmas=sigmas, weights=[-1.0, 2.0])
+    with pytest.raises(ValueError, match="spatial_centers"):
+        MatchedComparison(
+            "bad-centers",
+            target,
+            (DistributionArm("candidate", candidate, "compiled"),),
+            hamming_sigma=1.0,
+            spatial_centers=np.zeros((3, 2)),
+            spatial_sigma=1.0,
+        )
+    with pytest.raises(ValueError, match="spatial_sigma"):
+        MatchedComparison(
+            "bad-sigma",
+            target,
+            (DistributionArm("candidate", candidate, "compiled"),),
+            hamming_sigma=1.0,
+            spatial_centers=centers,
+            spatial_sigma=0.0,
+        )
+    comparison = MatchedComparison(
+        "immutable-centers",
+        target,
+        (DistributionArm("candidate", candidate, "compiled"),),
+        hamming_sigma=1.0,
+        spatial_centers=centers,
+        spatial_sigma=1.0,
+    )
+    centers[:] = -99.0
+    assert comparison.spatial_centers is not None
+    assert np.array_equal(comparison.spatial_centers, original_centers)
 
 
 def test_true_kl_and_floor_are_distinct() -> None:

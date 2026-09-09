@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 
 from .contracts import KernelSpec
-from .expectation import expectations_and_jacobian_exact
+from .expectation import expectations_and_jacobian_exact, expectations_exact
 from .kernel import _mixture, gaussian_hamming_matrix, gaussian_hamming_spectrum, hamming_walsh_matrix, spatial_walsh_matrix
 from .targets import all_observables, target_moments, target_probability_vector
 
@@ -64,6 +64,23 @@ def objective_and_gradient_exact(theta: np.ndarray, G: np.ndarray, target: objec
     B = spatial_walsh_matrix(kernel.centers, kernel.sigmas[0], sigmas=list(kernel.sigmas), weights=list(kernel.mixture_weights))
     loss = float(delta @ B @ delta)
     return loss, -2.0 * jacobian.T @ (B @ delta)
+
+
+def objective_exact(theta: np.ndarray, G: np.ndarray, target: object, kernel: KernelSpec) -> float:
+    """Evaluate the exact objective without constructing its Jacobian."""
+
+    n = np.asarray(G).shape[1]
+    observables = all_observables(n)
+    model_moments = expectations_exact(theta, G, observables)
+    target_values = target_moments(target, observables).values
+    delta = target_values - model_moments
+    if kernel.kind == "hamming_gaussian":
+        weights = gaussian_hamming_spectrum(n, kernel.sigmas, kernel.mixture_weights)
+        return float(np.sum(weights * delta**2))
+    if kernel.centers is None:
+        raise ValueError("spatial kernel needs centers")
+    B = spatial_walsh_matrix(kernel.centers, kernel.sigmas[0], sigmas=list(kernel.sigmas), weights=list(kernel.mixture_weights))
+    return float(delta @ B @ delta)
 
 
 def mmd2_exact(theta: np.ndarray, G: np.ndarray, target: object, kernel: KernelSpec) -> float:

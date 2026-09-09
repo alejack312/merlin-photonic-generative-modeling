@@ -29,6 +29,7 @@ PHOTONIC_EVALUATION = {
     "reason": "Phase 28 owned scope has no validated ideal photonic ring deployment adapter; no unsupported simulator label is substituted.",
 }
 FORBIDDEN_CLASSICAL_IMPORTS = frozenset({"torch", "perceval", "perceval_quandela", "merlinquantum", "merlin"})
+SOURCE_COMMIT_RULE = "explicit_commit_preserved; null_or_working_tree_resolves_to_observed"
 
 
 @dataclass(frozen=True)
@@ -259,13 +260,37 @@ def _initialize_ring_parameters(
     return np.asarray(theta, dtype=np.float64), metadata
 
 
+def _resolve_source_commit(configured: str | None, observed: object) -> tuple[str, str]:
+    """Resolve provenance without rewriting an explicit historical commit."""
+
+    if not isinstance(observed, str) or not observed:
+        raise ValueError("ring source provenance has no observed commit")
+    if configured is None or configured == "working-tree":
+        return observed, "observed_current_commit"
+    if not isinstance(configured, str) or not configured:
+        raise ValueError("ring source_commit must be a non-empty string or None")
+    return configured, "explicit_configured_commit"
+
+
 def train_rings(config: RingConfig) -> RingRun:
     source_provenance = git_source_identity(
         Path(__file__).resolve().parents[3],
         include_paths=("src/merlin_iqp", "scripts/v4_tcdp/train_rings.py", "pyproject.toml", "pytest.ini"),
     )
-    if config.source_commit in {None, "working-tree", "72e8079"}:
-        config = replace(config, source_commit=source_provenance.get("observed_commit"))
+    configured_source_commit = config.source_commit
+    resolved_source_commit, commit_resolution = _resolve_source_commit(
+        configured_source_commit, source_provenance.get("observed_commit")
+    )
+    source_provenance = {
+        **source_provenance,
+        "configured_commit": configured_source_commit,
+        "resolved_commit": resolved_source_commit,
+        "commit_resolution": commit_resolution,
+        "commit_rule": SOURCE_COMMIT_RULE,
+        "commit_matches_observed": resolved_source_commit == source_provenance.get("observed_commit"),
+    }
+    if config.source_commit != resolved_source_commit:
+        config = replace(config, source_commit=resolved_source_commit)
     dataset = load_rings_dataset(config.n)
     generator = chain_1d(config.n, config.n - 1)
     initial_theta, initialization_metadata = _initialize_ring_parameters(config, dataset, generator)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import builtins
 import json
+from dataclasses import replace
 
 import numpy as np
 import pytest
@@ -12,6 +13,8 @@ from merlin_iqp.classical import target_moments
 from merlin_iqp.classical._validation import hash_array
 from merlin_iqp.experiments.datasets import load_rings_dataset, make_grid_codec
 from merlin_iqp.experiments.rings import (
+    SOURCE_COMMIT_RULE,
+    _resolve_source_commit,
     classical_only_import_guard,
     resolve_config,
     train_rings,
@@ -76,6 +79,25 @@ def test_both_objective_profiles_train_with_shared_iqp_model(profile: str) -> No
     assert config.initialization_scale == 0.1
     assert run.source_provenance["observed_commit"]
     assert run.config.source_commit == run.source_provenance["observed_commit"]
+    assert run.source_provenance["commit_resolution"] == "observed_current_commit"
+    assert run.source_provenance["commit_matches_observed"] is True
+
+
+def test_explicit_historical_source_commit_is_preserved_and_not_silently_rewritten() -> None:
+    resolved, rule = _resolve_source_commit("72e8079", "current-commit")
+    assert resolved == "72e8079"
+    assert rule == "explicit_configured_commit"
+
+    config = replace(
+        resolve_config("rings_hamming", n=4, seed=0, steps=0),
+        source_commit="72e8079",
+    )
+    run = train_rings(config)
+    assert run.config.source_commit == "72e8079"
+    assert run.source_provenance["configured_commit"] == "72e8079"
+    assert run.source_provenance["resolved_commit"] == "72e8079"
+    assert run.source_provenance["commit_matches_observed"] is False
+    assert run.source_provenance["commit_rule"] == SOURCE_COMMIT_RULE
 
 
 def test_default_data_dependent_initialization_uses_exact_train_moments_and_scale() -> None:

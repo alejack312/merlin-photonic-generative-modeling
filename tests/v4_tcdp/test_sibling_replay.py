@@ -5,7 +5,7 @@ import subprocess
 import numpy as np
 import pytest
 
-from scripts.v4_tcdp.replay_sibling import replay_export
+from scripts.v4_tcdp.replay_sibling import _is_replay_candidate, replay_export
 
 
 def _make_source_fixture(root: Path) -> tuple[Path, Path]:
@@ -63,15 +63,39 @@ def test_training_smoke_checkpoint_replay_is_safe_and_explicit(tmp_path: Path) -
         tmp_path,
     )
     assert result["status"] == "adapted_reproduction"
+    assert result["inventory_eligibility"] == "exact_reproduction_candidate"
+    assert result["execution_state"] == "executed"
     assert result["unsafe_serialization_loaded"] is False
     assert result["raw_compiled_tvd"] < 1e-12
-    assert result["deployed_acceptance_mass"] == pytest.approx(1.0)
+    assert result["compiled_model_reference_acceptance_mass"] == pytest.approx(1.0)
+    assert result["compiled_model_reference_tvd"] == pytest.approx(0.0)
+    assert result["deployment_evidence"] == {
+        "status": "reference_only",
+        "label": "lossless_compiled_model_reference",
+        "eta": 1.0,
+        "independent": False,
+        "reason": "The eta=1 output reuses the compiled model; it is not an independent deployment run or deployment evidence.",
+    }
     raw = np.load(Path(result["namespace"]["destination"]) / "raw.npy", allow_pickle=False)
     assert raw.shape == (64,)
     assert np.isclose(raw.sum(), 1.0)
     assert result["dataset_regeneration"]["status"] == "regenerated"
     assert result["faithful_retraining"]["status"] == "not_run"
     assert Path(result["namespace"]["destination"]) != tmp_path / "training_smoke" / "step_0004"
+
+
+@pytest.mark.parametrize(
+    ("manifest", "expected"),
+    [
+        ({"disposition": "exact_reproduction", "execution_state": "not_run"}, True),
+        ({"disposition": "exact_reproduction", "execution_state": "executed"}, False),
+        ({"disposition": "blocked", "execution_state": "not_run"}, False),
+    ],
+)
+def test_inventory_eligibility_is_not_an_execution_outcome(
+    manifest: dict[str, object], expected: bool
+) -> None:
+    assert _is_replay_candidate(manifest) is expected
 
 
 def test_replay_namespaces_same_step_by_source_identity(tmp_path: Path) -> None:

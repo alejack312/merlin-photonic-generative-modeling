@@ -11,7 +11,7 @@ import numpy as np
 from .checkpoint import checkpoint_generator, load_checkpoint, save_checkpoint
 from .contracts import Checkpoint, KernelSpec
 from .model import IQPModel
-from .objectives import objective_and_gradient_exact
+from .objectives import objective_and_gradient_exact, objective_exact
 from ._validation import hash_json
 
 
@@ -70,7 +70,7 @@ class Trainer:
                 raise FloatingPointError("training objective or gradient is not finite")
             self._apply(gradient)
             self.step += 1
-            next_loss, _ = objective_and_gradient_exact(self.model.theta, self.model.G, self.target, self.kernel)
+            next_loss = objective_exact(self.model.theta, self.model.G, self.target, self.kernel)
             if not np.isfinite(next_loss) or not np.all(np.isfinite(self.model.theta)):
                 raise FloatingPointError("training trajectory is not finite")
             self.loss_history.append(float(next_loss))

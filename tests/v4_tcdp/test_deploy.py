@@ -40,6 +40,7 @@ import scripts.v4_tcdp.validate_deploy as validate_deploy
 import scripts.v4_tcdp.validate_physical_controls as validate_physical_controls
 from merlin_iqp.deploy.density import compose_instruments
 import merlin_iqp.deploy.fock as fock_module
+import merlin_iqp.deploy.maps as maps_module
 from merlin_iqp.deploy.maps import _choi_from_kraus
 
 
@@ -350,6 +351,74 @@ def test_throughput_and_conditional_erasure_conserve_mass() -> None:
     )
     assert distribution["FAILURE"] == pytest.approx(0.2)
     assert sum(distribution.values()) == pytest.approx(1.0)
+
+
+def test_conditional_erasure_retained_subset_preserves_all_mass_explicitly() -> None:
+    q = np.full(4, 0.25)
+    original = q.copy()
+    distribution = conditional_erasure_distribution(q, 0.5, retained=(0,), gate_success=0.8)
+    assert distribution["0E"] == pytest.approx(0.1)
+    assert distribution["1E"] == pytest.approx(0.1)
+    assert distribution["FAILURE"] == pytest.approx(0.8)
+    assert sum(distribution.values()) == pytest.approx(1.0)
+    represented = conditional_erasure_distribution(
+        q, 0.5, retained=(0,), gate_success=0.8, include_failure=False
+    )
+    assert sum(represented.values()) == pytest.approx(0.2)
+    assert np.array_equal(q, original)
+
+
+@pytest.mark.parametrize(
+    ("eta", "retained", "expected_output", "expected_failure"),
+    [
+        (0.0, (), "EE", 0.2),
+        (1.0, (0, 1), "00", 0.2),
+        (0.0, (0,), None, 1.0),
+        (1.0, (0,), None, 1.0),
+    ],
+)
+def test_conditional_erasure_handles_endpoint_and_gate_failure_mass(
+    eta: float,
+    retained: tuple[int, ...],
+    expected_output: str | None,
+    expected_failure: float,
+) -> None:
+    distribution = conditional_erasure_distribution(
+        np.array([0.25, 0.25, 0.25, 0.25]),
+        eta,
+        retained=retained,
+        gate_success=0.8,
+    )
+    if expected_output is not None:
+        assert distribution[expected_output] == pytest.approx(0.8 if expected_output == "EE" else 0.2)
+    assert distribution["FAILURE"] == pytest.approx(expected_failure)
+    assert sum(distribution.values()) == pytest.approx(1.0)
+
+
+def test_tomography_averages_independently_constructed_one_body_readouts() -> None:
+    settings = [(a, b) for a in "XYZ" for b in "XYZ"]
+    outcomes: dict[tuple[str, str], np.ndarray] = {}
+    for a in "XYZ":
+        for b in "XYZ":
+            first_expectation = 0.2 + 0.05 * "XYZ".index(b)
+            second_expectation = -0.1 + 0.04 * "XYZ".index(a)
+            correlation = 0.05
+            outcomes[(a, b)] = np.array(
+                [
+                    (1 + first_expectation * first + second_expectation * second + correlation * first * second) / 4
+                    for first in (1, -1)
+                    for second in (1, -1)
+                ]
+            )
+    original_outcomes = {key: value.copy() for key, value in outcomes.items()}
+    reconstructed = maps_module._tomography_output(settings, outcomes)
+    pauli = maps_module._paulis()
+    assert np.trace(reconstructed) == pytest.approx(1.0)
+    assert np.trace(np.kron(pauli["X"], pauli["I"]) @ reconstructed).real == pytest.approx(0.25)
+    assert np.trace(np.kron(pauli["I"], pauli["X"]) @ reconstructed).real == pytest.approx(-0.06)
+    assert np.trace(np.kron(pauli["X"], pauli["Y"]) @ reconstructed).real == pytest.approx(0.05)
+    for key, value in outcomes.items():
+        assert np.array_equal(value, original_outcomes[key])
 
 
 def test_cache_rejects_stale_source_metadata(tmp_path) -> None:

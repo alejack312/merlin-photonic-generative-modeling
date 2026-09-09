@@ -30,6 +30,7 @@ COMPATIBILITY_STATUSES = (
     "reference_only",
     "blocked",
 )
+INVENTORY_DISPOSITIONS = COMPATIBILITY_STATUSES + ("exact_reproduction_candidate",)
 CompatibilityStatus = Literal[
     "exact_reproduction",
     "adapted_reproduction",
@@ -553,8 +554,8 @@ def _source_rows(configs: list[dict[str, Any]], artifacts: list[dict[str, Any]],
             status = "blocked"
             reason = "The resolved source output directory is absent."
         else:
-            status = "exact_reproduction"
-            reason = "Config, source package and local result family are present; replay has not been executed by inventory."
+            status = "exact_reproduction_candidate"
+            reason = "Config, source package and local result family are present; this row is eligible for replay but has not been executed by inventory."
         changed: list[str] = []
         if status == "reference_only":
             changed = ["execution_backend_or_size_not_changed_in_inventory"]
@@ -679,7 +680,7 @@ def build_sibling_inventory(sibling_root: str | Path, *, pinned_commit: str = PI
         "config_count": len(configs),
         "artifact_count": len(artifact_records),
         "gaussian_config_count": sum(1 for config in configs if config["gaussian_related"]),
-        "dispositions": {status: sum(1 for row in result["source_rows"] if row["disposition"] == status) for status in COMPATIBILITY_STATUSES},
+        "dispositions": {status: sum(1 for row in result["source_rows"] if row["disposition"] == status) for status in INVENTORY_DISPOSITIONS},
     }
     return result
 
@@ -691,7 +692,7 @@ def _validate_inventory(value: Any) -> dict[str, Any]:
         if key not in value:
             raise ValueError(f"inventory missing {key}")
     for row in value["source_rows"]:
-        if row.get("disposition") not in COMPATIBILITY_STATUSES:
+        if row.get("disposition") not in INVENTORY_DISPOSITIONS:
             raise ValueError(f"invalid source disposition: {row.get('disposition')}")
     return value
 

@@ -37,6 +37,7 @@ class GateMap:
 @dataclass(frozen=True)
 class MapPhysicality:
     min_choi_eigenvalue: float
+    min_edagger_i_eigenvalue: float
     max_edagger_i_eigenvalue: float
     hermiticity_error: float
     trace_choi: float
@@ -135,18 +136,22 @@ def _readout_settings() -> list[tuple[str, str]]:
 
 def _tomography_output(settings: list[tuple[str, str]], outcomes: dict[tuple[str, str], np.ndarray]) -> np.ndarray:
     pauli = _paulis()
-    coeff: dict[tuple[str, str], complex] = {("I", "I"): 0.0j}
+    coeff: dict[tuple[str, str], complex] = {}
+    one_body: dict[tuple[str, str], list[complex]] = {}
+    identity_values: list[complex] = []
     # Each setting retains all four absolute outcome probabilities.  The
     # signs recover the nine two-Pauli coefficients; one-body coefficients
     # are averaged over the compatible settings for numerical stability.
     for a, b in settings:
         probs = outcomes[(a, b)]
-        coeff[(a, b)] = np.sum(probs * np.array([1, -1, -1, 1])) if False else None
-        values = probs.reshape(2, 2)
-        coeff[(a, "I")] = np.sum(values * np.array([[1, 1], [-1, -1]]))
-        coeff[("I", b)] = np.sum(values * np.array([[1, -1], [1, -1]]))
+        values = np.asarray(probs, dtype=complex).reshape(2, 2)
+        one_body.setdefault((a, "I"), []).append(np.sum(values * np.array([[1, 1], [-1, -1]])))
+        one_body.setdefault(("I", b), []).append(np.sum(values * np.array([[1, -1], [1, -1]])))
         coeff[(a, b)] = np.sum(values * np.array([[1, -1], [-1, 1]]))
-        coeff[("I", "I")] = np.sum(values)
+        identity_values.append(np.sum(values))
+    coeff[("I", "I")] = np.mean(identity_values)
+    for key, values in one_body.items():
+        coeff[key] = np.mean(values)
     rho = np.zeros((4, 4), complex)
     for a in "IXYZ":
         for b in "IXYZ":
@@ -311,7 +316,9 @@ def validate_gate_map(map_obj: GateMap, *, tolerance: float = 1e-9) -> MapPhysic
     derived_hermiticity_error = float(np.max(np.abs(derived_choi - derived_choi.conj().T)))
     min_choi = float(np.min(np.linalg.eigvalsh((choi + choi.conj().T) / 2.0)).real)
     edagger = _edagger_identity(map_obj)
-    max_edagger = float(np.max(np.linalg.eigvalsh((edagger + edagger.conj().T) / 2.0)).real)
+    edagger_eigenvalues = np.linalg.eigvalsh((edagger + edagger.conj().T) / 2.0)
+    min_edagger = float(np.min(edagger_eigenvalues).real)
+    max_edagger = float(np.max(edagger_eigenvalues).real)
     hermiticity_error = max(supplied_hermiticity_error, derived_hermiticity_error)
     units = _matrix_units(d)
     for a in range(d):
@@ -322,12 +329,14 @@ def validate_gate_map(map_obj: GateMap, *, tolerance: float = 1e-9) -> MapPhysic
             )
     passed = (
         min_choi >= -tolerance
+        and min_edagger >= -tolerance
         and max_edagger <= 1.0 + tolerance
         and hermiticity_error <= tolerance
         and choi_consistency_error <= tolerance
     )
     return MapPhysicality(
         min_choi_eigenvalue=min_choi,
+        min_edagger_i_eigenvalue=min_edagger,
         max_edagger_i_eigenvalue=max_edagger,
         hermiticity_error=hermiticity_error,
         trace_choi=float(np.trace(choi).real),

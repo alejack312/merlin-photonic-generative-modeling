@@ -1,8 +1,10 @@
 import os
+import importlib
 from pathlib import Path
 
 import pytest
 
+import scripts.v4_tcdp.retrain_sibling as retrain_sibling
 from scripts.v4_tcdp.retrain_sibling import _compare_trajectories, run_retraining
 
 
@@ -62,3 +64,32 @@ def test_retraining_finite_mismatch_is_fail_not_inconclusive() -> None:
 def test_retraining_contract_rejects_a_non_source_checkout(tmp_path: Path) -> None:
     with pytest.raises((FileNotFoundError, ValueError), match="source|manifest|config"):
         run_retraining(tmp_path / "different.yaml", tmp_path / "fake-sibling", tmp_path / "out")
+
+
+def test_source_import_fails_explicitly_when_pyyaml_is_missing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sibling_root = tmp_path / "sibling"
+    (sibling_root / "src").mkdir(parents=True)
+    real_import = importlib.import_module
+
+    def missing_yaml(name: str, *args: object, **kwargs: object) -> object:
+        if name == "yaml":
+            raise ModuleNotFoundError("yaml")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(retrain_sibling.importlib, "import_module", missing_yaml)
+    with pytest.raises(RuntimeError, match="real PyYAML|yaml stub"):
+        with retrain_sibling._isolated_source_import(sibling_root):
+            pass
+
+
+def test_source_import_uses_real_yaml_and_does_not_silently_accept_malformed_yaml(
+    tmp_path: Path,
+) -> None:
+    sibling_root = tmp_path / "sibling"
+    (sibling_root / "src").mkdir(parents=True)
+    with retrain_sibling._isolated_source_import(sibling_root):
+        yaml = importlib.import_module("yaml")
+        with pytest.raises(yaml.YAMLError):
+            yaml.safe_load("broken: [")

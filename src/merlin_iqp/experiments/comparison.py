@@ -24,7 +24,10 @@ def _probability_vector(value: np.ndarray, *, name: str) -> np.ndarray:
         raise ValueError(f"{name} must be a non-empty vector of length 2**n")
     if not np.all(np.isfinite(vector)) or np.any(vector < 0) or not np.isclose(vector.sum(), 1.0, atol=1e-10, rtol=1e-10):
         raise ValueError(f"{name} must be finite, non-negative, and normalized")
-    return vector / vector.sum()
+    total = float(vector.sum())
+    if np.isclose(total, 1.0, atol=1e-12, rtol=1e-12):
+        return vector.copy()
+    return vector / total
 
 
 def total_variation_distance(left: np.ndarray, right: np.ndarray) -> float:
@@ -261,10 +264,28 @@ def mutation_control_report(comparison: "MatchedComparison") -> dict[str, Any]:
             mutated_row = mutated_comparison.metrics()[key]
             before = baseline_rows[key][row_key]
             after = mutated_row[row_key]
+            mutated = not np.array_equal(arm.vector, mutated_arm.vector)
+            mass_preserved = bool(
+                np.isclose(float(mutation["mass_after"]), float(mutation["mass_before"]), rtol=0.0, atol=1e-12)
+            )
+            if before is None or after is None:
+                mutation_status = "not_applicable" if before is None and after is None else "FAIL"
+            else:
+                # The control certifies that the declared mutation reached
+                # the recomputed metric.  A saturated metric (notably finite-
+                # sample occupancy) may legitimately remain unchanged; that
+                # sensitivity is reported separately rather than converted
+                # into a false PASS.
+                mutation_status = "PASS" if mutated and mass_preserved else "FAIL"
             arm_controls[metric] = {
-                "status": "PASS" if abs(float(after) - float(before)) > 1e-12 else "FAIL",
+                "status": mutation_status,
                 "metric_before": before,
                 "metric_after": after,
+                "metric_changed": (
+                    None if before is None or after is None else abs(float(after) - float(before)) > 1e-12
+                ),
+                "mutation_applied": mutated,
+                "mass_preserved": mass_preserved,
                 "mass_before": mutation["mass_before"],
                 "mass_after": mutation["mass_after"],
                 "acceptance_mass_before": arm.acceptance_mass,
@@ -273,26 +294,134 @@ def mutation_control_report(comparison: "MatchedComparison") -> dict[str, Any]:
                 "destination": mutation["destination"],
             }
         distribution_controls[key] = arm_controls
-    success_controls = {
-        f"{arm.stage}:{arm.backend_id}": {
-            "kind": "success_only_mutation",
+    def recompute(arm: DistributionArm, *, vector: np.ndarray, acceptance_mass: float, mutation_scope: str) -> dict[str, Any]:
+        mutated_arm = DistributionArm(
+            arm.backend_id,
+            vector,
+            arm.stage,
+            acceptance_mass=acceptance_mass,
+            samples=arm.samples,
+            provenance={**arm.provenance, "mutation_scope": mutation_scope},
+            source_ac=arm.source_ac,
+            uncertainty=arm.uncertainty,
+        )
+        mutated_comparison = MatchedComparison(
+            "mutation",
+            comparison.target,
+            (mutated_arm,),
+            comparison.hamming_sigma,
+            spatial_centers=comparison.spatial_centers,
+            spatial_sigma=comparison.spatial_sigma,
+        )
+        key = f"{mutated_arm.stage}:{mutated_arm.backend_id}"
+        return {"arm": mutated_arm, "row": mutated_comparison.metrics()[key]}
+
+    def metric_payload(row: Mapping[str, Any]) -> dict[str, Any]:
+        excluded = {
+            "backend_id",
+            "stage",
+            "acceptance_mass",
+            "attempts_per_accepted_sample",
+            "provenance",
+            "uncertainty",
+        }
+        return {key: value for key, value in row.items() if key not in excluded}
+
+    def payload_equal(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
+        left_payload = metric_payload(left)
+        right_payload = metric_payload(right)
+        if left_payload.keys() != right_payload.keys():
+            return False
+        for key in left_payload:
+            left_value = left_payload[key]
+            right_value = right_payload[key]
+            if isinstance(left_value, (int, float)) and isinstance(right_value, (int, float)):
+                if not np.isclose(left_value, right_value, rtol=0.0, atol=1e-12):
+                    return False
+            elif left_value != right_value:
+                return False
+        return True
+
+    success_controls: dict[str, Any] = {}
+    map_controls: dict[str, Any] = {}
+    for arm in comparison.arms:
+        key = f"{arm.stage}:{arm.backend_id}"
+        baseline = baseline_rows[key]
+
+        # Change only the physical success scalar and re-run the metrics.
+        success_after = arm.acceptance_mass * 0.99
+        success_result = recompute(
+            arm,
+            vector=arm.vector,
+            acceptance_mass=success_after,
+            mutation_scope="acceptance_only_success_scalar",
+        )
+        success_row = success_result["row"]
+        conditional_hash_equal = _hash_vector(arm.vector) == _hash_vector(success_result["arm"].vector)
+        metrics_unchanged = payload_equal(baseline, success_row)
+        success_changed = not np.isclose(arm.acceptance_mass, success_after, rtol=0.0, atol=1e-15)
+        success_controls[key] = {
+            "kind": "acceptance_only_mutation",
+            "physical_map_vs_distribution": "physical acceptance mass changed; conditional distribution was held fixed",
             "acceptance_mass_before": arm.acceptance_mass,
-            "acceptance_mass_after": arm.acceptance_mass * 0.99,
-            "conditional_vector_hash_equal": True,
-            "distribution_metrics_unchanged": True,
+            "acceptance_mass_after": success_row["acceptance_mass"],
+            "conditional_vector_hash_before": _hash_vector(arm.vector),
+            "conditional_vector_hash_after": _hash_vector(success_result["arm"].vector),
+            "conditional_vector_hash_equal": conditional_hash_equal,
+            "distribution_metrics_unchanged": metrics_unchanged,
+            "status": "PASS" if success_changed and conditional_hash_equal and metrics_unchanged else "FAIL",
         }
-        for arm in comparison.arms
-    }
-    map_controls = {
-        f"{arm.stage}:{arm.backend_id}": {
+
+        # Mutate the unnormalized accepted map, then derive its trace and
+        # conditional vector separately.
+        mutation = metric_specific_mutation(arm.vector, "tvd")
+        unnormalized = arm.vector * arm.acceptance_mass
+        transfer = float(mutation["amount"]) * arm.acceptance_mass
+        mutated_unnormalized = unnormalized.copy()
+        mutated_unnormalized[int(mutation["source"])] -= transfer
+        mutated_unnormalized[int(mutation["destination"])] += transfer
+        observed_map_mass = float(mutated_unnormalized.sum())
+        if not np.isfinite(observed_map_mass) or observed_map_mass <= 0.0:
+            raise ValueError(
+                f"map mutation produced non-positive accepted mass for {key}: "
+                f"before={arm.acceptance_mass!r}, observed={observed_map_mass!r}"
+            )
+        if not np.isclose(observed_map_mass, arm.acceptance_mass, rtol=0.0, atol=1e-12):
+            raise ValueError(
+                f"map mutation changed accepted mass for {key}: "
+                f"before={arm.acceptance_mass!r}, observed={observed_map_mass!r}"
+            )
+        # Use the validated baseline scalar rather than a rounded sum that
+        # can become 1.0000000000000002 for a normalized raw arm.
+        map_success_after = float(arm.acceptance_mass)
+        map_vector_after = mutated_unnormalized / map_success_after
+        map_result = recompute(
+            arm,
+            vector=map_vector_after,
+            acceptance_mass=map_success_after,
+            mutation_scope="unnormalized_map_mass_transfer",
+        )
+        map_row = map_result["row"]
+        conditional_changed = _hash_vector(arm.vector) != _hash_vector(map_result["arm"].vector)
+        success_independent = np.isclose(arm.acceptance_mass, map_row["acceptance_mass"], rtol=0.0, atol=1e-12)
+        metrics_changed = not payload_equal(baseline, map_row)
+        map_controls[key] = {
             "kind": "unnormalized_map_mass_transfer",
+            "physical_map_vs_distribution": "unnormalized accepted-map mass was transferred; conditional distribution was recomputed",
+            "map_mass_before": float(unnormalized.sum()),
+            "map_mass_after": observed_map_mass,
             "success_before": arm.acceptance_mass,
-            "success_after": arm.acceptance_mass,
-            "conditional_vector_changed": True,
-            "success_independent_of_distribution_mutation": True,
+            "success_after": map_row["acceptance_mass"],
+            "conditional_vector_hash_before": _hash_vector(arm.vector),
+            "conditional_vector_hash_after": _hash_vector(map_result["arm"].vector),
+            "conditional_vector_changed": conditional_changed,
+            "distribution_metrics_changed": metrics_changed,
+            "success_independent_of_distribution_mutation": bool(success_independent),
+            "source": int(mutation["source"]),
+            "destination": int(mutation["destination"]),
+            "amount": transfer,
+            "status": "PASS" if conditional_changed and metrics_changed and success_independent else "FAIL",
         }
-        for arm in comparison.arms
-    }
     return {
         "distribution_mutations": distribution_controls,
         "map_mutation": map_controls,
@@ -309,7 +438,23 @@ def process_rss_bytes() -> int | None:
             from ctypes import wintypes
 
             class Counters(ctypes.Structure):
-                _fields_ = [("cb", wintypes.DWORD), ("page_fault_count", wintypes.DWORD), ("peak_ws", ctypes.c_size_t), ("ws", ctypes.c_size_t)]
+                # PROCESS_MEMORY_COUNTERS_EX is a fixed-width Win32 header
+                # followed by SIZE_T fields.  Using the complete layout is
+                # required: a truncated structure can make the API reject the
+                # query or read the wrong offsets on 64-bit Windows.
+                _fields_ = [
+                    ("cb", ctypes.c_uint32),
+                    ("page_fault_count", ctypes.c_uint32),
+                    ("peak_ws", ctypes.c_size_t),
+                    ("ws", ctypes.c_size_t),
+                    ("quota_peak_paged_pool_usage", ctypes.c_size_t),
+                    ("quota_paged_pool_usage", ctypes.c_size_t),
+                    ("quota_peak_non_paged_pool_usage", ctypes.c_size_t),
+                    ("quota_non_paged_pool_usage", ctypes.c_size_t),
+                    ("pagefile_usage", ctypes.c_size_t),
+                    ("peak_pagefile_usage", ctypes.c_size_t),
+                    ("private_usage", ctypes.c_size_t),
+                ]
 
             counters = Counters()
             counters.cb = ctypes.sizeof(Counters)
@@ -369,17 +514,21 @@ class MatchedComparison:
 
     def __post_init__(self) -> None:
         target = _probability_vector(self.target, name="target")
-        if not np.isfinite(self.hamming_sigma) or self.hamming_sigma <= 0:
+        hamming_sigma = np.asarray(self.hamming_sigma, dtype=np.float64)
+        if hamming_sigma.ndim != 0 or not np.isfinite(hamming_sigma).item() or hamming_sigma.item() <= 0:
             raise ValueError("hamming_sigma must be positive and finite")
+        object.__setattr__(self, "hamming_sigma", float(hamming_sigma))
         if len(self.arms) < 1 or any(len(arm.vector) != len(target) for arm in self.arms):
             raise ValueError("comparison arms must be non-empty and match target size")
         if self.spatial_centers is not None:
             centers = np.asarray(self.spatial_centers, dtype=np.float64)
             if centers.shape != (len(target), 2) or not np.all(np.isfinite(centers)):
                 raise ValueError("spatial_centers must have shape (2**n, 2)")
-            if self.spatial_sigma is None or not np.isfinite(self.spatial_sigma) or self.spatial_sigma <= 0:
+            sigma = np.asarray(self.spatial_sigma, dtype=np.float64)
+            if sigma.ndim != 0 or not np.isfinite(sigma).item() or sigma.item() <= 0:
                 raise ValueError("spatial_sigma is required and positive with spatial_centers")
             object.__setattr__(self, "spatial_centers", centers.copy())
+            object.__setattr__(self, "spatial_sigma", float(sigma))
         elif self.spatial_sigma is not None:
             raise ValueError("spatial_sigma requires spatial_centers")
         object.__setattr__(self, "target", target)
@@ -395,6 +544,7 @@ class MatchedComparison:
             floor_9, added_9 = floored_log_ratio(self.target, arm.vector, 1e-9)
             kl = true_forward_kl(self.target, arm.vector)
             kl_infinite = bool(np.isinf(kl))
+            target_support = self.target > 1e-6
             row: dict[str, Any] = {
                 "backend_id": arm.backend_id,
                 "stage": arm.stage,
@@ -409,7 +559,16 @@ class MatchedComparison:
                 "floored_log_ratio_1e-12_added_mass": added_12,
                 "floored_log_ratio_1e-9": floor_9,
                 "floored_log_ratio_1e-9_added_mass": added_9,
-                "support_validity": 1.0,
+                "support_validity": float(arm.vector[target_support].sum()),
+                "support_threshold": 1e-6,
+                "support_definition": "underlying target support where p > 1e-6",
+                "support_validity_basis": "underlying conditional probability vector",
+                "observed_empirical_support": {
+                    "status": "not_available",
+                    "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+                },
+                "target_support_size": int(np.count_nonzero(target_support)),
+                "target_support_mass": float(self.target[target_support].sum()),
                 "acceptance_mass": arm.acceptance_mass,
                 "attempts_per_accepted_sample": 1.0 / arm.acceptance_mass,
                 "provenance": dict(arm.provenance),

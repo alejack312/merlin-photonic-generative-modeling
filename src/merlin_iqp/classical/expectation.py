@@ -82,3 +82,19 @@ def expectations_and_jacobian_exact(theta: np.ndarray, G: np.ndarray, observable
     for index in range(len(values)):
         jacobian[:, index] = np.mean(-2.0 * sine * signs[:, index, None] * overlaps[:, index][None, :], axis=0)
     return expectations, jacobian
+
+
+def expectations_exact(theta: np.ndarray, G: np.ndarray, observables: np.ndarray | None = None) -> np.ndarray:
+    """Evaluate exact parity expectations without constructing a Jacobian."""
+
+    matrix = binary_matrix(G, name="G")
+    values = finite_vector(theta, name="theta", length=len(matrix))
+    if observables is None:
+        obs = all_observables(matrix.shape[1])
+    else:
+        obs = binary_matrix(observables, name="observables", width=matrix.shape[1])
+    z = all_bitstrings(matrix.shape[1])
+    signs = 1.0 - 2.0 * ((z @ matrix.T) % 2).astype(np.float64)
+    overlaps = ((obs @ matrix.T) % 2).astype(np.float64)
+    phases = 2.0 * ((signs * values[None, :]) @ overlaps.T)
+    return np.cos(phases).mean(axis=0)
