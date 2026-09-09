@@ -45,3 +45,40 @@ def test_validator_rejects_incomplete_resource_sizes(tmp_path: Path) -> None:
     _write(tmp_path / "bad.json", {"schema": "v4.resource-budget.v1", "sizes": [10], "cases": []})
     result = validate(tmp_path)
     assert result["status"] == "FAIL"
+
+
+def test_validator_rejects_resource_pass_with_inconclusive_case(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "bad.json",
+        {
+            "schema": "v4.resource-budget.v1",
+            "status": "PASS",
+            "sizes": [4, 6, 8, 10],
+            "cases": [
+                {"n": n, "measurement_status": "PASS" if n != 8 else "INCONCLUSIVE"}
+                for n in [4, 6, 8, 10]
+            ],
+        },
+    )
+    result = validate(tmp_path)
+    assert result["status"] == "FAIL"
+
+
+def test_validator_requires_labeled_support_evidence(tmp_path: Path) -> None:
+    _write(
+        tmp_path / "bad.json",
+        {
+            "schema_version": "v4_tcdp.matched_comparison.v1",
+            "target_hash": "0" * 64,
+            "arms": [{"stage": "raw", "backend_id": "x", "acceptance_mass": 1.0}],
+            "metrics": {
+                "raw:x": {
+                    "acceptance_mass": 1.0,
+                    "attempts_per_accepted_sample": 1.0,
+                    "support_validity": 1.0,
+                }
+            },
+        },
+    )
+    result = validate(tmp_path)
+    assert result["status"] == "FAIL"

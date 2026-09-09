@@ -5,7 +5,7 @@ import subprocess
 import numpy as np
 import pytest
 
-from scripts.v4_tcdp.replay_sibling import _is_replay_candidate, replay_export
+from scripts.v4_tcdp.replay_sibling import _checkpoint_candidates, _is_replay_candidate, replay_export
 
 
 def _make_source_fixture(root: Path) -> tuple[Path, Path]:
@@ -54,6 +54,17 @@ def test_replay_rejects_malformed_generator_and_nonfinite_loss(tmp_path: Path) -
     np.savez(checkpoint, G=np.array([[1, 0], [0, 1]], dtype=np.uint8), theta=np.array([0.1, 0.2]), step=np.array(1), loss=np.array(float("nan")))
     with pytest.raises(ValueError, match="checkpoint loss must be finite"):
         replay_export(manifest, source, tmp_path / "replayed")
+
+
+def test_replay_rejects_checkpoint_path_outside_sibling_root(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    external = tmp_path / "external" / "step_0002.npz"
+    _, manifest_path = _make_source_fixture(source)
+    external.parent.mkdir()
+    np.savez(external, G=np.eye(2, dtype=np.uint8), theta=np.array([0.1, 0.2]), step=np.array(2), loss=np.array(0.5))
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["result_evidence"] = [str(external)]
+    assert _checkpoint_candidates(manifest, source) == []
 
 
 def test_training_smoke_checkpoint_replay_is_safe_and_explicit(tmp_path: Path) -> None:

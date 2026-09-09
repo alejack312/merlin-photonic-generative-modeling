@@ -71,6 +71,7 @@ def _numeric_scalar(value: object, *, name: str, integer: bool = False) -> float
 
 
 def _checkpoint_candidates(manifest: dict[str, Any], sibling_root: Path) -> list[Path]:
+    root = sibling_root.resolve()
     candidates = [
         (sibling_root / Path(item)).resolve()
         for item in manifest.get("result_evidence", [])
@@ -79,7 +80,7 @@ def _checkpoint_candidates(manifest: dict[str, Any], sibling_root: Path) -> list
     return [
         path
         for path in candidates
-        if path.is_file() and path.name.startswith("step_")
+        if path.is_relative_to(root) and path.is_file() and path.name.startswith("step_")
     ]
 
 

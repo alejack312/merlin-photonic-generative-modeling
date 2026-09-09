@@ -493,6 +493,9 @@ class DistributionArm:
             raise ValueError("stage must be raw, compiled, or deployed")
         if not np.isfinite(self.acceptance_mass) or not 0 < self.acceptance_mass <= 1:
             raise ValueError("acceptance_mass must be in (0, 1]")
+        reciprocal_limit = 1.0 / np.finfo(np.float64).max
+        if self.acceptance_mass <= reciprocal_limit:
+            raise ValueError("acceptance_mass is too small for JSON-safe throughput")
         if self.samples is not None and self.samples < 0:
             raise ValueError("samples must be non-negative")
         if self.source_ac is not None and (not np.isfinite(self.source_ac) or self.source_ac < 0):

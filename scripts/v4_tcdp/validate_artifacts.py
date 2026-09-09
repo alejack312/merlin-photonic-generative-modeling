@@ -47,6 +47,19 @@ def _finite_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
 
 
+def _is_current_comparison_artifact(path: Path) -> bool:
+    """Apply the v2 semantic contract to current namespaces only.
+
+    Older committed comparison outputs are retained historical evidence and
+    predate the support-provenance fields. They remain parseable, while every
+    correction namespace and every ad-hoc artifact is checked strictly.
+    """
+
+    if "results" not in path.parts:
+        return True
+    return any(part.startswith("correction") for part in path.parts)
+
+
 def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
     """Check invariants that JSON syntax and hashes cannot establish."""
 
@@ -84,6 +97,13 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
             support = row.get("support_validity")
             if support is not None and (not _finite_number(support) or not 0.0 <= float(support) <= 1.0):
                 failures.append(f"{path}: invalid support_validity for {key}")
+            if support is not None and _is_current_comparison_artifact(path):
+                if row.get("support_definition") != "underlying target support where p > 1e-6":
+                    failures.append(f"{path}: support_definition is missing or inconsistent for {key}")
+                if row.get("support_validity_basis") != "underlying conditional probability vector":
+                    failures.append(f"{path}: support_validity_basis is missing or inconsistent for {key}")
+                if row.get("support_threshold") != 1e-6:
+                    failures.append(f"{path}: support_threshold is missing or inconsistent for {key}")
     elif schema in {"v4_tcdp.photonic_ring.v1", "v4_tcdp.photonic_ring.v2"}:
         direct = value.get("direct")
         if isinstance(direct, dict):
@@ -109,6 +129,11 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
             status = str(case.get("measurement_status", "")).upper()
             if status not in {"PASS", "FAIL", "UNKNOWN", "INCONCLUSIVE"}:
                 failures.append(f"{path}: invalid resource measurement_status")
+        if str(value.get("status", "")).upper() == "PASS" and any(
+            not isinstance(case, dict) or str(case.get("measurement_status", "")).upper() != "PASS"
+            for case in cases if isinstance(cases, list)
+        ):
+            failures.append(f"{path}: resource PASS requires every registered measurement to PASS")
 
 
 def validate(root: Path) -> dict[str, int | str]:

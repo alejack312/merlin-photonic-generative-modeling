@@ -208,6 +208,11 @@ def test_distribution_rejects_unnormalized_or_invalid_stage() -> None:
         DistributionArm("x", [0.5, 0.5], "simulated")
 
 
+def test_distribution_rejects_acceptance_that_overflows_throughput() -> None:
+    with pytest.raises(ValueError, match="JSON-safe throughput"):
+        DistributionArm("x", [0.5, 0.5], "raw", acceptance_mass=1e-320)
+
+
 def test_ring_smoke_comparison_keeps_raw_compiled_and_deployed_distinct() -> None:
     comparison = build_comparison(
         __import__("pathlib").Path("results/v4_tcdp/rings/rings_hamming/n4_seed0_smoke")

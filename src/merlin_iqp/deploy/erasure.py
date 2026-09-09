@@ -58,9 +58,15 @@ def conditional_erasure_distribution(
         raise ValueError("eta must be in [0,1]")
     if not np.isfinite(gate_success) or not 0.0 <= gate_success <= 1.0:
         raise ValueError("gate_success must be in [0,1]")
-    if not np.all(np.isfinite(values)) or np.any(values < -1e-12) or not np.isclose(values.sum(), 1.0, atol=1e-12):
+    if not np.all(np.isfinite(values)) or np.any(values < 0.0) or not np.isclose(values.sum(), 1.0, atol=1e-12):
         raise ValueError("q must be a normalized nonnegative distribution")
-    keep = () if retained is None else tuple(sorted(set(int(i) for i in retained)))
+    if retained is None:
+        keep = ()
+    else:
+        raw_indices = tuple(retained)
+        if any(isinstance(i, (bool, np.bool_)) or not isinstance(i, (int, np.integer)) for i in raw_indices):
+            raise ValueError("retained qubits must be integer indices")
+        keep = tuple(sorted(set(int(i) for i in raw_indices)))
     if any(i < 0 or i >= n for i in keep):
         raise ValueError("retained qubit out of range")
     output: dict[str, float] = {}

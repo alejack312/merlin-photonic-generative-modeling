@@ -138,6 +138,13 @@ def test_fixed_photon_loss_rejects_invalid_survival() -> None:
         apply_compiled_density(compiled, eta=0.0)
 
 
+def test_erasure_rejects_negative_mass_and_fractional_retained_index() -> None:
+    with pytest.raises(ValueError, match="nonnegative"):
+        conditional_erasure_distribution([0.5, -1e-14, 0.5 + 1e-14, 0.0], 0.5)
+    with pytest.raises(ValueError, match="integer indices"):
+        conditional_erasure_distribution([0.5, 0.5], 0.5, retained=[0.2])
+
+
 def test_k_zero_is_a_valid_identity_instrument_control() -> None:
     compiled = compile_iqp(3, [0.2, -0.1, 0.31], [])
     observed, success = apply_compiled_density(compiled)
