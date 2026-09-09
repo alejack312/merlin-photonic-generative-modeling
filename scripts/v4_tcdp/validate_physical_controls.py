@@ -193,7 +193,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_repaired_v2.json"),
+        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json"),
         help="manifest path; defaults to the committed v4_tcdp namespace",
     )
     parser.add_argument(

@@ -19,7 +19,7 @@ The branch adds three additive boundaries: a NumPy classical IQP trainer, a read
 
 ## Deliberately open
 
-The repository does not claim a validated multiphoton noisy source model, multi-gate full-Fock equivalence, or an intermediate-projection theorem. The fixed-photon n=2/n=3 physical controls pass; the shared-gate final-only/intermediate conditional TVD is `0.585411845271861`, so final-only is the supported boundary. Photonic ring evaluation is implemented and exercised for the registered n=4 spatial and Hamming smoke profiles only; n=6/n=8 photonic deployment is not extrapolated.
+The repository does not claim a validated multiphoton noisy source model, multi-gate full-Fock equivalence, or an intermediate-projection theorem. The fixed-photon n=2/n=3 physical controls pass; after correcting the coherent readout, the registered shared-gate final-only/intermediate conditional TVD is `1.942890293094024e-16` with unchanged accepted mass. Final-only remains the selected declared boundary, and the fixture result is not generalized to a theorem. Photonic ring evaluation is implemented and exercised for the registered n=4 spatial and Hamming smoke profiles only; n=6/n=8 photonic deployment is not extrapolated.
 
 The registered sibling/substrate chain is now complete for the eight source-trainer cells that have verified small-n NPZ inputs: one `training_smoke` cell, four bandwidth cells, and three Ghosh–Kim cells. The artifact-backed chain is sibling IQP -> local equivalent IQP -> compiled CP map -> deployed fixed-photon map, with the source Hamming bandwidth, MSB-first codec, hashes, acceptance, and conditional metrics preserved. The n=9 deployed arms are analytic model-derived references; they do not extend the direct full-Fock physical boundary.
 

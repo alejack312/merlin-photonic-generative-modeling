@@ -61,11 +61,11 @@ venv\Scripts\python.exe scripts\v4_tcdp\compare_sibling_backends.py `
   --retraining-root results\v4_tcdp\sibling_retraining\training_smoke `
   --retraining-root results\v4_tcdp\sibling_retraining\closure_20260908\bandwidth_source_rerun `
   --retraining-root results\v4_tcdp\sibling_retraining\closure_20260908\ghosh_kim_source_rerun `
-  --output-root results\v4_tcdp\sibling_comparisons\closure_20260908_complete_v4 `
+  --output-root results\v4_tcdp\sibling_comparisons\closure_20260909_final `
   --eta 0.9
 ```
 
-The resulting [summary](../results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4/summary.json) contains eight `PASS` cells: one training-smoke cell, four bandwidth cells, and three Ghosh–Kim cells. Each cell stores the source samples, empirical target histogram, sibling/local raw vectors, unquantized control, quantized compiled vector, deployed vector, per-arm metrics, source/checkpoint/config hashes, and acceptance provenance. Profile names are part of each cell identity so equal `(n, sigma)` values from different source experiments cannot overwrite one another.
+The resulting [repaired summary](../results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json) contains eight `PASS` cells: one training-smoke cell, four bandwidth cells, and three Ghosh–Kim cells. Each cell stores the source samples, empirical target histogram, sibling/local raw vectors, unquantized control, quantized compiled vector, deployed vector, per-arm metrics, source/checkpoint/config hashes, and acceptance provenance. Profile names are part of each cell identity so equal `(n, sigma)` values from different source experiments cannot overwrite one another. The repaired comparison also enforces local-versus-unquantized compilation equality per cell.
 
 The source and local IQP vectors agree within the existing probability-vector tolerance `1.0e-12` (the largest observed residual is `1.3877787807814457e-16`); deterministic acceptance scaling uses `1.0e-16`, and source trajectory evidence remains `1.0e-12`. The same source bandwidth is used in the Hamming Gaussian kernel for each cell. For `eta=0.9`, deployed acceptance is checked as `eta**n * model_success`, while the normalized deployed vector is checked against the compiled conditional vector separately.
 

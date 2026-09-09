@@ -13,6 +13,17 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
 
+## Current repair update (2026-09-09)
+
+The independent audit findings A01–A04 are repaired in implementation commit `7089dbf`; the final evidence commit is the current `HEAD` recorded below. A01 now preserves coherent interference in projection readout; A02 rejects incomplete full-Fock mass instead of normalizing it away; A03 enforces local-versus-unquantized compilation equality per sibling cell; and A04 rejects invalid spatial-kernel mixtures. The repaired physical manifest reports shared-gate final-only/intermediate TVD `1.942890293094024e-16` with unchanged accepted mass. The previous `0.585411845271861` value is superseded and retained only in dated audit/historical artifacts.
+
+Final evidence paths:
+
+- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final.json`
+- `results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json`
+
 ## Reproduction commands
 
 Run from the photonic repository root:
@@ -28,7 +39,7 @@ venv/Scripts/python.exe scripts/v4_tcdp/replay_sibling.py results/v4_tcdp/siblin
 $env:MERLIN_SIBLING_ROOT='C:/Users/cuqui/iqp-mmd-barren-plateau'; venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py
 venv/Scripts/python.exe scripts/v4_tcdp/retrain_sibling.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --config C:/Users/cuqui/iqp-mmd-barren-plateau/configs/experiments/training_smoke.yaml --output-root results/v4_tcdp/sibling_retraining/training_smoke
 venv/Scripts/python.exe scripts/v4_tcdp/compare_backends.py results/v4_tcdp/rings/rings_hamming/n6_seed0_main --eta 0.9 --output results/v4_tcdp/comparisons/rings_hamming_n6_seed0_eta09.json
-venv/Scripts/python.exe scripts/v4_tcdp/compare_sibling_backends.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --retraining-root results/v4_tcdp/sibling_retraining/training_smoke --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/bandwidth_source_rerun --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun --output-root results/v4_tcdp/sibling_comparisons/closure_20260908_complete_v4 --eta 0.9
+venv/Scripts/python.exe scripts/v4_tcdp/compare_sibling_backends.py --sibling-root C:/Users/cuqui/iqp-mmd-barren-plateau --retraining-root results/v4_tcdp/sibling_retraining/training_smoke --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/bandwidth_source_rerun --retraining-root results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun --output-root results/v4_tcdp/sibling_comparisons/closure_20260909_final --eta 0.9
 venv/Scripts/python.exe scripts/v4_tcdp/run_nat.py --n 4 --seed 0 --steps 150 --matched-continuation --output results/v4_tcdp/nat/n4_seed0_primary.json
 ```
 

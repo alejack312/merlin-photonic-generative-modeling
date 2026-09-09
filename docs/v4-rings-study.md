@@ -36,6 +36,6 @@ Artifacts:
 
 ## Backend boundary and legacy context
 
-The training step is protected by a classical-only import guard that rejects torch, Perceval, and MerLin backend imports. The registered n=4 spatial and Hamming smoke checkpoints were subsequently evaluated through the fixed-photon final-only photonic adapter with matching qubit references; those two artifacts are bounded `PASS` controls, not evidence for n=6/n=8 photonic deployment or a photonic advantage. The shared-gate physical controls show a material final-only/intermediate discrepancy, so the intermediate boundary remains unsupported.
+The training step is protected by a classical-only import guard that rejects torch, Perceval, and MerLin backend imports. The registered n=4 spatial and Hamming smoke checkpoints were subsequently evaluated through the fixed-photon final-only photonic adapter with matching qubit references; those two artifacts are bounded `PASS` controls, not evidence for n=6/n=8 photonic deployment or a photonic advantage. After the coherent-readout repair, the registered shared-gate physical control has final-only/intermediate conditional TVD `1.942890293094024e-16` and unchanged accepted mass. This fixture does not establish a general projection theorem; the declared deployment boundary remains final-only.
 
 The historical 462-bin `QuantumLayer.simple` ansatz remains contextual only. It has a different latent-input ansatz and output space from this `2**n` IQP model. Native MMD values from those unmatched spaces are not compared.

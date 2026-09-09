@@ -32,7 +32,11 @@ The primary v4 deployment model is narrower than this taxonomy: fixed photon num
 
 Suppose a state evolves through `U1` and `U2`. Final projection applies the validity or acceptance test after the complete evolution. Intermediate projection removes invalid components between stages. A component that leaves the selected subspace can sometimes evolve back into it later, so final-only and intermediate projection need not agree.
 
-The selected v4 composition rule applies unnormalized, trace-decreasing CP maps in sequence and normalizes only once at the end. Per-stage normalization would change the instrument. The registered shared-gate control records conditional TVD `0.585411845271861` between final-only and intermediate projection, so final-only is the supported boundary; no general equivalence is claimed.
+The selected v4 composition rule applies unnormalized, trace-decreasing CP maps in sequence and normalizes only once at the end. Per-stage normalization would change the instrument. The repaired registered shared-gate control records conditional TVD `1.942890293094024e-16` between final-only and intermediate projection with unchanged accepted mass. Final-only remains the selected boundary by declared scope; no general equivalence is claimed.
+
+### Correction recorded 2026-09-09
+
+An independent audit found that the previous intermediate-readout calculation squared each retained path before summing paths, which discarded interference and produced the earlier `0.585411845271861` value. The implementation now sums coherent amplitudes before squaring. The earlier numerical conclusion is superseded; the conceptual distinction between final and intermediate projection remains open outside this registered fixture.
 
 ## Loss, post-selection and conditioning
 
@@ -63,4 +67,3 @@ The registered v4 control uses matched continued-ideal arms from one frozen warm
 ## Evidence boundary
 
 This note closes the owner-authored explanation requirement. It does not convert the separately recorded NULL-07 hypothesis into an experiment, and it does not upgrade the documented broader physical/full-Fock, larger-`n` deployment, unavailable-input or sampled-uncertainty gaps.
-
