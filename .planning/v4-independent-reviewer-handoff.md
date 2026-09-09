@@ -20,10 +20,10 @@ The independent audit findings A01–A04 are repaired in implementation commit `
 Final evidence paths:
 
 - `results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json` (superseded by the acceptance-qualified v2 artifact below)
-- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json`
-- `results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final2.json`
-- `results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final2.json`
-- `results/v4_tcdp/deploy/resource_budget_final_v7.json`
+- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final3.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final3.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final3.json`
+- `results/v4_tcdp/deploy/resource_budget_final_v8.json`
 - `results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json`
 
 ## Post-repair update (2026-09-09)
@@ -73,6 +73,13 @@ Post-repair verification after B01–B03:
 - Artifact validator: `402` JSON files, `72` JSONL rows, `14` payload hashes, `0` failures.
 - Resource pilot v7: n=4/6/8/10 all `PASS` under the approved timing and RSS gates.
 - Acceptance qualification: physical maximum independent acceptance error `4.163336342344337e-17`; regenerated ring errors `2.3852447794681098e-18` and `1.951563910473908e-18`, tolerance `1.0e-16`.
+
+Focused repair closure (2026-09-09, implementation commit `ce637a8` plus provenance-matched artifact closure):
+
+- Targeted regression set: `103 passed in 41.25s`, including ring acceptance qualification, physical-control acceptance mutation rejection, strict checkpoint history/resume round-trip, and exact resource-pilot aggregation.
+- Provenance-matched artifacts: physical controls `final3`, spatial/Hamming n=4 ring smoke `final3`, and resource pilot `v8`; the physical maximum independent acceptance error is `4.163336342344337e-17`, and ring errors are `2.3852447794681098e-18` and `1.951563910473908e-18`, all below `1.0e-16`.
+- Artifact validator: `406` JSON files, `72` JSONL rows, `16` payload hashes, `0` failures; `compileall` and `git diff --check` pass.
+- Full suite and explicit sibling integration remain the already-recorded `697 passed, 1 skipped` and `30 passed` results for the same implementation code; only active artifact references were advanced from `final2`/`v7` to `final3`/`v8`.
 
 Final verification in the closure pass: the full suite passed `687 passed, 1 skipped in 918.94s (0:15:18)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; explicit sibling integration plus the new comparison gate passed `28 passed, 1 skipped in 175.16s`; the new validators compiled; and artifact validation passed with `355` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
 

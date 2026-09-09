@@ -30,7 +30,7 @@ SUPPORTED_VALIDATION_SCHEMA = "v4_tcdp.physical_controls.v2"
 SUPPORTED_PROJECTION = "final_only"
 PROJECTION_COMPARISON_TOLERANCE = 1e-12
 ACCEPTANCE_TOLERANCE = 1e-16
-DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json")
+DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final3.json")
 
 
 def _file_hash(path: Path) -> str:

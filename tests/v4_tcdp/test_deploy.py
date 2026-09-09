@@ -297,7 +297,7 @@ def test_direct_intermediate_projection_tracks_absolute_acceptance() -> None:
 
 
 def test_physical_control_manifest_records_projection_evidence() -> None:
-    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest_20260909_final2.json"
+    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest_20260909_final3.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema_version"] == "v4_tcdp.physical_controls.v2"
     assert manifest["status"] == "PASS"
