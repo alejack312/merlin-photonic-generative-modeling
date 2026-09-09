@@ -77,7 +77,7 @@ Post-repair verification after B01–B03:
 Focused repair closure (2026-09-09, implementation commit `ce637a8` plus provenance-matched artifact closure):
 
 - Targeted regression set: `103 passed in 41.25s`, including ring acceptance qualification, physical-control acceptance mutation rejection, strict checkpoint history/resume round-trip, and exact resource-pilot aggregation.
-- Provenance-matched artifacts: physical controls `final3`, spatial/Hamming n=4 ring smoke `final3`, and resource pilot `v8`; the physical maximum independent acceptance error is `4.163336342344337e-17`, and ring errors are `2.3852447794681098e-18` and `1.951563910473908e-18`, all below `1.0e-16`.
+- Provenance-matched artifacts: physical controls `final3`, spatial/Hamming n=4 ring smoke `final3`, and resource pilot `v8`; the physical maximum independent acceptance error is `4.163336342344337e-17`, and ring errors are `2.3852447794681098e-18` and `1.951563910473908e-18`, all below `1.0e-16`. The resource pilot records source commit `ef67c4a` with `dirty=false` and all four registered sizes passing.
 - Artifact validator: `406` JSON files, `72` JSONL rows, `16` payload hashes, `0` failures; `compileall` and `git diff --check` pass.
 - Full suite and explicit sibling integration remain the already-recorded `697 passed, 1 skipped` and `30 passed` results for the same implementation code; only active artifact references were advanced from `final2`/`v7` to `final3`/`v8`.
 
