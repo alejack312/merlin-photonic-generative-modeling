@@ -8,14 +8,14 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Final review target: the current `git rev-parse HEAD` on `codex/v4-implementation`. This handoff intentionally does not pin a stale pre-review documentation hash.
+- Final review target: `800a53c` on `codex/v4-implementation` (`git rev-parse HEAD`).
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
 
 ## Current repair update (2026-09-09)
 
-The independent audit findings A01–A04 are repaired in implementation commit `7089dbf`; the final evidence commit is the current `HEAD` recorded below. A01 now preserves coherent interference in projection readout; A02 rejects incomplete full-Fock mass instead of normalizing it away; A03 enforces local-versus-unquantized compilation equality per sibling cell; and A04 rejects invalid spatial-kernel mixtures. The repaired physical manifest reports shared-gate final-only/intermediate TVD `1.942890293094024e-16` with unchanged accepted mass. The previous `0.585411845271861` value is superseded and retained only in dated audit/historical artifacts.
+The independent audit findings A01–A04 are repaired in implementation commit `7089dbf`; final evidence and documentation are in `800a53c`. A01 now preserves coherent interference in projection readout; A02 rejects incomplete full-Fock mass instead of normalizing it away; A03 enforces local-versus-unquantized compilation equality per sibling cell; and A04 rejects invalid spatial-kernel mixtures. The repaired physical manifest reports shared-gate final-only/intermediate TVD `1.942890293094024e-16` with unchanged accepted mass. The previous `0.585411845271861` value is superseded and retained only in dated audit/historical artifacts.
 
 Final evidence paths:
 
@@ -49,6 +49,16 @@ The required full suite is:
 $env:PCVL_PERSISTENT_PATH = Join-Path ([System.IO.Path]::GetTempPath()) 'merlin-v4-perceval'
 venv/Scripts/python.exe -m pytest -q
 ```
+
+Current post-repair verification at `800a53c`:
+
+- Full suite: `693 passed, 1 skipped` in `366.53s`, with writable `PCVL_PERSISTENT_PATH`.
+- Explicit sibling integration: `30 passed` in `50.47s`, with `MERLIN_SIBLING_ROOT` set to the pinned clean sibling checkout.
+- Artifact validator: `398` JSON files, `72` JSONL rows, `12` payload hashes, `0` failures.
+- `compileall` and `git diff --check`: pass.
+- Sibling comparison regeneration: eight cells, overall `PASS`, local/unquantized compilation control enforced per cell.
+- Repaired physical manifest: overall `PASS`; shared-gate projection TVD `1.942890293094024e-16`; full-Fock mass reconciliation fields present.
+- Repaired n=4 spatial/Hamming photonic artifacts: both `PASS`; direct-vs-compiled TVD `1.390014947762197e-16` and `1.767385066422933e-16`.
 
 Final verification in the closure pass: the full suite passed `687 passed, 1 skipped in 918.94s (0:15:18)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; explicit sibling integration plus the new comparison gate passed `28 passed, 1 skipped in 175.16s`; the new validators compiled; and artifact validation passed with `355` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
 
