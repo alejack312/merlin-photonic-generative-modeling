@@ -2,6 +2,18 @@
 
 Date: 2026-09-09. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528fd6332b2f78aab83c0b50`. The current integration point and remaining-work map are recorded in [.planning/v4-closure-checklist.md](../.planning/v4-closure-checklist.md). This report separates implementation completion from scientific acceptance.
 
+## 2026-09-10 bounded correction pass
+
+The F1–F14 findings in [the dated correction note](v4-correction-pass-2026-09-10.md) were repaired or their claims were narrowed. The implementation/test portion is committed as `c76f0ea`; fresh evidence was regenerated in isolated namespaces after the final control and JSON-safety fixes.
+
+- Full suite: `venv/Scripts/python.exe -m pytest -q` → `719 passed, 1 skipped` with a writable `PCVL_PERSISTENT_PATH`.
+- Focused correction suite → `186 passed, 1 skipped`; explicit sibling integration → `35 passed`.
+- Artifact validation → `499` JSON files, `72` JSONL rows, `17` payload hashes, `0` failures.
+- Resource pilot [correction artifact](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json) → n=4/6/8/10 registered measurements, `PASS`.
+- Fresh [22-cell ring comparison namespace](../results/v4_tcdp/corrections_20260910/metrics_v3/) and [eight-cell sibling comparison](../results/v4_tcdp/sibling_comparisons/correction_20260910_v3/summary.json) → `PASS` within their declared analytic/fixed-photon scopes.
+
+These checks close the identified implementation and evidence-integrity defects. They do not convert bounded model-derived controls into general full-Fock validation, larger-n photonic deployment, or an experimentally adjudicated NULL-07 result. The authoritative ledger remains the source for each requirement’s five-state status.
+
 ## 2026-09-09 focused repair addendum
 
 The independent audit findings A01–A04 and post-repair findings B01–B03 are repaired and rechecked. The repaired physical manifest records coherent shared-gate final-only/intermediate TVD `1.942890293094024e-16`, independently checked acceptance, unchanged accepted mass, and full-Fock mass reconciliation. The regenerated n=4 spatial and Hamming photonic artifacts are `PASS` against the repaired manifest, and the regenerated eight-cell sibling comparison namespace enforces local-versus-unquantized compilation equality. The resource pilot now requires all registered measurements to pass. The earlier `0.585411845271861` value remains only in the dated audit and superseded historical artifacts; it is not current evidence.

@@ -8,7 +8,24 @@ Updated 2026-09-09 after the independent projection/mass/compiler/kernel repair 
 - `NOT IMPLEMENTED`: the required implementation or run does not exist.
 - `BLOCKED`: the next action cannot safely proceed until a named owner decision or external input is supplied.
 
-An incomplete row includes the missing item, next concrete action, and owner dependency. A PASS is limited to the stated bounded evidence and never upgrades a dependent scientific claim.
+An incomplete row includes the missing item, next concrete action, and owner dependency. A PASS is limited to the stated bounded evidence and never upgrades a dependent scientific claim. The 2026-09-10 correction-pass report is [here](../docs/v4-correction-pass-2026-09-10.md).
+
+## 2026-09-10 bounded correction pass
+
+| Requirement/finding | Status | Missing implementation or evidence | Next concrete action | Owner dependency |
+|---|---|---|---|---|
+| Resource measurement identity and aggregation | PASS | Worker-process identity, OS peak RSS, exact registered-size coverage, and status propagation are implemented and tested. | None for the registered n=4/6/8/10 pilot. | None |
+| Mutation and support controls | PASS (bounded control scope) | Controls recompute mutated objects; support validity uses target support `p > 1e-6`; metric sensitivity is reported separately from mutation application. | None for this control scope. | None |
+| Erasure/tomography/physicality contracts | PASS (analytic scope) | Finite input, explicit represented mass, corrected one-body tomography aggregation, lower/upper `E†I` bounds, and operative-Choi consistency are implemented and tested. | Direct physical tomography remains outside the analytic reconstruction claim. | Perceval/physical capability for a broader claim |
+| Ring comparison evidence | PASS (registered artifact refresh) | All 22 existing ring comparison cells were regenerated under a new namespace with fit, support, metric, and acceptance fields. | Use the dated refresh artifacts for review; do not infer larger-n photonic deployment. | None |
+| Sibling/substrate comparison evidence | PASS (eight registered available cells) | Eight matched source/local/compiled/fixed-photon reference cells were regenerated with the pinned source evidence and eta=0.9. | Extend only to rows with exact inputs/capabilities. | Missing sibling inputs/capabilities for unavailable rows |
+| Inventory/replay provenance | PASS | Unrun rows are `exact_reproduction_candidate`; real PyYAML is required; eta=1 replay is labeled a lossless compiled reference. | None for the repaired provenance boundary. | None |
+| NULL-07 source-gap adjudication | INCONCLUSIVE | Hypothesis is recorded, but no source-model mutation has been run. | Run the authorized fixed-gate/source-model mutation, reporting absolute mass and conditional quality separately. | No choice needed; execution evidence is missing |
+| Broader full-Fock / larger-n photonic deployment | INCONCLUSIVE | No validated direct full-Fock composition exists beyond the registered small-n controls; n=6/n=8 ring checkpoints are classical only. | Complete independent small-n full-Fock shared-qubit/bystander and projection cases first, then justify any larger-n extension. | Physical/backend capability |
+| Sampled uncertainty | INCONCLUSIVE | Existing panels are exact population-vector metrics or bounded samples without the registered uncertainty panel. | Add the plan-defined sampled panel within its approved budget and record seed/interval method. | None for design; compute budget must remain within plan |
+| Unavailable sibling experiments | BLOCKED | The exact source data/environment/capability for the named unavailable rows is absent. | Supply the exact missing input or capability, then rerun from the pinned source without substitution. | External input/capability |
+| NAT efficacy interpretation | INCONCLUSIVE | Current matched arms establish continuation/reproducibility under the fixed-photon uniform-loss model, not superiority or noisy adaptation. | Run only a registered distinct-noise or prescribed stopping-rule arm if the plan calls for it; report negative/null results. | None for the current null; broader noise design may need owner decision |
+| WRITE-07 explanation | PASS (owner-authored record) | The owner explanation is recorded and scoped; code/manifest convention is separately identified. | Keep interpretation provisional and do not convert it into physical validation. | None |
 
 ## 2026-09-09 independent audit repair disposition
 

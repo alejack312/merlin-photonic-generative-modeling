@@ -4,6 +4,14 @@
 
 Review the additive v4.0 implementation against the binding plan, additive design, audit, and the five-state evidence ledger. Treat scientific interpretation as provisional. Do not modify the sibling repository, merge, publish, or launch unapproved sweeps.
 
+## Current correction-pass handoff (2026-09-10)
+
+- Implementation/test corrections are committed at `c76f0ea` on `codex/v4-implementation`; the final documentation/evidence commit is the current branch head recorded by `git rev-parse HEAD`.
+- The 2026-09-09 F1–F14 audit is dispositioned in [docs/v4-correction-pass-2026-09-10.md](../docs/v4-correction-pass-2026-09-10.md). No sibling files or legacy pipelines were changed.
+- Verification: full suite `719 passed, 1 skipped`; focused correction suite `186 passed, 1 skipped`; explicit sibling integration `35 passed`; artifact validation `499` JSON, `72` JSONL, `17` payload hashes, `0` failures; compileall and diff check pass.
+- Fresh evidence is isolated at [resource_budget_correction_20260910.json](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json), [metrics_v3](../results/v4_tcdp/corrections_20260910/metrics_v3/), and [sibling comparison v3](../results/v4_tcdp/sibling_comparisons/correction_20260910_v3/summary.json). Ring count is 22; sibling comparison count is 8 and overall `PASS`.
+- Review boundaries remain explicit: direct full-Fock evidence is bounded to registered small-n controls; the ring/sibling deployed arms are analytic/model-derived; larger-n deployment, NULL-07 adjudication, sampled uncertainty, NAT efficacy interpretation, and unavailable sibling inputs remain incomplete or blocked in the ledger.
+
 ## Git and provenance
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
