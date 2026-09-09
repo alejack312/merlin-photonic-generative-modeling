@@ -9,6 +9,7 @@ from scripts.v4_tcdp.compare_sibling_backends import (
     PROBABILITY_TOLERANCE,
     _acceptance_for_arm,
     _target_histogram,
+    _validate_unquantized_compilation,
     _vector_from_mapping,
 )
 
@@ -27,3 +28,10 @@ def test_acceptance_roundoff_is_recorded_as_valid_probability() -> None:
     assert _acceptance_for_arm(1.0 + 0.5 * PROBABILITY_TOLERANCE) == 1.0
     with pytest.raises(ValueError, match="exceeds one"):
         _acceptance_for_arm(1.0 + 2.0 * PROBABILITY_TOLERANCE)
+
+
+def test_unquantized_compilation_control_rejects_modified_distribution() -> None:
+    reference = np.array([0.25, 0.25, 0.25, 0.25])
+    assert _validate_unquantized_compilation(reference, reference.copy())["tvd"] == pytest.approx(0.0)
+    with pytest.raises(ValueError, match="unquantized compilation"):
+        _validate_unquantized_compilation(reference, np.array([1.0, 0.0, 0.0, 0.0]))

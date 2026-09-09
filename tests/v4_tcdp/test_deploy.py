@@ -38,6 +38,7 @@ from merlin_iqp.deploy import (
 )
 import scripts.v4_tcdp.validate_deploy as validate_deploy
 from merlin_iqp.deploy.density import compose_instruments
+import merlin_iqp.deploy.fock as fock_module
 from merlin_iqp.deploy.maps import _choi_from_kraus
 
 
@@ -248,6 +249,33 @@ def test_direct_no_gate_single_angle_matches_independent_reference() -> None:
     assert result.distribution == pytest.approx(reference, abs=1e-12)
 
 
+def test_full_fock_rejects_backend_missing_probability_mass(monkeypatch) -> None:
+    try:
+        pcvl, slos_backend, simulator, allstate_iterator = fock_module._perceval_modules()
+    except ImportError as exc:
+        pytest.skip(f"Perceval unavailable: {exc}")
+
+    class HalfMassSimulator:
+        def __init__(self, backend) -> None:
+            self._inner = simulator(backend)
+
+        def set_circuit(self, circuit) -> None:
+            self._inner.set_circuit(circuit)
+
+        def probs(self, input_state):
+            return {state: probability * 0.5 for state, probability in self._inner.probs(input_state).items()}
+
+    monkeypatch.setattr(
+        fock_module,
+        "_perceval_modules",
+        lambda: (pcvl, slos_backend, HalfMassSimulator, allstate_iterator),
+    )
+    result = direct_fock_cp_reference(2, [0.0, 0.0], [])
+    assert result.status == "INCONCLUSIVE"
+    assert result.diagnostics["full_fock_total_mass"] == pytest.approx(0.5)
+    assert result.diagnostics["mass_reconciliation_error"] == pytest.approx(0.5)
+
+
 def test_direct_intermediate_projection_tracks_absolute_acceptance() -> None:
     pairs = [(0, 1, 0.20), (1, 2, 0.30)]
     final = direct_fock_cp_reference(3, [0.17, -0.24, 0.36], pairs, projection="final_only")
@@ -262,10 +290,13 @@ def test_direct_intermediate_projection_tracks_absolute_acceptance() -> None:
     assert intermediate.diagnostics["raw_source_acceptance"] == pytest.approx(
         final.diagnostics["raw_source_acceptance"], abs=1e-12
     )
+    assert intermediate.diagnostics["full_fock_total_mass"] == pytest.approx(1.0, abs=1e-12)
+    assert intermediate.diagnostics["mass_reconciliation_error"] <= 1e-12
+    assert _tvd(final.distribution, intermediate.distribution) <= 1e-12
 
 
 def test_physical_control_manifest_records_projection_evidence() -> None:
-    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest.json"
+    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest_20260909_repaired_v2.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema_version"] == "v4_tcdp.physical_controls.v2"
     assert manifest["status"] == "PASS"
@@ -286,7 +317,8 @@ def test_physical_control_manifest_records_projection_evidence() -> None:
         assert comparison["absolute_mass_valid"] is True
         assert comparison["eta"] == pytest.approx(control["eta"])
         assert comparison["accepted_mass_delta"] <= 1e-12
-    assert manifest["controls"][2]["projection_comparison"]["conditional_tvd_final_vs_intermediate"] > 1e-3
+    assert manifest["controls"][2]["projection_comparison"]["conditional_tvd_final_vs_intermediate"] <= 1e-12
+    assert manifest["controls"][2]["projection_comparison"]["general_equivalence"] is False
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:

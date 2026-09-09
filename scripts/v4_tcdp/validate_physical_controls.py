@@ -87,6 +87,7 @@ def _control(control_id: str, n: int, singles: list[float], pairs: list[tuple[in
         "eta": ETA,
         "conditional_distribution_valid": projection_valid,
         "absolute_mass_valid": projection_valid,
+        "general_equivalence": False,
     }
     if projection_valid:
         projection_comparison["conditional_tvd_final_vs_intermediate"] = _tvd(
@@ -192,7 +193,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/v4_tcdp/deploy/physical_control_manifest.json"),
+        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_repaired_v2.json"),
         help="manifest path; defaults to the committed v4_tcdp namespace",
     )
     parser.add_argument(

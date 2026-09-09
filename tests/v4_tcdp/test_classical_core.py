@@ -71,6 +71,27 @@ def test_generic_spatial_walsh_identity_retains_off_diagonal_terms() -> None:
     assert direct == pytest.approx(float(delta @ B @ delta), abs=1e-12)
 
 
+@pytest.mark.parametrize("weights", [[-1.0, 2.0], [0.0, 0.0], [np.nan, 1.0]])
+def test_spatial_mmd_rejects_invalid_kernel_mixture_weights(weights: list[float]) -> None:
+    with pytest.raises(ValueError, match="weights"):
+        spatial_mmd2(
+            np.array([1.0, 0.0]),
+            np.array([0.0, 1.0]),
+            np.array([[0.0], [1.0]]),
+            sigmas=[0.1, 10.0],
+            weights=weights,
+        )
+
+
+def test_spatial_mmd_rejects_invalid_centers() -> None:
+    with pytest.raises(ValueError, match="centers"):
+        spatial_mmd2(
+            np.array([1.0, 0.0]),
+            np.array([0.0, 1.0]),
+            np.array([[0.0], [np.nan]]),
+        )
+
+
 def test_expectation_and_objective_gradients_match_finite_difference() -> None:
     G = chain_1d(3, 2)
     theta = np.array([0.23, -0.17, 0.31, 0.41, -0.29])

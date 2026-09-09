@@ -6,7 +6,7 @@ import numpy as np
 
 from .contracts import KernelSpec
 from .expectation import expectations_and_jacobian_exact
-from .kernel import gaussian_hamming_matrix, gaussian_hamming_spectrum, hamming_walsh_matrix, spatial_walsh_matrix
+from .kernel import _mixture, gaussian_hamming_matrix, gaussian_hamming_spectrum, hamming_walsh_matrix, spatial_walsh_matrix
 from .targets import all_observables, target_moments, target_probability_vector
 
 
@@ -36,14 +36,14 @@ def hamming_mmd2_walsh(p: np.ndarray, q: np.ndarray, sigma: float = 1.0, *, sigm
 def spatial_mmd2(p: np.ndarray, q: np.ndarray, centers: np.ndarray, sigma: float = 1.0, *, sigmas: list[float] | None = None, weights: list[float] | None = None) -> float:
     p_vec, q_vec = _probabilities(p, q)
     points = np.asarray(centers, dtype=np.float64)
+    if points.ndim != 2 or not np.all(np.isfinite(points)):
+        raise ValueError("centers must be a finite two-dimensional matrix")
     if len(points) != len(p_vec):
         raise ValueError("centers and probability vectors must have equal lengths")
     delta = p_vec - q_vec
     # The direct form intentionally remains available for the generic spatial path.
     distances = np.sum((points[:, None, :] - points[None, :, :]) ** 2, axis=2)
-    sig_values = [sigma] if sigmas is None else sigmas
-    mix = np.ones(len(sig_values)) if weights is None else np.asarray(weights, dtype=np.float64)
-    mix /= mix.sum()
+    sig_values, mix = _mixture(sigma if sigmas is None else sigmas, weights)
     K = sum(w * np.exp(-distances / (2.0 * s**2)) for s, w in zip(sig_values, mix, strict=True))
     return float(delta @ K @ delta)
 

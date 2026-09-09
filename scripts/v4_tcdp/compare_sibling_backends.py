@@ -227,6 +227,26 @@ def _vector_from_mapping(mapping: dict[str, float], n: int) -> np.ndarray:
     return np.maximum(vector, 0.0) / np.maximum(vector.sum(), 1.0)
 
 
+def _validate_unquantized_compilation(
+    local_vector: np.ndarray,
+    unquantized_vector: np.ndarray,
+) -> dict[str, float]:
+    """Require unquantized compilation to match the local qubit reference."""
+
+    local = np.asarray(local_vector, dtype=np.float64)
+    compiled = np.asarray(unquantized_vector, dtype=np.float64)
+    if local.shape != compiled.shape:
+        raise ValueError("local and unquantized compilation vectors have different shapes")
+    max_abs_error = float(np.max(np.abs(local - compiled)))
+    tvd = float(total_variation_distance(local, compiled))
+    if max_abs_error > PROBABILITY_TOLERANCE or tvd > PROBABILITY_TOLERANCE:
+        raise ValueError(
+            "unquantized compilation does not match the local IQP reference "
+            f"(max_abs_error={max_abs_error}, tvd={tvd}, tolerance={PROBABILITY_TOLERANCE})"
+        )
+    return {"max_abs_error": max_abs_error, "tvd": tvd, "tolerance": PROBABILITY_TOLERANCE}
+
+
 def _acceptance_for_arm(value: float) -> float:
     """Convert harmless trace roundoff to a valid probability without hiding it."""
 
@@ -386,6 +406,7 @@ def _build_cell(record: dict[str, Any], *, sibling_root: Path, eta: float) -> tu
     unquantized_vector = _vector_from_mapping(unquantized_mapping, n)
     compiled_vector = _vector_from_mapping(compiled_mapping, n)
     deployed_vector = _vector_from_mapping(deployed_mapping, n)
+    unquantized_equality = _validate_unquantized_compilation(local_vector, unquantized_vector)
     expected_deployed_success = compiled_success * eta**n
     if abs(deployed_success - expected_deployed_success) > EXACT_TOLERANCE:
         raise AssertionError("fixed-photon acceptance is not eta**n times compiled success")
@@ -414,6 +435,7 @@ def _build_cell(record: dict[str, Any], *, sibling_root: Path, eta: float) -> tu
             "status": "PASS",
             "scope": "cell-level source/substrate controls",
             "source_local_probability_equality": {"max_abs_error": source_local_max_abs, "tolerance": PROBABILITY_TOLERANCE},
+            "local_unquantized_probability_equality": unquantized_equality,
             "fixed_photon_loss_shape": {"conditional_tvd": float(conditional_loss_tvd), "tolerance": PROBABILITY_TOLERANCE},
             "acceptance_scaling": {"formula": "eta**n * compiled_model_success", "absolute_error": float(abs(deployed_success - expected_deployed_success)), "tolerance": EXACT_TOLERANCE},
             "metric_mutation_panel": "covered by the registered comparison control suite; not recomputed per sibling cell",
@@ -447,6 +469,8 @@ def _build_cell(record: dict[str, Any], *, sibling_root: Path, eta: float) -> tu
         "source_local_generator_equal": True,
         "source_local_theta_max_abs_error": theta_error,
         "source_local_probability_max_abs_error": source_local_max_abs,
+        "local_unquantized_probability_max_abs_error": unquantized_equality["max_abs_error"],
+        "local_unquantized_tvd": unquantized_equality["tvd"],
         "source_final_loss": source_loss,
         "local_final_loss": local_loss,
         "local_loss_recomputed_from_target": float(hamming_mmd2(local_vector, target, sigma=bandwidth)),

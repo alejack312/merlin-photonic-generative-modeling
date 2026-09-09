@@ -28,8 +28,8 @@ SUPPORTED_N = 4
 SUPPORTED_RUN_KIND = "smoke"
 SUPPORTED_VALIDATION_SCHEMA = "v4_tcdp.physical_controls.v2"
 SUPPORTED_PROJECTION = "final_only"
-MATERIAL_PROJECTION_TVD = 1e-3
-DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest.json")
+PROJECTION_COMPARISON_TOLERANCE = 1e-12
+DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_repaired_v2.json")
 
 
 def _file_hash(path: Path) -> str:
@@ -97,8 +97,12 @@ def _validate_physical_manifest(path: Path) -> tuple[dict[str, Any], float]:
     discrepancy = comparison.get("conditional_tvd_final_vs_intermediate") if isinstance(comparison, dict) else None
     if not isinstance(comparison, dict) or comparison.get("valid") is not True:
         raise ValueError("shared-gate projection comparison is missing or invalid")
-    if not isinstance(discrepancy, (int, float)) or not math.isfinite(float(discrepancy)) or float(discrepancy) <= MATERIAL_PROJECTION_TVD:
-        raise ValueError("shared-gate final-only/intermediate discrepancy is missing or not material")
+    if (
+        not isinstance(discrepancy, (int, float))
+        or not math.isfinite(float(discrepancy))
+        or float(discrepancy) > PROJECTION_COMPARISON_TOLERANCE
+    ):
+        raise ValueError("shared-gate final-only/intermediate fixture comparison exceeds tolerance")
     return manifest, float(discrepancy)
 
 
@@ -327,9 +331,10 @@ def evaluate_ring_artifact(
             "final_only_selected_boundary": True,
             "intermediate_shared_gate_comparison": {
                 "supported": False,
+                "fixture_equivalence": projection_discrepancy <= PROJECTION_COMPARISON_TOLERANCE,
                 "conditional_tvd_final_only_vs_intermediate": projection_discrepancy,
-                "materiality_threshold": MATERIAL_PROJECTION_TVD,
-                "reason": "shared-gate conditional projection differs materially; final_only is the supported boundary",
+                "comparison_tolerance": PROJECTION_COMPARISON_TOLERANCE,
+                "reason": "registered shared-gate fixture matches after coherent readout; no general projection-equivalence theorem is claimed",
             },
         },
         "hashes": {

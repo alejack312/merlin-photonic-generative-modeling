@@ -30,6 +30,40 @@ class FullFockResult:
 
 PairSpec = tuple[int, int, float, float]
 Projection = Literal["final_only", "intermediate"]
+FULL_FOCK_MASS_TOLERANCE = 1.0e-12
+
+
+class _MassReconciliationError(ValueError):
+    def __init__(self, context: str, measured_mass: float) -> None:
+        self.context = context
+        self.measured_mass = float(measured_mass)
+        self.reconciliation_error = abs(self.measured_mass - 1.0)
+        super().__init__(
+            f"{context} total mass {self.measured_mass} differs from 1.0 by "
+            f"{self.reconciliation_error} > {FULL_FOCK_MASS_TOLERANCE}"
+        )
+
+
+def _validate_total_mass(total_mass: float, context: str) -> float:
+    if not math.isfinite(total_mass):
+        raise ValueError(f"{context} returned non-finite total mass {total_mass!r}")
+    reconciliation_error = abs(float(total_mass) - 1.0)
+    if reconciliation_error > FULL_FOCK_MASS_TOLERANCE:
+        raise _MassReconciliationError(context, float(total_mass))
+    return reconciliation_error
+
+
+def _failure_diagnostics(prefix: str, exc: Exception) -> dict[str, Any]:
+    diagnostics: dict[str, Any] = {"reason": f"{prefix}: {type(exc).__name__}: {exc}"}
+    if isinstance(exc, _MassReconciliationError):
+        diagnostics.update(
+            {
+                "full_fock_total_mass": exc.measured_mass,
+                "mass_reconciliation_error": exc.reconciliation_error,
+                "mass_reconciliation_tolerance": FULL_FOCK_MASS_TOLERANCE,
+            }
+        )
+    return diagnostics
 
 
 def _tvd(left: dict[str, float], right: dict[str, float]) -> float:
@@ -156,7 +190,12 @@ def _all_states(input_state: Any, allstate_iterator: Any) -> list[Any]:
     return list(allstate_iterator(input_state))
 
 
-def _final_distribution(processor: Any, input_state: Any, n: int, ancilla_groups: Sequence[tuple[int, ...]]) -> tuple[dict[str, float], float, int, int]:
+def _final_distribution(
+    processor: Any,
+    input_state: Any,
+    n: int,
+    ancilla_groups: Sequence[tuple[int, ...]],
+) -> tuple[dict[str, float], float, int, int, float, float]:
     _, _, Simulator, allstate_iterator = _perceval_modules()
     simulator = Simulator(_perceval_modules()[1]())
     simulator.set_circuit(processor.linear_circuit())
@@ -167,21 +206,41 @@ def _final_distribution(processor: Any, input_state: Any, n: int, ancilla_groups
     state_count = 0
     for state, probability in full.items():
         state_count += 1
-        mass = float(np.real(complex(probability)))
+        complex_probability = complex(probability)
+        if abs(complex_probability.imag) > FULL_FOCK_MASS_TOLERANCE:
+            raise ValueError("direct full-Fock simulator returned a complex probability")
+        mass = float(complex_probability.real)
+        if not math.isfinite(mass) or mass < 0.0:
+            raise ValueError("direct full-Fock simulator returned negative or non-finite probability mass")
         full_mass += mass
         bits = _accepted_state(state, n, ancilla_groups)
         if bits is not None:
             accepted[bits] = accepted.get(bits, 0.0) + mass
             accepted_count += 1
-    if full_mass <= 0.0 or not math.isfinite(full_mass):
-        raise ValueError("direct full-Fock simulator returned non-positive or non-finite mass")
-    raw_acceptance = float(sum(accepted.values()) / full_mass)
+    reconciliation_error = _validate_total_mass(full_mass, "direct full-Fock simulator")
+    accepted_total = float(sum(accepted.values()))
+    if accepted_total < 0.0 or accepted_total > 1.0 + FULL_FOCK_MASS_TOLERANCE:
+        raise ValueError(f"accepted full-Fock mass {accepted_total} is outside [0, 1]")
+    raw_acceptance = accepted_total
     if raw_acceptance <= 0.0:
-        return {}, raw_acceptance, state_count, accepted_count
-    return {key: value / sum(accepted.values()) for key, value in accepted.items()}, raw_acceptance, state_count, accepted_count
+        return {}, raw_acceptance, state_count, accepted_count, full_mass, reconciliation_error
+    return (
+        {key: value / accepted_total for key, value in accepted.items()},
+        raw_acceptance,
+        state_count,
+        accepted_count,
+        full_mass,
+        reconciliation_error,
+    )
 
 
-def _intermediate_distribution(n: int, singles: Sequence[float], pair_specs: Sequence[PairSpec], input_state: Any, ancilla_groups: Sequence[tuple[int, ...]]) -> tuple[dict[str, float], float, int, int]:
+def _intermediate_distribution(
+    n: int,
+    singles: Sequence[float],
+    pair_specs: Sequence[PairSpec],
+    input_state: Any,
+    ancilla_groups: Sequence[tuple[int, ...]],
+) -> tuple[dict[str, float], float, int, int, float, float]:
     """Propagate amplitudes while projecting after each CP insertion.
 
     This is intentionally a small-n diagnostic.  It retains complex
@@ -207,6 +266,7 @@ def _intermediate_distribution(n: int, singles: Sequence[float], pair_specs: Seq
         if abs(amplitude) > 1e-14
     }
     initial_mass = float(sum(abs(amplitude) ** 2 for amplitude in amplitudes.values()))
+    initial_reconciliation_error = _validate_total_mass(initial_mass, "intermediate source propagation")
     for gate_index in range(len(pair_specs)):
         # Remove preparation/diagonal components by constructing the gate-only
         # circuit from the same CP core.  Rebuilding it avoids relying on
@@ -232,22 +292,32 @@ def _intermediate_distribution(n: int, singles: Sequence[float], pair_specs: Seq
     final_processor = _build_final_readout_processor(n, pair_specs)
     final_sim = Simulator(SLOSBackend())
     final_sim.set_circuit(final_processor.linear_circuit())
-    accepted: dict[str, float] = {}
-    accepted_count = 0
+    accepted_amplitudes: dict[str, complex] = {}
+    accepted_states: set[str] = set()
     for input_value, input_amplitude in amplitudes.items():
         for output_state in states:
             transition = final_sim.prob_amplitude(input_value, output_state)
             amplitude = input_amplitude * transition
-            mass = float(abs(amplitude) ** 2)
             bits = _accepted_state(output_state, n, ancilla_groups)
             if bits is not None:
-                accepted[bits] = accepted.get(bits, 0.0) + mass
-                accepted_count += 1
-    accepted_total = sum(accepted.values())
+                accepted_amplitudes[bits] = accepted_amplitudes.get(bits, 0.0j) + amplitude
+                accepted_states.add(bits)
+    accepted = {key: float(abs(amplitude) ** 2) for key, amplitude in accepted_amplitudes.items()}
+    accepted_total = float(sum(accepted.values()))
+    if accepted_total < 0.0 or accepted_total > initial_mass + FULL_FOCK_MASS_TOLERANCE:
+        raise ValueError(f"intermediate accepted mass {accepted_total} exceeds source mass {initial_mass}")
+    accepted_count = len(accepted_states)
     if initial_mass <= 0.0 or accepted_total <= 0.0:
-        return {}, 0.0, len(states), accepted_count
-    raw_acceptance = float(accepted_total / initial_mass)
-    return {key: value / accepted_total for key, value in accepted.items()}, raw_acceptance, len(states), accepted_count
+        return {}, 0.0, len(states), accepted_count, initial_mass, initial_reconciliation_error
+    raw_acceptance = accepted_total
+    return (
+        {key: value / accepted_total for key, value in accepted.items()},
+        raw_acceptance,
+        len(states),
+        accepted_count,
+        initial_mass,
+        initial_reconciliation_error,
+    )
 
 
 def _build_gate_only_processor(n: int, pair_specs: Sequence[PairSpec], gate_index: int) -> Any:
@@ -312,18 +382,18 @@ def direct_fock_cp_reference(
     try:
         processor, input_state, ancilla_groups = _build_direct_processor(n, singles, pair_specs)
         if projection == "final_only" or len(pair_specs) <= 1:
-            distribution, raw_acceptance, state_count, accepted_count = _final_distribution(
+            distribution, raw_acceptance, state_count, accepted_count, full_mass, reconciliation_error = _final_distribution(
                 processor, input_state, n, ancilla_groups
             )
         else:
-            distribution, raw_acceptance, state_count, accepted_count = _intermediate_distribution(
+            distribution, raw_acceptance, state_count, accepted_count, full_mass, reconciliation_error = _intermediate_distribution(
                 n, singles, pair_specs, input_state, ancilla_groups
             )
     except Exception as exc:
         return FullFockResult(
             "INCONCLUSIVE",
             diagnostics={
-                "reason": f"direct Perceval full-Fock reference failed: {type(exc).__name__}: {exc}",
+                **_failure_diagnostics("direct Perceval full-Fock reference failed", exc),
                 "backend": "Perceval SLOS",
                 "projection": projection,
             },
@@ -349,7 +419,9 @@ def direct_fock_cp_reference(
             "raw_source_acceptance": raw_acceptance,
             "full_fock_state_count": state_count,
             "accepted_state_count": accepted_count,
-            "mass_reconciliation_error": float(1.0 - (raw_acceptance + (1.0 - raw_acceptance))),
+            "full_fock_total_mass": full_mass,
+            "mass_reconciliation_error": reconciliation_error,
+            "mass_reconciliation_tolerance": FULL_FOCK_MASS_TOLERANCE,
             "conditional_distribution": True,
             "distribution_hash": _json_hash(distribution),
             "folded_single_angles": list(folded),
@@ -371,11 +443,11 @@ def direct_fock_compiled_distribution(compiled: Any, *, eta: float = 1.0, projec
     if projection == "final_only" or len(pair_specs) <= 1:
         try:
             processor, input_state, ancilla_groups = _build_direct_processor(compiled.n, compiled.singles, pair_specs)
-            distribution, raw_acceptance, state_count, accepted_count = _final_distribution(
+            distribution, raw_acceptance, state_count, accepted_count, full_mass, reconciliation_error = _final_distribution(
                 processor, input_state, compiled.n, ancilla_groups
             )
         except Exception as exc:
-            return FullFockResult("INCONCLUSIVE", diagnostics={"reason": f"direct Perceval compiled adapter failed: {type(exc).__name__}: {exc}"})
+            return FullFockResult("INCONCLUSIVE", diagnostics=_failure_diagnostics("direct Perceval compiled adapter failed", exc))
         eta_value = float(eta)
         if not math.isfinite(eta_value) or not 0.0 < eta_value <= 1.0:
             raise ValueError("eta must be finite and in (0,1]")
@@ -394,6 +466,9 @@ def direct_fock_compiled_distribution(compiled: Any, *, eta: float = 1.0, projec
                 "raw_source_acceptance": float(raw_acceptance),
                 "full_fock_state_count": state_count,
                 "accepted_state_count": accepted_count,
+                "full_fock_total_mass": full_mass,
+                "mass_reconciliation_error": reconciliation_error,
+                "mass_reconciliation_tolerance": FULL_FOCK_MASS_TOLERANCE,
                 "distribution_hash": _json_hash(distribution),
                 "compiled_metadata": compiled.as_metadata(),
             },
@@ -408,11 +483,11 @@ def _direct_compiled_intermediate(compiled: Any, *, eta: float) -> FullFockResul
     )
     try:
         _, input_state, ancilla_groups = _build_direct_processor(compiled.n, compiled.singles, pair_specs)
-        distribution, raw_acceptance, state_count, accepted_count = _intermediate_distribution(
+        distribution, raw_acceptance, state_count, accepted_count, full_mass, reconciliation_error = _intermediate_distribution(
             compiled.n, compiled.singles, pair_specs, input_state, ancilla_groups
         )
     except Exception as exc:
-        return FullFockResult("INCONCLUSIVE", diagnostics={"reason": f"direct Perceval compiled intermediate adapter failed: {type(exc).__name__}: {exc}"})
+        return FullFockResult("INCONCLUSIVE", diagnostics=_failure_diagnostics("direct Perceval compiled intermediate adapter failed", exc))
     eta_value = float(eta)
     if not math.isfinite(eta_value) or not 0.0 < eta_value <= 1.0:
         raise ValueError("eta must be finite and in (0,1]")
@@ -431,6 +506,9 @@ def _direct_compiled_intermediate(compiled: Any, *, eta: float) -> FullFockResul
             "raw_source_acceptance": float(raw_acceptance),
             "full_fock_state_count": state_count,
             "accepted_state_count": accepted_count,
+            "full_fock_total_mass": full_mass,
+            "mass_reconciliation_error": reconciliation_error,
+            "mass_reconciliation_tolerance": FULL_FOCK_MASS_TOLERANCE,
             "distribution_hash": _json_hash(distribution),
             "compiled_metadata": compiled.as_metadata(),
         },
