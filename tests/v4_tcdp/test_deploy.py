@@ -37,6 +37,7 @@ from merlin_iqp.deploy import (
     validate_gate_map,
 )
 import scripts.v4_tcdp.validate_deploy as validate_deploy
+import scripts.v4_tcdp.validate_physical_controls as validate_physical_controls
 from merlin_iqp.deploy.density import compose_instruments
 import merlin_iqp.deploy.fock as fock_module
 from merlin_iqp.deploy.maps import _choi_from_kraus
@@ -296,7 +297,7 @@ def test_direct_intermediate_projection_tracks_absolute_acceptance() -> None:
 
 
 def test_physical_control_manifest_records_projection_evidence() -> None:
-    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest_20260909_final.json"
+    manifest_path = Path(__file__).parents[2] / "results" / "v4_tcdp" / "deploy" / "physical_control_manifest_20260909_final2.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["schema_version"] == "v4_tcdp.physical_controls.v2"
     assert manifest["status"] == "PASS"
@@ -317,8 +318,28 @@ def test_physical_control_manifest_records_projection_evidence() -> None:
         assert comparison["absolute_mass_valid"] is True
         assert comparison["eta"] == pytest.approx(control["eta"])
         assert comparison["accepted_mass_delta"] <= 1e-12
+        assert comparison["acceptance_tolerance"] == pytest.approx(1.0e-16)
+        assert comparison["final_accepted_mass_error"] <= 1.0e-16
+        assert comparison["intermediate_accepted_mass_error"] <= 1.0e-16
     assert manifest["controls"][2]["projection_comparison"]["conditional_tvd_final_vs_intermediate"] <= 1e-12
     assert manifest["controls"][2]["projection_comparison"]["general_equivalence"] is False
+
+
+def test_physical_controls_reject_acceptance_mutation(monkeypatch) -> None:
+    original = validate_physical_controls.direct_fock_cp_reference
+
+    def halved_acceptance(*args, **kwargs):
+        result = original(*args, **kwargs)
+        assert result.accepted_mass is not None
+        half = result.accepted_mass / 2.0
+        return replace(result, accepted_mass=half, rejected_mass=1.0 - half)
+
+    monkeypatch.setattr(validate_physical_controls, "direct_fock_cp_reference", halved_acceptance)
+    result = validate_physical_controls._control(
+        "shared_gate_n3", 3, [0.17, -0.24, 0.36], [(0, 1, 0.20), (1, 2, 0.30)]
+    )
+    assert result["status"] == "FAIL"
+    assert result["projection_comparison"]["absolute_mass_valid"] is False
 
 
 def test_throughput_and_conditional_erasure_conserve_mass() -> None:

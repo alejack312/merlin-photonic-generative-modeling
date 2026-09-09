@@ -22,7 +22,7 @@ Relevant records:
 - [Independent reviewer handoff](../.planning/v4-independent-reviewer-handoff.md)
 - [Owner explanation](v4-owner-explanation-2026-09-09.md)
 - [Repaired eight-cell sibling comparison summary](../results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json)
-- [Recorded resource pilot](../results/v4_tcdp/deploy/resource_budget_final_v6.json)
+- [Recorded resource pilot](../results/v4_tcdp/deploy/resource_budget_final_v7.json)
 - [Optical simulation implementation](../src/merlin_iqp/deploy/fock.py)
 
 The bounded results do not establish broader multiphoton validation, direct larger-n optical deployment, all sibling experiments, sampled uncertainty, or the source-mutation hypothesis. The ledger remains the authority for individual acceptance statuses.

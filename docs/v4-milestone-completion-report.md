@@ -4,11 +4,11 @@ Date: 2026-09-09. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528f
 
 ## 2026-09-09 focused repair addendum
 
-The independent audit findings A01–A04 are repaired and rechecked. The repaired physical manifest records coherent shared-gate final-only/intermediate TVD `1.942890293094024e-16`, unchanged accepted mass, and full-Fock mass reconciliation. The regenerated n=4 spatial and Hamming photonic artifacts are `PASS` against the repaired manifest, and the regenerated eight-cell sibling comparison namespace enforces local-versus-unquantized compilation equality. The earlier `0.585411845271861` value remains only in the dated audit and superseded historical artifacts; it is not current evidence.
+The independent audit findings A01–A04 and post-repair findings B01–B03 are repaired and rechecked. The repaired physical manifest records coherent shared-gate final-only/intermediate TVD `1.942890293094024e-16`, independently checked acceptance, unchanged accepted mass, and full-Fock mass reconciliation. The regenerated n=4 spatial and Hamming photonic artifacts are `PASS` against the repaired manifest, and the regenerated eight-cell sibling comparison namespace enforces local-versus-unquantized compilation equality. The resource pilot now requires all registered measurements to pass. The earlier `0.585411845271861` value remains only in the dated audit and superseded historical artifacts; it is not current evidence.
 
-- [Repaired physical controls](../results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json)
-- [Repaired spatial ring evaluation](../results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final.json)
-- [Repaired Hamming ring evaluation](../results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final.json)
+- [Repaired physical controls](../results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json)
+- [Repaired spatial ring evaluation](../results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final2.json)
+- [Repaired Hamming ring evaluation](../results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final2.json)
 - [Repaired sibling comparison summary](../results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json)
 
 ## 2026-09-08 closure-pass addendum
@@ -53,12 +53,12 @@ that closure. Immutable writers reject silently replacing the former artifacts w
 
 ## Evidence and commands
 
-- Physical controls: `venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path <writable-perceval-path> --output results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json` — manifest status `PASS` for the declared fixed-photon final-only controls, with full-Fock mass reconciliation.
-- Photonic ring smoke: `venv/Scripts/python.exe scripts/v4_tcdp/evaluate_ring_photonic.py results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke --eta 0.9 --validation-manifest results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json --output results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final.json`, and the corresponding Hamming path/output. Both report `PASS`; direct-vs-compiled TVD is below `2e-16`.
+- Physical controls: `venv/Scripts/python.exe scripts/v4_tcdp/validate_physical_controls.py --pcvl-path <writable-perceval-path> --output results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json` — manifest status `PASS` for the declared fixed-photon final-only controls, with independently checked acceptance and full-Fock mass reconciliation.
+- Photonic ring smoke: `venv/Scripts/python.exe scripts/v4_tcdp/evaluate_ring_photonic.py results/v4_tcdp/rings/rings_spatial_exact/n4_seed0_smoke --eta 0.9 --validation-manifest results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json --output results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final2.json`, and the corresponding Hamming path/output. Both report `PASS`; direct-vs-compiled TVD is below `2e-16` and acceptance is independently qualified.
 - Focused integration: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_ring_photonic.py tests/v4_tcdp/test_resource_pilot.py tests/v4_tcdp/test_comparison.py tests/v4_tcdp/test_nat.py tests/v4_tcdp/test_sibling_replay.py` — 124 passed.
 - Explicit sibling integration: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_inventory.py` — 21 passed.
 - Script compilation: `venv/Scripts/python.exe -m compileall -q scripts/v4_tcdp` — passed.
-- Resource pilot: `venv/Scripts/python.exe scripts/v4_tcdp/resource_pilot.py --output results/v4_tcdp/deploy/resource_budget_final_v6.json` — n=4/6/8/10 completed within the approved three-hour timing gate, no full-circuit superoperator was allocated, and the n=10 RSS criterion passed with clean source provenance.
+- Resource pilot: `venv/Scripts/python.exe scripts/v4_tcdp/resource_pilot.py --output results/v4_tcdp/deploy/resource_budget_final_v7.json` — n=4/6/8/10 completed within the approved three-hour timing gate, no full-circuit superoperator was allocated, and the n=10 RSS criterion passed with clean source provenance; aggregation now requires every registered measurement to pass.
 - Artifact validation: 355 current JSON artifacts parsed; finite-value, declared-output, physical payload-hash, registered-ring payload-hash, sibling-comparison, and final-resource payload-hash checks all passed.
 - Documentation mirror: README and `docs/technical-findings.md` state the same bounded v4 evidence and explicitly preserve the remaining ledger statuses; no new scientific claim is introduced there.
 - Full-suite command: `venv/Scripts/python.exe -m pytest -q` with `PCVL_PERSISTENT_PATH` set to a writable directory → `687 passed, 1 skipped in 918.94s (0:15:18)`.

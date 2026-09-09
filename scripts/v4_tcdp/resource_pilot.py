@@ -365,13 +365,22 @@ def rss_status(case: dict[str, Any]) -> str:
 
 
 def aggregate_status(cases: list[dict[str, Any]]) -> str:
-    if any(case.get("measurement_status") == "FAIL" for case in cases):
-        return "FAIL"
-    n10 = next((case for case in cases if case.get("n") == 10), None)
-    if n10 is None or rss_status(n10) == "INCONCLUSIVE":
+    allowed_statuses = {"PASS", "FAIL", "INCONCLUSIVE"}
+    sizes = [case.get("n") for case in cases]
+    statuses = [str(case.get("measurement_status", "")).upper() for case in cases]
+    if any(status not in allowed_statuses for status in statuses):
         return "INCONCLUSIVE"
-    if rss_status(n10) == "FAIL":
+    if "FAIL" in statuses:
         return "FAIL"
+    if len(cases) != len(PILOT_SIZES) or set(sizes) != set(PILOT_SIZES) or len(set(sizes)) != len(sizes):
+        return "INCONCLUSIVE"
+    if "INCONCLUSIVE" in statuses:
+        return "INCONCLUSIVE"
+    rss_statuses = [rss_status(case) for case in cases]
+    if "FAIL" in rss_statuses:
+        return "FAIL"
+    if "INCONCLUSIVE" in rss_statuses:
+        return "INCONCLUSIVE"
     return "PASS"
 
 

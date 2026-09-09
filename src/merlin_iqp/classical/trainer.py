@@ -113,6 +113,8 @@ class Trainer:
         checkpoint = load_checkpoint(path, expected_spec_hash=self.spec_hash, expected_dataset_hash=self.dataset_hash, expected_kernel_hash=self.kernel.hash)
         if checkpoint.optimizer != self.optimizer or len(checkpoint.theta) != self.model.m:
             raise ValueError("checkpoint optimizer or theta shape is incompatible")
+        if checkpoint.step > 0 and not checkpoint.loss_history:
+            raise ValueError("checkpoint with positive step must include complete loss history")
         if len(checkpoint.loss_history) not in {0, checkpoint.step + 1}:
             raise ValueError("checkpoint loss history length is inconsistent with checkpoint step")
         saved_lr = checkpoint.optimizer_state.get("lr")

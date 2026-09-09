@@ -19,10 +19,16 @@ The independent audit findings A01–A04 are repaired in implementation commit `
 
 Final evidence paths:
 
-- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json`
-- `results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final.json`
-- `results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final.json`
+- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json` (superseded by the acceptance-qualified v2 artifact below)
+- `results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final2.json`
+- `results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final2.json`
+- `results/v4_tcdp/deploy/resource_budget_final_v7.json`
 - `results/v4_tcdp/sibling_comparisons/closure_20260909_final/summary.json`
+
+## Post-repair update (2026-09-09)
+
+The B01–B03 findings from the post-repair audit are repaired. Ring and physical qualification now independently validate absolute acceptance; positive-step checkpoints require complete histories and round-trip through save/resume; and resource aggregation requires exactly the registered sizes with every measurement passing. The regenerated physical/ring artifacts and resource pilot are versioned separately from the prior final artifacts.
 
 ## Reproduction commands
 
@@ -59,6 +65,14 @@ Current post-repair verification at `800a53c`:
 - Sibling comparison regeneration: eight cells, overall `PASS`, local/unquantized compilation control enforced per cell.
 - Repaired physical manifest: overall `PASS`; shared-gate projection TVD `1.942890293094024e-16`; full-Fock mass reconciliation fields present.
 - Repaired n=4 spatial/Hamming photonic artifacts: both `PASS`; direct-vs-compiled TVD `1.390014947762197e-16` and `1.767385066422933e-16`.
+
+Post-repair verification after B01–B03:
+
+- Full suite: `697 passed, 1 skipped` in `442.88s`, with writable `PCVL_PERSISTENT_PATH`.
+- Explicit sibling integration: `30 passed` in `70.31s`.
+- Artifact validator: `402` JSON files, `72` JSONL rows, `14` payload hashes, `0` failures.
+- Resource pilot v7: n=4/6/8/10 all `PASS` under the approved timing and RSS gates.
+- Acceptance qualification: physical maximum independent acceptance error `4.163336342344337e-17`; regenerated ring errors `2.3852447794681098e-18` and `1.951563910473908e-18`, tolerance `1.0e-16`.
 
 Final verification in the closure pass: the full suite passed `687 passed, 1 skipped in 918.94s (0:15:18)` with `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory; explicit sibling integration plus the new comparison gate passed `28 passed, 1 skipped in 175.16s`; the new validators compiled; and artifact validation passed with `355` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. These are environment notes, not relaxed acceptance gates.
 
@@ -111,7 +125,7 @@ These decisions unlock implementation, but do not certify physical full-Fock com
 
 - Physical controls: fixed-photon n=2/n=3 no-gate, bystander, and shared-gate controls `PASS`; final-only/intermediate shared conditional TVD `0.585411845271861`, so final-only is the supported boundary. The historical pre-fix `FAIL` candidate is preserved separately.
 - Registered ring outputs: `registered_v2_ring_photonic_n4_seed0_smoke.json` and its Hamming counterpart; both `PASS`, direct-vs-compiled TVD below `2e-16`, with recomputable payload hashes and matched parameters.
-- Resource pilot: `resource_budget_final_v6.json`; n=4/6/8/10 all `PASS`, clean source commit `980cfe7`, n=10 RSS growth `0` bytes, timing criterion `PASS`, and a payload hash.
+- Historical resource pilot: `resource_budget_final_v6.json`; superseded by the acceptance-qualified resource pilot v7 listed in the current post-repair verification.
 - NAT: registered n=4 seeds 0–4 and n=6/n=8 seed 0 matched reports; final reports include target improvement, fixed-reference TVD, acceptance, optimizer-state equality, and fixed-pair ablation labeling.
 - Closure checklist: [.planning/v4-closure-checklist.md](v4-closure-checklist.md) maps each incomplete requirement to the missing evidence, next action, dependency, and budget.
 - Post-fix targeted verification: `111 passed`; full suite: `681 passed, 1 skipped in 396.74s (0:06:36)`.

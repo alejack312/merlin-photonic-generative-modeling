@@ -33,7 +33,15 @@ def test_n10_rss_gate_is_strictly_below_400_mib() -> None:
 def test_aggregate_status_preserves_failure_and_missing_memory_evidence() -> None:
     assert resource_pilot.aggregate_status([{"n": 4, "measurement_status": "FAIL"}]) == "FAIL"
     assert resource_pilot.aggregate_status([{"n": 10, "measurement_status": "PASS", "rss_growth_bytes": None}]) == "INCONCLUSIVE"
-    assert resource_pilot.aggregate_status([{"n": 10, "measurement_status": "PASS", "rss_growth_bytes": 1}]) == "PASS"
+    complete = [
+        {"n": n, "measurement_status": "PASS", "peak_rss_bytes": 100, "rss_growth_bytes": 1}
+        for n in resource_pilot.PILOT_SIZES
+    ]
+    assert resource_pilot.aggregate_status(complete) == "PASS"
+    assert resource_pilot.aggregate_status([*complete[:1], {"n": 10, "measurement_status": "PASS", "rss_growth_bytes": 1}]) == "INCONCLUSIVE"
+    assert resource_pilot.aggregate_status([{**case, "measurement_status": "INCONCLUSIVE"} if case["n"] == 4 else case for case in complete]) == "INCONCLUSIVE"
+    assert resource_pilot.aggregate_status([*complete, {"n": 4, "measurement_status": "PASS", "peak_rss_bytes": 100, "rss_growth_bytes": 1}]) == "INCONCLUSIVE"
+    assert resource_pilot.aggregate_status([*complete[:3], {"n": 10, "measurement_status": "UNKNOWN", "peak_rss_bytes": 100, "rss_growth_bytes": 1}]) == "INCONCLUSIVE"
 
 
 def test_worker_payload_validation_rejects_wrong_shape_or_superoperator_claim() -> None:

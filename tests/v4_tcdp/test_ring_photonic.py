@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 
 import pytest
 
 from merlin_iqp.deploy.ring import evaluate_ring_artifact, load_ring_artifact
+import merlin_iqp.deploy.ring as ring_module
 from merlin_iqp.classical._validation import hash_json
 
 
@@ -40,6 +42,21 @@ def test_evaluate_ring_artifact_uses_final_only_and_fixed_photon_eta() -> None:
     assert result["comparison"]["final_only_selected_boundary"] is True
     assert result["hashes"]["generator"] == artifact.hashes["generator"]
     assert result["hashes"]["final_theta"] == artifact.hashes["final_theta"]
+
+
+def test_ring_evaluation_rejects_zero_acceptance_even_when_shape_matches(monkeypatch) -> None:
+    artifact = load_ring_artifact(RING_ROOT)
+    original = ring_module.direct_fock_compiled_distribution
+
+    def zero_acceptance(compiled, *, eta: float, projection: str):
+        result = original(compiled, eta=eta, projection=projection)
+        return replace(result, accepted_mass=0.0, rejected_mass=1.0)
+
+    monkeypatch.setattr(ring_module, "direct_fock_compiled_distribution", zero_acceptance)
+    result = evaluate_ring_artifact(artifact, eta=0.9)
+    assert result["status"] == "FAIL"
+    assert result["comparison"]["acceptance"]["status"] == "FAIL"
+    assert result["comparison"]["acceptance"]["field_consistency"] is False
 
 
 def test_ring_payload_hash_is_recomputable_without_self_reference() -> None:

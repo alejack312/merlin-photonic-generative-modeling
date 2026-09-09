@@ -18,7 +18,7 @@ from merlin_iqp.classical._validation import binary_matrix, finite_vector, hash_
 from merlin_iqp.classical.objectives import hamming_mmd2, spatial_mmd2
 
 from .compile import compile_iqp
-from .density import ideal_iqp_distribution
+from .density import apply_compiled_density, ideal_iqp_distribution
 from .fock import FullFockResult, direct_fock_compiled_distribution
 from merlin_iqp.experiments.rings import PROFILE_REGISTRY
 from merlin_iqp.experiments.sibling_import import git_source_identity
@@ -29,7 +29,8 @@ SUPPORTED_RUN_KIND = "smoke"
 SUPPORTED_VALIDATION_SCHEMA = "v4_tcdp.physical_controls.v2"
 SUPPORTED_PROJECTION = "final_only"
 PROJECTION_COMPARISON_TOLERANCE = 1e-12
-DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json")
+ACCEPTANCE_TOLERANCE = 1e-16
+DEFAULT_VALIDATION_MANIFEST = Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json")
 
 
 def _file_hash(path: Path) -> str:
@@ -260,14 +261,39 @@ def evaluate_ring_artifact(
         raise ValueError("direct ring evaluator returned an unexpected projection")
     if direct.accepted_mass is None or not math.isfinite(float(direct.accepted_mass)) or not 0.0 <= float(direct.accepted_mass) <= 1.0:
         raise ValueError("direct ring evaluator returned an invalid absolute acceptance")
+    direct_acceptance = float(direct.accepted_mass)
+    direct_rejection = direct.rejected_mass
+    raw_acceptance = direct.diagnostics.get("raw_source_acceptance")
+    eta_reported = direct.diagnostics.get("eta", eta_value)
+    acceptance_fields_valid = (
+        raw_acceptance is not None
+        and math.isfinite(float(raw_acceptance))
+        and 0.0 < float(raw_acceptance) <= 1.0
+        and math.isfinite(float(eta_reported))
+        and math.isclose(float(eta_reported), eta_value, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+        and direct_acceptance > 0.0
+        and direct_rejection is not None
+        and math.isfinite(float(direct_rejection))
+        and math.isclose(direct_acceptance + float(direct_rejection), 1.0, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+        and math.isclose(direct_acceptance, float(raw_acceptance) * eta_value**SUPPORTED_N, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+    )
 
     raw_reference = _compiled_reference(compile_iqp(SUPPORTED_N, singles.tolist(), pairs, topology="path", quantize=False))
     compiled_reference = _compiled_reference(compiled)
+    _, expected_acceptance = apply_compiled_density(compiled, eta=eta_value)
+    acceptance_error = abs(direct_acceptance - float(expected_acceptance))
+    acceptance_valid = acceptance_fields_valid and acceptance_error <= ACCEPTANCE_TOLERANCE
     bitstrings = [format(index, f"0{SUPPORTED_N}b") for index in range(2**SUPPORTED_N)]
     unknown_keys = set(direct.distribution) - set(bitstrings)
     if unknown_keys:
         raise ValueError(f"direct ring evaluator returned undecodable bitstrings: {sorted(unknown_keys)}")
     decoded_vector = np.asarray([float(direct.distribution.get(bitstring, 0.0)) for bitstring in bitstrings], dtype=np.float64)
+    conditional_distribution_valid = bool(
+        direct_acceptance > 0.0
+        and np.all(np.isfinite(decoded_vector))
+        and not np.any(decoded_vector < 0.0)
+        and np.isclose(decoded_vector.sum(), 1.0, atol=1e-10, rtol=1e-10)
+    )
     if not np.all(np.isfinite(decoded_vector)) or np.any(decoded_vector < 0.0) or not np.isclose(decoded_vector.sum(), 1.0, atol=1e-10, rtol=1e-10):
         raise ValueError("direct ring evaluator returned an invalid conditional distribution")
     decoded_vector /= decoded_vector.sum()
@@ -288,7 +314,7 @@ def evaluate_ring_artifact(
     validation_hash = _file_hash(validation_path)
     result: dict[str, Any] = {
         "schema_version": "v4_tcdp.photonic_ring.v2",
-        "status": "PASS" if direct_tvd_compiled <= 1e-12 else "FAIL",
+        "status": "PASS" if acceptance_valid and conditional_distribution_valid and direct_tvd_compiled <= 1e-12 else "FAIL",
         "run_id": artifact.manifest["run_id"],
         "projection": SUPPORTED_PROJECTION,
         "ring_scope": {"n": SUPPORTED_N, "run_kind": SUPPORTED_RUN_KIND, "ring_deployment": "smoke_only"},
@@ -312,7 +338,7 @@ def evaluate_ring_artifact(
             "decoded_conditional_vector": decoded_vector.tolist(),
             "decoded_bitstrings": bitstrings,
             "conditional_distribution": {key: float(value) for key, value in zip(bitstrings, decoded_vector, strict=True)},
-            "absolute_accepted_mass": float(direct.accepted_mass),
+            "absolute_accepted_mass": direct_acceptance,
             "rejected_mass": direct.rejected_mass,
             "diagnostics": direct.diagnostics,
         },
@@ -324,10 +350,20 @@ def evaluate_ring_artifact(
             "compiled_vector_sha256": hash_array(compiled_vector),
         },
         "comparison": {
-            "status": "PASS" if direct_tvd_compiled <= 1e-12 else "FAIL",
+            "status": "PASS" if acceptance_valid and direct_tvd_compiled <= 1e-12 else "FAIL",
             "direct_vs_raw_qubit_tvd": float(direct_tvd_raw),
             "direct_vs_compiled_qubit_tvd": float(direct_tvd_compiled),
             "metrics": metrics,
+            "acceptance": {
+                "status": "PASS" if acceptance_valid and conditional_distribution_valid else "FAIL",
+                "measured_absolute_accepted_mass": direct_acceptance,
+                "independent_expected_absolute_accepted_mass": float(expected_acceptance),
+                "absolute_error": float(acceptance_error),
+                "tolerance": ACCEPTANCE_TOLERANCE,
+                "field_consistency": acceptance_fields_valid,
+                "conditional_distribution_valid": conditional_distribution_valid,
+                "formula": "eta**n * composed_ideal_compiled_instrument_success",
+            },
             "final_only_selected_boundary": True,
             "intermediate_shared_gate_comparison": {
                 "supported": False,

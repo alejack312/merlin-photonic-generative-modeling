@@ -31,7 +31,7 @@ def main() -> int:
     parser.add_argument(
         "--validation-manifest",
         type=Path,
-        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json"),
+        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json"),
         help="validated direct-control manifest required before deployment",
     )
     parser.add_argument(

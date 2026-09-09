@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -19,10 +20,11 @@ import subprocess
 import tempfile
 from typing import Any
 
-from merlin_iqp.deploy import direct_fock_cp_reference, ideal_iqp_distribution
+from merlin_iqp.deploy import direct_fock_cp_reference, ideal_cp_map, ideal_iqp_distribution
 
 
 ETA = 0.9
+ACCEPTANCE_TOLERANCE = 1.0e-16
 
 
 def _tvd(left: dict[str, float], right: dict[str, float]) -> float:
@@ -65,15 +67,41 @@ def _control(control_id: str, n: int, singles: list[float], pairs: list[tuple[in
     # singles are only the compiled physical implementation detail and would
     # silently omit the pair interaction from this comparison.
     analytic = ideal_iqp_distribution(n, singles, pairs)
-    eta_consistent = all(
-        result.accepted_mass is not None
-        and result.diagnostics.get("eta") == ETA
-        and result.accepted_mass == result.diagnostics.get("raw_source_acceptance", 0.0) * ETA**n
-        for result in (final, intermediate)
+    expected_acceptance = ETA**n * math.prod(ideal_cp_map(4.0 * theta).success for _, _, theta in pairs)
+
+    def acceptance_valid(result: Any) -> bool:
+        accepted = result.accepted_mass
+        rejected = result.rejected_mass
+        raw = result.diagnostics.get("raw_source_acceptance")
+        reported_eta = result.diagnostics.get("eta")
+        return bool(
+            result.status == "PASS"
+            and accepted is not None
+            and rejected is not None
+            and raw is not None
+            and reported_eta is not None
+            and math.isfinite(float(accepted))
+            and math.isfinite(float(rejected))
+            and math.isfinite(float(raw))
+            and math.isfinite(float(reported_eta))
+            and 0.0 < float(accepted) <= 1.0
+            and 0.0 <= float(rejected) <= 1.0
+            and 0.0 < float(raw) <= 1.0
+            and math.isclose(float(reported_eta), ETA, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+            and math.isclose(float(accepted), float(raw) * ETA**n, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+            and math.isclose(float(accepted) + float(rejected), 1.0, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+            and math.isclose(float(accepted), expected_acceptance, rel_tol=0.0, abs_tol=ACCEPTANCE_TOLERANCE)
+        )
+
+    final_acceptance_error = (
+        None if final.accepted_mass is None else abs(float(final.accepted_mass) - expected_acceptance)
     )
+    intermediate_acceptance_error = (
+        None if intermediate.accepted_mass is None else abs(float(intermediate.accepted_mass) - expected_acceptance)
+    )
+    eta_consistent = acceptance_valid(final) and acceptance_valid(intermediate)
     projection_valid = (
-        final.status == "PASS"
-        and intermediate.status == "PASS"
+        eta_consistent
         and final.accepted_mass is not None
         and intermediate.accepted_mass is not None
         and set(final.distribution) == set(intermediate.distribution)
@@ -86,7 +114,11 @@ def _control(control_id: str, n: int, singles: list[float], pairs: list[tuple[in
         else "comparison unavailable because one projection did not complete, supports differ, or eta scaling is inconsistent",
         "eta": ETA,
         "conditional_distribution_valid": projection_valid,
-        "absolute_mass_valid": projection_valid,
+        "absolute_mass_valid": eta_consistent,
+        "expected_accepted_mass": expected_acceptance,
+        "final_accepted_mass_error": final_acceptance_error,
+        "intermediate_accepted_mass_error": intermediate_acceptance_error,
+        "acceptance_tolerance": ACCEPTANCE_TOLERANCE,
         "general_equivalence": False,
     }
     if projection_valid:
@@ -193,7 +225,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final.json"),
+        default=Path("results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json"),
         help="manifest path; defaults to the committed v4_tcdp namespace",
     )
     parser.add_argument(

@@ -195,6 +195,42 @@ def test_adam_checkpoint_resume_is_equivalent(tmp_path) -> None:
         load_checkpoint(checkpoint_path, expected_kernel_hash="stale")
 
 
+def test_positive_step_checkpoint_without_history_is_rejected_before_resume(tmp_path) -> None:
+    from dataclasses import replace
+    from merlin_iqp.classical.checkpoint import save_checkpoint
+
+    G = chain_1d(3, 1)
+    target = _target()
+    kernel = KernelSpec("hamming_gaussian", sigma=0.6)
+    source = Trainer(IQPModel(G, [0.17, -0.09, 0.13, 0.05]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    source.run(2)
+    path = tmp_path / "empty-history.npz"
+    save_checkpoint(replace(source.checkpoint(), loss_history=()), path, generator=G)
+    resumed = Trainer(IQPModel(G, [0.7, 0.8, 0.9, 0.4]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    with pytest.raises(ValueError, match="positive step must include complete loss history"):
+        resumed.resume(path)
+    assert resumed.step == 0
+    assert resumed.loss_history == []
+
+
+def test_accepted_resume_run_save_resume_round_trip(tmp_path) -> None:
+    G = chain_1d(3, 1)
+    target = _target()
+    kernel = KernelSpec("hamming_gaussian", sigma=0.6)
+    first_path = tmp_path / "first.npz"
+    second_path = tmp_path / "second.npz"
+    source = Trainer(IQPModel(G, [0.17, -0.09, 0.13, 0.05]), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    source.run(2, checkpoint_path=first_path)
+    resumed = Trainer(IQPModel(G, np.zeros(G.shape[0])), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    resumed.resume(first_path)
+    resumed.run(1, checkpoint_path=second_path)
+    continued = Trainer(IQPModel(G, np.zeros(G.shape[0])), target, kernel, optimizer="adam", lr=0.03, seed=9)
+    continued.resume(second_path)
+    assert continued.step == 3
+    assert len(continued.loss_history) == 4
+    np.testing.assert_array_equal(continued.model.theta, resumed.model.theta)
+
+
 def test_checkpoint_resume_rejects_changed_learning_rate(tmp_path) -> None:
     G = chain_1d(3, 1)
     target = _target()
