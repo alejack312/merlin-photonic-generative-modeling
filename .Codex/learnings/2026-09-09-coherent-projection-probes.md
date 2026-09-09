@@ -29,3 +29,8 @@ Date: 2026-09-09 · Scope: project · Recurs when: optical paths compare final a
 ## Next time
 - Do: use a small coherent superposition and an independently checked readout.
 - Do not: preserve a published discrepancy merely because downstream tests require it.
+
+## Repair addendum (2026-09-09)
+- The production readout now sums complex amplitudes per logical output before squaring; full-Fock outputs reject incomplete mass instead of silently renormalizing it.
+- The sibling comparator now enforces local-versus-unquantized compilation equality, and the public spatial MMD path shares positive finite mixture validation with typed kernels.
+- Verification: focused repair tests `113 passed, 1 skipped`; full suite `693 passed, 1 skipped`; explicit sibling integration `30 passed`; artifact validation `398` JSON, `72` JSONL, `12` payload hashes, zero failures.
