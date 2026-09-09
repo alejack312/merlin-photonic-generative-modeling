@@ -8,14 +8,14 @@ Review the additive v4.0 implementation against the binding plan, additive desig
 
 - Repository: `C:\Users\cuqui\merlin-quantum-case-study`
 - Base: `de80e9313beed614528fd6332b2f78aab83c0b50` (`fix/narrow-circuit-claim`)
-- Final review target: `800a53c` on `codex/v4-implementation` (`git rev-parse HEAD`).
+- Final review target: the current `git rev-parse HEAD` on `codex/v4-implementation`; the prior implementation/evidence commit is `800a53c`.
 - Sibling: `C:\Users\cuqui\iqp-mmd-barren-plateau`
 - Required sibling checkpoint: `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`
 - Verified sibling state: branch `alejack312`, clean, ahead of its remote by one commit; no sibling edits were made.
 
 ## Current repair update (2026-09-09)
 
-The independent audit findings A01–A04 are repaired in implementation commit `7089dbf`; final evidence and documentation are in `800a53c`. A01 now preserves coherent interference in projection readout; A02 rejects incomplete full-Fock mass instead of normalizing it away; A03 enforces local-versus-unquantized compilation equality per sibling cell; and A04 rejects invalid spatial-kernel mixtures. The repaired physical manifest reports shared-gate final-only/intermediate TVD `1.942890293094024e-16` with unchanged accepted mass. The previous `0.585411845271861` value is superseded and retained only in dated audit/historical artifacts.
+The independent audit findings A01–A04 are repaired in implementation commit `7089dbf`; final evidence and documentation are in `800a53c` plus this handoff update. A01 now preserves coherent interference in projection readout; A02 rejects incomplete full-Fock mass instead of normalizing it away; A03 enforces local-versus-unquantized compilation equality per sibling cell; and A04 rejects invalid spatial-kernel mixtures. The repaired physical manifest reports shared-gate final-only/intermediate TVD `1.942890293094024e-16` with unchanged accepted mass. The previous `0.585411845271861` value is superseded and retained only in dated audit/historical artifacts.
 
 Final evidence paths:
 
