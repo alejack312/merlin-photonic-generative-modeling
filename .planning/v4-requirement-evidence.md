@@ -1,6 +1,6 @@
 # v4.0 requirement evidence ledger
 
-Updated 2026-09-08 after the current-head physical and registered-NAT verification pass. Statuses are strict:
+Updated 2026-09-09 after recording the owner-authored WRITE-07 explanation. Statuses are strict:
 
 - `PASS`: the bounded criterion has direct implementation and verification evidence.
 - `FAIL`: an attempted acceptance check produced a contrary result.
@@ -95,7 +95,7 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | NAT-01 | PASS | D2 selects bounded discrete alpha-key neighbor search with continuous single-angle updates; focused tests prove pair-key movement, catalog membership, winding preservation and reproducibility. | Validate on the registered ring/cell profile before interpreting efficacy. | None |
 | NAT-02 | PASS | Registered n=4 seeds 0–4 and n=6/n=8 seed-0 runs contain two matched 150-step continuations from one frozen warm start with identical optimizer state/budget, target improvement, fixed-reference TVD, acceptance, and explicit fixed-pair ablation fields. | Interpret efficacy only as ideal/model-derived continuation evidence; no noisy superiority claim. | None |
 | NAT-03 | PASS | Registered n=4 reports are green/completed, so the “two calendar days without green n=4” condition was not triggered. A bounded n=8 matched run completed both arms in `264.498991300003` seconds under the retained `1200`-second limit, with machine-readable timing provenance. | None for the retained stop rule; do not launch a two-day n=4 wait while n=4 is green. | None |
-| WRITE-07 | BLOCKED | Owner explanation of signs, source/gate noise, projection, loss, NAT and conditioning is absent. | Owner writes the explanation before interpretive synthesis. | Owner decision |
+| WRITE-07 | PASS | The owner-authored explanation of sign/winding, source versus gate noise, final-only versus intermediate projection, loss/post-selection/conditioning, small-`n` limits and NAT controls is recorded in [v4-owner-explanation-2026-09-09.md](../docs/v4-owner-explanation-2026-09-09.md). It preserves the fixed-photon `g2=0` scope, the unnormalized CP-map composition rule, the separate acceptance/conditional metrics and the limits of the registered NAT control. | None for the explanation-record requirement. Scientific claims remain limited to the evidence cited in their individual rows. | None |
 | WRITE-08 | PASS | Rings, sibling, deployment, backend-comparison and v4 synthesis reports link canonical artifacts and limits. | None for current evidence. | None |
 | WRITE-09 | PASS | README and `docs/technical-findings.md` now mirror only the verified, scope-qualified v4 implementation and evidence, link the canonical report/ledger, and state the remaining scientific and owner-gated boundaries. | None for the documentation mirror. | None |
 | REVIEW-02 | PASS | Independent current-head recheck verified the physical manifest, ring payloads/writers, NAT optimizer-state rejection, clean resource pilot, immutable physical writer, focused publication checks, bounded documentation mirrors, and full-suite handoff. The reviewer’s stale-note/default-path findings were repaired and rechecked at the committed integration head. | None for the completed review gate. | None |
