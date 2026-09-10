@@ -1,0 +1,219 @@
+{
+  "changed_fields": [
+    "execution_backend_or_size_not_changed_in_inventory"
+  ],
+  "config": {
+    "capabilities": [
+      "gaussian_kernel",
+      "gaussian_mixture",
+      "marginal_diagnostics",
+      "anticoncentration",
+      "checkpoint_export",
+      "dataset_generation_or_loading",
+      "ising_or_spin_target",
+      "jax_dependency",
+      "higher_weight_or_graph"
+    ],
+    "content": {
+      "circuit": {
+        "allow_legacy_families": "bool",
+        "bounded_degree": {
+          "max_degree": "int",
+          "max_weight": "int"
+        },
+        "community": {
+          "n_blocks": "int",
+          "p_inter": "float",
+          "p_intra": "float"
+        },
+        "complete_graph": {},
+        "dense": {
+          "expected_weight": "float"
+        },
+        "erdos_renyi": {
+          "p_edge": "list[float]"
+        },
+        "family": "str",
+        "lattice": {
+          "dimension": "int",
+          "range": "int"
+        },
+        "n_generators": "str",
+        "n_qubits": "list[int]",
+        "product_state": {},
+        "symmetric": {
+          "parity": "str"
+        }
+      },
+      "dataset": {
+        "binary_mixture": {
+          "n_modes": "int",
+          "noise": "float",
+          "threshold": "float"
+        },
+        "ising": {
+          "beta": "float",
+          "burn_in_sweeps": "int",
+          "coupling_std": "float",
+          "num_chains": "int",
+          "thinning": "int",
+          "topology": "str"
+        },
+        "n_samples": "int",
+        "type": "str"
+      },
+      "estimation": {
+        "batch_size": "int",
+        "num_a_samples": "int",
+        "num_seeds": "int",
+        "num_z_samples": "int",
+        "use_jax": "bool"
+      },
+      "experiment": {
+        "description": "str",
+        "log_level": "str",
+        "name": "str",
+        "output_dir": "str",
+        "seed": "int"
+      },
+      "forge": {
+        "export_instances": "bool",
+        "max_n": "int",
+        "mode": "str",
+        "plateau_agreement": {
+          "ac_field": "str",
+          "label_kind": "str",
+          "label_source": "str"
+        },
+        "query_template": "str",
+        "thresholds": {
+          "max_weight": "int",
+          "overlap_threshold": "int"
+        },
+        "timeout_sec": "int"
+      },
+      "init": {
+        "data_dependent": {
+          "dataset": "str",
+          "fallback_std": "float",
+          "method": "str",
+          "scale": "float"
+        },
+        "scheme": "str",
+        "small_angle": {
+          "std": "list[float]"
+        },
+        "uniform": {
+          "high": "float",
+          "low": "float"
+        }
+      },
+      "kernel": {
+        "bandwidth": "list[float]",
+        "multi_scale_gaussian": {
+          "sigmas": "list[float]",
+          "weights": "list[float]"
+        },
+        "polynomial": {
+          "constant": "float",
+          "degree": "int"
+        },
+        "type": "str"
+      },
+      "output": {
+        "figures": {
+          "dpi": "int",
+          "enabled": "bool",
+          "format": "str"
+        },
+        "format": "str",
+        "save_raw": "bool"
+      },
+      "qiskit": {
+        "backend": "str",
+        "max_n": "int",
+        "n_shots": "list[int]",
+        "noise": {
+          "enabled": "bool",
+          "error_rate": "list[float]",
+          "gamma_1q": "list[float]",
+          "gamma_2q": "list[float]",
+          "gate_time_1q_ns": "list[float]",
+          "gate_time_2q_ns": "list[float]",
+          "lam_1q": "list[float]",
+          "lam_2q": "list[float]",
+          "model": "str",
+          "p0_given_1": "list[float]",
+          "p1_given_0": "list[float]",
+          "preset": "list[str]",
+          "readout_rate": "list[float]",
+          "t1_ns": "list[float]",
+          "t2_ns": "list[float]"
+        },
+        "transpile": {
+          "optimization_level": "int",
+          "save_qasm": "bool"
+        }
+      },
+      "training": {
+        "checkpoint_every": "int",
+        "diagnostics": {
+          "anti_concentration": {
+            "alphas": "list[float]",
+            "beta_min": "float",
+            "primary_alpha": "float",
+            "second_moment_threshold": "float"
+          },
+          "distribution_mode": "str",
+          "enabled": "bool",
+          "exact_probability_max_n": "int",
+          "max_order": "int",
+          "max_subsets_per_order": "int",
+          "sample_count": "int",
+          "sample_from_exact_probability_max_n": "int"
+        },
+        "exact_loss_max_n": "int",
+        "loss_mode": "str",
+        "lr": "float",
+        "num_steps": "int",
+        "optimizer": "str"
+      }
+    },
+    "declared_paths": [],
+    "gaussian_related": true,
+    "keyword_hits": [
+      "bandwidth",
+      "checkpoint",
+      "dataset",
+      "gaussian",
+      "iqp",
+      "ising",
+      "marginal",
+      "mixture",
+      "sigma"
+    ],
+    "kind": "config",
+    "parse_error": null,
+    "parse_status": "parsed",
+    "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\schema.yaml",
+    "relative_path": "configs/schema.yaml",
+    "sha256": "1b509e666e48fa12412da2fbca4ec3c5671c543f6031a589625e2dc0f86be35b",
+    "size_bytes": 10364,
+    "suffix": ".yaml"
+  },
+  "copy_performed": false,
+  "disposition": "reference_only",
+  "execution_state": "not_run",
+  "missing_data_policy": "No missing dataset is generated by this manifest.",
+  "reason": "The source row is a large/JAX variance study; it is inventoried for provenance, not silently reduced to a different run.",
+  "requested_pinned_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "result_evidence": [],
+  "schema_version": "v4_tcdp.sibling_export_manifest.v1",
+  "source_branch": "alejack312",
+  "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "source_dirty": false,
+  "source_id": "str:configs/schema.yaml",
+  "source_pin_status": "MATCH",
+  "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+  "source_tree_identity_kind": "git_tree"
+}
