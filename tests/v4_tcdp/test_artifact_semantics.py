@@ -1,7 +1,30 @@
 import json
+import copy
 from pathlib import Path
 
 from scripts.v4_tcdp.validate_artifacts import validate
+
+
+def test_current_comparison_rejects_missing_support_and_conflicting_acceptance(tmp_path: Path) -> None:
+    source = next(Path("results/v4_tcdp/corrections_20260910/metrics_v5").glob("*.json"))
+    baseline = json.loads(source.read_text(encoding="utf-8"))
+    destination = tmp_path / "comparison.json"
+    _write(destination, baseline)
+    assert validate(tmp_path)["status"] == "PASS"
+
+    missing = copy.deepcopy(baseline)
+    for row in missing["metrics"].values():
+        row.pop("support_validity")
+    _write(destination, missing)
+    assert validate(tmp_path)["status"] == "FAIL"
+
+    inconsistent = copy.deepcopy(baseline)
+    arm = inconsistent["arms"][0]
+    row = inconsistent["metrics"][f"{arm['stage']}:{arm['backend_id']}"]
+    row["acceptance_mass"] = arm["acceptance_mass"] * 0.5
+    row["attempts_per_accepted_sample"] = 1.0 / row["acceptance_mass"]
+    _write(destination, inconsistent)
+    assert validate(tmp_path)["status"] == "FAIL"
 
 
 def _write(path: Path, value: object) -> Path:

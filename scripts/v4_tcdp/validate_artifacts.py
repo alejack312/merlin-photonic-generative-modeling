@@ -79,6 +79,7 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
             ):
                 failures.append(f"{path}: current matched comparison lacks a valid target_hash")
         arm_keys = set()
+        arm_acceptance = {}
         for arm in arms:
             if not isinstance(arm, dict):
                 failures.append(f"{path}: matched comparison arm is not an object")
@@ -86,6 +87,7 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
             key = f"{arm.get('stage')}:{arm.get('backend_id')}"
             arm_keys.add(key)
             acceptance = arm.get("acceptance_mass")
+            arm_acceptance[key] = acceptance
             if not _finite_number(acceptance) or not 0.0 < float(acceptance) <= 1.0:
                 failures.append(f"{path}: invalid arm acceptance_mass for {key}")
         if arm_keys != set(metrics):
@@ -100,7 +102,12 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
                 failures.append(f"{path}: invalid metric acceptance_mass for {key}")
             elif not _finite_number(attempts) or not math.isclose(float(attempts), 1.0 / float(acceptance), rel_tol=0.0, abs_tol=1e-12):
                 failures.append(f"{path}: attempts_per_accepted_sample is inconsistent for {key}")
+            if _is_current_comparison_artifact(path) and _finite_number(acceptance) and _finite_number(arm_acceptance.get(key)):
+                if not math.isclose(float(acceptance), float(arm_acceptance[key]), rel_tol=1e-12, abs_tol=0.0):
+                    failures.append(f"{path}: metric acceptance_mass disagrees with arm for {key}")
             support = row.get("support_validity")
+            if support is None and _is_current_comparison_artifact(path):
+                failures.append(f"{path}: current metric row lacks support_validity for {key}")
             if support is not None and (not _finite_number(support) or not 0.0 <= float(support) <= 1.0):
                 failures.append(f"{path}: invalid support_validity for {key}")
             if support is not None and _is_current_comparison_artifact(path):
