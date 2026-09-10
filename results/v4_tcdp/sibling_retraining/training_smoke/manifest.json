@@ -1,0 +1,12 @@
+[
+  {
+    "family": "product_state",
+    "kernel": "gaussian",
+    "init_scheme": "small_angle",
+    "n": 6,
+    "bandwidth": 4.0,
+    "er_p_edge": null,
+    "small_angle_std": 0.15,
+    "dataset_type": "product_bernoulli"
+  }
+]

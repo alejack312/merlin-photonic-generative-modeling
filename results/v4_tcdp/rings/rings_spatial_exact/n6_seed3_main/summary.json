@@ -1,0 +1,43 @@
+{
+  "initialization": {
+    "method": "parity",
+    "parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
+    "randomness_source": "none; exact train target moments",
+    "scale": 0.1,
+    "scheme": "data_dependent",
+    "seed": 3,
+    "target_dataset_hash": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+    "target_moments_hash": "dc09e3bff1e9484b8a5fb6a2b5a6b63f980076da3eaf65322b8278a3a4e42806",
+    "target_representation": "exact_probabilities",
+    "target_split": "train"
+  },
+  "metrics": {
+    "quantization_floor_rms": 0.0705800271431736,
+    "test_hamming_mmd2_sigma_primary": 0.011494748674344395,
+    "test_spatial_mmd2": 0.04155825792562495,
+    "test_tvd": 0.5493439803951713,
+    "train_hamming_mmd2_sigma_primary": 0.0046814590025281485,
+    "train_spatial_mmd2": 0.030321422183296948,
+    "train_tvd": 0.5118206423475529
+  },
+  "photonic_evaluation": {
+    "reason": "Phase 28 owned scope has no validated ideal photonic ring deployment adapter; no unsupported simulator label is substituted.",
+    "status": "INCONCLUSIVE"
+  },
+  "replication_identity": {
+    "deterministic_initialization": true,
+    "duplicate_of": "rings_spatial_exact/n6_seed0_main",
+    "equivalence_key": "c039a1a7f7d4cc04e8f26d643c75ea958d46e464ac57f1730d2bb29e6b49a65b",
+    "final_parameter_hash": "f2471835e6518eca0a62a19c0eee73881636a9352f4643fdfb962688fc3a2c79",
+    "independent_replica": false,
+    "initial_parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
+    "n_unique_parameterizations_observed": 2,
+    "observed_replica_count": 5,
+    "randomness_source": "none; exact train target moments",
+    "replica_id": "rings_spatial_exact/n6_seed3_main",
+    "replication_group": "rings_spatial_exact/n6/main",
+    "seed": 3,
+    "status": "duplicate_deterministic"
+  },
+  "run_id": "rings_spatial_exact/n6_seed3_main"
+}

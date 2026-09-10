@@ -1,0 +1,1012 @@
+{
+  "config": {
+    "generator_family": "chain_1d",
+    "initialization": "data_dependent",
+    "initialization_method": "parity",
+    "initialization_scale": 0.1,
+    "initialization_std": 0.1,
+    "lr": 0.05,
+    "n": 6,
+    "optimizer": "adam",
+    "profile_id": "rings_hamming",
+    "profile_kernel_kind": "hamming_gaussian",
+    "run_kind": "main",
+    "seed": 0,
+    "sigma": 1.224744871391589,
+    "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+    "steps": 300
+  },
+  "dataset": {
+    "codec": {
+      "bit_order": "msb_first",
+      "centers_hash": "029214415b16dec983484b4d3ac13256b4fdc26429a49664e6df5263f8754ab7",
+      "cols": 8,
+      "hi": 1.1,
+      "index_order": "row_major",
+      "lo": -0.1,
+      "mapping": [
+        {
+          "bitstring": "000000",
+          "center": [
+            -0.1,
+            -0.1
+          ],
+          "column": 0,
+          "index": 0,
+          "row": 0
+        },
+        {
+          "bitstring": "000001",
+          "center": [
+            -0.1,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 1,
+          "row": 0
+        },
+        {
+          "bitstring": "000010",
+          "center": [
+            -0.1,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 2,
+          "row": 0
+        },
+        {
+          "bitstring": "000011",
+          "center": [
+            -0.1,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 3,
+          "row": 0
+        },
+        {
+          "bitstring": "000100",
+          "center": [
+            -0.1,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 4,
+          "row": 0
+        },
+        {
+          "bitstring": "000101",
+          "center": [
+            -0.1,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 5,
+          "row": 0
+        },
+        {
+          "bitstring": "000110",
+          "center": [
+            -0.1,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 6,
+          "row": 0
+        },
+        {
+          "bitstring": "000111",
+          "center": [
+            -0.1,
+            1.1
+          ],
+          "column": 7,
+          "index": 7,
+          "row": 0
+        },
+        {
+          "bitstring": "001000",
+          "center": [
+            0.07142857142857145,
+            -0.1
+          ],
+          "column": 0,
+          "index": 8,
+          "row": 1
+        },
+        {
+          "bitstring": "001001",
+          "center": [
+            0.07142857142857145,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 9,
+          "row": 1
+        },
+        {
+          "bitstring": "001010",
+          "center": [
+            0.07142857142857145,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 10,
+          "row": 1
+        },
+        {
+          "bitstring": "001011",
+          "center": [
+            0.07142857142857145,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 11,
+          "row": 1
+        },
+        {
+          "bitstring": "001100",
+          "center": [
+            0.07142857142857145,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 12,
+          "row": 1
+        },
+        {
+          "bitstring": "001101",
+          "center": [
+            0.07142857142857145,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 13,
+          "row": 1
+        },
+        {
+          "bitstring": "001110",
+          "center": [
+            0.07142857142857145,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 14,
+          "row": 1
+        },
+        {
+          "bitstring": "001111",
+          "center": [
+            0.07142857142857145,
+            1.1
+          ],
+          "column": 7,
+          "index": 15,
+          "row": 1
+        },
+        {
+          "bitstring": "010000",
+          "center": [
+            0.2428571428571429,
+            -0.1
+          ],
+          "column": 0,
+          "index": 16,
+          "row": 2
+        },
+        {
+          "bitstring": "010001",
+          "center": [
+            0.2428571428571429,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 17,
+          "row": 2
+        },
+        {
+          "bitstring": "010010",
+          "center": [
+            0.2428571428571429,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 18,
+          "row": 2
+        },
+        {
+          "bitstring": "010011",
+          "center": [
+            0.2428571428571429,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 19,
+          "row": 2
+        },
+        {
+          "bitstring": "010100",
+          "center": [
+            0.2428571428571429,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 20,
+          "row": 2
+        },
+        {
+          "bitstring": "010101",
+          "center": [
+            0.2428571428571429,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 21,
+          "row": 2
+        },
+        {
+          "bitstring": "010110",
+          "center": [
+            0.2428571428571429,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 22,
+          "row": 2
+        },
+        {
+          "bitstring": "010111",
+          "center": [
+            0.2428571428571429,
+            1.1
+          ],
+          "column": 7,
+          "index": 23,
+          "row": 2
+        },
+        {
+          "bitstring": "011000",
+          "center": [
+            0.41428571428571437,
+            -0.1
+          ],
+          "column": 0,
+          "index": 24,
+          "row": 3
+        },
+        {
+          "bitstring": "011001",
+          "center": [
+            0.41428571428571437,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 25,
+          "row": 3
+        },
+        {
+          "bitstring": "011010",
+          "center": [
+            0.41428571428571437,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 26,
+          "row": 3
+        },
+        {
+          "bitstring": "011011",
+          "center": [
+            0.41428571428571437,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 27,
+          "row": 3
+        },
+        {
+          "bitstring": "011100",
+          "center": [
+            0.41428571428571437,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 28,
+          "row": 3
+        },
+        {
+          "bitstring": "011101",
+          "center": [
+            0.41428571428571437,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 29,
+          "row": 3
+        },
+        {
+          "bitstring": "011110",
+          "center": [
+            0.41428571428571437,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 30,
+          "row": 3
+        },
+        {
+          "bitstring": "011111",
+          "center": [
+            0.41428571428571437,
+            1.1
+          ],
+          "column": 7,
+          "index": 31,
+          "row": 3
+        },
+        {
+          "bitstring": "100000",
+          "center": [
+            0.5857142857142859,
+            -0.1
+          ],
+          "column": 0,
+          "index": 32,
+          "row": 4
+        },
+        {
+          "bitstring": "100001",
+          "center": [
+            0.5857142857142859,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 33,
+          "row": 4
+        },
+        {
+          "bitstring": "100010",
+          "center": [
+            0.5857142857142859,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 34,
+          "row": 4
+        },
+        {
+          "bitstring": "100011",
+          "center": [
+            0.5857142857142859,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 35,
+          "row": 4
+        },
+        {
+          "bitstring": "100100",
+          "center": [
+            0.5857142857142859,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 36,
+          "row": 4
+        },
+        {
+          "bitstring": "100101",
+          "center": [
+            0.5857142857142859,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 37,
+          "row": 4
+        },
+        {
+          "bitstring": "100110",
+          "center": [
+            0.5857142857142859,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 38,
+          "row": 4
+        },
+        {
+          "bitstring": "100111",
+          "center": [
+            0.5857142857142859,
+            1.1
+          ],
+          "column": 7,
+          "index": 39,
+          "row": 4
+        },
+        {
+          "bitstring": "101000",
+          "center": [
+            0.7571428571428573,
+            -0.1
+          ],
+          "column": 0,
+          "index": 40,
+          "row": 5
+        },
+        {
+          "bitstring": "101001",
+          "center": [
+            0.7571428571428573,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 41,
+          "row": 5
+        },
+        {
+          "bitstring": "101010",
+          "center": [
+            0.7571428571428573,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 42,
+          "row": 5
+        },
+        {
+          "bitstring": "101011",
+          "center": [
+            0.7571428571428573,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 43,
+          "row": 5
+        },
+        {
+          "bitstring": "101100",
+          "center": [
+            0.7571428571428573,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 44,
+          "row": 5
+        },
+        {
+          "bitstring": "101101",
+          "center": [
+            0.7571428571428573,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 45,
+          "row": 5
+        },
+        {
+          "bitstring": "101110",
+          "center": [
+            0.7571428571428573,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 46,
+          "row": 5
+        },
+        {
+          "bitstring": "101111",
+          "center": [
+            0.7571428571428573,
+            1.1
+          ],
+          "column": 7,
+          "index": 47,
+          "row": 5
+        },
+        {
+          "bitstring": "110000",
+          "center": [
+            0.9285714285714287,
+            -0.1
+          ],
+          "column": 0,
+          "index": 48,
+          "row": 6
+        },
+        {
+          "bitstring": "110001",
+          "center": [
+            0.9285714285714287,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 49,
+          "row": 6
+        },
+        {
+          "bitstring": "110010",
+          "center": [
+            0.9285714285714287,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 50,
+          "row": 6
+        },
+        {
+          "bitstring": "110011",
+          "center": [
+            0.9285714285714287,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 51,
+          "row": 6
+        },
+        {
+          "bitstring": "110100",
+          "center": [
+            0.9285714285714287,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 52,
+          "row": 6
+        },
+        {
+          "bitstring": "110101",
+          "center": [
+            0.9285714285714287,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 53,
+          "row": 6
+        },
+        {
+          "bitstring": "110110",
+          "center": [
+            0.9285714285714287,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 54,
+          "row": 6
+        },
+        {
+          "bitstring": "110111",
+          "center": [
+            0.9285714285714287,
+            1.1
+          ],
+          "column": 7,
+          "index": 55,
+          "row": 6
+        },
+        {
+          "bitstring": "111000",
+          "center": [
+            1.1,
+            -0.1
+          ],
+          "column": 0,
+          "index": 56,
+          "row": 7
+        },
+        {
+          "bitstring": "111001",
+          "center": [
+            1.1,
+            0.07142857142857145
+          ],
+          "column": 1,
+          "index": 57,
+          "row": 7
+        },
+        {
+          "bitstring": "111010",
+          "center": [
+            1.1,
+            0.2428571428571429
+          ],
+          "column": 2,
+          "index": 58,
+          "row": 7
+        },
+        {
+          "bitstring": "111011",
+          "center": [
+            1.1,
+            0.41428571428571437
+          ],
+          "column": 3,
+          "index": 59,
+          "row": 7
+        },
+        {
+          "bitstring": "111100",
+          "center": [
+            1.1,
+            0.5857142857142859
+          ],
+          "column": 4,
+          "index": 60,
+          "row": 7
+        },
+        {
+          "bitstring": "111101",
+          "center": [
+            1.1,
+            0.7571428571428573
+          ],
+          "column": 5,
+          "index": 61,
+          "row": 7
+        },
+        {
+          "bitstring": "111110",
+          "center": [
+            1.1,
+            0.9285714285714287
+          ],
+          "column": 6,
+          "index": 62,
+          "row": 7
+        },
+        {
+          "bitstring": "111111",
+          "center": [
+            1.1,
+            1.1
+          ],
+          "column": 7,
+          "index": 63,
+          "row": 7
+        }
+      ],
+      "n": 6,
+      "rows": 8,
+      "tie_breaking": "lowest_row_major_index"
+    },
+    "dataset_hash": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+    "dataset_id": "rings.make_circles.400.seed42.split42.train_minmax",
+    "histograms": {
+      "test_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        3,
+        4,
+        4,
+        5,
+        0,
+        0,
+        0,
+        2,
+        2,
+        0,
+        0,
+        4,
+        1,
+        0,
+        0,
+        5,
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        7,
+        0,
+        0,
+        3,
+        2,
+        0,
+        0,
+        5,
+        3,
+        0,
+        0,
+        0,
+        4,
+        9,
+        5,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "test_hash": "07c868ec4617af126139d4267ce8fded5ea4b7a176d84141a8c0e41c39ff3fa4",
+      "train_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        13,
+        23,
+        21,
+        11,
+        1,
+        0,
+        0,
+        14,
+        13,
+        0,
+        0,
+        11,
+        15,
+        0,
+        0,
+        22,
+        0,
+        0,
+        0,
+        0,
+        22,
+        0,
+        0,
+        21,
+        0,
+        0,
+        0,
+        0,
+        18,
+        0,
+        0,
+        13,
+        13,
+        0,
+        0,
+        10,
+        13,
+        0,
+        0,
+        1,
+        12,
+        18,
+        20,
+        13,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "train_hash": "2e54d2e9f303e46726ff62759f4c35f36c7c857cc9a765f9b57ead47916dded3"
+    },
+    "n": 6,
+    "normalized_test_hash": "52bf7f9fcd0f41331e367ec42e16620fafd709b79c69018daa9050ddfd3371ed",
+    "normalized_train_hash": "585649e3d7e6497a35fa8888d35efb956e68b9de9851ad2c9239416c47baff38",
+    "quantization": {
+      "test": {
+        "exact_tie_count": 0,
+        "max_euclidean_error": 0.1076925848823117,
+        "max_tie_multiplicity": 1,
+        "mean_euclidean_error": 0.06986671489660803,
+        "mean_squared_error": 0.005396557193470224,
+        "rms_euclidean_error": 0.0734612632172237,
+        "samples": 80,
+        "tie_breaking": "lowest_row_major_index"
+      },
+      "train": {
+        "exact_tie_count": 2,
+        "max_euclidean_error": 0.11157499537009502,
+        "max_tie_multiplicity": 2,
+        "mean_euclidean_error": 0.06545601136031357,
+        "mean_squared_error": 0.004981540231531123,
+        "rms_euclidean_error": 0.0705800271431736,
+        "samples": 320,
+        "tie_breaking": "lowest_row_major_index"
+      }
+    },
+    "raw_split_sizes": {
+      "test": 80,
+      "train": 320
+    },
+    "raw_test_hash": "a042ed189fbc8f0ebe13a1643fa5c2d6c20a90130d56fbcb16068d9b3608c997",
+    "raw_train_hash": "5337f1b701786c9cad11dc9e68a04e484b19b7056b55a7d73e70ca433ac89e5e",
+    "schema_version": "v4_tcdp.rings_dataset.v1",
+    "test_ids_hash": "03035d60e5a837eb8ece20a277838a5fc0153ff72079d195e18ef5fb9390acc6",
+    "train_ids_hash": "4849214aeb5c229401eec2978f02df43b39f16eea071c3ccdb9a36237c849d68",
+    "transform": {
+      "clip_floor": 1e-06,
+      "kind": "train_derived_minmax",
+      "max_values": [
+        1.0,
+        1.0
+      ],
+      "min_values": [
+        -1.0,
+        -1.0
+      ],
+      "normalized_dtype": "float32",
+      "scale": [
+        2.0,
+        2.0
+      ]
+    }
+  },
+  "environment": {
+    "numpy": "2.5.1",
+    "python": "3.12.1"
+  },
+  "initialization": {
+    "method": "parity",
+    "parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
+    "randomness_source": "none; exact train target moments",
+    "scale": 0.1,
+    "scheme": "data_dependent",
+    "seed": 0,
+    "target_dataset_hash": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+    "target_moments_hash": "dc09e3bff1e9484b8a5fb6a2b5a6b63f980076da3eaf65322b8278a3a4e42806",
+    "target_representation": "exact_probabilities",
+    "target_split": "train"
+  },
+  "legacy_v1_context": {
+    "ansatz": "QuantumLayer.simple",
+    "native_mmd_comparison": "forbidden_unmatched_ansatz_and_output_space",
+    "output_bins": 462,
+    "status": "context_only"
+  },
+  "manifest_hash": "388b966dcba9631015d189b5287f8b8e10665d0ddd3c877f7a9b009eb052631c",
+  "metrics": {
+    "quantization_floor_rms": 0.0705800271431736,
+    "test_hamming_mmd2_sigma_primary": 0.00891419098411555,
+    "test_spatial_mmd2": 0.04571385528662353,
+    "test_tvd": 0.5672522159875856,
+    "train_hamming_mmd2_sigma_primary": 0.005201935776145374,
+    "train_spatial_mmd2": 0.03522877789302731,
+    "train_tvd": 0.5539286313328513
+  },
+  "model": {
+    "bit_order": "msb_first",
+    "final_theta_hash": "bd41364896042846723853856162664cbc10d9670d52c0314e77eb65b3ed2bb7",
+    "generator_family": "chain_1d",
+    "generator_hash": "2703879beb2637679d02497c3df1fc0d6f6f305eb4199d8f8d867ad19ecf3d17",
+    "generator_shape": [
+      11,
+      6
+    ],
+    "initial_theta_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
+    "output_probability_hash": "c94dd204f0c7ea16cb420a4f00d2a603a569bbca40efe9e7d2cfbc701813646b"
+  },
+  "photonic_evaluation": {
+    "reason": "Phase 28 owned scope has no validated ideal photonic ring deployment adapter; no unsupported simulator label is substituted.",
+    "status": "INCONCLUSIVE"
+  },
+  "profile_registry": {
+    "rings_hamming": {
+      "budget_status": "registered_not_launched",
+      "default_initialization": "data_dependent",
+      "default_initialization_method": "parity",
+      "default_initialization_scale": 0.1,
+      "initialization_ablations": [
+        "small_angle",
+        "uniform"
+      ],
+      "kernel_kind": "hamming_gaussian",
+      "main_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "main_steps": 300,
+      "registered_n": [
+        4,
+        6,
+        8
+      ],
+      "sigma_rule": "0.5*sqrt(n)"
+    },
+    "rings_spatial_exact": {
+      "budget_status": "registered_not_launched",
+      "default_initialization": "data_dependent",
+      "default_initialization_method": "parity",
+      "default_initialization_scale": 0.1,
+      "initialization_ablations": [
+        "small_angle",
+        "uniform"
+      ],
+      "kernel_kind": "spatial_gaussian",
+      "main_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "main_steps": 300,
+      "registered_n": [
+        4,
+        6,
+        8
+      ],
+      "sigma_rule": "0.1"
+    }
+  },
+  "replication_identity": {
+    "deterministic_initialization": true,
+    "duplicate_of": null,
+    "equivalence_key": "dcb72f063e72f3e3c4edf749e15ef8d85b7d7ba38435f27be8fadee381f38032",
+    "final_parameter_hash": "bd41364896042846723853856162664cbc10d9670d52c0314e77eb65b3ed2bb7",
+    "independent_replica": false,
+    "initial_parameter_hash": "52cd09e986d257c8e595e041c2302b9dac3805ab7f81f1ae06762c759bcf922e",
+    "n_unique_parameterizations_observed": 2,
+    "observed_replica_count": 5,
+    "randomness_source": "none; exact train target moments",
+    "replica_id": "rings_hamming/n6_seed0_main",
+    "replication_group": "rings_hamming/n6/main",
+    "seed": 0,
+    "status": "deterministic_primary"
+  },
+  "run_id": "rings_hamming/n6_seed0_main",
+  "schema_version": "v4_tcdp.rings_run.v2",
+  "selection_rule": "fixed_last_step",
+  "source_provenance": {
+    "dirty": true,
+    "git_status": [
+      "M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed2_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed2_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed3_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed3_main/summary.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed4_main/manifest.json",
+      " M results/v4_tcdp/rings/rings_spatial_exact/n8_seed4_main/summary.json",
+      "?? results/v4_tcdp/sibling_replays/training_smoke_configs_experiments_training_smoke_yaml__f6d6ebe87e4ee1de__12843f05ea590fae/"
+    ],
+    "observed_branch": "codex/v4-implementation",
+    "observed_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+    "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+    "tree_identity": "1fa2d7e1c9759c12561fef0286e41513c96118db2701bd6aed7ad4c3f442e7eb",
+    "tree_identity_kind": "working_tree_content_sha256"
+  }
+}

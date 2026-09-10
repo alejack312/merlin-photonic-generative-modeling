@@ -1,0 +1,210 @@
+{
+  "cells": [
+    {
+      "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
+      "max_loss_abs_error": 0.0,
+      "max_theta_abs_error": 0.0,
+      "rerun_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 984531953,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "rerun_final_loss": 0.10192286667746661,
+      "rerun_trajectory": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma1p0\\trajectory.jsonl",
+      "rerun_trajectory_sha256": "1c0684b35e8d709c06b269600f20f2a04343906b24f0af8bfc3a64bae55f8b65",
+      "source_cell": {
+        "bandwidth": 1.0,
+        "dataset_type": "binary_mixture",
+        "family": "lattice",
+        "init": "uniform",
+        "kernel": "gaussian",
+        "n": 9
+      },
+      "source_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 984531953,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "source_final_loss": 0.10192286667746661,
+      "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma1p0\\trajectory.jsonl",
+      "source_trajectory_sha256": "56d3b3fb29397133adb68f3d9e7dd57ae708fd6e59ae35a7bd97bbdd1b0250b2",
+      "status": "PASS",
+      "trajectory_rows": 5
+    },
+    {
+      "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
+      "max_loss_abs_error": 0.0,
+      "max_theta_abs_error": 0.0,
+      "rerun_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 811030217,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "rerun_final_loss": 0.0255036652945119,
+      "rerun_trajectory": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma3p0\\trajectory.jsonl",
+      "rerun_trajectory_sha256": "e0c081b3d2ecb4cb94e6c3d23cd874413c78e85eebba58b304c89c212e79feaf",
+      "source_cell": {
+        "bandwidth": 3.0,
+        "dataset_type": "binary_mixture",
+        "family": "lattice",
+        "init": "uniform",
+        "kernel": "gaussian",
+        "n": 9
+      },
+      "source_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 811030217,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "source_final_loss": 0.0255036652945119,
+      "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma3p0\\trajectory.jsonl",
+      "source_trajectory_sha256": "9f89a3f90706e1e5d3e678ca86c36d080f7b7b10d60c3affe1c645bfeb589bf2",
+      "status": "PASS",
+      "trajectory_rows": 5
+    },
+    {
+      "interpretation": "Source and retrained trajectories matched within fixed 1e-12 tolerance.",
+      "max_loss_abs_error": 0.0,
+      "max_theta_abs_error": 0.0,
+      "rerun_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 764997582,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "rerun_final_loss": 0.0010016028827352754,
+      "rerun_trajectory": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma9p0\\trajectory.jsonl",
+      "rerun_trajectory_sha256": "93eacbdbca422ccb25f5dd1465c2028cc8324e85f2947b2f317d3249271f8904",
+      "source_cell": {
+        "bandwidth": 9.0,
+        "dataset_type": "binary_mixture",
+        "family": "lattice",
+        "init": "uniform",
+        "kernel": "gaussian",
+        "n": 9
+      },
+      "source_dataset_metadata": {
+        "latent_center_generation_policy": "standard_normal",
+        "n_modes": 4,
+        "n_samples": 512,
+        "noise": 0.1,
+        "seed": 764997582,
+        "threshold": 0.0,
+        "type": "binary_mixture"
+      },
+      "source_final_loss": 0.0010016028827352754,
+      "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma9p0\\trajectory.jsonl",
+      "source_trajectory_sha256": "758ca114c96b481326f5bafbe47c079a59034d931b46ff74d6f80f7dee662f55",
+      "status": "PASS",
+      "trajectory_rows": 5
+    }
+  ],
+  "config_comparison": {
+    "changed_fields": [
+      "experiment.description",
+      "experiment.name",
+      "experiment.output_dir",
+      "forge.plateau_agreement.label_kind"
+    ],
+    "note": "The source runner's active circuit, dataset, kernel and training settings must be identical; output metadata is redirected, and only the explicitly listed resolver defaults may be materialized in the isolated rerun.",
+    "output_redirected_fields": [
+      {
+        "field": "experiment.description",
+        "rerun": "Isolated faithful rerun of the pinned sibling Ghosh-Kim small-n cells",
+        "source": "Exact small-n learned-distribution AC cell"
+      },
+      {
+        "field": "experiment.name",
+        "rerun": "ghosh_kim_small_n_v4_retrain",
+        "source": "ghosh_kim_small_n"
+      },
+      {
+        "field": "experiment.output_dir",
+        "rerun": "results/v4_tcdp/sibling_retraining/closure_20260908/ghosh_kim_source_rerun",
+        "source": "results/ac_ghosh_kim/small_n_exact"
+      }
+    ],
+    "resolved_default_fields": [
+      {
+        "field": "forge.plateau_agreement.label_kind",
+        "rerun": "concentration",
+        "source": "<missing>"
+      }
+    ],
+    "status": "PASS",
+    "unexpected_fields": []
+  },
+  "registered_budget": {
+    "bandwidths": [
+      1.0,
+      3.0,
+      9.0
+    ],
+    "cells": 3,
+    "n": [
+      9
+    ],
+    "steps": [
+      0,
+      5,
+      10,
+      15,
+      20
+    ]
+  },
+  "reproduction_kind": "faithful_source_retraining",
+  "rerun_output": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun",
+  "rerun_results": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\results.jsonl",
+  "rerun_results_sha256": "80cf55d0416e12328440cfe474d9f8bd76c830835e5c4c12b7e2f3a6e0cc7e40",
+  "resolved_rerun_config": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\ghosh_kim_source_rerun\\config.json",
+  "resolved_rerun_config_sha256": "b6be0c73f432dcacc926040358370ff15cb78fbd0c80213e87d03ae9a7e81ae9",
+  "resolved_source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\config.json",
+  "resolved_source_config_sha256": "71533c0676cc627d561d34210e9bd6edb84f90d1192d8b3ea36377f8f0a86117",
+  "schema_version": "v4_tcdp.sibling_bandwidth_validation.v1",
+  "sibling_unchanged": true,
+  "source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_small_n.yaml",
+  "source_config_sha256": "e6e0056ea4bb0389d3557cdab512c0bd1b3baaa8c0737cee053f91d5e0ad70f3",
+  "source_identity_after": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "source_identity_before": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "source_results": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\results.jsonl",
+  "source_results_sha256": "2957345970f78392e07b52032193e5ac49e9227ee1d74634fca357fd3d5eb956",
+  "status": "PASS",
+  "trajectory_tolerance": 1e-12
+}

@@ -1,0 +1,425 @@
+{
+  "codec": {
+    "bit_order": "msb_first",
+    "centers_hash": "8ad8820e5ec5762d83d41c1051838ac8454e868e91b15f562bb0bd7d94de8d5e",
+    "cols": 4,
+    "hi": 1.1,
+    "index_order": "row_major",
+    "lo": -0.1,
+    "mapping": [
+      {
+        "bitstring": "0000",
+        "center": [
+          -0.1,
+          -0.1
+        ],
+        "column": 0,
+        "index": 0,
+        "row": 0
+      },
+      {
+        "bitstring": "0001",
+        "center": [
+          -0.1,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 1,
+        "row": 0
+      },
+      {
+        "bitstring": "0010",
+        "center": [
+          -0.1,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 2,
+        "row": 0
+      },
+      {
+        "bitstring": "0011",
+        "center": [
+          -0.1,
+          1.1
+        ],
+        "column": 3,
+        "index": 3,
+        "row": 0
+      },
+      {
+        "bitstring": "0100",
+        "center": [
+          0.30000000000000004,
+          -0.1
+        ],
+        "column": 0,
+        "index": 4,
+        "row": 1
+      },
+      {
+        "bitstring": "0101",
+        "center": [
+          0.30000000000000004,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 5,
+        "row": 1
+      },
+      {
+        "bitstring": "0110",
+        "center": [
+          0.30000000000000004,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 6,
+        "row": 1
+      },
+      {
+        "bitstring": "0111",
+        "center": [
+          0.30000000000000004,
+          1.1
+        ],
+        "column": 3,
+        "index": 7,
+        "row": 1
+      },
+      {
+        "bitstring": "1000",
+        "center": [
+          0.7000000000000002,
+          -0.1
+        ],
+        "column": 0,
+        "index": 8,
+        "row": 2
+      },
+      {
+        "bitstring": "1001",
+        "center": [
+          0.7000000000000002,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 9,
+        "row": 2
+      },
+      {
+        "bitstring": "1010",
+        "center": [
+          0.7000000000000002,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 10,
+        "row": 2
+      },
+      {
+        "bitstring": "1011",
+        "center": [
+          0.7000000000000002,
+          1.1
+        ],
+        "column": 3,
+        "index": 11,
+        "row": 2
+      },
+      {
+        "bitstring": "1100",
+        "center": [
+          1.1,
+          -0.1
+        ],
+        "column": 0,
+        "index": 12,
+        "row": 3
+      },
+      {
+        "bitstring": "1101",
+        "center": [
+          1.1,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 13,
+        "row": 3
+      },
+      {
+        "bitstring": "1110",
+        "center": [
+          1.1,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 14,
+        "row": 3
+      },
+      {
+        "bitstring": "1111",
+        "center": [
+          1.1,
+          1.1
+        ],
+        "column": 3,
+        "index": 15,
+        "row": 3
+      }
+    ],
+    "n": 4,
+    "rows": 4,
+    "tie_breaking": "lowest_row_major_index"
+  },
+  "comparison": {
+    "direct_vs_compiled_qubit_tvd": 1.767385066422933e-16,
+    "direct_vs_raw_qubit_tvd": 0.00644038040883457,
+    "final_only_selected_boundary": true,
+    "intermediate_shared_gate_comparison": {
+      "conditional_tvd_final_only_vs_intermediate": 0.585411845271861,
+      "materiality_threshold": 0.001,
+      "reason": "shared-gate conditional projection differs materially; final_only is the supported boundary",
+      "supported": false
+    },
+    "metrics": {
+      "hamming_mmd2": 1.4576313978638352e-32,
+      "profile_mmd2": 1.4576313978638352e-32,
+      "spatial_mmd2": 2.2989903449047633e-32,
+      "tvd": 1.767385066422933e-16
+    },
+    "status": "PASS"
+  },
+  "config": {
+    "generator_family": "chain_1d",
+    "initialization": "small_angle",
+    "initialization_std": 0.1,
+    "lr": 0.05,
+    "n": 4,
+    "optimizer": "adam",
+    "profile_id": "rings_hamming",
+    "profile_kernel_kind": "hamming_gaussian",
+    "run_kind": "smoke",
+    "seed": 0,
+    "sigma": 1.0,
+    "source_commit": "72e8079",
+    "steps": 3
+  },
+  "config_sha256": "5b3214a3bfdc0d79a054032ab5018deba777018a4f08c81fd6f45cd9911099b0",
+  "direct": {
+    "absolute_accepted_mass": 0.0013629669360371143,
+    "conditional_distribution": {
+      "0000": 0.7675944785372616,
+      "0001": 0.02205121532569927,
+      "0010": 0.03793119747365176,
+      "0011": 0.0639479033579288,
+      "0100": 0.02006744964021912,
+      "0101": 0.0006956996979201133,
+      "0110": 0.028687245266942673,
+      "0111": 0.0002007578560502761,
+      "1000": 0.02051798057730648,
+      "1001": 0.00042759625145902453,
+      "1010": 7.424960551229758e-05,
+      "1011": 0.0016014591015829284,
+      "1100": 0.03257742062648182,
+      "1101": 0.0007721129718944278,
+      "1110": 0.00022337717300471594,
+      "1111": 0.0026298565370846795
+    },
+    "decoded_bitstrings": [
+      "0000",
+      "0001",
+      "0010",
+      "0011",
+      "0100",
+      "0101",
+      "0110",
+      "0111",
+      "1000",
+      "1001",
+      "1010",
+      "1011",
+      "1100",
+      "1101",
+      "1110",
+      "1111"
+    ],
+    "decoded_conditional_vector": [
+      0.7675944785372616,
+      0.02205121532569927,
+      0.03793119747365176,
+      0.0639479033579288,
+      0.02006744964021912,
+      0.0006956996979201133,
+      0.028687245266942673,
+      0.0002007578560502761,
+      0.02051798057730648,
+      0.00042759625145902453,
+      7.424960551229758e-05,
+      0.0016014591015829284,
+      0.03257742062648182,
+      0.0007721129718944278,
+      0.00022337717300471594,
+      0.0026298565370846795
+    ],
+    "diagnostics": {
+      "accepted_state_count": 16,
+      "backend": "Perceval SLOS direct full-Fock",
+      "compiled_metadata": {
+        "alpha_keys": 63,
+        "alpha_step": 0.1,
+        "compiler": "merlin_iqp.deploy.compile",
+        "n": 4,
+        "pair_angles": [
+          {
+            "i": 0,
+            "j": 1,
+            "key": 55,
+            "lifted_alpha": -0.7831853071795862,
+            "lifted_theta": -0.19579632679489656,
+            "raw_alpha": -0.8050833823604474,
+            "raw_theta": -0.20127084559011185,
+            "winding": -1,
+            "wrapped_alpha": 5.5
+          },
+          {
+            "i": 1,
+            "j": 2,
+            "key": 7,
+            "lifted_alpha": 0.7000000000000001,
+            "lifted_theta": 0.17500000000000002,
+            "raw_alpha": 0.7277355681618629,
+            "raw_theta": 0.18193389204046573,
+            "winding": 0,
+            "wrapped_alpha": 0.7000000000000001
+          },
+          {
+            "i": 2,
+            "j": 3,
+            "key": 11,
+            "lifted_alpha": 1.1,
+            "lifted_theta": 0.275,
+            "raw_alpha": 1.121931288349418,
+            "raw_theta": 0.2804828220873545,
+            "winding": 0,
+            "wrapped_alpha": 1.1
+          }
+        ],
+        "quantized": true,
+        "topology": "path"
+      },
+      "distribution_hash": "0e74ddfcf731ff51a5f471ca763b899baf3e4d14f96aea130084db17336ef526",
+      "full_fock_state_count": 5621,
+      "perceval_version": "1.2.4",
+      "projection": "final_only",
+      "raw_source_acceptance": 0.0020773768267598144,
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true
+    },
+    "rejected_mass": 0.9986370330639629,
+    "status": "PASS"
+  },
+  "eta": 0.9,
+  "hashes": {
+    "compiled_metadata": "c5996e257f0473b2705235fe0fedb96025501030d425eba0bc9616230aa5f65b",
+    "compiled_qubit_reference": "99046ad04baed755e3543eca9a603ea2c5450015e3f5886c3e81d5a3e9232b74",
+    "configuration": "5b3214a3bfdc0d79a054032ab5018deba777018a4f08c81fd6f45cd9911099b0",
+    "dataset": "2a021db64ff4ce325765025da21cf8b6754a61648dbfa87050ee3853b4c949ae",
+    "decoded_conditional_vector": "9a0506ae08f6803cb8d6839d981270132e849f44be4eb6276cccd1354b91bdfc",
+    "final_theta": "bd02584159e7c05e611a42357c7beffbabdcd265626cbc6f2e7850b32ad88268",
+    "generator": "9f4c4ba8abb1416a673c5c82dfa891736d3a827f52a4995c8382f5e0f04fd7f2",
+    "manifest": "2d07425e3abda4a4ae5c0682a93ccded704b6b11ad57cc69d16a822ec52ed3aa",
+    "output_payload": "eb3c42f815b86ccb87d63aed2c4ec3ae7394ff17b52195f80a4a5f010db2bf04",
+    "raw_qubit_reference": "571f0b785ba3bf85ce559609ce861528b12803bd819bf28608fec0e1f2812aa4",
+    "run": "a1385a68e1b0132b4585fe8794c750da77a7af8d78e0adebeba3c8f76d57cebc",
+    "validation_manifest": "942ed80efbb6ee03ddf67f9a2f2e080f1693013a8800ba1aedc4f5e75d80e03a"
+  },
+  "projection": "final_only",
+  "provenance": {
+    "backend": "Perceval SLOS direct full-Fock",
+    "perceval_version": "1.2.4",
+    "physical_source_boundary": "fixed-photon g2=0, source once, explicit eta",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.1",
+    "repo": {
+      "dirty": false,
+      "git_status": [],
+      "observed_branch": "codex/v4-implementation",
+      "observed_commit": "bf01aa2bf2a91c5f0304a2fd9ee29a51f8267a0f",
+      "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+      "tree_identity": "7e5d2786080f2a7944b7a897f746dc0519ca1264",
+      "tree_identity_kind": "git_tree",
+      "workspace_git_status": [
+        " M results/v4_tcdp/deploy/physical_control_manifest.json",
+        "?? .Codex/learnings/2026-09-07-isolated-resource-pilot.md",
+        "?? results/v4_tcdp/deploy/physical_control_manifest_candidate.json",
+        "?? results/v4_tcdp/deploy/registered_ring_photonic_n4_seed0_smoke.json",
+        "?? results/v4_tcdp/nat/registered/",
+        "?? results/v4_tcdp/perceval-local/"
+      ]
+    },
+    "source_commit": "72e8079",
+    "validation_manifest_payload_sha256": "536a742c50ff7c992d5fb7a7d2d7fa7f8020951851e96b2cf4f5ceee4d50baf3",
+    "validation_manifest_status": "PASS"
+  },
+  "qubit_reference": {
+    "bit_order": "msb_first",
+    "compiled_quantized_theta": {
+      "0000": 0.7675944785372617,
+      "0001": 0.02205121532569919,
+      "0010": 0.03793119747365174,
+      "0011": 0.06394790335792876,
+      "0100": 0.020067449640219108,
+      "0101": 0.000695699697920112,
+      "0110": 0.028687245266942635,
+      "0111": 0.00020075785605026876,
+      "1000": 0.020517980577306503,
+      "1001": 0.0004275962514590217,
+      "1010": 7.424960551229468e-05,
+      "1011": 0.0016014591015829336,
+      "1100": 0.03257742062648182,
+      "1101": 0.0007721129718944175,
+      "1110": 0.00022337717300471645,
+      "1111": 0.0026298565370846756
+    },
+    "compiled_vector_sha256": "6b5c98bb7908bf5b2ddf31e106c8b474429e734b89846d93c0790b7deab82d13",
+    "raw_final_theta": {
+      "0000": 0.7613723396474577,
+      "0001": 0.02213395071370834,
+      "0010": 0.037755702795212544,
+      "0011": 0.0661373737233632,
+      "0100": 0.020036507008712394,
+      "0101": 0.0008410959419330071,
+      "0110": 0.03068439971899874,
+      "0111": 0.00019359324059885932,
+      "1000": 0.02053928991610734,
+      "1001": 0.000422956657825819,
+      "1010": 9.466750886690173e-05,
+      "1011": 0.001666202490276418,
+      "1100": 0.03420023687569524,
+      "1101": 0.0008153301906416493,
+      "1110": 0.00022497376415134358,
+      "1111": 0.0028813798064506596
+    },
+    "raw_vector_sha256": "e9fcaeb9a07661f4dc88cd1fcf6ea3d1beb161924cceff1aea6391da6d64db40"
+  },
+  "ring_scope": {
+    "n": 4,
+    "ring_deployment": "smoke_only",
+    "run_kind": "smoke"
+  },
+  "run_id": "rings_hamming/n4_seed0_smoke",
+  "schema_version": "v4_tcdp.photonic_ring.v2",
+  "source_model": "fixed_photon_g2_0",
+  "source_once": true,
+  "status": "PASS",
+  "target_and_budget": {
+    "dataset_hash": "2a021db64ff4ce325765025da21cf8b6754a61648dbfa87050ee3853b4c949ae",
+    "dataset_id": "rings.make_circles.400.seed42.split42.train_minmax",
+    "learning_rate": 0.05,
+    "optimizer": "adam",
+    "seed": 0,
+    "steps": 3,
+    "train_histogram_hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26"
+  }
+}

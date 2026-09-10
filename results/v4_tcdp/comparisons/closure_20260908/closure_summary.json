@@ -1,0 +1,637 @@
+{
+  "cells": [
+    {
+      "acceptance_mass": {
+        "compiled": 1.3029685054593632e-05,
+        "deployed": 6.924508855098295e-06,
+        "expected_deployed_to_compiled_ratio": 0.531441,
+        "observed_deployed_to_compiled_ratio": 0.531441,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n6_seed2_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "029214415b16dec983484b4d3ac13256b4fdc26429a49664e6df5263f8754ab7",
+        "dataset": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+        "generator": "2703879beb2637679d02497c3df1fc0d6f6f305eb4199d8f8d867ad19ecf3d17",
+        "theta": "f2471835e6518eca0a62a19c0eee73881636a9352f4643fdfb962688fc3a2c79",
+        "train_histogram": "2e54d2e9f303e46726ff62759f4c35f36c7c857cc9a765f9b57ead47916dded3"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "deployed": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "raw": {
+          "crosscheck_abs_error": 6.938893903907228e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.0046814590025281485,
+          "value": 0.0046814590025281485,
+          "walsh": 0.004681459002528155
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 1.1102230246251565e-16
+      },
+      "n": 6,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.0072252814034813395,
+        "raw_to_deployed_tvd": 0.0072252814034813395,
+        "rounding_tvd": 0.0072252814034813395,
+        "status": "PASS",
+        "total_tvd": 0.0072252814034813395
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 2,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n6_seed2_main__matched_backends.json",
+      "source_comparison_sha256": "b722c5c0ac0a0ae3bb1c6610042664117ee3339ad5f6ebd0c67625271703b214",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n6_seed2_main/manifest.json",
+      "source_run_manifest_sha256": "ef29127f834e7ce3e49bc40cffb824cd7d9bd5ad8e96cf4a977aa7a56f52bd89",
+      "target_tvd": {
+        "compiled": 0.5111770271245076,
+        "deployed": 0.5111770271245076,
+        "raw": 0.5118206423475529
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 1.3029685054593632e-05,
+        "deployed": 6.924508855098295e-06,
+        "expected_deployed_to_compiled_ratio": 0.531441,
+        "observed_deployed_to_compiled_ratio": 0.531441,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n6_seed3_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "029214415b16dec983484b4d3ac13256b4fdc26429a49664e6df5263f8754ab7",
+        "dataset": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+        "generator": "2703879beb2637679d02497c3df1fc0d6f6f305eb4199d8f8d867ad19ecf3d17",
+        "theta": "f2471835e6518eca0a62a19c0eee73881636a9352f4643fdfb962688fc3a2c79",
+        "train_histogram": "2e54d2e9f303e46726ff62759f4c35f36c7c857cc9a765f9b57ead47916dded3"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "deployed": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "raw": {
+          "crosscheck_abs_error": 6.938893903907228e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.0046814590025281485,
+          "value": 0.0046814590025281485,
+          "walsh": 0.004681459002528155
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 1.1102230246251565e-16
+      },
+      "n": 6,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.0072252814034813395,
+        "raw_to_deployed_tvd": 0.0072252814034813395,
+        "rounding_tvd": 0.0072252814034813395,
+        "status": "PASS",
+        "total_tvd": 0.0072252814034813395
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 3,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n6_seed3_main__matched_backends.json",
+      "source_comparison_sha256": "c1165ecb8f3b7361b01722818671c241ccd06f7531356079a527c658c4d79d27",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n6_seed3_main/manifest.json",
+      "source_run_manifest_sha256": "c9af744d80d5223348f8e5639298e5019b05de75e119b83575a387e16a7274a8",
+      "target_tvd": {
+        "compiled": 0.5111770271245076,
+        "deployed": 0.5111770271245076,
+        "raw": 0.5118206423475529
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 1.3029685054593632e-05,
+        "deployed": 6.924508855098295e-06,
+        "expected_deployed_to_compiled_ratio": 0.531441,
+        "observed_deployed_to_compiled_ratio": 0.531441,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n6_seed4_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "029214415b16dec983484b4d3ac13256b4fdc26429a49664e6df5263f8754ab7",
+        "dataset": "ba2b07022bc1d4770769ceac6eebaaffd9351c2cae6c1bdf63252c5fdeac0e6d",
+        "generator": "2703879beb2637679d02497c3df1fc0d6f6f305eb4199d8f8d867ad19ecf3d17",
+        "theta": "f2471835e6518eca0a62a19c0eee73881636a9352f4643fdfb962688fc3a2c79",
+        "train_histogram": "2e54d2e9f303e46726ff62759f4c35f36c7c857cc9a765f9b57ead47916dded3"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "deployed": {
+          "crosscheck_abs_error": 4.336808689942018e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.004689487496293644,
+          "value": 0.004689487496293644,
+          "walsh": 0.0046894874962936485
+        },
+        "raw": {
+          "crosscheck_abs_error": 6.938893903907228e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.0046814590025281485,
+          "value": 0.0046814590025281485,
+          "walsh": 0.004681459002528155
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 1.1102230246251565e-16
+      },
+      "n": 6,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.0072252814034813395,
+        "raw_to_deployed_tvd": 0.0072252814034813395,
+        "rounding_tvd": 0.0072252814034813395,
+        "status": "PASS",
+        "total_tvd": 0.0072252814034813395
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 4,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n6_seed4_main__matched_backends.json",
+      "source_comparison_sha256": "41a2a93ae0eef4af932b9cdf9d192ba2e7437404736b33e8efcb375a1c558c29",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n6_seed4_main/manifest.json",
+      "source_run_manifest_sha256": "d434ae89e4eb9c86c7c629a00445b2fad5936cbcfb3602b0680f2276450e2c9f",
+      "target_tvd": {
+        "compiled": 0.5111770271245076,
+        "deployed": 0.5111770271245076,
+        "raw": 0.5118206423475529
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 2.3183752181272602e-07,
+        "deployed": 9.979845118803834e-08,
+        "expected_deployed_to_compiled_ratio": 0.4304672100000001,
+        "observed_deployed_to_compiled_ratio": 0.4304672100000001,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n8_seed0_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+        "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+        "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+        "theta": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
+        "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "deployed": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "raw": {
+          "crosscheck_abs_error": 1.734723475976807e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005118451001447163,
+          "value": 0.005118451001447163,
+          "walsh": 0.005118451001447165
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 0.0
+      },
+      "n": 8,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.01097692750650986,
+        "raw_to_deployed_tvd": 0.01097692750650986,
+        "rounding_tvd": 0.01097692750650986,
+        "status": "PASS",
+        "total_tvd": 0.01097692750650986
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 0,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n8_seed0_main__matched_backends.json",
+      "source_comparison_sha256": "ca836bffe3f8f979028af581be37311238b963e3ecffa8da6434df2ffea10761",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n8_seed0_main/manifest.json",
+      "source_run_manifest_sha256": "3b688595cf5043f85409aeea10a422b30c5d7f66062602579b1b516bac9e6187",
+      "target_tvd": {
+        "compiled": 0.5814323101218629,
+        "deployed": 0.5814323101218629,
+        "raw": 0.5809456015166332
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 2.3183752181272602e-07,
+        "deployed": 9.979845118803834e-08,
+        "expected_deployed_to_compiled_ratio": 0.4304672100000001,
+        "observed_deployed_to_compiled_ratio": 0.4304672100000001,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n8_seed1_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+        "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+        "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+        "theta": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
+        "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "deployed": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "raw": {
+          "crosscheck_abs_error": 1.734723475976807e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005118451001447163,
+          "value": 0.005118451001447163,
+          "walsh": 0.005118451001447165
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 0.0
+      },
+      "n": 8,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.01097692750650986,
+        "raw_to_deployed_tvd": 0.01097692750650986,
+        "rounding_tvd": 0.01097692750650986,
+        "status": "PASS",
+        "total_tvd": 0.01097692750650986
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 1,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n8_seed1_main__matched_backends.json",
+      "source_comparison_sha256": "5dc154814c6a0ef68cf1a5bacbbc5a2c28959741b0c376c0c3bfe39e836a2cfd",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n8_seed1_main/manifest.json",
+      "source_run_manifest_sha256": "94f343bbc23d92fff0f2e46607b804926c43cc0373c845fba3ebcae7888c593a",
+      "target_tvd": {
+        "compiled": 0.5814323101218629,
+        "deployed": 0.5814323101218629,
+        "raw": 0.5809456015166332
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 2.3183752181272602e-07,
+        "deployed": 9.979845118803834e-08,
+        "expected_deployed_to_compiled_ratio": 0.4304672100000001,
+        "observed_deployed_to_compiled_ratio": 0.4304672100000001,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n8_seed2_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+        "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+        "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+        "theta": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
+        "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "deployed": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "raw": {
+          "crosscheck_abs_error": 1.734723475976807e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005118451001447163,
+          "value": 0.005118451001447163,
+          "walsh": 0.005118451001447165
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 0.0
+      },
+      "n": 8,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.01097692750650986,
+        "raw_to_deployed_tvd": 0.01097692750650986,
+        "rounding_tvd": 0.01097692750650986,
+        "status": "PASS",
+        "total_tvd": 0.01097692750650986
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 2,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n8_seed2_main__matched_backends.json",
+      "source_comparison_sha256": "722b2d1cd7768e4a63eb520c3533ed6a1f5624b8b0a588234a61df9ff84f7018",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n8_seed2_main/manifest.json",
+      "source_run_manifest_sha256": "819cfcec1dbc407743e127892f525e1b36006c1c915814ce25cef7d0e1899c74",
+      "target_tvd": {
+        "compiled": 0.5814323101218629,
+        "deployed": 0.5814323101218629,
+        "raw": 0.5809456015166332
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 2.3183752181272602e-07,
+        "deployed": 9.979845118803834e-08,
+        "expected_deployed_to_compiled_ratio": 0.4304672100000001,
+        "observed_deployed_to_compiled_ratio": 0.4304672100000001,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n8_seed3_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+        "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+        "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+        "theta": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
+        "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "deployed": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "raw": {
+          "crosscheck_abs_error": 1.734723475976807e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005118451001447163,
+          "value": 0.005118451001447163,
+          "walsh": 0.005118451001447165
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 0.0
+      },
+      "n": 8,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.01097692750650986,
+        "raw_to_deployed_tvd": 0.01097692750650986,
+        "rounding_tvd": 0.01097692750650986,
+        "status": "PASS",
+        "total_tvd": 0.01097692750650986
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 3,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n8_seed3_main__matched_backends.json",
+      "source_comparison_sha256": "b6ae549fe2f421df3d3c9141020fc11ec935125f9a675989c5556be876247691",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n8_seed3_main/manifest.json",
+      "source_run_manifest_sha256": "a58a3c2f8000edaf4caacc16004fdedbb4681bbfecb23d74f6a71092450de5fb",
+      "target_tvd": {
+        "compiled": 0.5814323101218629,
+        "deployed": 0.5814323101218629,
+        "raw": 0.5809456015166332
+      }
+    },
+    {
+      "acceptance_mass": {
+        "compiled": 2.3183752181272602e-07,
+        "deployed": 9.979845118803834e-08,
+        "expected_deployed_to_compiled_ratio": 0.4304672100000001,
+        "observed_deployed_to_compiled_ratio": 0.4304672100000001,
+        "ratio_abs_error": 0.0
+      },
+      "cell_id": "rings_spatial_exact/n8_seed4_main/matched_backends",
+      "compiled_deployed_same_effective_parameters": true,
+      "eta": 0.9,
+      "evaluated_hashes": {
+        "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+        "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+        "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+        "theta": "584c2ffd6e5a315bcc4eb5d067918f0ae421a7e942a9cee51594a5ffd7829732",
+        "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+      },
+      "hamming_mmd2": {
+        "compiled": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "deployed": {
+          "crosscheck_abs_error": 2.6020852139652106e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005098851446229963,
+          "value": 0.005098851446229963,
+          "walsh": 0.005098851446229966
+        },
+        "raw": {
+          "crosscheck_abs_error": 1.734723475976807e-18,
+          "crosscheck_status": "PASS",
+          "direct": 0.005118451001447163,
+          "value": 0.005118451001447163,
+          "walsh": 0.005118451001447165
+        }
+      },
+      "integrity": {
+        "all_finite": true,
+        "all_hamming_crosschecks_pass": true,
+        "compiled_target_tvd_residual": 0.0,
+        "loss_ratio_status": "PASS",
+        "raw_target_tvd_residual": 0.0
+      },
+      "n": 8,
+      "paired_tvd": {
+        "compiled_to_deployed_tvd": 0.0,
+        "noise_identity": "fixed_photon_uniform_loss_preserves_conditional_vector",
+        "noise_tvd": 0.0,
+        "raw_to_compiled_tvd": 0.01097692750650986,
+        "raw_to_deployed_tvd": 0.01097692750650986,
+        "rounding_tvd": 0.01097692750650986,
+        "status": "PASS",
+        "total_tvd": 0.01097692750650986
+      },
+      "physical_status": "reference_only",
+      "profile_id": "rings_spatial_exact",
+      "raw_compiled_deployed_distinct": true,
+      "seed": 4,
+      "source_commit": "2a4d7102557712ea3eb381599ef0405be96f86a7",
+      "source_comparison_artifact": "results/v4_tcdp/comparisons/closure_20260908/rings_spatial_exact__n8_seed4_main__matched_backends.json",
+      "source_comparison_sha256": "d12295d8c48b4065e8f1004f5e18aedaeffc7570a91da4099074277159a89f35",
+      "source_run_manifest": "results/v4_tcdp/rings/rings_spatial_exact/n8_seed4_main/manifest.json",
+      "source_run_manifest_sha256": "27a574c30a5766cc83eb9dd0b735df1463fc19608493b8cf7e14ad10b2ca2cf6",
+      "target_tvd": {
+        "compiled": 0.5814323101218629,
+        "deployed": 0.5814323101218629,
+        "raw": 0.5809456015166332
+      }
+    }
+  ],
+  "generated_at": "2026-09-08",
+  "registered_cells_preserved_elsewhere": {
+    "artifact_roots": [
+      "results/v4_tcdp/metrics/"
+    ],
+    "count": 12,
+    "note": "Existing Hamming n=6/n=8 seeds 0-4 and spatial n=6 seeds 0-1 artifacts were read-only inputs and not overwritten."
+  },
+  "schema_version": "v4_tcdp.bounded_comparison_closure.v1",
+  "scope": {
+    "accepted_sample_budget": 20000,
+    "comparison_eta": 0.9,
+    "new_cells_derived_here": 8,
+    "physical_n_gt_4_launched": false,
+    "registered_primary_cells": "both profiles x n={6,8} x seeds={0,1,2,3,4}",
+    "registered_profiles": [
+      "rings_spatial_exact",
+      "rings_hamming"
+    ],
+    "sibling_replay_launched": false,
+    "training_launched": false
+  },
+  "status": {
+    "hamming_gaussian_mmd_crosscheck": "PASS",
+    "larger_n_physical_arm": {
+      "reason": "validated physical deployment boundary is n=4; n=6/n=8 are not deployed",
+      "status": "BLOCKED"
+    },
+    "new_spatial_cells": "PASS_bounded_analytic_map",
+    "provenance_and_hashes": "PASS",
+    "raw_compiled_deployed_separation": "PASS",
+    "sampled_uncertainty": {
+      "reason": "registered vectors are exact population maps; no sampled arm was authorized",
+      "status": "NOT_RUN"
+    },
+    "sibling_matched_arm": {
+      "reason": "exact sibling matched comparison input is unavailable; no analytic substitute used",
+      "status": "BLOCKED"
+    },
+    "target_and_paired_tvd": "PASS_bounded_analytic_map"
+  }
+}

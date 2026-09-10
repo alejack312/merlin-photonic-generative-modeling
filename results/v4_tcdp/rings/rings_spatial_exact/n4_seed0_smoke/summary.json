@@ -1,0 +1,16 @@
+{
+  "metrics": {
+    "quantization_floor_rms": 0.1856589447436645,
+    "test_hamming_mmd2_sigma_primary": 0.43375763051375377,
+    "test_spatial_mmd2": 0.6829325804260553,
+    "test_tvd": 0.8644530125264482,
+    "train_hamming_mmd2_sigma_primary": 0.4246001561119608,
+    "train_spatial_mmd2": 0.6773627388036133,
+    "train_tvd": 0.8644530125264482
+  },
+  "photonic_evaluation": {
+    "reason": "Phase 28 owned scope has no validated ideal photonic ring deployment adapter; no unsupported simulator label is substituted.",
+    "status": "INCONCLUSIVE"
+  },
+  "run_id": "rings_spatial_exact/n4_seed0_smoke"
+}

@@ -1,5 +1,7 @@
 # Conceptual Notes & Clarifications
 
+> **Historical record, reconciled 2026-09-10.** Original decisions, hypotheses and owner attempts are preserved below. For current scientific claims use [the corrected synthesis](docs/technical-findings.md), [mapping limitations](docs/raster-order.md) and [bounded release](docs/v4-bounded-release.md). Earlier causal explanations and proposed work are not additional release evidence.
+
 Explanatory notes for concepts for explaining this project in interviews, or to a future version of the owner who has forgotten the details. Distinct from [DESIGN_DECISIONS.md](DESIGN_DECISIONS.md), which logs *what was chosen and why*; this file explains *how the chosen thing actually works*, including misconceptions caught and corrected along the way.
 
 ---

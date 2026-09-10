@@ -1,0 +1,81 @@
+{
+  "config_comparison": {
+    "allowed_adaptations": [
+      {
+        "field": "circuit.n_qubits",
+        "rerun": [
+          6
+        ],
+        "source": 6
+      },
+      {
+        "field": "experiment.description",
+        "rerun": "Isolated faithful rerun of the pinned sibling exact small-n validation cell",
+        "source": "Exact small-n anti-concentration validation for one concrete complete-graph IQP model"
+      },
+      {
+        "field": "experiment.name",
+        "rerun": "anti_concentration_validation_v4_retrain",
+        "source": "anti_concentration_validation"
+      },
+      {
+        "field": "experiment.output_dir",
+        "rerun": "C:/Users/cuqui/merlin-quantum-case-study/results/v4_tcdp/sibling_retraining/closure_20260908/validation_source_rerun",
+        "source": "results/validation/"
+      }
+    ],
+    "changed_fields": [
+      "circuit.n_qubits",
+      "experiment.description",
+      "experiment.name",
+      "experiment.output_dir"
+    ],
+    "reason": "Only output metadata and the source schema's scalar-to-list n_qubits normalization changed.",
+    "status": "PASS",
+    "unexpected_fields": []
+  },
+  "provenance_match": {
+    "family": true,
+    "n": true,
+    "seed": true,
+    "source": true
+  },
+  "reproduction_kind": "faithful_source_validation_rerun",
+  "rerun_config": "C:\\Users\\cuqui\\merlin-quantum-case-study\\configs\\v4_sibling_validation_retrain.yaml",
+  "rerun_config_sha256": "d0148de38486863f67ec624eddd63d0a9888ce0a137f9d7f0028f033e8cfbc17",
+  "rerun_csv": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\validation_source_rerun\\complete_graph_n6_seed7_thresholds.csv",
+  "rerun_csv_sha256": "052f1f48b6b462977d810a5eafae467c2ce3e632d0ed65769e177c6ccb333ac9",
+  "rerun_result": "C:\\Users\\cuqui\\merlin-quantum-case-study\\results\\v4_tcdp\\sibling_retraining\\closure_20260908\\validation_source_rerun\\complete_graph_n6_seed7.json",
+  "rerun_result_sha256": "7319d3a9fc1cd26c6e0034b07613bfd57a43440e2c4649a2aa7918d0c58c736c",
+  "schema_version": "v4_tcdp.sibling_validation_rerun.v1",
+  "sibling_unchanged": true,
+  "source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\validation.yaml",
+  "source_config_sha256": "79a2cda0ba2406ac10ebdba0442b153ec9b314c03f3449f4679dda4a764053f1",
+  "source_csv": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\validation\\complete_graph_n6_seed7_thresholds.csv",
+  "source_csv_sha256": "052f1f48b6b462977d810a5eafae467c2ce3e632d0ed65769e177c6ccb333ac9",
+  "source_identity_after": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "source_identity_before": {
+    "dirty": false,
+    "git_status": [],
+    "observed_branch": "alejack312",
+    "observed_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "root": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau",
+    "tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+    "tree_identity_kind": "git_tree",
+    "workspace_git_status": []
+  },
+  "source_result": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\validation\\complete_graph_n6_seed7.json",
+  "source_result_sha256": "81d0ad95ed9b34ded7b32e8a00b53516477352dbfb0890d8abb9f921a4c2f4bc",
+  "status": "PASS",
+  "summary_equal_excluding_provenance": true,
+  "threshold_csv_byte_equal": true
+}

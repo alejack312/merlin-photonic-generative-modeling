@@ -1,12 +1,14 @@
 # Design Decisions Log
 
+> **Historical record, reconciled 2026-09-10.** Original decisions, hypotheses and owner attempts are preserved below. For current scientific claims use [the corrected synthesis](docs/technical-findings.md), [mapping limitations](docs/raster-order.md) and [bounded release](docs/v4-bounded-release.md). Earlier causal explanations and proposed work are not additional release evidence.
+
 Durable architecture/design calls for the MerLin project, per [MerLin_SMART_Spec_Sept1.md](MerLin_SMART_Spec_Sept1.md). One entry per decision: what was chosen, what was rejected, and why.
 
 ---
 
 ## 2026-07-19 — Generator output representation: full-distribution matching (not single-point averaging, not discrete sampling)
 
-**Context:** Converting the quickstart classifier (`quantum_layer(x) → class probabilities`) into an MMD-based generative model for the circles dataset required deciding what a "generated sample" actually means, given that `QuantumLayer`'s raw output is always a probability vector over `output_size` measurement outcomes (verified empirically: rows are non-negative and sum to exactly 1; see [quickstart.py](quickstart.py)).
+**Context:** Converting the quickstart classifier (`quantum_layer(x) → class probabilities`) into an MMD-based generative model for the circles dataset required deciding what a "generated sample" actually means, given that `QuantumLayer`'s raw output is always a probability vector over `output_size` measurement outcomes (verified empirically: rows are non-negative and sum to exactly 1; see [quickstart.py](scripts/v1_generator/quickstart.py)).
 
 **Options considered:**
 1. **Full-distribution matching (chosen).** Bin both the real 2D circles data and the circuit's output probability vector over the same fixed set of `K` reference points (bin-centers spanning the data region). Compare the two resulting probability vectors directly, with no collapsing to a single point and no sampling.

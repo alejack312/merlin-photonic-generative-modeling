@@ -1,0 +1,590 @@
+{
+  "arms": [
+    {
+      "acceptance_mass": 1.0,
+      "backend_id": "numpy-iqp",
+      "provenance": {
+        "model_hash": "108140066e2b9105521cb0a496a776baca521e1fc5ed82fa10e2203bdb8841b9"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "raw",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 5.4344212772784595e-08,
+      "backend_id": "ideal-unquantized-control",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": false,
+        "role": "compilation_control"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "compiled",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 5.5406438332621276e-08,
+      "backend_id": "ideal-compiled-map",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": true,
+        "role": "primary_compiled_reference"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "compiled",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 5.5406438332621276e-08,
+      "backend_id": "ideal-deployed-map",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "eta": 1.0,
+        "loss": "uniform_all_photons",
+        "physical_status": "reference_only",
+        "quantized": true,
+        "role": "same_effective_parameters_as_compiled",
+        "source_model": "fixed_photon_g2_0"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "deployed",
+      "uncertainty": {}
+    }
+  ],
+  "cell_id": "rings_hamming/n8_seed4_main/matched_backends",
+  "common_manifest": {
+    "budget": {
+      "accepted_samples": 20000,
+      "training_steps": 300
+    },
+    "compiled_deployed_same_effective_parameters": true,
+    "dataset_hash": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+    "evaluated_hashes": {
+      "centers": "72401639740da8a4277c6a06ca2a593924bb510b907bc95c75ec72b2ff2d23e4",
+      "dataset": "53827a80410514d7a1e18f6503a82418f46b83f353a801ad46430be099ee9709",
+      "generator": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+      "theta": "108140066e2b9105521cb0a496a776baca521e1fc5ed82fa10e2203bdb8841b9",
+      "train_histogram": "3d95f33d91c330ee49f22115a723a5bd2432fd6bcb17550fdf725ad56a980ca7"
+    },
+    "generator_hash": "11e947afc1ef2ee23a5f29545861ceeba6cd984d530303aac539d46a065e042d",
+    "loss": {
+      "acceptance_rule": "eta**n * model_success",
+      "eta": 1.0
+    },
+    "raw_compiled_deployed_distinct": true,
+    "seed": 4,
+    "source_model": "fixed_photon_g2_0",
+    "split": "train",
+    "theta_hash": "108140066e2b9105521cb0a496a776baca521e1fc5ed82fa10e2203bdb8841b9",
+    "unquantized_compilation_control": true
+  },
+  "controls": {
+    "distribution_mutations": {
+      "compiled:ideal-compiled-map": {
+        "hamming_mmd2": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.0019598211389375377,
+          "metric_before": 0.0018853186833566189,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order1": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 128,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.005327623117801435,
+          "metric_before": 0.0016772076240641927,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order2": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 0,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.029987044125107474,
+          "metric_before": 0.028347663796558117,
+          "source": 105,
+          "status": "PASS"
+        },
+        "occupancy": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 254.569511994639,
+          "metric_before": 254.569511994639,
+          "source": 105,
+          "status": "FAIL"
+        },
+        "tvd": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.6041163599188037,
+          "metric_before": 0.6041163599188037,
+          "source": 105,
+          "status": "FAIL"
+        }
+      },
+      "compiled:ideal-unquantized-control": {
+        "hamming_mmd2": {
+          "acceptance_mass_after": 5.4344212772784595e-08,
+          "acceptance_mass_before": 5.4344212772784595e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.001958017249742563,
+          "metric_before": 0.0018820186622084986,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order1": {
+          "acceptance_mass_after": 5.4344212772784595e-08,
+          "acceptance_mass_before": 5.4344212772784595e-08,
+          "destination": 128,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.005242947633427728,
+          "metric_before": 0.0014613557285522091,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order2": {
+          "acceptance_mass_after": 5.4344212772784595e-08,
+          "acceptance_mass_before": 5.4344212772784595e-08,
+          "destination": 0,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.030017613045844764,
+          "metric_before": 0.028269636433832675,
+          "source": 105,
+          "status": "PASS"
+        },
+        "occupancy": {
+          "acceptance_mass_after": 5.4344212772784595e-08,
+          "acceptance_mass_before": 5.4344212772784595e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 254.63894752835319,
+          "metric_before": 254.63894752835319,
+          "source": 105,
+          "status": "FAIL"
+        },
+        "tvd": {
+          "acceptance_mass_after": 5.4344212772784595e-08,
+          "acceptance_mass_before": 5.4344212772784595e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.6052170179821421,
+          "metric_before": 0.6052170179821421,
+          "source": 105,
+          "status": "FAIL"
+        }
+      },
+      "deployed:ideal-deployed-map": {
+        "hamming_mmd2": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.0019598211389375377,
+          "metric_before": 0.0018853186833566189,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order1": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 128,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.005327623117801435,
+          "metric_before": 0.0016772076240641927,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order2": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 0,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.029987044125107474,
+          "metric_before": 0.028347663796558117,
+          "source": 105,
+          "status": "PASS"
+        },
+        "occupancy": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 254.569511994639,
+          "metric_before": 254.569511994639,
+          "source": 105,
+          "status": "FAIL"
+        },
+        "tvd": {
+          "acceptance_mass_after": 5.5406438332621276e-08,
+          "acceptance_mass_before": 5.5406438332621276e-08,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.6041163599188037,
+          "metric_before": 0.6041163599188037,
+          "source": 105,
+          "status": "FAIL"
+        }
+      },
+      "raw:numpy-iqp": {
+        "hamming_mmd2": {
+          "acceptance_mass_after": 1.0,
+          "acceptance_mass_before": 1.0,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.0019580172497425615,
+          "metric_before": 0.0018820186622084969,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order1": {
+          "acceptance_mass_after": 1.0,
+          "acceptance_mass_before": 1.0,
+          "destination": 128,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.005242947633427652,
+          "metric_before": 0.001461355728552171,
+          "source": 105,
+          "status": "PASS"
+        },
+        "marginal_tvd_order2": {
+          "acceptance_mass_after": 1.0,
+          "acceptance_mass_before": 1.0,
+          "destination": 0,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.030017613045844743,
+          "metric_before": 0.028269636433832672,
+          "source": 105,
+          "status": "PASS"
+        },
+        "occupancy": {
+          "acceptance_mass_after": 1.0,
+          "acceptance_mass_before": 1.0,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 254.6389475283532,
+          "metric_before": 254.6389475283532,
+          "source": 105,
+          "status": "FAIL"
+        },
+        "tvd": {
+          "acceptance_mass_after": 1.0,
+          "acceptance_mass_before": 1.0,
+          "destination": 150,
+          "mass_after": 1.0,
+          "mass_before": 1.0,
+          "metric_after": 0.6052170179821421,
+          "metric_before": 0.6052170179821421,
+          "source": 105,
+          "status": "FAIL"
+        }
+      }
+    },
+    "map_mutation": {
+      "compiled:ideal-compiled-map": {
+        "conditional_vector_changed": true,
+        "kind": "unnormalized_map_mass_transfer",
+        "success_after": 5.5406438332621276e-08,
+        "success_before": 5.5406438332621276e-08,
+        "success_independent_of_distribution_mutation": true
+      },
+      "compiled:ideal-unquantized-control": {
+        "conditional_vector_changed": true,
+        "kind": "unnormalized_map_mass_transfer",
+        "success_after": 5.4344212772784595e-08,
+        "success_before": 5.4344212772784595e-08,
+        "success_independent_of_distribution_mutation": true
+      },
+      "deployed:ideal-deployed-map": {
+        "conditional_vector_changed": true,
+        "kind": "unnormalized_map_mass_transfer",
+        "success_after": 5.5406438332621276e-08,
+        "success_before": 5.5406438332621276e-08,
+        "success_independent_of_distribution_mutation": true
+      },
+      "raw:numpy-iqp": {
+        "conditional_vector_changed": true,
+        "kind": "unnormalized_map_mass_transfer",
+        "success_after": 1.0,
+        "success_before": 1.0,
+        "success_independent_of_distribution_mutation": true
+      }
+    },
+    "success_mutation": {
+      "compiled:ideal-compiled-map": {
+        "acceptance_mass_after": 5.485237394929506e-08,
+        "acceptance_mass_before": 5.5406438332621276e-08,
+        "conditional_vector_hash_equal": true,
+        "distribution_metrics_unchanged": true,
+        "kind": "success_only_mutation"
+      },
+      "compiled:ideal-unquantized-control": {
+        "acceptance_mass_after": 5.380077064505675e-08,
+        "acceptance_mass_before": 5.4344212772784595e-08,
+        "conditional_vector_hash_equal": true,
+        "distribution_metrics_unchanged": true,
+        "kind": "success_only_mutation"
+      },
+      "deployed:ideal-deployed-map": {
+        "acceptance_mass_after": 5.485237394929506e-08,
+        "acceptance_mass_before": 5.5406438332621276e-08,
+        "conditional_vector_hash_equal": true,
+        "distribution_metrics_unchanged": true,
+        "kind": "success_only_mutation"
+      },
+      "raw:numpy-iqp": {
+        "acceptance_mass_after": 0.99,
+        "acceptance_mass_before": 1.0,
+        "conditional_vector_hash_equal": true,
+        "distribution_metrics_unchanged": true,
+        "kind": "success_only_mutation"
+      }
+    }
+  },
+  "hamming_kernel": {
+    "distance": "Hamming",
+    "kind": "gaussian_on_hamming",
+    "normalization": "MMD2",
+    "sigma": 1.4142135623730951
+  },
+  "metrics": {
+    "compiled:ideal-compiled-map": {
+      "acceptance_mass": 5.5406438332621276e-08,
+      "attempts_per_accepted_sample": 18048444.00928108,
+      "backend_id": "ideal-compiled-map",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.9995923803495413,
+      "expected_occupancy": 254.569511994639,
+      "floored_log_ratio_1e-12": 1.2813316994546011,
+      "floored_log_ratio_1e-12_added_mass": 0.0,
+      "floored_log_ratio_1e-9": 1.2813316994546011,
+      "floored_log_ratio_1e-9_added_mass": 0.0,
+      "hamming_mmd2": 0.0018853186833566189,
+      "hamming_mmd2_crosscheck_abs_error": 8.673617379884035e-19,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0018853186833566189,
+      "hamming_mmd2_walsh": 0.0018853186833566197,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 8,
+      "marginal_tvd_order1_max": 0.004940855208788619,
+      "marginal_tvd_order1_mean": 0.0016772076240641927,
+      "marginal_tvd_order2_count": 28,
+      "marginal_tvd_order2_max": 0.16418425308928983,
+      "marginal_tvd_order2_mean": 0.028347663796558117,
+      "occupancy_fraction": 0.9944121562290585,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": true,
+        "role": "primary_compiled_reference"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "spatial_mmd2": 0.019938263524580432,
+      "stage": "compiled",
+      "state_space_size": 256,
+      "support_size": 79,
+      "support_validity": 1.0,
+      "true_forward_kl": 1.2813316994546016,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 1.2813316994546016,
+      "tvd_to_target": 0.6041163599188037,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "compiled:ideal-unquantized-control": {
+      "acceptance_mass": 5.4344212772784595e-08,
+      "attempts_per_accepted_sample": 18401223.404984105,
+      "backend_id": "ideal-unquantized-control",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.9997258810726684,
+      "expected_occupancy": 254.63894752835319,
+      "floored_log_ratio_1e-12": 1.279720112327439,
+      "floored_log_ratio_1e-12_added_mass": 0.0,
+      "floored_log_ratio_1e-9": 1.279720112327439,
+      "floored_log_ratio_1e-9_added_mass": 0.0,
+      "hamming_mmd2": 0.0018820186622084986,
+      "hamming_mmd2_crosscheck_abs_error": 2.168404344971009e-18,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0018820186622084986,
+      "hamming_mmd2_walsh": 0.0018820186622084964,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 8,
+      "marginal_tvd_order1_max": 0.004113515320456812,
+      "marginal_tvd_order1_mean": 0.0014613557285522091,
+      "marginal_tvd_order2_count": 28,
+      "marginal_tvd_order2_max": 0.16507597673860466,
+      "marginal_tvd_order2_mean": 0.028269636433832675,
+      "occupancy_fraction": 0.9946833887826296,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": false,
+        "role": "compilation_control"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "spatial_mmd2": 0.019947788609682958,
+      "stage": "compiled",
+      "state_space_size": 256,
+      "support_size": 79,
+      "support_validity": 1.0,
+      "true_forward_kl": 1.2797201123274393,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 1.2797201123274393,
+      "tvd_to_target": 0.6052170179821421,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "deployed:ideal-deployed-map": {
+      "acceptance_mass": 5.5406438332621276e-08,
+      "attempts_per_accepted_sample": 18048444.00928108,
+      "backend_id": "ideal-deployed-map",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.9995923803495413,
+      "expected_occupancy": 254.569511994639,
+      "floored_log_ratio_1e-12": 1.2813316994546011,
+      "floored_log_ratio_1e-12_added_mass": 0.0,
+      "floored_log_ratio_1e-9": 1.2813316994546011,
+      "floored_log_ratio_1e-9_added_mass": 0.0,
+      "hamming_mmd2": 0.0018853186833566189,
+      "hamming_mmd2_crosscheck_abs_error": 8.673617379884035e-19,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0018853186833566189,
+      "hamming_mmd2_walsh": 0.0018853186833566197,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 8,
+      "marginal_tvd_order1_max": 0.004940855208788619,
+      "marginal_tvd_order1_mean": 0.0016772076240641927,
+      "marginal_tvd_order2_count": 28,
+      "marginal_tvd_order2_max": 0.16418425308928983,
+      "marginal_tvd_order2_mean": 0.028347663796558117,
+      "occupancy_fraction": 0.9944121562290585,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "eta": 1.0,
+        "loss": "uniform_all_photons",
+        "physical_status": "reference_only",
+        "quantized": true,
+        "role": "same_effective_parameters_as_compiled",
+        "source_model": "fixed_photon_g2_0"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "spatial_mmd2": 0.019938263524580432,
+      "stage": "deployed",
+      "state_space_size": 256,
+      "support_size": 79,
+      "support_validity": 1.0,
+      "true_forward_kl": 1.2813316994546016,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 1.2813316994546016,
+      "tvd_to_target": 0.6041163599188037,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "raw:numpy-iqp": {
+      "acceptance_mass": 1.0,
+      "attempts_per_accepted_sample": 1.0,
+      "backend_id": "numpy-iqp",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.9997258810726684,
+      "expected_occupancy": 254.6389475283532,
+      "floored_log_ratio_1e-12": 1.2797201123274387,
+      "floored_log_ratio_1e-12_added_mass": 0.0,
+      "floored_log_ratio_1e-9": 1.2797201123274387,
+      "floored_log_ratio_1e-9_added_mass": 0.0,
+      "hamming_mmd2": 0.0018820186622084969,
+      "hamming_mmd2_crosscheck_abs_error": 0.0,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0018820186622084969,
+      "hamming_mmd2_walsh": 0.0018820186622084969,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 8,
+      "marginal_tvd_order1_max": 0.004113515320456812,
+      "marginal_tvd_order1_mean": 0.001461355728552171,
+      "marginal_tvd_order2_count": 28,
+      "marginal_tvd_order2_max": 0.1650759767386047,
+      "marginal_tvd_order2_mean": 0.028269636433832672,
+      "occupancy_fraction": 0.9946833887826297,
+      "provenance": {
+        "model_hash": "108140066e2b9105521cb0a496a776baca521e1fc5ed82fa10e2203bdb8841b9"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "spatial_mmd2": 0.01994778860968295,
+      "stage": "raw",
+      "state_space_size": 256,
+      "support_size": 79,
+      "support_validity": 1.0,
+      "true_forward_kl": 1.2797201123274387,
+      "true_forward_kl_status": "finite",
+      "true_forward_kl_value": 1.2797201123274387,
+      "tvd_to_target": 0.6052170179821421,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    }
+  },
+  "n": 8,
+  "resource_report": {
+    "elapsed_seconds": 66.48510270001134,
+    "memory_policy": "current-process RSS; no embedded 4^n-square superoperator",
+    "rss_after_bytes": null,
+    "rss_before_bytes": null,
+    "rss_delta_bytes": null,
+    "status": "rss_unavailable",
+    "timing_seconds": {
+      "compiled_quantized": 22.077350700012175,
+      "compiled_unquantized": 22.418315499991877,
+      "deployed_fixed_photon": 21.936311100027524,
+      "raw_exact": 0.0031045000068843365,
+      "validation_and_load": 0.04938320000655949
+    }
+  },
+  "schema_version": "v4_tcdp.matched_comparison.v1",
+  "spatial_kernel": {
+    "centers_hash": "70cdc2529e39dbcc62b81daa54ecd2eac05e6f4e8f4c2729156e9664814af2a0",
+    "kind": "Gaussian_on_xy",
+    "sigma": 0.1
+  },
+  "target_hash": "3a2ef497c5f9ffb2ba93194d54a382400493bec46837c7a8c935e61c6aefbf5d"
+}

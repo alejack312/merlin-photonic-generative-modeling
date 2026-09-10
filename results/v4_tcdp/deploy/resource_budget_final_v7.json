@@ -1,0 +1,223 @@
+{
+  "allocation_contract": {
+    "full_circuit_superoperator": "forbidden and not allocated",
+    "state_matrix": "(2**n, 2**n)"
+  },
+  "cases": [
+    {
+      "baseline_rss_bytes": 153268224,
+      "command": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py --worker --n 4",
+      "command_argv": [
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+        "--worker",
+        "--n",
+        "4"
+      ],
+      "compile_elapsed_seconds": 0.0009968999947886914,
+      "elapsed_seconds": 0.4704111000028206,
+      "evaluation_elapsed_seconds": 0.002854299993487075,
+      "full_circuit_superoperator_allocated": false,
+      "gate_count": 13,
+      "map_build_and_evaluation_elapsed_seconds": 0.4694085999944946,
+      "map_build_elapsed_seconds": 0.4665543000010075,
+      "map_count": 13,
+      "measurement_status": "PASS",
+      "model_success": 0.012663647915632636,
+      "n": 4,
+      "parent_elapsed_seconds": 8.717451999997138,
+      "peak_rss_bytes": 153268224,
+      "probability_sum": 0.9999999999999996,
+      "return_code": 0,
+      "rss_growth_bytes": 0,
+      "state_matrix_shape": [
+        16,
+        16
+      ],
+      "status": "PASS",
+      "stderr": "",
+      "timed_out": false,
+      "worker_payload_valid": true
+    },
+    {
+      "baseline_rss_bytes": 153649152,
+      "command": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py --worker --n 6",
+      "command_argv": [
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+        "--worker",
+        "--n",
+        "6"
+      ],
+      "compile_elapsed_seconds": 0.0011786999966716394,
+      "elapsed_seconds": 0.7501606000005268,
+      "evaluation_elapsed_seconds": 0.01217999999789754,
+      "full_circuit_superoperator_allocated": false,
+      "gate_count": 21,
+      "map_build_and_evaluation_elapsed_seconds": 0.748975899994548,
+      "map_build_elapsed_seconds": 0.7367958999966504,
+      "map_count": 21,
+      "measurement_status": "PASS",
+      "model_success": 0.0004726476922029092,
+      "n": 6,
+      "parent_elapsed_seconds": 9.10643710000295,
+      "peak_rss_bytes": 153649152,
+      "probability_sum": 0.9999999999999996,
+      "return_code": 0,
+      "rss_growth_bytes": 0,
+      "state_matrix_shape": [
+        64,
+        64
+      ],
+      "status": "PASS",
+      "stderr": "",
+      "timed_out": false,
+      "worker_payload_valid": true
+    },
+    {
+      "baseline_rss_bytes": 153280512,
+      "command": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py --worker --n 8",
+      "command_argv": [
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+        "--worker",
+        "--n",
+        "8"
+      ],
+      "compile_elapsed_seconds": 0.001401000001351349,
+      "elapsed_seconds": 1.2434033999961684,
+      "evaluation_elapsed_seconds": 0.18105820000346284,
+      "full_circuit_superoperator_allocated": false,
+      "gate_count": 29,
+      "map_build_and_evaluation_elapsed_seconds": 1.2419920000029379,
+      "map_build_elapsed_seconds": 1.060933799999475,
+      "map_count": 29,
+      "measurement_status": "PASS",
+      "model_success": 1.3564091775741721e-05,
+      "n": 8,
+      "parent_elapsed_seconds": 9.51457020000089,
+      "peak_rss_bytes": 153280512,
+      "probability_sum": 0.9999999999999989,
+      "return_code": 0,
+      "rss_growth_bytes": 0,
+      "state_matrix_shape": [
+        256,
+        256
+      ],
+      "status": "PASS",
+      "stderr": "",
+      "timed_out": false,
+      "worker_payload_valid": true
+    },
+    {
+      "baseline_rss_bytes": 153190400,
+      "command": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py --worker --n 10",
+      "command_argv": [
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+        "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+        "--worker",
+        "--n",
+        "10"
+      ],
+      "compile_elapsed_seconds": 0.002471300002071075,
+      "elapsed_seconds": 4.461653500002285,
+      "evaluation_elapsed_seconds": 3.089749499995378,
+      "full_circuit_superoperator_allocated": false,
+      "gate_count": 37,
+      "map_build_and_evaluation_elapsed_seconds": 4.45917119999649,
+      "map_build_elapsed_seconds": 1.3694217000011122,
+      "map_count": 37,
+      "measurement_status": "PASS",
+      "model_success": 3.116393493581372e-07,
+      "n": 10,
+      "parent_elapsed_seconds": 13.555132599998615,
+      "peak_rss_bytes": 153190400,
+      "probability_sum": 0.9999999999999982,
+      "return_code": 0,
+      "rss_growth_bytes": 0,
+      "state_matrix_shape": [
+        1024,
+        1024
+      ],
+      "status": "PASS",
+      "stderr": "",
+      "timed_out": false,
+      "worker_payload_valid": true
+    }
+  ],
+  "code_source": {
+    "branch": "codex/v4-implementation",
+    "commit": "6d3af6f52520dd1d29e49f1e8a616921d258111c",
+    "dirty": true,
+    "resource_pilot_sha256": "6d7e8c5a371465fc4df5b2f16646b4ef4ca1cdb26422bae339cd67cb969830d9",
+    "source_files_sha256": {
+      "scripts/v4_tcdp/resource_pilot.py": "6d7e8c5a371465fc4df5b2f16646b4ef4ca1cdb26422bae339cd67cb969830d9",
+      "src/merlin_iqp/deploy/compile.py": "7f9d45a8e191ddc928462067d508df12bf465363a98a64a7bca65773040f2642",
+      "src/merlin_iqp/deploy/density.py": "cc1d7fd57b6acd08f9431f1dfa3b5f23153b9bced8341cf1e66b815206e77199",
+      "src/merlin_iqp/deploy/maps.py": "bfa7ce19f751e8fed1d74a391f5d4d4a1a69f5234a5eb6e8e51c90e56b1bf9a0"
+    }
+  },
+  "commands": [
+    [
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+      "--worker",
+      "--n",
+      "4"
+    ],
+    [
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+      "--worker",
+      "--n",
+      "6"
+    ],
+    [
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+      "--worker",
+      "--n",
+      "8"
+    ],
+    [
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+      "C:\\Users\\cuqui\\merlin-quantum-case-study\\scripts\\v4_tcdp\\resource_pilot.py",
+      "--worker",
+      "--n",
+      "10"
+    ]
+  ],
+  "environment": {
+    "cpu_count": 16,
+    "cwd": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+    "machine": "AMD64",
+    "numpy": "2.5.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]",
+    "python_executable": "C:\\Users\\cuqui\\merlin-quantum-case-study\\venv\\Scripts\\python.exe",
+    "rss_sampler": "Windows GetProcessMemoryInfo working set, /proc/VmRSS fallback"
+  },
+  "generated_at_utc": "2026-09-09T18:00:10Z",
+  "map_build_timing_criterion": {
+    "expression": "each bounded worker completes within the approved three-hour gate",
+    "limit_seconds": 10800.0,
+    "status": "PASS"
+  },
+  "n10_memory_growth_criterion": {
+    "expression": "peak_rss - first_baseline_rss < 400 MiB",
+    "limit_bytes": 419430400,
+    "observed_growth_bytes": 0,
+    "observed_growth_mib": 0.0,
+    "status": "PASS"
+  },
+  "payload_sha256": "20dba8d5214baa03087db9366d4f482f6b54dedfd015e916fcb5c58858ac8a88",
+  "schema": "v4.resource-budget.v1",
+  "scope": "bounded exact compiled-map build/evaluation resource pilot",
+  "sizes": [
+    4,
+    6,
+    8,
+    10
+  ],
+  "status": "PASS"
+}

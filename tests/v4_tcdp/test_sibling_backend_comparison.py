@@ -1,0 +1,49 @@
+"""Focused contracts for the registered sibling/substrate comparator."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+import json
+
+from scripts.v4_tcdp.compare_sibling_backends import (
+    PROBABILITY_TOLERANCE,
+    _acceptance_for_arm,
+    _target_histogram,
+    _validate_unquantized_compilation,
+    _vector_from_mapping,
+    _write_immutable_json,
+)
+
+
+def test_hashed_comparison_json_uses_checkout_stable_lf_bytes(tmp_path) -> None:
+    path = tmp_path / "comparison.json"
+    payload = {"values": [0.1, 0.9]}
+    _write_immutable_json(path, payload)
+    expected = (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+    assert path.read_bytes() == expected
+    _write_immutable_json(path, payload)
+    assert path.read_bytes() == expected
+
+
+def test_source_sample_histogram_uses_explicit_msb_first_codec() -> None:
+    samples = np.array([[0, 0], [0, 1], [1, 0], [1, 0]], dtype=np.uint8)
+    np.testing.assert_array_equal(_target_histogram(samples, 2), [0.25, 0.25, 0.5, 0.0])
+
+
+def test_compiled_mapping_requires_complete_msb_first_state_space() -> None:
+    with pytest.raises(ValueError, match="complete explicit MSB-first"):
+        _vector_from_mapping({"00": 1.0}, 2)
+
+
+def test_acceptance_roundoff_is_recorded_as_valid_probability() -> None:
+    assert _acceptance_for_arm(1.0 + 0.5 * PROBABILITY_TOLERANCE) == 1.0
+    with pytest.raises(ValueError, match="exceeds one"):
+        _acceptance_for_arm(1.0 + 2.0 * PROBABILITY_TOLERANCE)
+
+
+def test_unquantized_compilation_control_rejects_modified_distribution() -> None:
+    reference = np.array([0.25, 0.25, 0.25, 0.25])
+    assert _validate_unquantized_compilation(reference, reference.copy())["tvd"] == pytest.approx(0.0)
+    with pytest.raises(ValueError, match="unquantized compilation"):
+        _validate_unquantized_compilation(reference, np.array([1.0, 0.0, 0.0, 0.0]))

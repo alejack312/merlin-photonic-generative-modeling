@@ -106,86 +106,63 @@ Audit: [`.planning/milestones/v3.1-MILESTONE-AUDIT.md`](milestones/v3.1-MILESTON
 
 </details>
 
-## v4.0 Train Classically, Deploy Photonically (Phases 26-32) — QUEUED 2026-09-03, behind v3.2 (2026-09-05)
+## v4.0 Train Classically, Deploy Photonically (Phases 26–32) — ADDITIVE PIPELINES PLANNED
 
-**Requeued 2026-09-05:** v3.2 Correction opened after this section was already merged. The agreed numbering keeps v3.2 as Phase 25 and shifts v4.0's seven phases to 26-32. v4.0's requirements remain parked at `.planning/REQUIREMENTS-v4.0-queued.md` (not deleted). It starts when v3.2 closes and the owner picks v4.0 as the next milestone.
+**Revision 4, 2026-09-05:** owner requested (1) a new classically trained IQP ring pipeline, (2) new sibling-experiment recreation pipeline, and (3) matched photonic/non-photonic Gaussian-on-Hamming comparisons. Existing pipelines/results remain unchanged. [Canonical plan](../docs/v4-plan-train-classical-deploy-photonic.md), [detailed additive design](../docs/v4-additive-pipelines-design.md), [52 requirements](REQUIREMENTS-v4.0-queued.md). This is planning, not implementation authorization.
 
-**Milestone goal:** Measure how far a classically trained IQP Born machine's photonic post-selected output drifts from the distribution the trainer deployed, under partial distinguishability, multi-photon emission, and loss, as a function of gate count and n; then test whether classical training against the tomographed gate channels closes that gap. Requirements: [`.planning/REQUIREMENTS.md`](REQUIREMENTS.md) § v4.0. Binding design: [`docs/v4-plan-train-classical-deploy-photonic.md`](../docs/v4-plan-train-classical-deploy-photonic.md) table 5.1 and forbidden moves § 9. Starts when v3.1 is closed via `/gsd-complete-milestone`.
+The revision-3 [physical audit](../docs/audits/2026-09-05-v4-plan-audit.md) remains binding. Its Ising-chain sweep is now a calibration/extension profile, not the main v4 deliverable. D1 gates noisy source claims, D2 NAT, D3 unspecified data-dependent initialization; none blocks explicitly configured classical ring/source reproduction. Ideal photonic comparisons still require compiler/projection validity.
 
-**Ordering:** 26 → 27 → 28 → 29 (owner) → 30 → 31 → 32. Phase 30 cannot start until Phase 28's `crosscheck_shared_qubit.json` is on disk and Phase 29's k=0 and noiseless nulls are filled.
+### Phase 26: Shared Core, Data Contracts & Sibling Inventory
 
-### Phase 26: Classical Trainer Vendoring & Convention Lock
-**Goal:** Bring the spring-semester classical IQP trainer into `merlin_iqp.classical` as a numpy-only package and prove its theta is this repo's theta.
-**Depends on:** v3.1 (test conventions); sibling repo `C:\Users\cuqui\iqp-mmd-barren-plateau` at a recorded commit.
-**Requirements:** TRAIN-01, TRAIN-02, TRAIN-03, TRAIN-04.
-**Executor:** Codex (mechanical). Plan section 3 verbatim in the prompt.
-**Success criteria:**
-1. `import merlin_iqp.classical` succeeds in the venv with jax uninstalled; `PROVENANCE.md` names the sibling commit and every stripped path.
-2. `tests/v4_tcdp/test_convention.py` green: Walsh-inverse vs `exact_qubit_iqp_distribution` < 1e-12; scaled-theta variants fail; exact MMD² at n=10 under 60 s.
-3. Full suite still green.
+Requirements TRAIN-01..04, ADD-01, MOD-01..04, REPRO-01..02.
+- 26A: target/spec/checkpoint/experiment contracts, provenance and separate output namespaces.
+- 26B: import-closed NumPy trainer adaptation, finite spatial Gaussian objective and exact/MC Hamming objective, required Gaussian mixtures.
+- 26C: inventory both sibling packages and resolve actual config/data/G/theta/checkpoint artifacts; explicit compatible/adapted/blocked rows.
+**Done:** import isolation, weighted-target/loss/gradient/one-update checks, finite Walsh and Hamming checks, source inventory manifest, preserved legacy interface checks. No Perceval inside classical training.
 
-### Phase 27: Noisy Gate Map Reconstruction
-**Goal:** Reconstruct one noisy `CP(alpha)` gate as a trace-decreasing completely positive 2-qubit map by linear inversion from absolute post-selected Perceval probabilities (method verified 2026-09-03: exact to 5e-16 ideal, CP at V=0.9, 2.3 s per map); Perceval tomography is a fidelity cross-check only.
-**Depends on:** none beyond Perceval 1.2.4 (probe facts in plan § 0).
-**Requirements:** CHAN-01, CHAN-02, CHAN-03, CHAN-04.
-**Executor:** Codex. Plan sections 4.2-4.3 verbatim.
-**Success criteria:**
-1. Ideal maps equal `(1/sigma_max^4) U ρ U†` to 1e-9 at four alphas with the phase on |11⟩; every cached map is CP and trace-non-increasing on all 16 matrix units; no per-gate renormalisation anywhere.
-2. Input-dependence of success at V=0.9 recorded; repeatability 1e-13; Perceval tomography fidelity agrees with the map's exact conditional fidelity within 5e-3 at three noise points.
-3. `alpha_key` yields exactly 63 keys; `map_timing.json` exists, measured at the slowest condition, and the 1134-map budget is under 3 single-core hours (measured ~45 min on 2026-09-03).
+### Phase 27: Ideal Photonic Compilation & Physical Capability Gates
 
-### Phase 28: Density-Matrix Deployment Simulator & Full-Fock Cross-Check
-**Goal:** Compose gate channels on an n-qubit density matrix, prove it exact against the qubit reference and against full-Fock Perceval, and measure the one approximation it makes.
-**Depends on:** Phase 26 (adapter), Phase 27 (channels).
-**Requirements:** DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, REFRAME-03.
-**Executor:** Codex. Plan sections 4.4-4.7 verbatim.
-**Success criteria:**
-1. Ideal maps reproduce `exact_qubit_iqp_distribution` to 1e-12 and the closed-form success product to 1e-9; k=0 ignores noisy maps; the hand-computed asymmetric n=3 fixture matches by named bitstring; no `4^n × 4^n` matrix is formed.
-2. Composed vs full-Fock: TVD < 1e-9 **and** success probability agreement to 1e-9 for one gate at n=2 and n=3 (bystander, V-only and g2-only separately).
-3. `results/v4_tcdp/crosscheck_shared_qubit.json` holds the shared-qubit discrepancies at three noise points × two alphas, with the pre-registered band applied.
-4. Erasure helper passes hand-enumerated per-pattern tests including the shared-qubit case; heralded-CZ throughput overlay function exists.
+Requirements CHAN-01..04; compiler portion of DEPLOY-01..04.
+- Exact-angle ideal qubit/photonic equivalence and sign/bit/winding tests.
+- Explicit support for graph/order/generator weights; reject unsupported models, do not turn them into chains.
+- Source-once/projection/noise diagnostics before expensive caches; g2/loss remains conditional on D1.
+**Done:** independent supported small-n physical references, honest capability manifest, physicality/fidelity checks and budget pilot. Classical reproduction can proceed without a noisy map cache.
 
-### Phase 29: Owner Null Results (owner-only gate)
-**Goal:** The owner writes, red first, what the deployment sweep outputs if the gates contribute nothing, before any sweep row exists.
-**Depends on:** Phase 28 (the functions the nulls are tested against).
-**Requirements:** NULL-03, NULL-04, NULL-05, NULL-06, NULL-07, NULL-08, NULL-09.
-**Executor:** Owner for NULL-03..08 (Claude asks questions and points at rows; does not supply formulas, 24-CONTEXT.md D-02); Codex for NULL-09's pipeline control tests.
-**Success criteria:**
-1. `tests/v4_tcdp/test_nulls_tcdp.py` exists with all owner functions filled; k=0, noiseless, eta, both throughput, and NAT-ideal nulls green; scaling hypothesis marked xfail.
-2. Each owner function's docstring carries the owner's one-sentence "why it has this shape".
-3. `test_control_point_every_cell` and `test_control_point_can_fail` present and green on three cells.
+### Phase 28: New Ring Pipeline & Deployment Adapter
 
-### Phase 30: Classical Training Runs & Deployment Gap Sweep
-**Goal:** Train every design-table cell classically, deploy each through the channel simulator across the hardware-anchored noise grid, and report the six metrics against the nulls.
-**Depends on:** Phases 26-29.
-**Requirements:** SWEEP-01, SWEEP-02, SWEEP-03, SWEEP-04, SWEEP-05.
-**Executor:** Codex for scripts and figures; owner interprets first, Claude checks (CLAUDE.md rule).
-**Success criteria:**
-1. `results/v4_tcdp/trained/` complete and byte-reproducible; `deploy_sweep.csv` has every cell or `missing_cells.md` explains each gap.
-2. Figures 1-4 regenerate from `tcdp_analysis.py` with no manual edits.
-3. For each null, the write-up states matched / did not match; the headline outcome from plan § 5.6 is named.
-4. Tomography wall-clock reported; any alpha rounding stated.
+Requirements RING-01..04, DEPLOY-01..05, REFRAME-03 as applicable.
+- Reproduce original ring data/split and explicit 2^n codec, keeping v1's different 462-output ansatz intact.
+- rings_spatial_exact and rings_hamming profiles, n=4 smoke and proposed n=6/8 main runs, n=10 resource extension.
+- Frozen checkpoint comparison on supported ideal backends; ring report includes both objective views and quantization.
+**Done:** classical-only training guard, data equivalence, profiles/results, source-attempt/acceptance semantics and honest physical-support statuses. No test-set tuning or promised ring-fit outcome.
 
-### Phase 31: Noise-Aware Classical Training
-**Goal:** Train theta against the channel-composed deployed distribution and measure whether the gap closes at Ascella-grade noise. The milestone's method claim, either way it comes out.
-**Depends on:** Phase 30 (baseline gaps).
-**Requirements:** NAT-01, NAT-02, NAT-03.
-**Executor:** Codex; owner reads timing before each n step.
-**Success criteria:**
-1. Finite-difference training loop on the exact deployed vector runs green end-to-end at n=4.
-2. Before/after gap table at n ∈ {4,6,8}, k=n-1, Ascella noise, 5 seeds, next to the ideal-trained baseline.
-3. Stop rule outcome recorded in `PROJECT.md` (completed, or stopped with numbers).
+### Phase 29: Sibling Recreation & Owner Controls
 
-### Phase 32: Write-Up, Review Gate, Communication
-**Goal:** Owner checkpoint, study document, mirrors, two-stage review, Gibbs pass, Vincent note.
-**Depends on:** Phases 30-31.
-**Requirements:** WRITE-07, WRITE-08, WRITE-09, REVIEW-02, COMM-02.
-**Executor:** Owner (checkpoint, journal, note); Sonnet (prose, read aloud before commit); Fable/Opus then Codex (review).
-**Success criteria:**
-1. Owner checkpoint transcript recorded before prose; no hedging on the four questions.
-2. `docs/tcdp-study.md`, technical-findings section, README paragraph, CLAUDE.md Repo state all present; every number traces to CSV or test.
-3. REVIEW.md dispositions every finding from both reviews.
-4. Vincent note drafted; send/hold recorded; journal entry in the owner's words.
+Requirements REPRO-03..05, NULL-03..09.
+- Faithful training_smoke first; bandwidth_marginal and ghosh_kim exact-small-n checkpoint replay/retraining.
+- Inventory broader scaling, grid5000, genomic and legacy Gaussian-mixture/high-weight experiments; preserve source configs and identify larger unsupported photonic cases.
+- Owner supplies actual scientific null/interpretation answers; agents implement import/replay mechanics.
+**Done:** source-specific reproduction ledger and registered numerical/statistical comparisons; every relevant row dispositioned. Blocked rows are not called reproduced.
+
+### Phase 30: Matched Hamming Benchmark & Qualified Noise Extension
+
+Requirements COMPARE-01..04, SWEEP-01..05.
+- Same frozen G/theta/data/kernel across classical evaluator, independent qubit reference and supported photonic realization.
+- Exact versus sampled comparisons, common budget accounting, compilation/noise/target differences, seed pairing and informative metrics.
+- Noise/calibration runs only after model decisions and resource gates; rings and sibling ideal results come first.
+**Done:** reproducible backend-comparison report/plots, source and ring arms, manifest completeness, explicit unsupported/missing arms. No claimed ideal photonic learning advantage where equality is the control.
+
+### Phase 31: NAT with Matched Continuation Control
+
+Requirements NAT-01..03.
+Selected validated ring/sibling checkpoints or explicitly selected calibration cells; D1/D2/D3 as applicable. Optimizer must move pair keys or have validated continuous dependence. Match continued-ideal budget/state/RNG; report target improvement separately from fixed-reference gap and acceptance cost.
+**Done:** validated update/control and recorded efficacy or attempted/stopped per existing 20-minute n=8/two-day n=4 rule.
+
+### Phase 32: Synthesis, Owner Explanation & Review
+
+Requirements WRITE-07..09, REVIEW-02.
+Three workstream reports plus tcdp synthesis, preserved old histories and artifact-backed mirrors. Owner explains distinct ring ansatz, Walsh efficiency, reproduction/adaptation and physical conditioning before interpretations. Fable/Opus then Codex reviews. The former optional communication gate was retired by the owner on 2026-09-08 after two unanswered messages to Vincent; no automatic sending is performed.
+**Done:** implementation tests and artifact checks pass; report distinguishes delivered pipelines, fully reproduced experiments, adaptations and remaining physical support. No blocked item silently counted complete.
 
 ### Phase 25: v3.2 Correction (Audit Response) — shipped 2026-09-05
 

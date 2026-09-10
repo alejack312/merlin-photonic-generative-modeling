@@ -1,0 +1,438 @@
+{
+  "codec": {
+    "bit_order": "msb_first",
+    "centers_hash": "8ad8820e5ec5762d83d41c1051838ac8454e868e91b15f562bb0bd7d94de8d5e",
+    "cols": 4,
+    "hi": 1.1,
+    "index_order": "row_major",
+    "lo": -0.1,
+    "mapping": [
+      {
+        "bitstring": "0000",
+        "center": [
+          -0.1,
+          -0.1
+        ],
+        "column": 0,
+        "index": 0,
+        "row": 0
+      },
+      {
+        "bitstring": "0001",
+        "center": [
+          -0.1,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 1,
+        "row": 0
+      },
+      {
+        "bitstring": "0010",
+        "center": [
+          -0.1,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 2,
+        "row": 0
+      },
+      {
+        "bitstring": "0011",
+        "center": [
+          -0.1,
+          1.1
+        ],
+        "column": 3,
+        "index": 3,
+        "row": 0
+      },
+      {
+        "bitstring": "0100",
+        "center": [
+          0.30000000000000004,
+          -0.1
+        ],
+        "column": 0,
+        "index": 4,
+        "row": 1
+      },
+      {
+        "bitstring": "0101",
+        "center": [
+          0.30000000000000004,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 5,
+        "row": 1
+      },
+      {
+        "bitstring": "0110",
+        "center": [
+          0.30000000000000004,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 6,
+        "row": 1
+      },
+      {
+        "bitstring": "0111",
+        "center": [
+          0.30000000000000004,
+          1.1
+        ],
+        "column": 3,
+        "index": 7,
+        "row": 1
+      },
+      {
+        "bitstring": "1000",
+        "center": [
+          0.7000000000000002,
+          -0.1
+        ],
+        "column": 0,
+        "index": 8,
+        "row": 2
+      },
+      {
+        "bitstring": "1001",
+        "center": [
+          0.7000000000000002,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 9,
+        "row": 2
+      },
+      {
+        "bitstring": "1010",
+        "center": [
+          0.7000000000000002,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 10,
+        "row": 2
+      },
+      {
+        "bitstring": "1011",
+        "center": [
+          0.7000000000000002,
+          1.1
+        ],
+        "column": 3,
+        "index": 11,
+        "row": 2
+      },
+      {
+        "bitstring": "1100",
+        "center": [
+          1.1,
+          -0.1
+        ],
+        "column": 0,
+        "index": 12,
+        "row": 3
+      },
+      {
+        "bitstring": "1101",
+        "center": [
+          1.1,
+          0.30000000000000004
+        ],
+        "column": 1,
+        "index": 13,
+        "row": 3
+      },
+      {
+        "bitstring": "1110",
+        "center": [
+          1.1,
+          0.7000000000000002
+        ],
+        "column": 2,
+        "index": 14,
+        "row": 3
+      },
+      {
+        "bitstring": "1111",
+        "center": [
+          1.1,
+          1.1
+        ],
+        "column": 3,
+        "index": 15,
+        "row": 3
+      }
+    ],
+    "n": 4,
+    "rows": 4,
+    "tie_breaking": "lowest_row_major_index"
+  },
+  "comparison": {
+    "acceptance": {
+      "absolute_error": 2.3852447794681098e-18,
+      "conditional_distribution_valid": true,
+      "field_consistency": true,
+      "formula": "eta**n * composed_ideal_compiled_instrument_success",
+      "independent_expected_absolute_accepted_mass": 0.0013629669360371165,
+      "measured_absolute_accepted_mass": 0.0013629669360371189,
+      "status": "PASS",
+      "tolerance": 1e-16
+    },
+    "direct_vs_compiled_qubit_tvd": 1.390014947762197e-16,
+    "direct_vs_raw_qubit_tvd": 0.006559226892507766,
+    "final_only_selected_boundary": true,
+    "intermediate_shared_gate_comparison": {
+      "comparison_tolerance": 1e-12,
+      "conditional_tvd_final_only_vs_intermediate": 1.942890293094024e-16,
+      "fixture_equivalence": true,
+      "reason": "registered shared-gate fixture matches after coherent readout; no general projection-equivalence theorem is claimed",
+      "supported": false
+    },
+    "metrics": {
+      "hamming_mmd2": 2.2373799447684661e-32,
+      "profile_mmd2": 1.563905411105991e-32,
+      "spatial_mmd2": 1.563905411105991e-32,
+      "tvd": 1.390014947762197e-16
+    },
+    "status": "PASS"
+  },
+  "config": {
+    "generator_family": "chain_1d",
+    "initialization": "small_angle",
+    "initialization_std": 0.1,
+    "lr": 0.05,
+    "n": 4,
+    "optimizer": "adam",
+    "profile_id": "rings_spatial_exact",
+    "profile_kernel_kind": "spatial_gaussian",
+    "run_kind": "smoke",
+    "seed": 0,
+    "sigma": 0.1,
+    "source_commit": "72e8079",
+    "steps": 3
+  },
+  "config_sha256": "728c04d261921b86de52b4d6beab389123efadc44416c107232c67a5411ad46c",
+  "direct": {
+    "absolute_accepted_mass": 0.0013629669360371189,
+    "conditional_distribution": {
+      "0000": 0.7674532730874886,
+      "0001": 0.022085973223191505,
+      "0010": 0.037906632999577645,
+      "0011": 0.0639418806847873,
+      "0100": 0.020108329553064217,
+      "0101": 0.000693763294520162,
+      "0110": 0.028691593344385254,
+      "0111": 0.00020132007673670974,
+      "1000": 0.020600944335065915,
+      "1001": 0.0004305288870372018,
+      "1010": 7.409313085191114e-05,
+      "1011": 0.0016082054566640515,
+      "1100": 0.03257853550970965,
+      "1101": 0.0007733787946528243,
+      "1110": 0.00022178126148410907,
+      "1111": 0.002629766360783106
+    },
+    "decoded_bitstrings": [
+      "0000",
+      "0001",
+      "0010",
+      "0011",
+      "0100",
+      "0101",
+      "0110",
+      "0111",
+      "1000",
+      "1001",
+      "1010",
+      "1011",
+      "1100",
+      "1101",
+      "1110",
+      "1111"
+    ],
+    "decoded_conditional_vector": [
+      0.7674532730874886,
+      0.022085973223191505,
+      0.037906632999577645,
+      0.0639418806847873,
+      0.020108329553064217,
+      0.000693763294520162,
+      0.028691593344385254,
+      0.00020132007673670974,
+      0.020600944335065915,
+      0.0004305288870372018,
+      7.409313085191114e-05,
+      0.0016082054566640515,
+      0.03257853550970965,
+      0.0007733787946528243,
+      0.00022178126148410907,
+      0.002629766360783106
+    ],
+    "diagnostics": {
+      "accepted_state_count": 16,
+      "backend": "Perceval SLOS direct full-Fock",
+      "compiled_metadata": {
+        "alpha_keys": 63,
+        "alpha_step": 0.1,
+        "compiler": "merlin_iqp.deploy.compile",
+        "n": 4,
+        "pair_angles": [
+          {
+            "i": 0,
+            "j": 1,
+            "key": 55,
+            "lifted_alpha": -0.7831853071795862,
+            "lifted_theta": -0.19579632679489656,
+            "raw_alpha": -0.8063441646467555,
+            "raw_theta": -0.20158604116168888,
+            "winding": -1,
+            "wrapped_alpha": 5.5
+          },
+          {
+            "i": 1,
+            "j": 2,
+            "key": 7,
+            "lifted_alpha": 0.7000000000000001,
+            "lifted_theta": 0.17500000000000002,
+            "raw_alpha": 0.7276409819525541,
+            "raw_theta": 0.18191024548813853,
+            "winding": 0,
+            "wrapped_alpha": 0.7000000000000001
+          },
+          {
+            "i": 2,
+            "j": 3,
+            "key": 11,
+            "lifted_alpha": 1.1,
+            "lifted_theta": 0.275,
+            "raw_alpha": 1.1221100227992236,
+            "raw_theta": 0.2805275056998059,
+            "winding": 0,
+            "wrapped_alpha": 1.1
+          }
+        ],
+        "quantized": true,
+        "topology": "path"
+      },
+      "distribution_hash": "f54b8af6be8e2b576db79487b31168a2c589a9423ffbde65ed5491c060cac88d",
+      "full_fock_state_count": 5621,
+      "full_fock_total_mass": 1.0000000000000002,
+      "mass_reconciliation_error": 2.220446049250313e-16,
+      "mass_reconciliation_tolerance": 1e-12,
+      "perceval_version": "1.2.4",
+      "projection": "final_only",
+      "raw_source_acceptance": 0.0020773768267598213,
+      "source_model": "fixed_photon_g2_0",
+      "source_once": true
+    },
+    "rejected_mass": 0.9986370330639629,
+    "status": "PASS"
+  },
+  "eta": 0.9,
+  "hashes": {
+    "compiled_metadata": "44916113cc3e2cca1f9ed5e73782488fe6ff6340e0e14f69266c5e55211b0ae8",
+    "compiled_qubit_reference": "27af349cdde50fc7e7d4874cdbf3188b8e964d5153f444bbb62c89247ee5ea8e",
+    "configuration": "728c04d261921b86de52b4d6beab389123efadc44416c107232c67a5411ad46c",
+    "dataset": "2a021db64ff4ce325765025da21cf8b6754a61648dbfa87050ee3853b4c949ae",
+    "decoded_conditional_vector": "0f73e1593c180169a3e71c8242783331e0570192e6808f4f457db57d0ed8e986",
+    "final_theta": "dd82d1024a30151cac803d12675595ee4f9fde8fe655b4effcfaf0c14f494c7e",
+    "generator": "9f4c4ba8abb1416a673c5c82dfa891736d3a827f52a4995c8382f5e0f04fd7f2",
+    "manifest": "c58f4dff0ca006a56915a16caebf0e1c55d97d29034cff3cf9a26de470365756",
+    "output_payload": "ac5996c68879be2ff065f0e44e4e19defa6d3ba1ef74976e7f2eb083ac6a622b",
+    "raw_qubit_reference": "27ff309e77c8cb1eb71eabd1394b8114550d0ea6cfc7ed476e859de95f867c56",
+    "run": "40f4364cd9db8cfbb82b18cc7cb10d1487b8e34019fe92a2888a0ce980bc1f7a",
+    "validation_manifest": "a6596fdacac430f025cb7ce0f4a4b40fb22f332e51912fbc0dc9ed7e24977be4"
+  },
+  "projection": "final_only",
+  "provenance": {
+    "backend": "Perceval SLOS direct full-Fock",
+    "perceval_version": "1.2.4",
+    "physical_source_boundary": "fixed-photon g2=0, source once, explicit eta",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.1",
+    "repo": {
+      "dirty": false,
+      "git_status": [],
+      "observed_branch": "codex/v4-implementation",
+      "observed_commit": "ce637a879e27aa3a03ca3b4eeec08afe38627b48",
+      "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+      "tree_identity": "852680213a4390326bda3d0774b79e62a6369dfb",
+      "tree_identity_kind": "git_tree",
+      "workspace_git_status": [
+        "?? results/v4_tcdp/deploy/physical_control_manifest_20260909_final2.json",
+        "?? results/v4_tcdp/deploy/physical_control_manifest_20260909_final3.json",
+        "?? results/v4_tcdp/deploy/registered_v3_ring_photonic_hamming_n4_seed0_smoke_20260909_final2.json",
+        "?? results/v4_tcdp/deploy/registered_v3_ring_photonic_spatial_n4_seed0_smoke_20260909_final2.json",
+        "?? results/v4_tcdp/deploy/resource_budget_final_v7.json"
+      ]
+    },
+    "source_commit": "72e8079",
+    "validation_manifest_payload_sha256": "742280cf99bca2c4b499bf769c27337149f2b32032eb23bf4411144db75cac82",
+    "validation_manifest_status": "PASS"
+  },
+  "qubit_reference": {
+    "bit_order": "msb_first",
+    "compiled_quantized_theta": {
+      "0000": 0.7674532730874886,
+      "0001": 0.02208597322319151,
+      "0010": 0.03790663299957766,
+      "0011": 0.0639418806847872,
+      "0100": 0.02010832955306419,
+      "0101": 0.0006937632945201609,
+      "0110": 0.028691593344385192,
+      "0111": 0.00020132007673670312,
+      "1000": 0.020600944335065943,
+      "1001": 0.00043052888703720227,
+      "1010": 7.409313085190528e-05,
+      "1011": 0.0016082054566640511,
+      "1100": 0.03257853550970963,
+      "1101": 0.0007733787946528183,
+      "1110": 0.00022178126148410696,
+      "1111": 0.002629766360783104
+    },
+    "compiled_vector_sha256": "b4ee9e890e9799c30772c965a84029c1fb470825689d6ebc999c6985473bfc93",
+    "raw_final_theta": {
+      "0000": 0.7611179904316603,
+      "0001": 0.022166667793809297,
+      "0010": 0.037729245212592674,
+      "0011": 0.06614268653374993,
+      "0100": 0.020073533165340718,
+      "0101": 0.0008392136880366536,
+      "0110": 0.030680537399331066,
+      "0111": 0.0001943960570582677,
+      "1000": 0.020624613487479557,
+      "1001": 0.0004256928447445715,
+      "1010": 9.497784100246439e-05,
+      "1011": 0.0016737239315984646,
+      "1100": 0.03430145854030417,
+      "1101": 0.000819316037409574,
+      "1110": 0.00022507001514845208,
+      "1111": 0.0028908770207338773
+    },
+    "raw_vector_sha256": "6ec185e63f749c42270686b241fcd658bee39ba82ce6fcfa7a90917264dd99df"
+  },
+  "ring_scope": {
+    "n": 4,
+    "ring_deployment": "smoke_only",
+    "run_kind": "smoke"
+  },
+  "run_id": "rings_spatial_exact/n4_seed0_smoke",
+  "schema_version": "v4_tcdp.photonic_ring.v2",
+  "source_model": "fixed_photon_g2_0",
+  "source_once": true,
+  "status": "PASS",
+  "target_and_budget": {
+    "dataset_hash": "2a021db64ff4ce325765025da21cf8b6754a61648dbfa87050ee3853b4c949ae",
+    "dataset_id": "rings.make_circles.400.seed42.split42.train_minmax",
+    "learning_rate": 0.05,
+    "optimizer": "adam",
+    "seed": 0,
+    "steps": 3,
+    "train_histogram_hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26"
+  }
+}

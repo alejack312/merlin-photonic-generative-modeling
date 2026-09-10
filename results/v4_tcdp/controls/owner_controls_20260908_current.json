@@ -1,0 +1,98 @@
+{
+  "controls": {
+    "NULL-03": {
+      "max_factorization_residual": 2.220446049250313e-16,
+      "model_success": 1.0000000000000004,
+      "n": 4,
+      "pair_count": 0,
+      "prediction": "k=0 output factorizes under product preparation and measurement",
+      "source_model": "analytic product IQP reference",
+      "status": "PASS",
+      "tolerance": 1e-12
+    },
+    "NULL-04": {
+      "exact_tolerance": 1e-16,
+      "max_probability_residual": 1.1102230246251565e-16,
+      "n": 4,
+      "pairs": [
+        [
+          0,
+          1,
+          0.23
+        ],
+        [
+          2,
+          3,
+          -0.18
+        ]
+      ],
+      "prediction": "same-parameter ideal compilation equals the independent reference under the declared codec",
+      "probability_tolerance": 1e-12,
+      "singles": [
+        0.17,
+        -0.23,
+        0.31,
+        0.41
+      ],
+      "source_model": "analytic compiled map; quantize=false",
+      "status": "PASS",
+      "success_residual": 1.3877787807814457e-17,
+      "tvd": 1.7477339020466331e-16
+    },
+    "NULL-05": {
+      "conditional_shape_tvd": 0.0,
+      "eta": 0.9,
+      "exact_tolerance": 1e-16,
+      "expected_lossy_success": 0.01172756248011639,
+      "ideal_success": 0.017874657034166117,
+      "lossy_success": 0.01172756248011639,
+      "n": 4,
+      "prediction": "uniform fixed-photon loss scales accepted mass by eta**n and preserves conditional shape",
+      "probability_tolerance": 1e-12,
+      "source_model": "fixed_photon_g2_0",
+      "status": "PASS",
+      "success_residual": 0.0
+    },
+    "NULL-06": {
+      "cp_model": {
+        "eta": 0.9,
+        "fixed_photon_attempts_per_sample": 85.26921103131701,
+        "general_attempts_per_sample": 85.26921103131701,
+        "model_success": 0.017874657034166117,
+        "n": 4,
+        "residual": 0.0,
+        "status": "PASS",
+        "total_acceptance": 0.01172756248011639
+      },
+      "heralded_model": {
+        "attempts_per_sample": 381.0394756896814,
+        "eta": 0.9,
+        "expected": 381.0394756896814,
+        "k": 2,
+        "n": 3,
+        "residual": 0.0,
+        "status": "PASS"
+      },
+      "prediction": "attempts per accepted sample equals 1/s under each declared acceptance model",
+      "status": "PASS",
+      "tolerance": 1e-16
+    }
+  },
+  "payload_sha256": "ce8a360cfc6733185ed16f243d2088251f62fd827348a8defe131c6915070f0f",
+  "provenance": {
+    "python": "3.12.1",
+    "repo_commit": "d16f50794085d76b2ba829348a3e2d4ad8893017"
+  },
+  "schema_version": "v4_tcdp.owner_controls.v1",
+  "scope": {
+    "conditional_distributions_and_absolute_success_separate": true,
+    "d1": "fixed_photon_g2_0 with explicit uniform loss",
+    "owner_prediction_note": "docs/v4-owner-predictions-2026-09-08.md",
+    "physical_backend": false
+  },
+  "status": "PASS",
+  "tolerances": {
+    "exact_deterministic": 1e-16,
+    "probability_map": 1e-12
+  }
+}

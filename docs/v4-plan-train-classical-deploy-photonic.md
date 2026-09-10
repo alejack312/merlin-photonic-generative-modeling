@@ -1,351 +1,225 @@
 # v4.0 Plan: Train Classically, Deploy Photonically (TCDP)
 
-**Status:** revision 2, 2026-09-03, after a Codex adversarial read (`.planning/research/v4-plan-codex-review.md`, disposition in `v4-plan-codex-review-disposition.md`). Not started.
-**Executor:** Codex (gpt-5.5) for every task marked MECH; Sonnet for prose tasks; Fable or Opus for the two review gates. The owner runs every task marked OWNER personally.
-**Rule of the milestone:** every measurement has a null result written as a failing test before the sweep runs (`CLAUDE.md`, "Null-result gate"). A sweep whose numbers match its null is a pipeline check, not a finding.
-**Rule for the executor:** no tolerance, grid value, seed count, threshold, or formula in this document may be changed by the executor. A failing check is reported with the measured number. Anything this document does not specify is a stop-and-ask, not a judgment call.
+> **Documentation reconciliation, 2026-09-10.** Historical planning contract: statements below about work not yet started describe the planning date. The selected bounded release is now implemented and verified, while original broader scientific acceptance remains incomplete. Proposed experiments and budgets below are not evidence that they were executed. Current dispositions are in [the ledger](../.planning/v4-requirement-evidence.md) and [bounded release](v4-bounded-release.md).
 
----
+**Status: revision 4, 2026-09-05 — owner vision integrated; planning complete, implementation not started.** Retains revision 3's safeguards and supersedes revision 2 in commit `3f9cb92`. The original review and disposition remain historical records. See [audit](audits/2026-09-05-v4-plan-audit.md), [probes](audits/2026-09-05-v4-plan-probes.py), and [results](audits/2026-09-05-v4-plan-probe-results.json).
 
-## 0. The question, and why it is open
+The owner now requests three additive deliverables: a classically trained IQP ring pipeline, a sibling-experiment reproduction pipeline, and matched photonic/non-photonic Hamming-kernel comparisons, sharing extensible modules. The binding [additive pipelines design](v4-additive-pipelines-design.md) specifies data contracts, actual sibling experiments, interfaces, phase tasks and acceptance tests. It takes precedence for workstream scope and sequencing; the physical safeguards below remain binding. No old pipeline is replaced. This turn plans the work, not implements it; owner checkpoint answers remain unwritten.
 
-**Question.** An IQP Born machine is trained entirely classically (Van den Nest's cosine formula, the spring-semester `iqp-mmd-barren-plateau` methodology). The trained parameters are deployed on a photonic device: dual-rail photons, post-selected `CP(alpha)` gates for every ZZ term, realistic loss, partial distinguishability, and multi-photon emission. **How far is the device's post-selected output from the distribution the classical trainer thinks it deployed, as a function of gate count, system size, and the three noise parameters; what does a usable sample cost; and does training against the device's gate maps instead of the ideal gate close the gap?**
+## 0. Question, scope and owner decisions
 
-**Why it is open, stated at the strength the evidence supports.** In the four works reviewed for this plan and the 2026-09-03 literature searches (queries recorded in `docs/iqp-lit-scoping.md`'s addendum), no study deploys a classically trained IQP model through a photonic gate-noise model. Recio-Armengol, Ahmed, Bowles (arXiv:2503.02934) study qubit IQP deployment and do not study a photonic noise model. Raj, Mathur, Perdomo-Ortiz (arXiv:2608.31117, full text) evaluate the objective by state-vector simulation up to 30 qubits and define the coverage, fidelity, and forward-KL metrics used here. Salavrakos et al. (Quandela, arXiv:2405.02277) run a photonic Born machine on hardware with loss mitigation; whether its training route or circuit class overlaps this one is checked by a full read in Phase 32 before the write-up relies on it. The v3.1 closed forms settle the loss axis: conditioned on full detection the output is unchanged and throughput pays. The open axes are distinguishability and g2, which act inside the two-photon gates and are the parameters Quandela's roadmap tracks ("distinguishability 70% -> 99%").
+First deliver the two new pipelines and their ideal matched comparison. Then extend validated checkpoints to noise and NAT. Across both pipelines measure the ideal trained model, its ideal compiled version, and qualified noisy deployment at the same compiled settings. Separate compilation error, noise, target fit and acceptance cost. The former Ising-chain sweep is a calibration/extension profile, not a substitute for the requested ring and sibling experiments.
 
-**Verified facts this plan builds on (2026-09-03; do not re-derive):**
+This is a **simulated deployment study**, not a hardware experiment, sampling-hardness result or demonstration that a photonic device is necessary. The initial ideal chain and calibration Ising target are classically tractable; sibling families can differ and need explicit capabilities. Held-out dataset evaluation is supported where splits exist, but does not alone establish generalization or quantum advantage. The original 462-output ring generator is not the IQP ansatz; the new pipeline shares its data, not an unsupported claim of identical circuitry. The spatial kernel permits classical finite-vector training and a full Walsh representation; Hamming supplies the efficient diagonal spectral structure. See design §2 for the corrected mathematical premise.
 
-| Fact | Evidence |
-|---|---|
-| The sibling trainer's `theta` equals this repo's `thetas` / `pair_thetas` exactly, weight-1 and ZZ; scale 0.5 and 2 fail | Walsh-inverse of `iqp_expectation_exact` vs `exact_qubit_iqp_distribution`, n=3, error 0.0 |
-| Sibling core (`iqp/expectation.py`, `mmd/{kernel,loss,gradients,mixture}.py`, `rng.py`) imports with numpy only | import scan; `mmd2_exact_small_n` ran in this venv |
-| Perceval 1.2.4 `NoiseModel(indistinguishability, g2, transmittance)` acts on plain dual-rail `Processor`s | HOM dip 0.5 -> 0.25 -> 0 at V = 1, 0.5, 0 |
-| **Direct reconstruction** of the post-selected CP gate as a trace-decreasing CP map from absolute Perceval probabilities (section 4.2) is exact: max error 5e-16 vs `(1/9) U rho U^dag` at alpha = pi/3 and pi; Choi min eigenvalue -2e-15 at V = 0.9; 2.3 s per gate | probe recorded in `.planning/research/v4-plan-codex-review-disposition.md` |
-| Gate success probability is **input-dependent** under noise: 0.1111 to 0.1222 across 16 product inputs at V = 0.9. Per-gate renormalisation is therefore wrong; maps must be composed unnormalised and normalised once at the end | same probe |
-| Perceval `ProcessTomography` on the bare catalog gate: average fidelity 1.0 ideal, 0.9707 at V = 0.9; the direct reconstruction's mean conditional fidelity at V = 0.9 is 0.9703 | probe |
-| The PERM-adapted `_build_cp_insertion_core` gives fidelity 0.65 under tomography: reconstruct the **bare** catalog gate, never the adapted core | probe |
-| Perceval dual-rail logical convention inside the bare gate: mode pattern (1,0) = logical 0, (0,1) = logical 1 | tomography fidelity 1.0 with the phase on the 11 state |
-| Post-selected `probs()` under `NoiseModel` requires `min_detected_photons_filter(2)` | probe |
-| Loss on a CP gate costs `eta` per data photon only (vacuum ancilla). Heralded CZ costs `eta^2` extra per gate. v3.1's `eta^(n+2k)` table is heralded-CZ only | `_build_cp_insertion_core` docstring; v3.1 hardness doc |
-| Perceval SLOS is deterministic exact-arithmetic simulation: two reconstructions of the same key differ only by floating-point noise | probe fit residual 3e-16 |
+The prior literature search is background, not proof of novelty. Record search strings, dates, versions, included papers and exact relevant sections before claiming a contribution. State what the reviewed work does and what this experiment adds; avoid universal absence claims.
 
-**Hardware anchors** (cite, do not invent):
-
-| Source | V | g2(0) | end-to-end transmission |
+| ID | Owner decision | What the evidence rules out | Required record before dependent work |
 |---|---|---|---|
-| Ascella, Maring et al. Nat. Photon. 2024, arXiv:2306.00874 (full text) | 0.930 (M_s 0.944 corrected) | 7.3e-3 | ~8% |
-| Altair, Salavrakos et al. PRA 2025, arXiv:2405.02277 | 0.84 | 0.025 (purity) | loss ~0.96 |
-| Quandela roadmap 2026-2033 | 70% -> 99% target | | |
+| D1 | A validated fixed-photon, g2=0 map study with small-n source diagnostics, or a larger source/number-sector model supporting g2 jointly with loss | Applying an imperfect source once per gate and using eta^n post hoc at g2>0 | Source/detector model, retained axes, revised counts, permissible claims. Neither branch is selected here. |
+| D2 | NAT with discrete gate keys and continuous single angles, or a validated continuous-angle noise model | Adam finite differences h=1e-4 through roughly .025-wide theta quantization as a useful pair gradient | Algorithm, gradient/neighbor validation, resolution, objective and budget. |
+| D3 | Initialization method/scale and what the five seeds vary | Unspecified sibling defaults, or deterministic duplicates treated as independent restarts | Exact target-moment recipe/configuration, stationary-point pilot and replication unit. |
 
----
+### Resolved owner decisions (2026-09-06)
 
-## 1. Scope
+- **D1:** v4 primary physical scope is fixed photon number with `g2=0` and explicit uniform per-photon loss. Accepted conditional distributions remain separate from absolute success; joint multiphoton `g2>0` plus loss is outside this milestone.
+- **D2:** NAT uses the discrete `0.1*j` alpha catalog with deterministic circular neighbor/coordinate search for pair keys and the existing exact analytic gradient/update for continuous single-qubit angles. Quantized finite differences, interpolation and straight-through gradients are not used.
+- **D3:** primary profiles use the sibling-style data-dependent parity initialization at scale `0.1`, computed from the exact training target moments. `small_angle` and `uniform` remain explicit ablations. Deterministic duplicate parameterizations are recorded and are not counted as independent replicas.
 
-### Must
-- M1. Vendored classical trainer inside `merlin_iqp`, convention-tested against the repo's exact reference.
-- M2. Gate-map deployment simulator: one directly reconstructed trace-decreasing map per CP gate, composed on an n-qubit density matrix, normalised once at the end; cross-checked against full-Fock Perceval at n = 2, 3 including the shared-qubit two-gate case.
-- M3. The TCDP gap sweep on a 1D-chain IQP family at n in {4, 6, 8, 10}, noise grid anchored to Ascella and Altair, six exact metrics, every null written first, an ideal-map control point asserted in every cell.
-- M4. Noise-aware classical training (NAT): train against the map-composed deployed distribution and measure whether the gap closes. Promoted to Must 2026-09-03 (owner decision). Stop rule in section 6.
-- M5. Erasure-marked non-post-selected output (REFRAME-03).
-- M6. Write-up, technical-findings mirror, README paragraph, owner checkpoints, two-stage review.
+**Must:** both additive pipelines, shared modular contracts, faithful source inventory/reproduction, matched Hamming comparison, validated deployment, informative metrics/controls, NAT attempt with its existing stop rule, scoped erasure artifact and reproducible reports. **Won't:** implement during this planning turn; replace old pipelines/results; add dependencies here; assert unsupported physical equivalence; invent owner answers; publish or send messages automatically. D1 gates noisy physical scope, D2 gates NAT, D3 gates unspecified data-dependent profiles; they do not block explicitly configured classical ring or source-faithful runs.
 
-### Won't (write into `.planning/PROJECT.md` if tempted)
-- A structured Fock-space simulator to n = 20. Not needed for this question.
-- Any barren-plateau claim. The sibling project found init and n dominate; not re-litigated here.
-- Graph-state / MBQC realization (audit direction 4). Separate milestone.
-- Heralded CZ under distinguishability. CP(alpha) only.
-- Recycling mitigation (Salavrakos). Different detector model and circuit class. Cite only.
-- Analysis of the erasure-marked output. Audit direction 1, future milestone.
-- New dependencies of any kind.
+## 1. Physical and provenance contract
 
----
+Record repository commit/dirty hashes, sibling commit, Python/NumPy/Perceval/Exqalibur versions, source defaults, backend, detector model and probability cutoffs. The source baseline after owner-authorized cleanup is `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`; verify it before vendoring and hash local data/checkpoint inputs separately. Earlier 2.3-second reconstruction claims remain provisional until their complete scripts/configuration/results are committed and rerunnable. SLOS is floating-point numerical simulation, not exact arithmetic; small fitting residual is not a universal physical error bound.
 
-## 2. Repository layout the executor must produce
+**Revision-4 provenance clarification, updated 2026-09-05:** the owner subsequently requested cleanup of both repos. The previously dirty sibling source/configuration snapshot is now committed at the baseline above. Local experiment artifacts remain outside Git; preserve and hash the required inputs under additive design §5 before import. Cleanup does not establish full experiment reproducibility.
 
-```
-src/merlin_iqp/classical/            # M1, vendored from C:\Users\cuqui\iqp-mmd-barren-plateau\src\iqp_bp
-    __init__.py
-    PROVENANCE.md                    # sibling commit hash, copied files, removed jax/laplacian/polynomial paths
-    expectation.py                   # iqp_phase, iqp_expectation, iqp_expectation_exact (verbatim)
-    kernel.py                        # gaussian_* only
-    mixture.py                       # DatasetParityCache, dataset_expectations_batch (verbatim)
-    loss.py                          # mmd2, mmd2_exact_small_n (gaussian branch only)
-    gradients.py                     # grad_expectation_analytic, grad_mmd2_analytic, estimate_gradient_variance; jax functions deleted
-    rng.py                           # split_rng (verbatim)
-    families.py                      # chain_1d (new), product_state, lattice (verbatim)
-    initialization.py                # make_theta_with_metadata (verbatim)
-    trainer.py                       # Trainer (verbatim)
-    adapter.py                       # theta_to_repo, repo_to_theta (new)
-    ising_chain.py                   # exact 1D Ising target (new, 3.3)
-src/merlin_iqp/deploy/               # M2
-    __init__.py
-    gate_map.py                      # reconstruct_gate_map, GateMap, alpha_key, prep/read circuits
-    density_matrix.py                # deploy_density_matrix
-    fock_reference.py                # noisy_full_fock_distribution (n<=3 cross-check only)
-    throughput.py                    # heralded_cz_throughput (overlay only)
-    erasure.py                       # M5
-    metrics.py                       # the six metrics, formulas in 5.4
-tests/v4_tcdp/
-    test_convention.py               # 3.4
-    test_gate_map.py                 # 4.3
-    test_density_matrix.py           # 4.4
-    test_fock_crosscheck.py          # 4.5
-    test_metrics.py                  # 5.4
-    test_nulls_tcdp.py               # 5.2, owner-filled, red before the sweep
-scripts/v4_tcdp/
-    train_classical.py               # 5.3
-    deploy_sweep.py                  # 5.5
-    nat_train.py                     # 6
-    tcdp_analysis.py                 # 5.6
-results/v4_tcdp/
-docs/tcdp-study.md
-```
+Separate source preparation (photon-number mixture, brightness and internal labels attached once per input event), optical gates (acting on those photons), and detection/acceptance (PNR or threshold, ancilla monitoring and output rail occupancy). Default proposed cross-checks use ideal photon-number-resolving detectors and vacuum ancilla acceptance. Threshold-detector hardware papers are context, not validation of that model.
 
-No file outside this list is modified except `docs/technical-findings.md`, `README.md`, `CLAUDE.md` (Repo state), `.planning/*`. `pyproject.toml` is not touched.
+For exactly n input photons, passive optics, uniform loss and acceptance requiring all n photons, loss contributes eta^n and leaves the accepted distribution unchanged. This is a restricted control. At g2>0 extra photons may be lost while still producing accepted n-photon outcomes. The audit's n=2 probe has a conditional TVD shift of .0081128 at g2=.025, eta=.5 and does not obey eta^2 success scaling.
 
----
+Source noise is not intrinsically gate noise. At eta=1 full detection rejects extra source photons; bystanders also contribute source-acceptance factors. The measured noisy/ideal success ratios are .974519 at n=2 and .962023 at n=3 with one gate. A gate-only map misses the spectator cost. This discrepancy does not imply photon leakage into an unconnected bystander.
 
-## 3. Phase 26 (MECH, Codex): vendor the classical trainer
+## 2. Outputs, imports and caches
 
-### 3.1 Copy, strip, add `chain_1d`
-1. Record `git -C C:\Users\cuqui\iqp-mmd-barren-plateau rev-parse HEAD` into `PROVENANCE.md`.
-2. Copy the files listed in section 2 verbatim. Rewrite imports `iqp_bp.` -> `merlin_iqp.classical.`.
-3. Delete from `gradients.py`: `grad_mmd2_autodiff_vector`, `grad_mmd2_autodiff`, `_jax_fixed_sample_value_and_grad`, every `import jax`. Delete `laplacian_*`, `polynomial_*`, `multi_scale_*` from `kernel.py` and their branches in `loss.py`, `gradients.py`.
-4. Add to `families.py`:
-   ```python
-   def chain_1d(n: int, k: int) -> np.ndarray:
-       """Rows 0..n-1: weight-1 generator on qubit r. Rows n..n+k-1: ZZ pairs (0,1),(1,2),...,(k-1,k).
-       Requires 0 <= k <= n-1. Returns (n+k, n) uint8. Row order is part of the contract."""
-   ```
+Implementation uses `src/merlin_iqp/classical/`, `src/merlin_iqp/deploy/`, new `src/merlin_iqp/experiments/`, `tests/v4_tcdp/`, `scripts/v4_tcdp/`, isolated rings/sibling/comparisons subdirectories of `results/v4_tcdp/`, and the three workstream reports plus `docs/tcdp-study.md`. Modules and command names are specified in additive design §§3–6. Allowed mirrors remain README, technical findings, project instructions and .planning. No new dependency is authorized; source exports can use the sibling's existing environment.
 
-### 3.2 `adapter.py`
-```python
-def theta_to_repo(G, theta) -> tuple[list[float], dict[tuple[int,int], float]]:
-    """Weight-1 row on qubit r -> thetas[r]; weight-2 row on (i,j), i<j -> pair_thetas[(i,j)].
-    Raises ValueError on any row of weight 0 or >= 3, on duplicate rows, or if any qubit lacks a weight-1 row."""
-def repo_to_theta(n, thetas, pair_thetas) -> tuple[np.ndarray, np.ndarray]   # (G, theta) in chain_1d row order
-```
-No scaling, no sign change.
+Classical modules: expectation, Gaussian kernel, target moments, loss, gradients, RNG, families, initialization, trainer, adapter, Ising target, and required model/checkpoint support. Deployment modules: gate-map reconstruction, compilation, density matrix, full-Fock reference, throughput, erasure, metrics. Add tests by responsibility; six filenames is not a coverage standard.
 
-### 3.3 `ising_chain.py`
-```python
-def ising_chain_target(n: int) -> np.ndarray:
-    """Exact 2^n vector, index = int(bitstring, 2) with qubit 0 the most significant bit.
-    J = np.random.default_rng(4001).normal(size=19); use J[:n-1] (one common vector, prefixes per n).
-    p(x) proportional to exp(sum_{i<n-1} J[i] * s_i * s_{i+1}), s_i = 1 - 2*x_i, beta = 1. Normalised by exact enumeration."""
-def ising_chain_samples(n: int, m: int = 20000) -> np.ndarray:
-    """(m, n) uint8 drawn by inverse CDF from ising_chain_target(n) with default_rng(4002).
-    Used ONLY by the Monte-Carlo trainer at n in {16, 20}. Every metric and every exact-loss training run uses the vector."""
-```
+`PROVENANCE.md` records original → destination paths, file hashes, license notices, retained symbols and adaptations. Flattened imports need an explicit map: replacing only `iqp_bp.` leaves unresolved subpackages.
 
-### 3.4 `tests/v4_tcdp/test_convention.py`
-- `test_walsh_inverse_matches_exact_reference`: n in {2,3,4}, k in {0,1,n-1}, 5 draws: `p(x) = 2^-n sum_a <Z_a> (-1)^{a.x}` from `iqp_expectation_exact` vs `exact_qubit_iqp_distribution(n, *theta_to_repo(G, theta))`; max abs diff < 1e-12.
-- `test_asymmetric_hand_fixture`: n = 3, thetas = (0.3, 0.0, 0.9), pair (0,2) theta 0.4. Expected probabilities are computed inside the test by an explicit 8-term amplitude sum written out by hand (not by calling either library), compared by named bitstring to both the Walsh reconstruction and `exact_qubit_iqp_distribution`. This is the test that catches a shared bit-order mistake.
-- `test_scale_conventions_fail`: theta x 0.5 and theta x 2 exceed 1e-3.
-- `test_no_jax_import`; `test_exact_loss_runs_n10` (< 60 s); `test_ising_target_normalised_and_prefix_consistent` (sum = 1; `J[:3]` identical between the n = 4 and n = 6 calls).
+Required artifacts: `source_contract.json`, `gate_map_validation.json`, `crosscheck_shared_qubit.json`, `resource_budget.json`, `design_manifest.json`, `schema.json`, trained arrays/trajectories, map caches, exact output vectors, derived CSVs and structured failure records.
 
-**Done when:** all green, full suite green, `PROVENANCE.md` present.
+Caches are atomic and versioned, keyed by integer angle ID and all source/noise/detector settings, with implementation/source hashes and raw/effective angles. Reject stale caches and duplicate cell IDs. Resume only from matching manifests. Retain all raw acceptance/filter mass; a cache hit is not independent verification.
 
----
+## 3. Phase 26: classical trainer and compilation
 
-## 4. Phases 27-28 (MECH, Codex): gate maps and the deployment simulator
+### 3.1 Adapt the trainer explicitly
 
-### 4.1 Design decision (recorded; not re-decided)
-Full-Fock simulation of n qubits with k CP gates is infeasible past n ~ 5. Instead each gate is reconstructed once as a **trace-decreasing completely positive map** `Lambda_{alpha,V,g2}` on two qubits, and the n-qubit density matrix is evolved by composing these maps; the final state is normalised once, and its trace is the exact success probability of the composed post-selection. This is exact for post-selection applied at the end of the circuit, which is what the device does. The single approximation is that a photon's distinguishability is drawn independently in each gate it enters, whereas Perceval treats it as a property of the photon; 4.5 measures that error directly and the write-up carries it.
+The sibling Trainer imports IQPModel, save_iqp_checkpoint, RNG constants and derive_seed, absent from revision 2's copy list. Its exact-small-n loss consumes binary samples and Trainer casts data to uint8. It does not accept a probability vector as an exact target.
 
-**Not** the earlier design: no per-gate renormalisation (success is input-dependent, 0.1111 to 0.1222 at V = 0.9), no chi-matrix Pauli-ordering inference. Perceval `ProcessTomography` is used only as an independent fidelity cross-check.
+Add a target-moment boundary used consistently by loss, exact gradients and initialization. Test empirical moments versus weighted vector moments on a nonuniform hand case. Never cast probabilities to integers or substitute samples for a declared exact target. Trace the complete import closure. Test isolated imports without the sibling path and with JAX import forbidden; do not uninstall packages.
 
-### 4.2 `gate_map.py`
-```python
-@dataclass(frozen=True)
-class GateMap:
-    alpha: float               # rounded key, in [0, 2pi)
-    V: float
-    g2: float
-    superop: np.ndarray        # (16,16) complex; out_vec = superop @ rho.reshape(-1), ROW-MAJOR vec; trace-decreasing CP map
-    choi_min_eig: float
-    p_success_basis: np.ndarray  # (4,) success on the four computational inputs; reported only, never used for composition
-    cond_fidelity_avg: float   # exact average fidelity of the normalised map vs diag(1,1,1,e^{i alpha}), from the Choi matrix
-def reconstruct_gate_map(alpha: float, V: float, g2: float) -> GateMap
-def alpha_key(alpha_raw: float) -> float:   # (round((alpha_raw mod 2pi) / 0.1) mod 63) * 0.1  -> exactly 63 keys
-```
-Construction, exactly as in the verified probe:
-- Processor: `Processor("SLOS", 8, noise=NoiseModel(indistinguishability=V, g2=g2 or None))` (no `noise` argument when V = 1 and g2 = 0). Add `prep(ia)` on modes 0-1 and `prep(ib)` on modes 2-3; add the **bare** `PostProcessedControlledRotationsItem().build_circuit(n=2, alpha=float(alpha))` at mode 0; add `read(ra)` on 0-1 and `read(rb)` on 2-3; `add_herald(m, 0)` for m in 4..7; `set_postselection(PostSelect("[0,1]==1 & [2,3]==1"))`; `min_detected_photons_filter(2)`; input `BasicState([1,0,1,0])`.
-- `prep(label)`: `"0"` identity; `"1"` `PERM([1,0])`; `"+"` `BS.H()` at 0; `"i"` `BS.H()` at 0 then `PS(pi/2)` at 1. `read(basis)`: `"Z"` identity; `"X"` `BS.H()` at 0; `"Y"` `PS(-pi/2)` at 1 then `BS.H()` at 0.
-- Prep states and readout POVMs are **computed from the circuits' own unitaries** (`compute_unitary()`), never written by hand: `psi = U_prep[:, 0]`; `E_bit = R^dag |bit><bit| R`. Logical basis: mode pattern (1,0) = logical 0, (0,1) = logical 1.
-- Absolute outcome probability = `results[state] * global_perf`. Linear inversion by least squares over 16 inputs x 9 readout pairs x observed outcomes; assert rank 256 and fit residual < 1e-12.
-- Cache: `results/v4_tcdp/channels/{alpha:.1f}_{V}_{g2}.npz`. 63 x 18 = 1134 maps; measured 2.3 s each, about 45 minutes single-core. Loss (eta) is not a key: a lost data photon fails the pair post-selection, it does not change the conditional map.
+Keep Gaussian NumPy paths and required helpers. Exact small-n loss must agree with direct vector-kernel MMD; analytic gradients must agree with finite differences, including nonuniform p and nonzero pairs. Verify a full optimizer update and short trajectory.
 
-### 4.3 `tests/v4_tcdp/test_gate_map.py`
-- `test_ideal_map_exact`: V = 1, g2 = 0, alpha in {pi/6, pi/3, pi, 2.0}: `superop @ vec(rho)` equals `(1/sigma_max(alpha)^4) * U rho U^dag` to 1e-9 for 5 random pure rho (the trace is the closed-form success probability from `iqp_photonic`; the phase sits on the 11 state).
-- `test_completely_positive`: every cached map has Choi min eigenvalue > -1e-9.
-- `test_trace_non_increasing_all_units`: the map is Hermiticity-preserving on all 16 matrix units, and for the 16 product inputs the output trace is in (0, 1].
-- `test_success_input_dependence_recorded`: at V = 0.9, alpha = pi/3, the basis successes differ by more than 1e-4 (documents why per-gate renormalisation would be wrong).
-- `test_repeatable`: two reconstructions of the same key agree to 1e-13.
-- `test_tomography_crosscheck`: `ProcessTomography(...).average_fidelity(U)` on the same bare gate agrees with `cond_fidelity_avg` within 5e-3 at (V, g2) in {(1, 0), (0.9, 0), (0.93, 0.007)}. The discrepancy is recorded, not hidden: Perceval's figure averages differently over an input-dependent success.
-- `test_alpha_key`: 63 distinct keys over 10 000 random `alpha_raw` in [-10, 10]; `alpha_key(2*pi - 0.01) == 0.0`.
-- `test_reconstruction_wall_clock`: writes seconds per map to `results/v4_tcdp/map_timing.json`, measured at the slowest condition (V = 0.84, g2 = 0.025). If 1134 x that exceeds 3 hours single-core, stop and report.
+`chain_1d(n,k)`: n singles followed by (0,1),...,(k-1,k), 0<=k<=n-1, shape (n+k,n), uint8. Validate binary generators, dimensions, finite theta, no duplicate/zero/high-weight rows and all singles present. General adapters use singles then sorted pairs; chain order is a special case. Round-trip a non-chain (0,2) fixture rather than silently rejecting/discarding it in one direction.
 
-### 4.4 `density_matrix.py`
-```python
-def deploy_density_matrix(n, thetas, pair_thetas, gate_maps: dict[tuple[int,int], GateMap]) -> tuple[np.ndarray, float]:
-    """Returns (probs over 2^n, p_success). rho = |+><+|^n as a (2,)*2n tensor; apply exp(i thetas[r] Z_r) exactly;
-    for each (i,j) in pair_thetas IN ASCENDING ORDER OF (i,j): apply exp(i th Z_i) exp(i th Z_j) exactly then gate_maps[(i,j)]
-    (raises unless gate_maps[(i,j)].alpha == alpha_key(4*th)); apply H^n; p_success = real trace;
-    probs = diag / p_success. Two-qubit maps are applied by einsum on the tensor; a 4^n x 4^n matrix is never formed."""
-```
-Bit order: index = `int(bitstring, 2)`, qubit 0 most significant, matching `exact_qubit_iqp_distribution`. n <= 10; `test_peak_memory_n10` asserts peak RSS growth under 400 MB and records seconds per call at n = 8 into `results/v4_tcdp/deploy_timing.json`.
+### 3.2 Sign, bit order, winding and quantization
 
-`tests/v4_tcdp/test_density_matrix.py`:
-- `test_ideal_maps_reproduce_exact_reference`: n in {2,3,4}, k in {0,1,n-1}, ideal maps: probs vs `exact_qubit_iqp_distribution` < 1e-12 and `p_success` equals the product of `1/sigma_max^4` to 1e-9. (Phase 28 null.)
-- `test_k0_ignores_maps`: n = 4, k = 0, noisy maps passed: probs unchanged, `p_success == 1`.
-- `test_asymmetric_hand_fixture_deployed`: the n = 3 fixture of 3.4 through `deploy_density_matrix` with ideal maps, compared by named bitstring.
-- `test_alpha_mismatch_raises`; `test_no_4n_matrix_allocated` (monkeypatch `np.zeros`/`np.empty` to fail on shape `(4**n, 4**n)` for n = 6).
+Logical 0 is (1,0), output qubit 0 is the most significant bit. Sibling observable enumeration may be LSB-first: convert explicitly. Symmetric Hamming weights alone cannot detect label reversal.
 
-### 4.5 `fock_reference.py` and `tests/v4_tcdp/test_fock_crosscheck.py` (the trust gate)
-`noisy_full_fock_distribution(n, thetas, pair_thetas, V, g2) -> (probs, p_success)` for n <= 3. Layout: qubit q on modes (2q, 2q+1), Perceval dual-rail convention (logical 0 = photon in mode 2q). State prep `BS.H()` on each pair; diagonal layer `PS(2*theta)` on mode 2q+1 (equivalent to `exp(i theta Z)` up to global phase); for pair (i,j) with theta_ij: `PS(2*theta_ij)` on modes 2i+1 and 2j+1 then the bare CP gate with `alpha = 4*theta_ij` via `Processor.add({2i: 0, 2i+1: 1, 2j: 2, 2j+1: 3, a: 4, a+1: 5, a+2: 6, a+3: 7}, gate)` where `a = 2n + 4*g` for the g-th gate (g = 0, 1, ...); conjugation `BS.H()` on each pair; heralds `add_herald(m, 0)` on every ancilla mode; `set_postselection` requiring `[2q, 2q+1] == 1` for every q; `min_detected_photons_filter(n)`; `probs = results * global_perf` mapped to bitstrings by which mode of each pair holds the photon; `p_success = sum(probs)`; return normalised probs and `p_success`. **These tests choose theta_pair on the grid `alpha_key/4` so the reference's unrounded alpha equals the map's key.**
+For the bare CP(alpha)=diag(1,1,1,exp(i alpha)):
 
-Tests (all compare `deploy_density_matrix` to this reference):
-- `test_single_gate_n2`: pair (0,1); V in {1, 0.9, 0.7} x g2 in {0, 0.02}: TVD < 1e-9 **and** `p_success` agrees to 1e-9. (The composed trace equals the full-Fock success: this retires the "product of mean success" approximation.)
-- `test_single_gate_n3_bystander_V_only` and `test_single_gate_n3_bystander_g2_only`: pair (1,2), bystander 0: TVD < 1e-9. If g2-only fails while V-only passes, multi-photon emission leaks into bystander modes: g2 becomes a "gate-local approximation" column with the measured n = 3 discrepancy as its error bar, V carries the headline, and the executor stops to report both numbers.
-- `test_two_gates_shared_qubit_n3`: pairs (0,1), (1,2); (V, g2) in {(0.9, 0), (1, 0.02), (0.93, 0.007)}; theta_pair in {pi/12, 0.5}: record every TVD and success-probability discrepancy into `results/v4_tcdp/crosscheck_shared_qubit.json`. Pre-registered interpretation: max TVD < 0.01, reported as the error bar on every figure; 0.01 to 0.05, every figure additionally carries the full-Fock n = 3 points as an overlay and the write-up leads with the discrepancy; > 0.05, the method fails for this milestone and the executor stops.
+`exp(i t Zi Zj) = exp(-i t) exp(i t Zi) exp(i t Zj) CP(4t)`.
 
-### 4.6 `throughput.py`
-```python
-def heralded_cz_throughput(n, k, eta) -> float:   # 1 / (eta**(n+2*k) * (2/27)**k), v3.1's closed form, Fig 4 overlay only
-```
-CP-gate throughput is `1 / (eta**n * p_success)` with `p_success` the composed trace from `deploy_density_matrix`; no function multiplies per-gate means.
+On the logical-1 rail **PS(-2t)** implements exp(i t Z) up to global phase. Apply this sign to singles and both pair compensation phases. The audit's revision-2 full-Fock sign circuit has TVD .442651 from the intended model; corrected signs agree to 3.75e-16.
 
-### 4.7 `erasure.py` (M5)
-```python
-def erasure_marked_distribution(q_conditional, n, eta, gates: list[tuple[int,int]]) -> tuple[dict[str,float], float]:
-    """Keys are strings over {0,1,E}. A qubit that appears in any gate cannot be erased: loss there fails that gate's
-    post-selection, and that mass is returned as `dropped`. A qubit in no gate is erased independently w.p. 1-eta.
-    Exact per-pattern formula: for x with conditional prob q(x), every subset S of the free qubits gives
-    pattern (x with S -> E) with mass q(x) * eta^(n_gate) * eta^(n_free - |S|) * (1-eta)^|S|, summed over x;
-    dropped = 1 - eta^(n_gate)."""
-```
-Tests: exact per-pattern values against a hand-enumerated case for k = 0 (n = 2), one gate (n = 3, pair (0,1)), and the shared-qubit case (n = 3, pairs (0,1),(1,2): no free qubit); mass + dropped = 1 to 1e-12; eta = 1 reproduces `q_conditional`.
+Use integer keys j=0..62 with angles a_j=.1*j and circular-nearest lookup (minimize wrapped angular distance, deterministic ties). This retains 63 keys; the final circular gap is 2*pi-6.2, so bins are not uniform. Reject nonfinite values. Test all keys, negative inputs and both sides of wraps/ties with fixed fixtures.
 
----
+**Preserve the winding:** choose the lift a_j+2*pi*l closest to 4*t_trained and set t_eff=(a_j+2*pi*l)/4. The CP map uses wrapped a_j; local compensations use lifted t_eff. Setting t_eff=a_j/4 is wrong: exp(i(t+pi/2)ZZ)=i ZZ exp(i t ZZ), which changes local operations, not only global phase. The audit's example changes TVD by .760184.
 
-## 5. Phases 29-30: nulls, training, and the deployment gap sweep
+Persist raw theta/alpha, lifted theta_eff, wrapped angles and integer keys. Test arbitrary-angle exact compilation before quantization, then quantized compilation against the ideal reference at theta_eff. Grid fixtures must lie on the grid; revision 2's pi/12 did not. Uncached arbitrary-alpha map tests are separate.
 
-### 5.1 Fixed experimental design
+### 3.3 Calibration target, initialization and timing
 
-| Axis | Values | Reason |
-|---|---|---|
-| Circuit family | `chain_1d(n, k)` | gate count = k; nearest-neighbour connectivity |
-| n (deployable) | 4, 6, 8, 10 | density-matrix budget |
-| n (training only) | 16, 20 | shows the classical side scales; no deployment |
-| k | 0 .. n-1 | k = 0 is the null; gap vs k is the primary curve |
-| Target | `ising_chain_target(n)` (3.3); samples only for n in {16, 20} | structured low-order correlations |
-| Kernel | Gaussian on Hamming distance; sigma = 0.5 * sqrt(n) (primary) and sigma = 1.0 (control) | Rudolph et al.: bandwidth in Theta(sqrt n) keeps the loss low-bodied |
-| Loss | exact (`mmd2_exact_small_n`) for n <= 10; MC (`num_a_samples` 512, `num_z_samples` 2048) for n in {16, 20} | |
-| Init | `data_dependent` (primary), `small_angle` std 0.1, `uniform` | sibling's three schemes |
-| Optimizer | Adam, lr 0.05, 300 steps, checkpoint every 50 | sibling defaults |
-| Seeds | 5 per cell, `derive_seed("tcdp", n, k, kernel, init, seed_idx)` via `trainability/rng.py` | |
-| Map noise grid | V in {1.0, 0.99, 0.95, 0.93, 0.84, 0.70} x g2 in {0, 0.007, 0.025} = 18 points; (1.0, 0) is the **control point** and is asserted, not just recorded | Ascella, Altair, roadmap anchors |
-| Loss (eta) | {1.0, 0.9, 0.5, 0.08}, post hoc, as throughput columns | eta does not change the conditional map |
-| Gate angle | `alpha_key(4 * theta_pair_trained)`; `theta_eff = alpha_key / 4` is deployed; the ideal reference uses the trained theta | ARB-01 identity |
+The following Ising target belongs to the calibration profile only. Ring data and exact sibling datasets/splits come from additive design §§4–5 and must not be replaced with this target. Preserve source Gaussian mixtures when required; the shared objective boundary also supports finite spatial Gaussian training.
 
-Cell counts: deployable circuits 4 + 6 + 8 + 10 = 28 (n, k) pairs; x 2 kernels x 3 inits x 5 seeds = **840 trained cells**; x 18 map points = **15 120 rows** in `deploy_sweep.csv`. Training-only cells: 2 n x 2 kernels x 3 inits x 5 seeds = 60; 900 trained files in total. Maps: 1134, precomputed by `deploy_sweep.py --build-maps` before any row is written.
+Keep the zero-field open Ising chain: J=default_rng(4001).normal(size=19), prefixes J[:n-1], beta=1, signed s=1-2*x, p proportional to exp(sum J_i s_i s_(i+1)). Cast uint8 bits to signed integers before subtraction. Normalize stably. Independently verify Z=2^n product cosh(J_i), zero one-spin means, adjacent correlations tanh(J_i), prefix and bit-order consistency.
 
-### 5.2 `tests/v4_tcdp/test_nulls_tcdp.py` (OWNER; written red before `deploy_sweep.py` runs)
-Owner-filled functions (Claude asks and points at rows; does not supply formulas):
-- `owner_null_gap_k0(V, g2)`: predicted `tvd_ideal_deployed` at k = 0.
-- `owner_null_gap_noiseless(k)`: predicted gap at the control point (1.0, 0) for any k.
-- `owner_null_eta_effect(n, k, eta)`: predicted change in the conditional distribution from eta alone.
-- `owner_null_throughput_cp(n, alphas, eta)` and `owner_null_throughput_hcz(n, k, eta)`: both closed forms.
-- `owner_null_nat_ideal()`: what NAT does when every gate map is ideal (predicted before/after gap, and the relation between the NAT-trained and ideal-trained theta).
-- `owner_hypothesis_gap_scaling(k, F)`: first-order hypothesis for TVD vs k; `xfail(strict=False)`.
-Pipeline nulls (Codex may write these; they are checks, not findings):
-- `test_control_point_every_cell`: at (V, g2) = (1.0, 0), for every trained cell, `tvd_ideal_deployed == 0` (1e-12), `mmd2_train_deployed == mmd2_train_ideal`, both KL columns equal, `coverage_deployed == coverage_ideal`, `fidelity_deployed == fidelity_ideal`, `marginal_err_*_deployed == *_ideal`, `mean_gate_fidelity == 1`, `p_success` equals the product of closed-form successes. Run inside `deploy_sweep.py` as an assertion on the control rows, and standalone on three cells.
-- `test_control_point_can_fail`: perturb `q_dep` by 1e-3 on one entry; every equality above must fail.
+For n=16,20 only, retain 20,000 inverse-CDF samples at seed 4002. Label the empirical-target approximation separately from model/observable Monte Carlo uncertainty. This is fitting a specified target, not held-out generalization.
 
-### 5.3 `scripts/v4_tcdp/train_classical.py` (MECH)
-Trains every cell; writes `results/v4_tcdp/trained/{n}_{k}_{kernel}_{init}_{seed}.npz` with `G, theta, loss_trajectory, metadata, q_ideal` (n <= 10). Deterministic: re-running produces byte-identical `theta`.
+D3 must specify method and scale. The sibling defaults to parity, scale .1, not its alternative covariance recipe. For this target parity initialization gives zero singles; pair generators preserve bit parity and single-angle loss gradients vanish there. The probe reproduces this stationary subspace. Require a short training diagnostic; do not silently jitter or change initialization.
 
-### 5.4 `metrics.py` (formulas are the contract; `test_metrics.py` checks each on a hand case)
-All distributions are exact 2^n vectors. `p` = `ising_chain_target(n)`. `S = {x : p(x) > 1e-6}` (support set). `Q = 20000`.
-- `tvd(a, b) = 0.5 * sum |a - b|`.
-- `mmd2_train(q)`: computed **from the vectors**: `sum_a w_a (<Z_a>_p - <Z_a>_q)^2` with the training kernel's spectral weights (`spectral_weights_exact`) and Walsh transforms of `p` and `q`. The same number the exact trainer minimises.
-- `kl_target(q) = sum_x p(x) log(p(x) / max(q(x), floor))`, reported at `floor = 1e-12` and `floor = 1e-9` as two columns.
-- `coverage_pop(q) = (1/|S|) * sum_{x in S} (1 - (1 - q(x))^Q)`: expected fraction of the support seen in Q samples. Population analogue of Raj et al.'s sample coverage; there is no train/unseen split because the target is an exact vector, and this deviation is stated in the write-up.
-- `fidelity_pop(q) = sum_{x in S} q(x)`: expected fraction of samples that are valid.
-- `marginal_err_k(q, p)`: mean over all subsets T of size k (k = 1, 2) of `tvd(q_T, p_T)`.
-Each metric is computed for `q_ideal(theta_trained)` and `q_dep(theta_eff)`; the ideal/deployed pair is the comparison, the absolute value is against the target. Also `tvd_rounding_only = tvd(q_ideal(theta_eff), q_ideal(theta_trained))`, so alpha rounding is separated from noise in every cell; a cell where `tvd_rounding_only > 0.1 * tvd_ideal_deployed` is flagged in a `rounding_flag` column.
+Exact target + deterministic initialization + exact updates makes all five seeds identical unless another randomness source is declared. Record hashes/n_unique; do not describe duplicates as five independent restarts or bootstrap them as such.
 
-### 5.5 `scripts/v4_tcdp/deploy_sweep.py` (MECH)
-CSV columns, in this order: `n,k,kernel,init,seed,V,g2,alpha_trained_list,alpha_rounded_list,theta_eff_list,tvd_ideal_deployed,tvd_rounding_only,rounding_flag,mmd2_train_ideal,mmd2_train_deployed,kl12_target_ideal,kl12_target_deployed,kl9_target_ideal,kl9_target_deployed,coverage_ideal,coverage_deployed,fidelity_ideal,fidelity_deployed,marginal_err_k1_ideal,marginal_err_k1_deployed,marginal_err_k2_ideal,marginal_err_k2_deployed,mean_gate_fidelity,p_success,throughput_eta1.0,throughput_eta0.9,throughput_eta0.5,throughput_eta0.08`. List columns are `;`-joined floats. One row per (trained cell, V, g2). Erasure distributions are not in the CSV: `deploy_sweep.py --erasure` writes `results/v4_tcdp/erasure/{n}_{k}_{seed}_ascella.npz` for n <= 6, k in {0, 1, n-1}, primary kernel, data_dependent init, at the four eta values.
+Tests include an asymmetric explicit-amplitude fixture, Walsh/reference n=2..4 comparisons, adapter round trips, sign/scale/winding mutations, exact moments/gradients, RNG and resume. Time an entire update/short run at the largest n, including gradients. A <60-second loss call does not prove the total training budget.
 
-### 5.6 `scripts/v4_tcdp/tcdp_analysis.py` (MECH) and figures
-Aggregation for every figure: primary kernel, `data_dependent` init, mean and std over the 5 seeds at fixed (n, k, V, g2). Other kernel/init combinations appear only in an appendix table with the same aggregation.
-- Fig 1: `tvd_ideal_deployed` vs k, one panel per n, one line per V at g2 = 0; the control line (V = 1) is drawn and is zero.
-- Fig 2: `tvd_ideal_deployed` vs `(1 - mean_gate_fidelity) * k`, all (n, k, V, g2), with the owner's hypothesis line and the (0, 0) control cluster.
-- Fig 3: coverage and KL (floor 1e-12), ideal vs deployed, at the Ascella and Altair points, vs k, one panel per n.
-- Fig 4: CP throughput `1/(eta^n p_success)` vs (n, k) at the four eta values, with `heralded_cz_throughput` overlaid.
-- Table: the pre-registered headline numbers: at n = 10, k = 9, Ascella point, median over seeds of `tvd_ideal_deployed`, `coverage_deployed / coverage_ideal`, `kl12_target_deployed - kl12_target_ideal`. The two headline outcomes (pre-registered, descriptive, not tests): median TVD <= 0.02 reads "classically trained IQP survives Ascella-grade deployment through k = 9"; median TVD >= 0.1 reads "distinguishability is the deployment ceiling and the gate count where it bites is [first k with median TVD > 0.1]"; in between, the write-up reports the curve without a slogan.
+## 4. Phases 27–28: validate physics before scaling
 
-### 5.7 What would make this a finding rather than a pipeline check
-Only rows that differ from the nulls of 5.2: nonzero gap at k >= 1 under V < 1 or g2 > 0, its dependence on k and n, and whether the hypothesis line fits. The write-up states, per null, matched or not.
+### 4.1 Composition is conditional on an instrument model
 
----
+An unnormalized CP trace-nonincreasing map represents a specified success instrument on a specified input space. Composing such maps and tracking trace is exact for that instrument model, not automatically for a circuit with final-only post-selection.
 
-## 6. Phase 31 (M4): noise-aware classical training (NAT)
-Design (fixed):
-- Cells: n in {4, 6, 8}, k = n - 1, primary kernel, `data_dependent` init, the 5 Phase-30 seeds. Noise: Ascella (V = 0.93, g2 = 0.007). Maps: all 63 alphas at the Ascella point, precomputed (part of the 1134).
-- Objective: `mmd2_train(q_dep(theta))` with `q_dep` from `deploy_density_matrix` using `theta_eff = alpha_key(4 theta_pair) / 4` inside; the weight-1 angles enter exactly.
-- Warm start: theta from the corresponding Phase-30 ideal-trained cell. Adam, lr 0.02, 150 steps. Gradient: central finite differences, h = 1e-4, on the exact deployed vector (parameter-shift is not valid for a channel; the alpha rounding makes the objective piecewise, which is accepted and stated).
-- Cost: (2m + 1) evaluations per step, m = n + k: 9, 13, 17 at n = 4, 6, 8; x 150 steps x 5 seeds = 29 250 evaluations; budget = that number x the per-call time in `results/v4_tcdp/deploy_timing.json`, recorded before the run.
-- Report: for each seed, the six metrics of `q_dep(theta_NAT)` next to `q_dep(theta_ideal-trained)` and `q_ideal(theta_ideal-trained)`; the owner's `owner_null_nat_ideal` is run with ideal maps first (NAT on ideal maps must reproduce the ideal-trained gap, zero, and change theta by less than the optimizer's own step noise, quantified as the theta change from 150 further Adam steps on the ideal objective).
-- **Stop rule:** one n = 8 run over 20 minutes, or two calendar days without a green n = 4 end-to-end run: record timing in `PROJECT.md`, ship NAT as "attempted, stopped" with the numbers obtained. The milestone still closes.
+In general P U2 P U1 P != P U2 U1 P: rejected sectors can return. The probe gives a repeated-rail counterexample with fresh vacuum ancillas. This does not itself refute a one-pass chain. Prove for the supported ideal fixed-photon chain that retired rails cannot be repopulated, ancillas never re-enter and rejected sectors cannot reach final acceptance. Restrict/reject other topologies/orders unless validated.
 
----
+Partial distinguishability retains hidden labels across shared gates; a local reset of the environment is an additional approximation. g2 changes number sectors and source preparation, requiring D1. Single-gate reconstruction cannot establish multi-gate source-model validity.
 
-## 7. Phase 32: write-up, gates, review
-1. **OWNER checkpoint before any prose:** (a) why theta needs no conversion; (b) why composing unnormalised maps and normalising once is exact for end-of-circuit post-selection, and why per-gate renormalisation is not; (c) why k = 0 is a null for distinguishability but not for loss; (d) what the shared-qubit approximation is, and the measured number; (e) CP vs heralded-CZ throughput under loss. Hedging stops the phase.
-2. `docs/tcdp-study.md`: question, design table, per-null outcome, figures with the shared-qubit error bar, hardware anchors, "what this does/doesn't establish", literature table with read-depth labels.
-3. Mirrors: `docs/technical-findings.md` v4.0 section, README paragraph, `CLAUDE.md` Repo state.
-4. **REVIEW gate:** Fable or Opus, then Codex, prompt verbatim: "For each stated finding, write the null result and check whether the finding differs from it. Then check every number against `deploy_sweep.csv`." Dispositioned in `.planning/phases/32-*/32-REVIEW.md`.
-5. Gibbs pass offered (questions only); journal entry in the owner's words.
-6. Vincent note, owner's words; send/hold recorded.
+Per-step normalization is possible if each input-dependent success is multiplied and nonlinear conditioning is explicit. The forbidden operation is treating the normalized map as a linear TP channel or losing those factors. Default to unnormalized composition; validated rescaling plus log-success can prevent underflow. Call trace **model success** until physical-reference agreement is established.
 
----
+### 4.2 Reconstruction, physicality and fidelity
 
-## 8. Literature the write-up must engage (full reads; abstract-level claims are labelled until then)
-- Recio-Armengol, Ahmed, Bowles, arXiv:2503.02934 (in `docs/papers/`; confirm what deployment they report before characterising it).
-- Raj, Mathur, Perdomo-Ortiz, arXiv:2608.31117 (full text read 2026-09-03 for the metric definitions and the 30-qubit state-vector statement).
-- Salavrakos et al., arXiv:2405.02277 (full read required before any sentence about its training route or circuit class).
-- Xie, Notton, Senellart, arXiv:2605.11879 (full read before any implementation-level comparison).
-- Maring et al., arXiv:2306.00874 (full text read 2026-09-03 for the Ascella numbers).
+Use the bare catalog gate, correctly prepared 0,1,+,i inputs, X/Y/Z readouts, vacuum ancillas and declared acceptance. Derive matrices from optical unitaries and independently check them against known qubit matrices. Absolute outcomes include global_perf. Retain zero outcomes as well as observed outcomes; record probability thresholds and discarded mass.
 
----
+Fit row-major superoperator using 16 product preparations x 9 readouts. Record rank 256, conditioning, residual and time. Add held-out complex/asymmetric preparations and readouts. A fit to its own preparation set is not proof that a noisy-source preparation is a linear qubit encoding.
 
-## 9. Forbidden moves (the executor stops and asks instead)
-- Loosening any tolerance, seed count, grid value, threshold, aggregation, or formula in this document. A failing check is reported with the measured number. (v3.1's null test was widened from 0.35 to 0.5 by executor discretion with a wrong rationale; that is the failure this rule exists to prevent.)
-- Changing any value in table 5.1 or section 6.
-- Running `deploy_sweep.py` before `test_nulls_tcdp.py` exists with the k = 0, noiseless, and NAT-ideal nulls filled by the owner.
-- Reconstructing the PERM-adapted core instead of the bare catalog gate; hand-writing prep states or POVMs instead of deriving them from `compute_unitary()`.
-- Renormalising a gate map, or forming any 4^n x 4^n matrix.
-- Adding jax, iqpopt, pennylane, torch-based training, or any dependency.
-- Silently renormalising, flooring, or dropping any distribution mass without a named column reporting it.
-- Reporting a metric not defined in 5.4, or a headline not pre-registered in 5.6.
-- Writing any sentence containing "barren plateau" as a finding, or "nobody has" without the scope qualifier in section 0.
-- Writing the owner's null formulas, checkpoint answers, journal entry, or Vincent note.
+Use unnormalized Choi J=sum_ij |i><j| tensor E(|i><j|), Tr J=Tr E(I). Test Hermiticity and eigenvalues >=-1e-9. Test 0<=E_dagger(I)<=I by eigenvalues, not success on 16 chosen states. Hermiticity preservation is E(Eij)^dagger=E(Eji); off-diagonal units are not themselves Hermitian states. Check vectorization against explicit Kraus action and a non-diagonal known operation. No silent PSD/trace repair.
 
----
+Ideal exact-alpha maps equal s(alpha) U rho Udagger, s=1/sigma_max(alpha)^4, to 1e-9. Reference probability tolerance remains 1e-12; repeatability 1e-13. Record failures without relaxing tolerances; repeatability is not a physical error bound.
 
-## 10. Finish criteria (checked mechanically, pasted into the phase summary)
-1. `python -m pytest -q` green; `tests/v4_tcdp/` contains the six test files; the only permitted skips are NAT tests if NAT-03's stop rule fired.
-2. `results/v4_tcdp/deploy_sweep.csv` has 15 120 rows with the 5.5 schema, or `missing_cells.md` names each missing row; `results/v4_tcdp/trained/` has 900 files.
-3. `results/v4_tcdp/crosscheck_shared_qubit.json` exists and its numbers appear verbatim in `docs/tcdp-study.md`.
-4. Every figure regenerates from `tcdp_analysis.py` with no manual edits; the control line in Fig 1 is zero.
-5. Owner checkpoint transcript recorded; both reviews dispositioned; Vincent note drafted.
+Replace the undefined conditional fidelity with **success-weighted Haar fidelity**:
+`F_success=(Tr J + <u|J|u>)/((d+1)*Tr J)`, d=4, u=sum_i |i> tensor U|i>.
+This averages fidelity weighted by success, then divides by mean success. It differs from an unweighted average of normalized fidelities for input-dependent success. Test with explicit Kraus overlaps and Haar integration. Perceval tomography is secondary diagnostics with normalization recorded; different averages need not agree within .005. Define empty-gate mean fidelity as 1, not NaN.
 
-## 11. Model routing and sequencing
-- Phases 26, 27, 28, 30 scripts, 31 scripts: Codex (`codex exec`), one phase per prompt, the relevant section of this file pasted verbatim plus the verified-facts table.
-- Phase 29 and the owner items of Phase 32: owner.
-- Phase 32 prose: Sonnet drafts, owner reads aloud before commit.
-- Review gate: Fable or Opus, then Codex adversarial.
-- Order: 26 -> 27 -> 28 -> 29 -> 30 -> 31 -> 32. Phase 30 does not start until `crosscheck_shared_qubit.json` is on disk and the owner nulls are filled.
+### 4.3 Full-Fock/source trust gate
+
+Qubit q uses (2q,2q+1); gate g has fresh ancillas starting 2n+4g. Validate local/global mapping with a nonadjacent pair. Use H prep/readout and negative signs from §3.2. Noise is applied once at source input. For source/loss diagnostics retain photon sectors before conditioning, and reconcile acceptance plus rejection to 1 with named cutoff losses.
+
+Test n=2,3: no gate, single gate with bystander, shared gates; separate V-only, g2-only, loss-only and joint g2/loss. Check both normalized TVD and absolute success. Use asymmetric singles, different pair angles, near-zero and wrap cases. Enumerate fixtures in a manifest. A physically present zero-angle gate and no gate need distinct resource labels.
+
+The .01/.05 TVD bands from revision 2 are **small-n pilot triage only**: <.01 permits discussing a surrogate study; .01–.05 requires model reconsideration; >.05 stops this surrogate proposal. Record absolute/relative success errors separately. Do not extrapolate an n=3 discrepancy to n=10, KL, coverage or fidelity as an error bar without a bound for that size/metric. Show a separate validation panel. Larger-n hardware claims require compositional error analysis or direct validation.
+
+### 4.4 Throughput and erasures
+
+Throughput = independent source attempts per accepted sample. Fixed-n/g2=0 uniform-loss model: 1/(eta^n*p_model_success). General source model: use total acceptance including loss; eta belongs in model/cache/result keys. Do not double-count brightness/routing/gate losses when interpreting end-to-end hardware efficiency.
+
+Heralded-CZ 1/(eta^(n+2k)*(2/27)^k) is a separate ideal-source resource illustration under the validated heralded construction. It does not implement arbitrary trained CP angles and is not a noise-matched alternative.
+
+Revision 2's erasure helper lacks gate-failure mass and cannot represent full non-post-selected output. A synthetic output-erasure channel **conditioned on gate success** may erase every output qubit, including gate participants: for retained set R the mass is eta^|R|*(1-eta)^(n-|R|)*marginal_q(bits_R). Label this conditional/model-derived. Multiplying by gate success and adding a FAILURE category gives a complete coarse instrument only for that stated measurement model; it does not recover failed-gate output patterns.
+
+If M5 requires actual non-post-selected photonic output, obtain small-n full-Fock outcomes including ancilla failures, collisions and multiphoton categories, and reconcile mass before conditioning. {0,1,E} alone is insufficient at g2>0. Resolve scope with D1; a q-only artifact cannot silently complete REFRAME-03.
+
+## 5. Phases 29–30: design, controls and metrics
+
+### 5.1 Candidate grid and counts
+
+**Calibration extension only.** This grid does not define total v4 work or the ring/sibling profiles. Their resolved manifests and source configurations determine independent counts, optimizers and budgets; see additive design §§4–7. No source experiment silently inherits this profile's defaults.
+
+Retain proposed n={4,6,8,10} deployment, {16,20} training-only, k=0..n-1, Gaussian K=exp(-Hamming/(2*sigma^2)), sigma=.5*sqrt(n) primary and 1 control, three initialization labels, five seed IDs, Adam .05, 300 steps, checkpoints every 50. D3 completes initialization. This kernel uses Hamming distance, not its square; test direct K against normalized Walsh weights.
+
+V={1,.99,.95,.93,.84,.70}, g2={0,.007,.025} is provisional pending D1/calibration. Raw HOM visibility .93 is not automatically the source-overlap parameter: official Perceval tomography uses .9438 with g2=.00732. Record raw/corrected meanings and avoid counting multiphoton corrections twice. Use hardware-inspired labels, not “Ascella-grade deployment.” Verify roadmap numbers from a dated primary source before use.
+
+All-k arithmetic: 840 deployable training files plus (16+20)*2*3*5=1080 training-only = **1920**, not 900. A 900-file design needs an explicit single training-only k choice per n, not yet authorized. There are 15,120 deployment rows only for 18 noise points with legitimate post-hoc eta; four jointly modeled eta values give **60,480**. Generate unique IDs from configuration and decisions rather than hard-code an inconsistent count.
+
+63*18=1134 maps is arithmetic, not permission to build an invalid source model. Measure maximum cost across representative alpha/noise conditions. Budget whole training, deployment, NAT, controls, storage and memory. Retain 400 MiB peak RSS growth at n=10 and 3-hour map-build gate; measure in isolated processes. Never allocate an embedded 4^n x 4^n superoperator.
+
+### 5.2 Three distributions and controls
+
+q_raw=q_ideal(theta_trained); q_comp=q_ideal(theta_eff); q_dep=q_model(theta_eff,noise).
+Define rounding=TVD(raw,comp), noise=TVD(comp,dep), total=TVD(raw,dep); test triangle bounds, not additive equality.
+
+At the fixed-photon ideal-map control assert **q_dep=q_comp**, noise TVD=0, all comp/dep target metrics equal, gate fidelity=1 and model success equals the appropriate ideal product. Total TVD equals rounding TVD and generally is not zero.
+
+Owner tests remain unfilled: k=0 for a declared source model, same-parameter ideal maps, fixed-number loss, both throughput models, NAT interpretation and gap hypothesis. A hypothesis is a recorded scientific outcome, not xfail(strict=False) swallowing exceptions. Missing data/owner answers must fail the run.
+
+Mutations conserve probability by transferring mass and use an appropriate fixture per metric. Perturbing q cannot change gate fidelity or separately computed success; mutate those separately. Some metrics are invariant to some perturbations; never require every scalar to detect every change. Constant metrics are tested as constants.
+
+### 5.3 Metrics
+
+Use the target representation and splits declared by each ring/sibling profile. The numerical Ising support statement below applies only to the calibration grid; recompute support for every dataset. If only samples/moments are available, use the profile's validated estimator and do not fabricate an exact probability vector or exact TVD.
+
+Validate finite, nonnegative, unit-mass vectors before metrics; any numerical repair needs a fixed policy and recorded raw mass/minimum. p is the exact target; Q=20000 is accepted samples, not source attempts.
+
+- TVD: .5*sum(abs(a-b)); report three contrasts and target TVD as a fit diagnostic.
+- MMD²: sum_a w_a(moment_p-moment_q)^2, normalized Gaussian weights. Cross-check direct (p-q)^T K (p-q) and trainer objective.
+- Forward KL: true KL is infinite where p>0 and q=0. Floors 1e-12 and 1e-9 may remain as labeled **floored log-ratio scores**, with added floor mass/count reported. Unnormalized flooring is not true KL and can make it negative.
+- Expected coverage: over S={x:p(x)>1e-6}, mean(-expm1(Q*log1p(-q(x)))), handle q=1 exactly. Persist |S|/excluded p mass. Occupancy is not held-out generalization.
+- Support-validity (old fidelity_pop): sum_S q. **S is the whole space for this grid**; minimum p at n=10 is 1.74358e-6. Hence validity is always 1. Keep it as an annotated control, not an informative fidelity/noise result; do not manufacture variation by changing the target.
+- Marginal TVD: mean over all labeled size-1/2 subsets, with bit-order fixtures. Matching low orders does not establish full-distribution agreement.
+
+### 5.4 Artifacts, figures and claims
+
+NPZ vectors/JSON manifests are canonical; CSVs are derived. Freeze schema before production. Include cell/design/model hashes, all axes and units, raw/lifted angles/keys, three TVDs, metrics on raw/comp/dep, support diagnostics, fidelity definition, total acceptance/conditioning, attempts/sample, rounding/source/map diagnostics and status. Validate uniqueness/completeness; missing is never zero.
+
+Keep primary kernel/init figures and other combinations in the appendix. Show seed-level outcomes and n_unique. Re-training across k changes ansatz, learned angles and expressivity; its curve is descriptive, not the causal effect of adding an otherwise identical gate. Noise ablations compare the same trained/compiled cell.
+
+Figures: noise TVD vs k with zero ideal control and separate compilation curve; noise TVD versus sum gate infidelities as a heuristic, not bound; target-fit metrics raw/comp/dep; attempts/sample with qualified heralded illustration. Small-n model checks get a separate panel, not extrapolated error bars.
+
+Retain .02/.1 only as descriptive TVD bands at the prespecified n=10,k=9 cell with all seed values. Remove slogans assigning hardware survival or a distinguishability ceiling; source/compilation/model errors prevent that attribution. A control deviation alone establishes neither novelty nor utility nor causation.
+
+## 6. Phase 31: NAT with an equal-budget control
+
+NAT extends selected validated ring/sibling checkpoints, or the calibration profile if explicitly selected. Freeze the selected dataset/model/kernel/noise settings in its manifest; the n grid below is the retained calibration proposal, not permission to replace a source experiment. Classical pipeline delivery and ideal comparisons do not wait for NAT research.
+
+Retain n={4,6,8}, k=n-1, primary kernel/init, five seed IDs, warm starts, 150 steps and the existing stop rule. D1 supplies validated noise; D2 supplies an algorithm able to move pair angles. h=1e-4 through the quantizer gave zero pair differences for 99.19% of audit draws. “Parameter-shift is invalid for every channel” is also false; applicability depends on parameter dependence and conditioning.
+
+Objective remains noisy target MMD². Improving it need not reduce distance to the original ideal-trained model. Report target changes, distance to that fixed reference, same-parameter noise gap and acceptance cost separately.
+
+Ideal control is same-parameter equality for every tested theta, not unchanged theta after another 150 steps. Compare NAT with equal-budget continued ideal optimization from the same warm start, matching optimizer state, discretization, budget and RNG. At ideal noise, identical algorithms/objectives should follow identical trajectories; both may improve over the original fit. Weight-1-only optimization must be explicitly chosen/labeled.
+
+For all m=n+k=2n-1 parameters, the old finite-difference evaluation counts are 15,23,31 per step at n=4,6,8: **51,750** total over 150 steps/five seeds, excluding control/validation. This corrects arithmetic, not the unsuitable algorithm. Recompute actual cost after D2, including maps/control/metrics.
+
+Stop rule retained: an n=8 run over 20 minutes or two calendar days without green n=4 end-to-end produces **attempted/stopped** with timings and partial data, not PASS efficacy. Fix best/last-iterate selection before running and compare like checkpoints.
+
+## 7. Phase 32: interpretation and review
+
+Owner explains angle/sign/winding, source versus gate noise, composition/loss assumptions, small-n validation limits, NAT control and throughput conditioning before interpretive prose. Record actual answers. Offer Gibbs reflection; owner writes it.
+
+Write tcdp-study from artifacts with PASS/FAIL/INCONCLUSIVE boundaries. Mirror verified conclusions only. Fable/Opus then Codex review physical assumptions, nulls, numbers and extrapolations as well as every prior finding. A disposition row is not validation. The former optional Vincent communication gate was retired by the owner on 2026-09-08 after two unanswered messages; no further outreach is part of v4.
+
+## 8. Execution and finish gates
+
+Phase numbers stay **26–32** with revised workstream tasks in additive design §7: shared core/inventory; ideal compilation; rings; sibling recreation/owner controls; matched comparison/noise extension; NAT; synthesis. Data/core and source reproduction can progress before noise decisions. Only noisy comparison waits for D1; NAT waits for D2 and its selected initialization. Phase 27 requires physical validity before expensive maps. Source-faithful settings and explicit ring defaults do not inherit unspecified D3 settings. Phase 31 never executes the broken quantized finite differences.
+
+Before production: import/target/gradient/angle tests, physical/source checks, schema/manifest tests and resource gates pass for the explicitly approved scope. Pilot failure stops dependent claims. No small-n failure becomes a universal error bar.
+
+Run venv/Scripts/python.exe -m pytest -q plus applicable configured Python checks. Validate artifacts/hashes, missing/duplicate IDs, finite values, units and rejection mass. Regenerate figures from canonical data. Missing runs are partial completion. NAT may be attempted/stopped under its rule; physical validation and owner explanations cannot be skipped to close scientific claims.
+
+## 9. Primary sources and read depth
+
+- [Recio-Armengol et al. 2503.02934v2](https://arxiv.org/html/2503.02934v2): training context; inspect exact initialization/model assumptions before comparison.
+- [Raj et al. 2608.31117](https://arxiv.org/abs/2608.31117): metric/generalization context; prior full-read claim is historical, not a new full read here. Our known-vector protocol differs.
+- [Salavrakos et al. 2405.02277v3](https://arxiv.org/html/2405.02277v3): architecture/experimental sections inspected here; universal-interferometer QCBM and threshold detectors differ from this rail-encoded PNR proposal.
+- [Maring et al. 2306.00874](https://arxiv.org/abs/2306.00874): verify raw/corrected visibility and efficiency definitions before calibration; old table alone is insufficient.
+- [Xie et al. 2605.11879](https://arxiv.org/abs/2605.11879): abstract checked; no new implementation-level claim here.
+- [Perceval source](https://perceval.quandela.net/docs/v1.1/reference/exqalibur/source.html), [v1.2 tomography](https://perceval.quandela.net/docs/v1.2/notebooks/Tomography_walkthrough.html): source-mixture/normalization context. Installed source governs execution; documentation is not proof that input-dependent normalization is TP.
+- [Catalog gate reference 2405.01395](https://arxiv.org/abs/2405.01395): full construction comparison remains an implementation prerequisite; the installed unitary is used directly in the independent audit probes.

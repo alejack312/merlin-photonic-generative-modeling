@@ -1,0 +1,450 @@
+{
+  "artifact_hashes": {
+    "comparison": "825d9fae280d74a689cd74c8b3e8088719f0fad45ae045af24290611636d8c2a",
+    "compiled": "58568156ead072b88fc4fe82eb57507dbe74e6f0a176cc845edc612b227d6666",
+    "data": "8e5d8ff1576da07086e730163a5212163fb17db37807e5fd670896cf2a11d7a7",
+    "deployed": "58568156ead072b88fc4fe82eb57507dbe74e6f0a176cc845edc612b227d6666",
+    "local_iqp": "f0469422efd2ca06ff21a4e3bdb3b5f6e4101473e7a370ffd16a9046bd64ad0d",
+    "sibling_iqp": "ef522c70118e285846cdefd720fa8dee88a5461e5a0c3c3111bdeb9679422c6e",
+    "target": "b010ac2d459e44bee0b4d30303d0efd2edb09a4e3741167a94b44dac3b98899e",
+    "unquantized": "3c7f8e5a9372d88d7ff02dcf3ea97634a90f566ff65aad706c9dbd4a7116aca9"
+  },
+  "artifacts": {
+    "comparison": "comparison.json",
+    "compiled": "compiled.npy",
+    "data": "data.npy",
+    "deployed": "deployed.npy",
+    "local_iqp": "local_iqp.npy",
+    "manifest": "manifest.json",
+    "sibling_iqp": "sibling_iqp.npy",
+    "target": "target.npy",
+    "unquantized": "unquantized.npy"
+  },
+  "comparison": {
+    "acceptance_checks": {
+      "attempts_per_accepted_sample": 3508107067835.1484,
+      "compiled_deployed_conditional_tvd": 0.0,
+      "compiled_model_success": 7.357742343097979e-13,
+      "deployed_absolute_success": 2.8505401364990255e-13,
+      "deployed_success_abs_error": 0.0,
+      "expected_deployed_absolute_success": 2.8505401364990255e-13,
+      "status": "PASS",
+      "unquantized_model_success": 7.510918501843282e-13
+    },
+    "arms": [
+      {
+        "acceptance_mass": 1.0,
+        "backend_id": "sibling-iqp",
+        "provenance": {
+          "source": "pinned_sibling_iqp_bp"
+        },
+        "samples": 20000,
+        "source_ac": null,
+        "stage": "raw",
+        "uncertainty": {}
+      },
+      {
+        "acceptance_mass": 1.0,
+        "backend_id": "local-equivalent-iqp",
+        "provenance": {
+          "role": "equivalent_qubit_reference",
+          "source": "merlin_iqp"
+        },
+        "samples": 20000,
+        "source_ac": null,
+        "stage": "raw",
+        "uncertainty": {}
+      },
+      {
+        "acceptance_mass": 7.510918501843282e-13,
+        "backend_id": "ideal-unquantized-control",
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "quantized": false,
+          "raw_model_success": 7.510918501843282e-13,
+          "role": "compilation_control"
+        },
+        "samples": 20000,
+        "source_ac": null,
+        "stage": "compiled",
+        "uncertainty": {}
+      },
+      {
+        "acceptance_mass": 7.357742343097979e-13,
+        "backend_id": "ideal-compiled-map",
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "quantized": true,
+          "raw_model_success": 7.357742343097979e-13,
+          "role": "primary_compiled_reference"
+        },
+        "samples": 20000,
+        "source_ac": null,
+        "stage": "compiled",
+        "uncertainty": {}
+      },
+      {
+        "acceptance_mass": 2.8505401364990255e-13,
+        "backend_id": "ideal-deployed-map",
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "eta": 0.9,
+          "loss": "uniform_all_photons",
+          "physical_status": "model_derived_reference_only",
+          "projection": "final_only",
+          "quantized": true,
+          "raw_model_success": 2.8505401364990255e-13,
+          "role": "same-effective-parameters-as-compiled",
+          "source_model": "fixed_photon_g2_0"
+        },
+        "samples": 20000,
+        "source_ac": null,
+        "stage": "deployed",
+        "uncertainty": {}
+      }
+    ],
+    "cell_id": "sibling/ghosh_kim_small_n/lattice/n9/sigma3_0/matched_backends",
+    "common_manifest": {
+      "bit_order": "msb_first",
+      "comparison_kind": "sibling_to_equivalent_to_compiled_photonic",
+      "dataset_hash": "8e5d8ff1576da07086e730163a5212163fb17db37807e5fd670896cf2a11d7a7",
+      "evaluation_budget": {
+        "accepted_samples": 20000,
+        "population_vectors": true
+      },
+      "generator_hash": "43c91a6fe111f005322552866f8d97264e8e9b6f23b6d257bca5b3a33ee58a84",
+      "hamming_kernel": {
+        "formula": "exp(-H/(2*sigma**2))",
+        "kind": "gaussian_on_hamming",
+        "sigma": 3.0
+      },
+      "loss": {
+        "acceptance_rule": "eta**n * model_success",
+        "conditional_shape_expected_invariant": true,
+        "eta": 0.9
+      },
+      "photonic_capability": {
+        "compiled_density_max_n": 10,
+        "physical_full_fock_n": [
+          2,
+          3
+        ],
+        "status": "analytic_CP_map_model_derived_for_this_cell"
+      },
+      "source_model": "fixed_photon_g2_0",
+      "source_retraining": "verified separately by retraining_evidence.json",
+      "split": "source empirical samples; no train/test reinterpretation",
+      "target_hash": "b010ac2d459e44bee0b4d30303d0efd2edb09a4e3741167a94b44dac3b98899e",
+      "theta_hash": "1d817a011ecb6017b06f04d33980d718f2dec19e08a1120977216ed3ab6b6df4"
+    },
+    "controls": {
+      "acceptance_scaling": {
+        "absolute_error": 0.0,
+        "formula": "eta**n * compiled_model_success",
+        "tolerance": 1e-16
+      },
+      "fixed_photon_loss_shape": {
+        "conditional_tvd": 0.0,
+        "tolerance": 1e-12
+      },
+      "local_unquantized_probability_equality": {
+        "max_abs_error": 2.0816681711721685e-17,
+        "tolerance": 1e-12,
+        "tvd": 4.317163249655557e-16
+      },
+      "metric_mutation_panel": "covered by the registered comparison control suite; not recomputed per sibling cell",
+      "scope": "cell-level source/substrate controls",
+      "source_local_probability_equality": {
+        "max_abs_error": 3.2959746043559335e-17,
+        "tolerance": 1e-12
+      },
+      "status": "PASS"
+    },
+    "hamming_kernel": {
+      "distance": "Hamming",
+      "kind": "gaussian_on_hamming",
+      "normalization": "MMD2",
+      "sigma": 3.0
+    },
+    "metrics": {
+      "compiled:ideal-compiled-map": {
+        "acceptance_mass": 7.357742343097979e-13,
+        "attempts_per_accepted_sample": 1359112555685.0498,
+        "backend_id": "ideal-compiled-map",
+        "excluded_target_mass": 0.0,
+        "expected_coverage": 0.4735002317046123,
+        "expected_occupancy": 231.17337986702336,
+        "floored_log_ratio_1e-12": 13.393897217752935,
+        "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+        "floored_log_ratio_1e-9": 10.655080183312752,
+        "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+        "hamming_mmd2": 0.025060937845406896,
+        "hamming_mmd2_crosscheck_abs_error": 3.122502256758253e-17,
+        "hamming_mmd2_crosscheck_status": "PASS",
+        "hamming_mmd2_direct": 0.025060937845406896,
+        "hamming_mmd2_walsh": 0.025060937845406927,
+        "marginal_bit_order": "msb_first",
+        "marginal_tvd_order1_count": 9,
+        "marginal_tvd_order1_max": 0.2926857729224964,
+        "marginal_tvd_order1_mean": 0.12922185631141245,
+        "marginal_tvd_order2_count": 36,
+        "marginal_tvd_order2_max": 0.4940978749907565,
+        "marginal_tvd_order2_mean": 0.24812271370119632,
+        "occupancy_fraction": 0.45151050755278,
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "quantized": true,
+          "raw_model_success": 7.357742343097979e-13,
+          "role": "primary_compiled_reference"
+        },
+        "sample_count": 20000,
+        "source_anticoncentration_status": "not_computed_missing_declared_input",
+        "stage": "compiled",
+        "state_space_size": 512,
+        "support_size": 10,
+        "support_validity": 1.0,
+        "true_forward_kl": null,
+        "true_forward_kl_status": "infinite",
+        "true_forward_kl_value": "inf",
+        "tvd_to_target": 0.9765503575199848,
+        "uncertainty": {
+          "reason": "exact population vector",
+          "status": "not_applicable"
+        }
+      },
+      "compiled:ideal-unquantized-control": {
+        "acceptance_mass": 7.510918501843282e-13,
+        "attempts_per_accepted_sample": 1331395088036.951,
+        "backend_id": "ideal-unquantized-control",
+        "excluded_target_mass": 0.0,
+        "expected_coverage": 0.4743510403719474,
+        "expected_occupancy": 231.69088522746745,
+        "floored_log_ratio_1e-12": 13.357723753273573,
+        "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+        "floored_log_ratio_1e-9": 10.61890671883339,
+        "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+        "hamming_mmd2": 0.025503665294511896,
+        "hamming_mmd2_crosscheck_abs_error": 1.734723475976807e-17,
+        "hamming_mmd2_crosscheck_status": "PASS",
+        "hamming_mmd2_direct": 0.025503665294511896,
+        "hamming_mmd2_walsh": 0.025503665294511913,
+        "marginal_bit_order": "msb_first",
+        "marginal_tvd_order1_count": 9,
+        "marginal_tvd_order1_max": 0.2936901522799147,
+        "marginal_tvd_order1_mean": 0.130718663386845,
+        "marginal_tvd_order2_count": 36,
+        "marginal_tvd_order2_max": 0.4941278772943999,
+        "marginal_tvd_order2_mean": 0.24965732126388884,
+        "occupancy_fraction": 0.45252126020989736,
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "quantized": false,
+          "raw_model_success": 7.510918501843282e-13,
+          "role": "compilation_control"
+        },
+        "sample_count": 20000,
+        "source_anticoncentration_status": "not_computed_missing_declared_input",
+        "stage": "compiled",
+        "state_space_size": 512,
+        "support_size": 10,
+        "support_validity": 1.0,
+        "true_forward_kl": null,
+        "true_forward_kl_status": "infinite",
+        "true_forward_kl_value": "inf",
+        "tvd_to_target": 0.9774990435722125,
+        "uncertainty": {
+          "reason": "exact population vector",
+          "status": "not_applicable"
+        }
+      },
+      "deployed:ideal-deployed-map": {
+        "acceptance_mass": 2.8505401364990255e-13,
+        "attempts_per_accepted_sample": 3508107067835.1484,
+        "backend_id": "ideal-deployed-map",
+        "excluded_target_mass": 0.0,
+        "expected_coverage": 0.4735002317046123,
+        "expected_occupancy": 231.17337986702336,
+        "floored_log_ratio_1e-12": 13.393897217752935,
+        "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+        "floored_log_ratio_1e-9": 10.655080183312752,
+        "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+        "hamming_mmd2": 0.025060937845406896,
+        "hamming_mmd2_crosscheck_abs_error": 3.122502256758253e-17,
+        "hamming_mmd2_crosscheck_status": "PASS",
+        "hamming_mmd2_direct": 0.025060937845406896,
+        "hamming_mmd2_walsh": 0.025060937845406927,
+        "marginal_bit_order": "msb_first",
+        "marginal_tvd_order1_count": 9,
+        "marginal_tvd_order1_max": 0.2926857729224964,
+        "marginal_tvd_order1_mean": 0.12922185631141245,
+        "marginal_tvd_order2_count": 36,
+        "marginal_tvd_order2_max": 0.4940978749907565,
+        "marginal_tvd_order2_mean": 0.24812271370119632,
+        "occupancy_fraction": 0.45151050755278,
+        "provenance": {
+          "construction": "absolute-probability-CP-map",
+          "eta": 0.9,
+          "loss": "uniform_all_photons",
+          "physical_status": "model_derived_reference_only",
+          "projection": "final_only",
+          "quantized": true,
+          "raw_model_success": 2.8505401364990255e-13,
+          "role": "same-effective-parameters-as-compiled",
+          "source_model": "fixed_photon_g2_0"
+        },
+        "sample_count": 20000,
+        "source_anticoncentration_status": "not_computed_missing_declared_input",
+        "stage": "deployed",
+        "state_space_size": 512,
+        "support_size": 10,
+        "support_validity": 1.0,
+        "true_forward_kl": null,
+        "true_forward_kl_status": "infinite",
+        "true_forward_kl_value": "inf",
+        "tvd_to_target": 0.9765503575199848,
+        "uncertainty": {
+          "reason": "exact population vector",
+          "status": "not_applicable"
+        }
+      },
+      "raw:local-equivalent-iqp": {
+        "acceptance_mass": 1.0,
+        "attempts_per_accepted_sample": 1.0,
+        "backend_id": "local-equivalent-iqp",
+        "excluded_target_mass": 0.0,
+        "expected_coverage": 0.47435104037194764,
+        "expected_occupancy": 231.69088522746733,
+        "floored_log_ratio_1e-12": 13.357723753273572,
+        "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+        "floored_log_ratio_1e-9": 10.61890671883339,
+        "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+        "hamming_mmd2": 0.025503665294511896,
+        "hamming_mmd2_crosscheck_abs_error": 1.0408340855860843e-17,
+        "hamming_mmd2_crosscheck_status": "PASS",
+        "hamming_mmd2_direct": 0.025503665294511896,
+        "hamming_mmd2_walsh": 0.025503665294511906,
+        "marginal_bit_order": "msb_first",
+        "marginal_tvd_order1_count": 9,
+        "marginal_tvd_order1_max": 0.2936901522799147,
+        "marginal_tvd_order1_mean": 0.13071866338684504,
+        "marginal_tvd_order2_count": 36,
+        "marginal_tvd_order2_max": 0.4941278772943999,
+        "marginal_tvd_order2_mean": 0.2496573212638888,
+        "occupancy_fraction": 0.45252126020989714,
+        "provenance": {
+          "role": "equivalent_qubit_reference",
+          "source": "merlin_iqp"
+        },
+        "sample_count": 20000,
+        "source_anticoncentration_status": "not_computed_missing_declared_input",
+        "stage": "raw",
+        "state_space_size": 512,
+        "support_size": 10,
+        "support_validity": 1.0,
+        "true_forward_kl": null,
+        "true_forward_kl_status": "infinite",
+        "true_forward_kl_value": "inf",
+        "tvd_to_target": 0.9774990435722124,
+        "uncertainty": {
+          "reason": "exact population vector",
+          "status": "not_applicable"
+        }
+      },
+      "raw:sibling-iqp": {
+        "acceptance_mass": 1.0,
+        "attempts_per_accepted_sample": 1.0,
+        "backend_id": "sibling-iqp",
+        "excluded_target_mass": 0.0,
+        "expected_coverage": 0.4743510403719487,
+        "expected_occupancy": 231.6908852274673,
+        "floored_log_ratio_1e-12": 13.357723753273573,
+        "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+        "floored_log_ratio_1e-9": 10.61890671883339,
+        "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+        "hamming_mmd2": 0.025503665294511906,
+        "hamming_mmd2_crosscheck_abs_error": 6.938893903907228e-18,
+        "hamming_mmd2_crosscheck_status": "PASS",
+        "hamming_mmd2_direct": 0.025503665294511906,
+        "hamming_mmd2_walsh": 0.025503665294511913,
+        "marginal_bit_order": "msb_first",
+        "marginal_tvd_order1_count": 9,
+        "marginal_tvd_order1_max": 0.2936901522799148,
+        "marginal_tvd_order1_mean": 0.13071866338684504,
+        "marginal_tvd_order2_count": 36,
+        "marginal_tvd_order2_max": 0.4941278772943998,
+        "marginal_tvd_order2_mean": 0.24965732126388884,
+        "occupancy_fraction": 0.4525212602098971,
+        "provenance": {
+          "source": "pinned_sibling_iqp_bp"
+        },
+        "sample_count": 20000,
+        "source_anticoncentration_status": "not_computed_missing_declared_input",
+        "stage": "raw",
+        "state_space_size": 512,
+        "support_size": 10,
+        "support_validity": 1.0,
+        "true_forward_kl": null,
+        "true_forward_kl_status": "infinite",
+        "true_forward_kl_value": "inf",
+        "tvd_to_target": 0.9774990435722124,
+        "uncertainty": {
+          "reason": "exact population vector",
+          "status": "not_applicable"
+        }
+      }
+    },
+    "n": 9,
+    "resource_report": {
+      "elapsed_seconds": 3.0926690000051167,
+      "memory_policy": "current-process RSS; no embedded 4^n-square superoperator",
+      "rss_after_bytes": null,
+      "rss_before_bytes": null,
+      "rss_delta_bytes": null,
+      "status": "rss_unavailable"
+    },
+    "schema_version": "v4_tcdp.matched_comparison.v1",
+    "source_checks": {
+      "local_final_loss": 0.0255036652945119,
+      "local_loss_recomputed_from_target": 0.025503665294511896,
+      "local_unquantized_probability_max_abs_error": 2.0816681711721685e-17,
+      "local_unquantized_tvd": 4.317163249655557e-16,
+      "loss_recomputed_abs_error": 3.469446951953614e-18,
+      "source_final_loss": 0.0255036652945119,
+      "source_local_generator_equal": true,
+      "source_local_probability_max_abs_error": 3.2959746043559335e-17,
+      "source_local_theta_max_abs_error": 0.0,
+      "status": "PASS",
+      "tolerances": {
+        "exact": 1e-16,
+        "probability": 1e-12,
+        "trajectory": 1e-12
+      }
+    },
+    "spatial_kernel": null,
+    "target_hash": "15ef5f6582c8af4dbed1eec0f6076016da1d7d428ebef53d4f3ba74b75868258"
+  },
+  "outputs": {
+    "compiled_deployed_tvd": 0.0,
+    "raw_compiled_tvd": 0.013984409476414088,
+    "source_local_tvd": 7.002838472503375e-16,
+    "status": "PASS"
+  },
+  "provenance": {
+    "input_hashes": {
+      "data": "8e5d8ff1576da07086e730163a5212163fb17db37807e5fd670896cf2a11d7a7",
+      "generator": "43c91a6fe111f005322552866f8d97264e8e9b6f23b6d257bca5b3a33ee58a84",
+      "target": "b010ac2d459e44bee0b4d30303d0efd2edb09a4e3741167a94b44dac3b98899e",
+      "theta": "1d817a011ecb6017b06f04d33980d718f2dec19e08a1120977216ed3ab6b6df4"
+    },
+    "local_checkpoint_sha256": "4e2db829c8371c8902c3a2edc5893bd84b4a690be588dc596c1e8189f31b5445",
+    "local_head": "7089dbfd86202dfcb5f7c1041af4f806384e3530",
+    "source_checkpoint_sha256": "25166af08682403e03ef10c71ffd5f48fb10fa3cec2349a543d86d53831a52c6",
+    "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+    "source_config": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\configs\\experiments\\ghosh_kim_small_n.yaml",
+    "source_config_sha256": "e6e0056ea4bb0389d3557cdab512c0bd1b3baaa8c0737cee053f91d5e0ad70f3",
+    "source_retraining_evidence_sha256": "5601360edb600e712b74bb90c30f64aa47b7fc32ff293e7b288fc51ae2547837",
+    "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma3p0\\trajectory.jsonl",
+    "source_trajectory_sha256": "9f89a3f90706e1e5d3e678ca86c36d080f7b7b10d60c3affe1c645bfeb589bf2",
+    "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc"
+  }
+}

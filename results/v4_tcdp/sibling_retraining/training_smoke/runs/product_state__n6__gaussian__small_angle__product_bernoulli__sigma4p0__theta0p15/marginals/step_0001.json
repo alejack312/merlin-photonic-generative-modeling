@@ -1,0 +1,62 @@
+{
+  "n": 6,
+  "orders": [
+    {
+      "max_chi_square": 119.00623770605397,
+      "max_fourier_squared_error": 1.1329947101604332,
+      "max_tv": 0.5322111212104725,
+      "mean_chi_square": 30.888378065251388,
+      "mean_fourier_squared_error": 0.894381760778615,
+      "mean_tv": 0.47032517024262366,
+      "median_chi_square": 9.487045683866928,
+      "median_fourier_squared_error": 0.946942610037447,
+      "median_tv": 0.48654090868403854,
+      "order": 1,
+      "order_weight": 0.08541593546622074,
+      "subset_count": 6,
+      "tau_power": 0.015623728558408866,
+      "total_subsets": 6,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 0.07639445476083105
+    },
+    {
+      "max_chi_square": 4411.134373981273,
+      "max_fourier_squared_error": 1.1239707573014648,
+      "max_tv": 0.7839789332251346,
+      "mean_chi_square": 608.9539233014889,
+      "mean_fourier_squared_error": 0.7667145900475619,
+      "mean_tv": 0.6880236638272554,
+      "median_chi_square": 202.45864694907263,
+      "median_fourier_squared_error": 0.7276588493181934,
+      "median_tv": 0.6759703271284587,
+      "order": 2,
+      "order_weight": 0.0033362884757170037,
+      "subset_count": 15,
+      "tau_power": 0.00024410089406684077,
+      "total_subsets": 15,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 0.002557981050939768
+    },
+    {
+      "max_chi_square": 61903.43310297166,
+      "max_fourier_squared_error": 0.988806904965231,
+      "max_tv": 0.8876465393258162,
+      "mean_chi_square": 8757.152604748324,
+      "mean_fourier_squared_error": 0.6753599275431976,
+      "mean_tv": 0.7811953497955566,
+      "median_chi_square": 2936.034468327034,
+      "median_fourier_squared_error": 0.7026472939702432,
+      "median_tv": 0.777252752227545,
+      "order": 3,
+      "order_weight": 6.950035404953351e-05,
+      "subset_count": 20,
+      "tau_power": 3.8137661097652375e-06,
+      "total_subsets": 20,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 4.6937754075119534e-05
+    }
+  ],
+  "sigma": 4.0,
+  "tau": 0.015623728558408866,
+  "weighted_mmd2_total": 0.07899937356584594
+}

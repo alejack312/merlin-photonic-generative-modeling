@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "compiled": "compiled.npy",
+    "deployed": "deployed.npy",
+    "raw": "raw.npy"
+  },
+  "checkpoint": {
+    "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\runs\\product_state__n6__gaussian__small_angle__product_bernoulli__sigma4p0__theta0p15\\checkpoints\\step_0004.npz",
+    "sha256": "da62c94cfc26b954438302f280d4b145a6b3104780580422a859b6f199da9fe5",
+    "source_loss": 0.0786651366003944,
+    "step": 4
+  },
+  "compiled_deployed_tvd": 0.0,
+  "deployed_acceptance_mass": 1.0000000000000002,
+  "generator_hash": "433bef3bd9ff67acdf089535518ee4c57ca2e62fc915ff361125d04c54ce3948",
+  "kernel": {
+    "comparison_kernel": "not computed; source target data is not exported",
+    "source_bandwidth": [
+      4.0
+    ],
+    "source_type": "gaussian"
+  },
+  "n": 6,
+  "raw_compiled_tvd": 3.4623685339673453e-16,
+  "reason": "frozen source checkpoint replayed through the ideal photonic construction; source SGD/data trajectory was not rerun",
+  "schema_version": "v4_tcdp.sibling_replay.v1",
+  "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "source_id": "training_smoke:configs/experiments/training_smoke.yaml",
+  "status": "adapted_reproduction",
+  "theta_hash": "a11e1bd8a445e2ca9f1277f0bb85ab007325bcef252ed98f485cbb639ecbdeac",
+  "unsafe_serialization_loaded": false
+}

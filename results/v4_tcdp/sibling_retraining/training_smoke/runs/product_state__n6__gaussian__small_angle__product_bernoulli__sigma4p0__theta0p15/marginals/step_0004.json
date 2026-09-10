@@ -1,0 +1,62 @@
+{
+  "n": 6,
+  "orders": [
+    {
+      "max_chi_square": 114.689639601411,
+      "max_fourier_squared_error": 1.1318558152723495,
+      "max_tv": 0.5319435626249154,
+      "mean_chi_square": 29.75472071063221,
+      "mean_fourier_squared_error": 0.8907247771296638,
+      "mean_tv": 0.4692838752710106,
+      "median_chi_square": 9.139103352746753,
+      "median_fourier_squared_error": 0.9425491334486731,
+      "median_tv": 0.4854067286404627,
+      "order": 1,
+      "order_weight": 0.08541593546622074,
+      "subset_count": 6,
+      "tau_power": 0.015623728558408866,
+      "total_subsets": 6,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 0.07608209008147121
+    },
+    {
+      "max_chi_square": 4093.7760433558874,
+      "max_fourier_squared_error": 1.1225049330818333,
+      "max_tv": 0.7836320149769657,
+      "mean_chi_square": 567.0670367303295,
+      "mean_fourier_squared_error": 0.7601989544962441,
+      "mean_tv": 0.6860050404949891,
+      "median_chi_square": 189.61107455333217,
+      "median_fourier_squared_error": 0.719736434495602,
+      "median_tv": 0.6736056815717631,
+      "order": 2,
+      "order_weight": 0.0033362884757170037,
+      "subset_count": 15,
+      "tau_power": 0.00024410089406684077,
+      "total_subsets": 15,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 0.002536243011137934
+    },
+    {
+      "max_chi_square": 55506.9821728698,
+      "max_fourier_squared_error": 0.9850346946255333,
+      "max_tv": 0.8866842112304678,
+      "mean_chi_square": 7891.3467910535865,
+      "mean_fourier_squared_error": 0.6666969777728872,
+      "mean_tv": 0.7782609178238233,
+      "median_chi_square": 2668.726683467983,
+      "median_fourier_squared_error": 0.6922524844024049,
+      "median_tv": 0.7744356527273157,
+      "order": 3,
+      "order_weight": 6.950035404953351e-05,
+      "subset_count": 20,
+      "tau_power": 3.8137661097652375e-06,
+      "total_subsets": 20,
+      "used_all_subsets": true,
+      "weighted_mmd2_contribution": 4.6335675998969634e-05
+    }
+  ],
+  "sigma": 4.0,
+  "tau": 0.015623728558408866,
+  "weighted_mmd2_total": 0.07866466876860811
+}

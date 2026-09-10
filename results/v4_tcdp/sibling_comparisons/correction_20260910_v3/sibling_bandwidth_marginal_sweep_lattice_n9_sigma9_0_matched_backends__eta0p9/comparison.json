@@ -1,0 +1,448 @@
+{
+  "acceptance_checks": {
+    "attempts_per_accepted_sample": 394634646359.0203,
+    "compiled_deployed_conditional_tvd": 0.0,
+    "compiled_model_success": 6.540669491459103e-12,
+    "deployed_absolute_success": 2.5339893727684677e-12,
+    "deployed_success_abs_error": 0.0,
+    "expected_deployed_absolute_success": 2.5339893727684677e-12,
+    "status": "PASS",
+    "unquantized_model_success": 4.331678598244691e-12
+  },
+  "arms": [
+    {
+      "acceptance_mass": 1.0,
+      "backend_id": "sibling-iqp",
+      "provenance": {
+        "source": "pinned_sibling_iqp_bp"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "raw",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 1.0,
+      "backend_id": "local-equivalent-iqp",
+      "provenance": {
+        "role": "equivalent_qubit_reference",
+        "source": "merlin_iqp"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "raw",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 4.331678598244691e-12,
+      "backend_id": "ideal-unquantized-control",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": false,
+        "raw_model_success": 4.331678598244691e-12,
+        "role": "compilation_control"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "compiled",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 6.540669491459103e-12,
+      "backend_id": "ideal-compiled-map",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": true,
+        "raw_model_success": 6.540669491459103e-12,
+        "role": "primary_compiled_reference"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "compiled",
+      "uncertainty": {}
+    },
+    {
+      "acceptance_mass": 2.5339893727684677e-12,
+      "backend_id": "ideal-deployed-map",
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "eta": 0.9,
+        "loss": "uniform_all_photons",
+        "physical_status": "model_derived_reference_only",
+        "projection": "final_only",
+        "quantized": true,
+        "raw_model_success": 2.5339893727684677e-12,
+        "role": "same-effective-parameters-as-compiled",
+        "source_model": "fixed_photon_g2_0"
+      },
+      "samples": 20000,
+      "source_ac": null,
+      "stage": "deployed",
+      "uncertainty": {}
+    }
+  ],
+  "cell_id": "sibling/bandwidth_marginal_sweep/lattice/n9/sigma9_0/matched_backends",
+  "common_manifest": {
+    "bit_order": "msb_first",
+    "comparison_kind": "sibling_to_equivalent_to_compiled_photonic",
+    "dataset_hash": "f5a288e412fb5c4c4062ac9c2ede8fdff0a6cd7df9128d97f002812be1f85da5",
+    "evaluation_budget": {
+      "accepted_samples": 20000,
+      "population_vectors": true
+    },
+    "generator_hash": "43c91a6fe111f005322552866f8d97264e8e9b6f23b6d257bca5b3a33ee58a84",
+    "hamming_kernel": {
+      "formula": "exp(-H/(2*sigma**2))",
+      "kind": "gaussian_on_hamming",
+      "sigma": 9.0
+    },
+    "loss": {
+      "acceptance_rule": "eta**n * model_success",
+      "conditional_shape_expected_invariant": true,
+      "eta": 0.9
+    },
+    "photonic_capability": {
+      "compiled_density_max_n": 10,
+      "physical_full_fock_n": [
+        2,
+        3
+      ],
+      "status": "analytic_CP_map_model_derived_for_this_cell"
+    },
+    "source_model": "fixed_photon_g2_0",
+    "source_retraining": "verified separately by retraining_evidence.json",
+    "split": "source empirical samples; no train/test reinterpretation",
+    "target_hash": "bf2165e1e891f8dc67c458f126b42579ddef1f0b8825ec0ef970581f2ac6fa1c",
+    "theta_hash": "c4c04758b9e2c87c79838ef73acaffd9f75471b8ba05b9369cf5268be1f4d93b"
+  },
+  "controls": {
+    "acceptance_scaling": {
+      "absolute_error": 0.0,
+      "formula": "eta**n * compiled_model_success",
+      "tolerance": 1e-16
+    },
+    "fixed_photon_loss_shape": {
+      "conditional_tvd": 0.0,
+      "tolerance": 1e-12
+    },
+    "local_unquantized_probability_equality": {
+      "max_abs_error": 4.163336342344337e-17,
+      "tolerance": 1e-12,
+      "tvd": 4.824890249973627e-16
+    },
+    "metric_mutation_panel": "covered by the registered comparison control suite; not recomputed per sibling cell",
+    "scope": "cell-level source/substrate controls",
+    "source_local_probability_equality": {
+      "max_abs_error": 6.938893903907228e-17,
+      "tolerance": 1e-12
+    },
+    "status": "PASS"
+  },
+  "hamming_kernel": {
+    "distance": "Hamming",
+    "kind": "gaussian_on_hamming",
+    "normalization": "MMD2",
+    "sigma": 9.0
+  },
+  "metrics": {
+    "compiled:ideal-compiled-map": {
+      "acceptance_mass": 6.540669491459103e-12,
+      "attempts_per_accepted_sample": 152889547668.75378,
+      "backend_id": "ideal-compiled-map",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.5086904461982751,
+      "expected_occupancy": 236.0354398471694,
+      "floored_log_ratio_1e-12": 14.788093644120774,
+      "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+      "floored_log_ratio_1e-9": 11.63103361427347,
+      "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+      "hamming_mmd2": 0.0007524160692784112,
+      "hamming_mmd2_crosscheck_abs_error": 4.228388472693467e-18,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0007524160692784112,
+      "hamming_mmd2_walsh": 0.000752416069278407,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 9,
+      "marginal_tvd_order1_max": 0.20682185558255442,
+      "marginal_tvd_order1_mean": 0.05145976688315516,
+      "marginal_tvd_order2_count": 36,
+      "marginal_tvd_order2_max": 0.5386377498706645,
+      "marginal_tvd_order2_mean": 0.2323117064979742,
+      "observed_empirical_support": {
+        "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+        "status": "not_available"
+      },
+      "occupancy_fraction": 0.46100671845150276,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": true,
+        "raw_model_success": 6.540669491459103e-12,
+        "role": "primary_compiled_reference"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "stage": "compiled",
+      "state_space_size": 512,
+      "support_definition": "underlying target support where p > 1e-6",
+      "support_size": 14,
+      "support_threshold": 1e-06,
+      "support_validity": 0.017037472549887422,
+      "support_validity_basis": "underlying conditional probability vector",
+      "target_support_mass": 1.0,
+      "target_support_size": 14,
+      "true_forward_kl": null,
+      "true_forward_kl_status": "infinite",
+      "true_forward_kl_value": "inf",
+      "tvd_to_target": 0.9907601409642881,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "compiled:ideal-unquantized-control": {
+      "acceptance_mass": 4.331678598244691e-12,
+      "attempts_per_accepted_sample": 230857386419.48782,
+      "backend_id": "ideal-unquantized-control",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.5146414083259635,
+      "expected_occupancy": 237.6383748010209,
+      "floored_log_ratio_1e-12": 14.802054397074812,
+      "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+      "floored_log_ratio_1e-9": 11.644994367227504,
+      "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+      "hamming_mmd2": 0.0007520298783308945,
+      "hamming_mmd2_crosscheck_abs_error": 9.540979117872439e-18,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0007520298783308945,
+      "hamming_mmd2_walsh": 0.000752029878330885,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 9,
+      "marginal_tvd_order1_max": 0.20845689863661068,
+      "marginal_tvd_order1_mean": 0.050271889364211564,
+      "marginal_tvd_order2_count": 36,
+      "marginal_tvd_order2_max": 0.5415780554287266,
+      "marginal_tvd_order2_mean": 0.23312346718471455,
+      "observed_empirical_support": {
+        "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+        "status": "not_available"
+      },
+      "occupancy_fraction": 0.4641374507832439,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "quantized": false,
+        "raw_model_success": 4.331678598244691e-12,
+        "role": "compilation_control"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "stage": "compiled",
+      "state_space_size": 512,
+      "support_definition": "underlying target support where p > 1e-6",
+      "support_size": 14,
+      "support_threshold": 1e-06,
+      "support_validity": 0.01669795984676043,
+      "support_validity_basis": "underlying conditional probability vector",
+      "target_support_mass": 1.0,
+      "target_support_size": 14,
+      "true_forward_kl": null,
+      "true_forward_kl_status": "infinite",
+      "true_forward_kl_value": "inf",
+      "tvd_to_target": 0.9906309096528347,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "deployed:ideal-deployed-map": {
+      "acceptance_mass": 2.5339893727684677e-12,
+      "attempts_per_accepted_sample": 394634646359.0203,
+      "backend_id": "ideal-deployed-map",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.5086904461982751,
+      "expected_occupancy": 236.0354398471694,
+      "floored_log_ratio_1e-12": 14.788093644120774,
+      "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+      "floored_log_ratio_1e-9": 11.63103361427347,
+      "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+      "hamming_mmd2": 0.0007524160692784112,
+      "hamming_mmd2_crosscheck_abs_error": 4.228388472693467e-18,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0007524160692784112,
+      "hamming_mmd2_walsh": 0.000752416069278407,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 9,
+      "marginal_tvd_order1_max": 0.20682185558255442,
+      "marginal_tvd_order1_mean": 0.05145976688315516,
+      "marginal_tvd_order2_count": 36,
+      "marginal_tvd_order2_max": 0.5386377498706645,
+      "marginal_tvd_order2_mean": 0.2323117064979742,
+      "observed_empirical_support": {
+        "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+        "status": "not_available"
+      },
+      "occupancy_fraction": 0.46100671845150276,
+      "provenance": {
+        "construction": "absolute-probability-CP-map",
+        "eta": 0.9,
+        "loss": "uniform_all_photons",
+        "physical_status": "model_derived_reference_only",
+        "projection": "final_only",
+        "quantized": true,
+        "raw_model_success": 2.5339893727684677e-12,
+        "role": "same-effective-parameters-as-compiled",
+        "source_model": "fixed_photon_g2_0"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "stage": "deployed",
+      "state_space_size": 512,
+      "support_definition": "underlying target support where p > 1e-6",
+      "support_size": 14,
+      "support_threshold": 1e-06,
+      "support_validity": 0.017037472549887422,
+      "support_validity_basis": "underlying conditional probability vector",
+      "target_support_mass": 1.0,
+      "target_support_size": 14,
+      "true_forward_kl": null,
+      "true_forward_kl_status": "infinite",
+      "true_forward_kl_value": "inf",
+      "tvd_to_target": 0.9907601409642881,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "raw:local-equivalent-iqp": {
+      "acceptance_mass": 1.0,
+      "attempts_per_accepted_sample": 1.0,
+      "backend_id": "local-equivalent-iqp",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.5146414083259663,
+      "expected_occupancy": 237.63837480102129,
+      "floored_log_ratio_1e-12": 14.80205439707481,
+      "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+      "floored_log_ratio_1e-9": 11.644994367227504,
+      "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+      "hamming_mmd2": 0.0007520298783309056,
+      "hamming_mmd2_crosscheck_abs_error": 2.0166160408230382e-17,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0007520298783309056,
+      "hamming_mmd2_walsh": 0.0007520298783308854,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 9,
+      "marginal_tvd_order1_max": 0.20845689863661063,
+      "marginal_tvd_order1_mean": 0.05027188936421158,
+      "marginal_tvd_order2_count": 36,
+      "marginal_tvd_order2_max": 0.5415780554287267,
+      "marginal_tvd_order2_mean": 0.23312346718471455,
+      "observed_empirical_support": {
+        "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+        "status": "not_available"
+      },
+      "occupancy_fraction": 0.4641374507832447,
+      "provenance": {
+        "role": "equivalent_qubit_reference",
+        "source": "merlin_iqp"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "stage": "raw",
+      "state_space_size": 512,
+      "support_definition": "underlying target support where p > 1e-6",
+      "support_size": 14,
+      "support_threshold": 1e-06,
+      "support_validity": 0.01669795984676043,
+      "support_validity_basis": "underlying conditional probability vector",
+      "target_support_mass": 1.0,
+      "target_support_size": 14,
+      "true_forward_kl": null,
+      "true_forward_kl_status": "infinite",
+      "true_forward_kl_value": "inf",
+      "tvd_to_target": 0.9906309096528347,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    },
+    "raw:sibling-iqp": {
+      "acceptance_mass": 1.0,
+      "attempts_per_accepted_sample": 1.0,
+      "backend_id": "sibling-iqp",
+      "excluded_target_mass": 0.0,
+      "expected_coverage": 0.5146414083259667,
+      "expected_occupancy": 237.63837480102129,
+      "floored_log_ratio_1e-12": 14.802054397074809,
+      "floored_log_ratio_1e-12_added_mass": 2.56e-10,
+      "floored_log_ratio_1e-9": 11.644994367227504,
+      "floored_log_ratio_1e-9_added_mass": 2.56e-07,
+      "hamming_mmd2": 0.0007520298783308415,
+      "hamming_mmd2_crosscheck_abs_error": 4.369334755116583e-17,
+      "hamming_mmd2_crosscheck_status": "PASS",
+      "hamming_mmd2_direct": 0.0007520298783308415,
+      "hamming_mmd2_walsh": 0.0007520298783308852,
+      "marginal_bit_order": "msb_first",
+      "marginal_tvd_order1_count": 9,
+      "marginal_tvd_order1_max": 0.20845689863661065,
+      "marginal_tvd_order1_mean": 0.050271889364211564,
+      "marginal_tvd_order2_count": 36,
+      "marginal_tvd_order2_max": 0.5415780554287266,
+      "marginal_tvd_order2_mean": 0.2331234671847145,
+      "observed_empirical_support": {
+        "reason": "comparison arm supplies a probability vector, not observed outcome samples",
+        "status": "not_available"
+      },
+      "occupancy_fraction": 0.4641374507832447,
+      "provenance": {
+        "source": "pinned_sibling_iqp_bp"
+      },
+      "sample_count": 20000,
+      "source_anticoncentration_status": "not_computed_missing_declared_input",
+      "stage": "raw",
+      "state_space_size": 512,
+      "support_definition": "underlying target support where p > 1e-6",
+      "support_size": 14,
+      "support_threshold": 1e-06,
+      "support_validity": 0.01669795984676043,
+      "support_validity_basis": "underlying conditional probability vector",
+      "target_support_mass": 1.0,
+      "target_support_size": 14,
+      "true_forward_kl": null,
+      "true_forward_kl_status": "infinite",
+      "true_forward_kl_value": "inf",
+      "tvd_to_target": 0.9906309096528347,
+      "uncertainty": {
+        "reason": "exact population vector",
+        "status": "not_applicable"
+      }
+    }
+  },
+  "n": 9,
+  "resource_report": {
+    "elapsed_seconds": 3.806761200001347,
+    "memory_policy": "current-process RSS; no embedded 4^n-square superoperator",
+    "rss_after_bytes": null,
+    "rss_before_bytes": null,
+    "rss_delta_bytes": null,
+    "status": "rss_unavailable"
+  },
+  "schema_version": "v4_tcdp.matched_comparison.v1",
+  "source_checks": {
+    "local_final_loss": 0.0007520298783308912,
+    "local_loss_recomputed_from_target": 0.0007520298783309056,
+    "local_unquantized_probability_max_abs_error": 4.163336342344337e-17,
+    "local_unquantized_tvd": 4.824890249973627e-16,
+    "loss_recomputed_abs_error": 1.441988889405721e-17,
+    "source_final_loss": 0.0007520298783308912,
+    "source_local_generator_equal": true,
+    "source_local_probability_max_abs_error": 6.938893903907228e-17,
+    "source_local_theta_max_abs_error": 0.0,
+    "status": "PASS",
+    "tolerances": {
+      "exact": 1e-16,
+      "probability": 1e-12,
+      "trajectory": 1e-12
+    }
+  },
+  "spatial_kernel": null,
+  "target_hash": "f3de3973d5553f864aed380d721d3998161e075bd6ed2801e6683d830dd82157"
+}

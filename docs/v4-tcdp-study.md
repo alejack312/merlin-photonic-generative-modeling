@@ -1,0 +1,32 @@
+# v4.0 TCDP implementation report
+
+Current numerical results and expected postselection costs are consolidated in [the bounded release](v4-bounded-release.md). Training here uses exact finite enumeration; it does not implement or benchmark the large-scale sampled estimator from the literature. Five deterministic seed labels per profile are not five independent repetitions.
+
+Status: reviewable implementation branch, with scientific interpretation provisional.
+
+Owner decisions are now recorded: D1 selects fixed-photon `g2=0` with explicit uniform loss; D2 selects discrete alpha-key NAT with continuous singles; D3 selects sibling-style parity initialization from exact train-target moments at scale `0.1`. The implementation and bounded verification pass are complete for the declared scopes; broader scientific claims remain explicitly qualified below.
+
+The branch adds three additive boundaries: a NumPy classical IQP trainer, a read-only sibling inventory/export boundary, and a logical compiler plus qualified ideal CP-map deployment boundary. Existing generator, trainability, hardness, photonic, checkpoints, and historical result paths remain unchanged.
+
+## Delivered evidence
+
+- The classical core has typed finite/binary/provenance contracts, exact IQP probabilities and Jacobians, spatial and Hamming Gaussian objectives, deterministic Adam/SGD updates, initialization, checkpoints and resume checks.
+- The ring pipeline reproduces the 400-point `make_circles` recipe and 320/80 split, persists train-derived normalization and the explicit `2**n` row-major MSB-first codec, and uses the selected data-dependent parity initialization at scale `0.1` by default. Small-angle and uniform remain explicit ablations.
+- The registered primary ring budget is complete for both kernels at n=6 and n=8: 20 main artifacts (five seed IDs per profile and n, 300 updates each) are present. The artifacts explicitly record that deterministic parity initialization yields one unique parameterization per profile/n group.
+- The sibling checkout was observed read-only at `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`; its source/config/result families were hashed and dispositioned. Inventory is not source scientific certification and no unsafe serialized artifact was loaded.
+- The available `training_smoke` step-4 checkpoint was safely replayed through the ideal construction as an adapted reproduction. Its product-Bernoulli input was regenerated from the recorded source recipe/seed, and an isolated source-trainer rerun matched all five recorded theta/loss rows exactly with verified source identity; checkpoint replay and retraining remain separately labelled.
+- Deployment tests cover negative PS signs, alpha keys, winding, topology rejection, ideal compiled equality, CP/trace-nonincreasing checks, unnormalized composition, explicit fixed-photon `eta**n` loss scaling, erasure mass, throughput controls and full-Fock capability boundaries.
+- NAT implements bounded discrete alpha-key neighbor search with continuous single-angle updates, Adam-state warm-start/resume, two matched continuation arms from one frozen warm start, and an equal-budget fixed-pair ablation; focused tests prove key movement, winding preservation, reproducibility and serialization.
+- The matched comparison preserves raw/compiled/deployed vectors and reports Hamming MMD², spatial MMD², TVD, true KL, labelled floored scores, expected coverage, support diagnostics and acceptance cost.
+
+## Deliberately open
+
+The repository does not claim a validated multiphoton noisy source model, multi-gate full-Fock equivalence, or an intermediate-projection theorem. The fixed-photon n=2/n=3 physical controls pass; after correcting the coherent readout, the registered shared-gate final-only/intermediate conditional TVD is `1.942890293094024e-16` with unchanged accepted mass. Final-only remains the selected declared boundary, and the fixture result is not generalized to a theorem. Photonic ring evaluation is implemented and exercised for the registered n=4 spatial and Hamming smoke profiles only; n=6/n=8 photonic deployment is not extrapolated.
+
+The registered sibling/substrate chain is now complete for the eight source-trainer cells that have verified small-n NPZ inputs: one `training_smoke` cell, four bandwidth cells, and three Ghosh–Kim cells. The artifact-backed chain is sibling IQP -> local equivalent IQP -> compiled CP map -> deployed fixed-photon map, with the source Hamming bandwidth, MSB-first codec, hashes, acceptance, and conditional metrics preserved. The n=9 deployed arms are analytic model-derived references; they do not extend the direct full-Fock physical boundary.
+
+Registered small-n sibling evidence is now faithful: eight training cells (`training_smoke`, four `bandwidth_marginal_sweep` cells, and three Ghosh–Kim small-n cells) were rerun from the pinned source trainer with exact recorded theta/loss agreement in isolated namespaces. The registered exact n=6 anti-concentration validation cell also has a PASS source-validation report with byte-identical substantive JSON/CSV outputs. Checkpoint replays remain separately labeled as replay/reference-only, and large-n, Qiskit-dependent, or missing-input rows retain their narrower dispositions. NAT artifacts contain matched ideal/model-derived arms and controls; they do not establish noisy efficacy or superiority. Owner predictions for NULL-03–06, the NULL-07 source-gap hypothesis, and the binding NULL-08 control are recorded; NULL-07 remains experimentally untested, and the owner-authored WRITE-07 explanation is now recorded in [docs/v4-owner-explanation-2026-09-09.md](v4-owner-explanation-2026-09-09.md). The former optional communication gate was retired after two unanswered owner-sent messages. No merge, publish, or further external communication was performed.
+
+See the [requirement evidence ledger](../.planning/v4-requirement-evidence.md) for per-ID status and commands.
+
+The 2026-09-10 bounded correction pass repaired resource-process identity, semantic control recomputation, support reporting, strict source/replay provenance, tomography/physicality checks, and the Jacobian-free trainer evaluation path. The refreshed artifacts and finding-by-finding dispositions are in [v4-correction-pass-2026-09-10.md](v4-correction-pass-2026-09-10.md). The scientific boundary is unchanged: small-n direct physical controls and model-derived ring/sibling comparisons are supported; broader full-Fock and larger-n photonic claims remain incomplete.

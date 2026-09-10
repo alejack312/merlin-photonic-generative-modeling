@@ -1,0 +1,69 @@
+{
+  "artifacts": {
+    "compiled": "compiled.npy",
+    "deployed": "deployed.npy",
+    "manifest": "manifest.json",
+    "raw": "raw.npy"
+  },
+  "checkpoint": {
+    "path": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma9p0\\checkpoints\\step_0020.npz",
+    "sha256": "b1630f1a1bbdea8207ce3f2131b07ca836777ce4a3f2128d83fa2fd52e996259",
+    "source_loss": 0.0010016028827352754,
+    "step": 20
+  },
+  "command": [
+    "venv/Scripts/python.exe",
+    "scripts/v4_tcdp/replay_sibling.py",
+    "results\\v4_tcdp\\sibling\\ghosh_kim_small_n_configs_experiments_ghosh_kim_small_n_yaml\\manifest.json"
+  ],
+  "compiled_deployed_tvd": 0.0,
+  "dataset_regeneration": null,
+  "deployed_acceptance_mass": 8.360199399249953e-13,
+  "faithful_retraining": {
+    "reason": "A frozen checkpoint was replayed; source data and optimizer trajectory were not independently retrained.",
+    "status": "not_run"
+  },
+  "generator_hash": "5e7089cbb55a2ab1db92f52966da84731ecbdaef1ef423ef1aca3f14f46388a1",
+  "input_hashes": {
+    "checkpoint": "b1630f1a1bbdea8207ce3f2131b07ca836777ce4a3f2128d83fa2fd52e996259",
+    "generator": "5e7089cbb55a2ab1db92f52966da84731ecbdaef1ef423ef1aca3f14f46388a1",
+    "theta": "132d66e5848e440511b4531face0a31e1e5a6741c33bcd5ef057419c3dfc23ad"
+  },
+  "kernel": {
+    "comparison_kernel": "not computed; source target data is not exported",
+    "source_bandwidth": [
+      1.0,
+      3.0,
+      9.0
+    ],
+    "source_type": "gaussian"
+  },
+  "n": 9,
+  "namespace": {
+    "checkpoint_hash": "b1630f1a1bbdea8207ce3f2131b07ca836777ce4a3f2128d83fa2fd52e996259",
+    "config_hash": "ef2a45241b56c6aa90c3a4265483ffed0a0cfd95363fbb58e5b4f101f4d47b72",
+    "destination": "results\\v4_tcdp\\sibling_replays\\required_profiles\\ghosh_kim_small_n\\ghosh_kim_small_n_configs_experiments_ghosh_kim_small_n_yaml__f6d6ebe87e4ee1de__12843f05ea590fae\\checkpoint_b1630f1a1bbdea82\\config_ef2a45241b56c6aa\\step_0020",
+    "source_key": "ghosh_kim_small_n_configs_experiments_ghosh_kim_small_n_yaml__f6d6ebe87e4ee1de__12843f05ea590fae"
+  },
+  "output_files": [
+    "raw.npy",
+    "compiled.npy",
+    "deployed.npy",
+    "manifest.json"
+  ],
+  "raw_compiled_tvd": 0.021421552593069916,
+  "reason": "frozen source checkpoint replayed through the ideal photonic construction; source SGD/data trajectory was not rerun",
+  "requested_pinned_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "schema_version": "v4_tcdp.sibling_replay.v1",
+  "source_branch": "alejack312",
+  "source_commit": "f6d6ebe87e4ee1de10893c6ea2f0ffa367493336",
+  "source_config_sha256": "e6e0056ea4bb0389d3557cdab512c0bd1b3baaa8c0737cee053f91d5e0ad70f3",
+  "source_dirty": false,
+  "source_id": "ghosh_kim_small_n:configs/experiments/ghosh_kim_small_n.yaml",
+  "source_manifest_sha256": "a4bc66c28125335f9c968f62814a0a4e9f698b359dfbb2a86b9dbeec7f323faf",
+  "source_pin_status": "MATCH",
+  "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc",
+  "status": "adapted_reproduction",
+  "theta_hash": "132d66e5848e440511b4531face0a31e1e5a6741c33bcd5ef057419c3dfc23ad",
+  "unsafe_serialization_loaded": false
+}

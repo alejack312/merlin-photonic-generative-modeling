@@ -4,19 +4,24 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Repo state
 
+The selected bounded v4.0 scope is closed for PR review; original full scientific acceptance remains incomplete. Current results, cost estimates, and clean-checkout evidence are in [docs/v4-bounded-release.md](docs/v4-bounded-release.md).
+
+As of 2026-09-10, branch `codex/v4-implementation` contains the additive v4.0 implementation through the bounded correction pass (implementation commit `a8db410`, including the bounded release validator and portable-serialization repairs): bounded ring comparisons, faithful registered small-n sibling retraining for the available bandwidth and Ghosh–Kim cells, an exact n=6 sibling validation rerun, matched NAT arms, fail-closed provenance, full raw-content identities, strict atomic continuation, complete ring artifact/summary reuse validation, paired NAT binding, fixed-photon n=2/n=3 Perceval controls, n=4 photonic ring smoke evaluation, the n=4/6/8/10 resource pilot, and an artifact-backed sibling-to-substrate comparison for all eight registered training cells. The correction pass also hardens worker RSS measurement, mutation/control semantics, support metrics, erasure/tomography/physicality checks, real YAML loading, replay labels, inventory dispositions, objective evaluation, and artifact semantic validation. The v4 evidence ledger is [.planning/v4-requirement-evidence.md](.planning/v4-requirement-evidence.md); broader multiphoton/full-Fock, direct n=6/n=8 photonic validation, unavailable sibling rows, NAT efficacy interpretation, and owner-authored interpretation requirements remain explicitly qualified.
+
 As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 encoding design, v2.1 weight-2 implementation) plus v3.0 (IQP circuit study: trainability, hardness-under-loss, ARB-01, Julia cross-checks, write-up), and was repackaged into an installable `merlin_iqp` library (src-layout) with phase scripts moved to `scripts/`. Real commands:
 
 - **Python env:** `venv/Scripts/python.exe` (Python 3.12; MerLin caps `python>=3.10,<=3.12`, `torch<2.13`).
 - **Install (editable):** `venv/Scripts/python.exe -m pip install -e . --no-deps` — required once per venv for `import merlin_iqp` to resolve; `pytest.ini`'s `pythonpath = src` is a fallback for test runs without it.
-- **Tests:** `venv/Scripts/python.exe -m pytest -q` — 296 tests (`testpaths = tests` per `pytest.ini`).
-- **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0). No dependency on anything outside itself.
+- **Tests:** `venv/Scripts/python.exe -m pytest -q` — full-suite execution remains the required gate; the latest correction-pass gate is `726 passed, 1 skipped`; v4 focused evidence is recorded in the ledger. (`testpaths = tests` per `pytest.ini`.)
+- **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0), `classical/` (v4 NumPy trainer), `experiments/` (v4 rings and sibling inventory), and `deploy/` (v4 compiler/qualified CP-map boundary). No existing pipeline was migrated.
 - **Study scripts:** `scripts/` — phase-tagged sweep/analysis/de-risking CLIs, not library code. Run from repo root, e.g. `python scripts/natural_order_train.py`.
 - **Trainability study:** `scripts/gradient_variance_sweep.py` (raw sweep) → `scripts/trainability_analysis.py` / `scripts/trainability_analysis_1701.py` (curve-fit analysis).
 - **Hardness-under-loss study:** `scripts/loss_sweep.py` (raw sweep) → `scripts/hardness_analysis.py` (TVD-vs-η/anticoncentration analysis).
 - **ARB-01 (arbitrary-θ weight-2 gate):** `scripts/cp_alpha_sweep.py`.
+- **v4 bounded CLIs:** `scripts/v4_tcdp/train_rings.py`, `scripts/v4_tcdp/inventory_sibling.py`, `scripts/v4_tcdp/retrain_sibling.py`, `scripts/v4_tcdp/run_nat.py`, `scripts/v4_tcdp/compare_backends.py`, and `scripts/v4_tcdp/compare_sibling_backends.py`. Results are isolated under `results/v4_tcdp/`; source retraining and sibling substrate comparison are explicit sibling-root integrations, not default-suite dependencies.
 - **Julia independent verifier:** `julia --project=julia julia/verify_qubit_iqp.jl` (and the other `julia/verify_*.jl` scripts) — Julia 1.10 LTS, Yao.jl, BosonSampling.jl.
 - **Forge (ancilla mode-mapping bookkeeping check):** `forge/ancilla_mapping.frg`.
-- **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) is the canonical write-up; it links out to `docs/trainability-study.md`, `docs/hardness-under-loss-study.md`, `docs/iqp-photonic-encoding.md`, and `docs/julia-cross-check-study.md` for full detail.
+- **Results synthesis:** [docs/technical-findings.md](docs/technical-findings.md) remains the legacy canonical write-up; v4 evidence is in [docs/v4-tcdp-study.md](docs/v4-tcdp-study.md), with [docs/v4-rings-study.md](docs/v4-rings-study.md), [docs/v4-sibling-reproduction.md](docs/v4-sibling-reproduction.md), and [docs/v4-backend-comparison.md](docs/v4-backend-comparison.md).
 
 Keep this section current at each new milestone — don't leave it stale.
 

@@ -1,0 +1,287 @@
+{
+  "artifact": {
+    "arm_id": "a",
+    "branch_from": "n4_seed0_metrics_smoke-warm-start.json",
+    "common_start_hash": "802d257df8db58533c08711f90a4ea762b9cc7108199b4c8e467cd90af65894d",
+    "evaluation_budget": {
+      "checkpoint_selection_rule": "fixed_last_step",
+      "completed_steps": 1,
+      "objective_evaluations": 9,
+      "pair_budget": 6,
+      "pair_evaluations": 6,
+      "pair_moves": 3,
+      "requested_steps": 1,
+      "single_gradient_evaluations": 1,
+      "status": "completed",
+      "stop_reason": null,
+      "time_limit_seconds": null
+    },
+    "role": "matched_continuation_arm"
+  },
+  "budgets": {
+    "checkpoint_selection_rule": "fixed_last_step",
+    "completed_steps": 1,
+    "objective_evaluations": 9,
+    "pair_budget": 6,
+    "pair_evaluations": 6,
+    "pair_moves": 3,
+    "requested_steps": 1,
+    "single_gradient_evaluations": 1,
+    "status": "completed",
+    "stop_reason": null,
+    "time_limit_seconds": null
+  },
+  "config": {
+    "allow_pair_moves": true,
+    "initialization": "data_dependent",
+    "initialization_method": "parity",
+    "initialization_scale": 0.1,
+    "initialization_std": 0.1,
+    "n": 4,
+    "pair_budget": 6,
+    "pairs": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ],
+    "resolved_pair_budget": 6,
+    "run_kind": "matched_arm_a",
+    "seed": 0,
+    "sigma": 1.0,
+    "single_lr": 0.05,
+    "single_optimizer": "adam",
+    "source_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+    "steps": 1,
+    "topology": "arbitrary_weight2"
+  },
+  "final_compiled": {
+    "alpha_keys": 63,
+    "alpha_step": 0.1,
+    "compiler": "merlin_iqp.deploy.compile",
+    "n": 4,
+    "pair_angles": [
+      {
+        "i": 0,
+        "j": 1,
+        "key": 59,
+        "lifted_alpha": -0.3831853071795859,
+        "lifted_theta": -0.09579632679489647,
+        "raw_alpha": -0.3831853071795859,
+        "raw_theta": -0.09579632679489647,
+        "winding": -1,
+        "wrapped_alpha": 5.9
+      },
+      {
+        "i": 1,
+        "j": 2,
+        "key": 2,
+        "lifted_alpha": 0.2,
+        "lifted_theta": 0.05,
+        "raw_alpha": 0.2,
+        "raw_theta": 0.05,
+        "winding": 0,
+        "wrapped_alpha": 0.2
+      },
+      {
+        "i": 2,
+        "j": 3,
+        "key": 58,
+        "lifted_alpha": -0.4831853071795855,
+        "lifted_theta": -0.12079632679489638,
+        "raw_alpha": -0.4831853071795855,
+        "raw_theta": -0.12079632679489638,
+        "winding": -1,
+        "wrapped_alpha": 5.800000000000001
+      }
+    ],
+    "quantized": true,
+    "topology": "arbitrary_weight2"
+  },
+  "final_loss": 0.599873645653159,
+  "final_pair_keys": [
+    59,
+    2,
+    58
+  ],
+  "final_pair_windings": [
+    -1,
+    0,
+    -1
+  ],
+  "final_singles": [
+    0.09326914906796113,
+    -0.09229990077750422,
+    0.09031397271377098,
+    -0.09030874827740858
+  ],
+  "generator": [
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1
+    ]
+  ],
+  "initial_pair_keys": [
+    60,
+    1,
+    59
+  ],
+  "initial_pair_windings": [
+    -1,
+    0,
+    -1
+  ],
+  "initial_singles": [
+    0.05374991782331605,
+    -0.053124903613359586,
+    0.05187483474010957,
+    -0.05187483952071852
+  ],
+  "loss_history": [
+    0.6312932089922372,
+    0.599873645653159
+  ],
+  "optimizer_state": {
+    "kind": "adam",
+    "m": [
+      -0.008984476313097373,
+      0.008978697526009358,
+      -0.008316515271724723,
+      0.00860038504042714
+    ],
+    "step": 2,
+    "v": [
+      7.1550721292005295e-06,
+      7.272005389675249e-06,
+      6.480088655484917e-06,
+      6.931897527675332e-06
+    ]
+  },
+  "pair_moves": 3,
+  "pairs_changed": 3,
+  "provenance": {
+    "algorithm": "bounded_discrete_alpha_key_neighbor_coordinate_search",
+    "compiler": {
+      "catalog_keys": 63,
+      "catalog_step": 0.1,
+      "module": "merlin_iqp.deploy.compile",
+      "quantize": true,
+      "winding_and_lift_preserved": true
+    },
+    "control": null,
+    "final_parameter_hash": "cace8a103a0e9729425f1cc8f32b7fbd29b57abfd36c0cf181416a634ad76899",
+    "forbidden_methods": [
+      "finite_difference_through_quantization",
+      "straight_through_gradient",
+      "interpolation"
+    ],
+    "generator_hash": "9f4c4ba8abb1416a673c5c82dfa891736d3a827f52a4995c8382f5e0f04fd7f2",
+    "initial_parameter_hash": "01551fec8453431ff959854486b2583fe6211ff2544a9f39e62b1267f121cb54",
+    "initialization": {
+      "method": "parity",
+      "scale": 0.1,
+      "scheme": "data_dependent",
+      "std": 0.1,
+      "target_hash": "0b5ba8ffccd785262d0611e0330b236f7acd6275072a0c91a508c58f09219a26",
+      "target_split": "train"
+    },
+    "numpy": "2.5.1",
+    "objective": {
+      "exact": true,
+      "kind": "hamming_gaussian",
+      "normalization": "mmd2",
+      "sigma": 1.0
+    },
+    "pair_update": "circular key neighbors (key-1, key+1) with strict-improvement acceptance",
+    "python": "3.12.1",
+    "replication": {
+      "deterministic_initialization": true,
+      "independent_replica": false,
+      "n_unique_parameterizations_observed": 1,
+      "seed": 0,
+      "unit": "independent RNG source or explicitly declared deterministic configuration"
+    },
+    "seed": 0,
+    "single_update": "objective_and_gradient_exact plus deterministic SGD/Adam update on first n coordinates",
+    "source_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+    "source_provenance": {
+      "dirty": true,
+      "git_status": [
+        " M scripts/v4_tcdp/run_nat.py",
+        " M src/merlin_iqp/deploy/__init__.py",
+        " M src/merlin_iqp/deploy/fock.py",
+        " M src/merlin_iqp/experiments/comparison.py",
+        " M src/merlin_iqp/experiments/nat.py"
+      ],
+      "observed_branch": "codex/v4-implementation",
+      "observed_commit": "9977207e885671aee444c34d3c86b356c4b10b17",
+      "root": "C:\\Users\\cuqui\\merlin-quantum-case-study",
+      "tree_identity": "7a14e7f22805b5b9cbe64a09fe5d01dc1134c9584d8521e487163e7f308db72b",
+      "tree_identity_kind": "working_tree_content_sha256",
+      "workspace_git_status": [
+        " M results/v4_tcdp/deploy/validation_manifest.json",
+        " M scripts/v4_tcdp/compare_backends.py",
+        " M scripts/v4_tcdp/replay_sibling.py",
+        " M scripts/v4_tcdp/retrain_sibling.py",
+        " M scripts/v4_tcdp/run_nat.py",
+        " M src/merlin_iqp/deploy/__init__.py",
+        " M src/merlin_iqp/deploy/fock.py",
+        " M src/merlin_iqp/experiments/comparison.py",
+        " M src/merlin_iqp/experiments/nat.py",
+        " M tests/v4_tcdp/test_comparison.py",
+        " M tests/v4_tcdp/test_nat.py",
+        "?? results/v4_tcdp/metrics/",
+        "?? results/v4_tcdp/nat/metrics/"
+      ]
+    },
+    "warm_start": "01551fec8453431ff959854486b2583fe6211ff2544a9f39e62b1267f121cb54"
+  },
+  "run_hash": "ed25d3420da670c2e2cb3cb0dede0ce215e0bce741b5f65994646575f8d5ad9c",
+  "schema_version": "v4_tcdp.nat_run.v1"
+}
