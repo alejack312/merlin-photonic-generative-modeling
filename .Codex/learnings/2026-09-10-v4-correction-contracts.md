@@ -27,9 +27,9 @@ Date: 2026-09-10 · Scope: project · Recurs when: an independent audit finds th
 - A mutation can leave a saturated metric unchanged; this is not the same as a mutation failing to apply.
 
 ## Verification
-- `venv/Scripts/python.exe -m pytest -q` → 719 passed, 1 skipped.
-- Focused correction suite → 186 passed, 1 skipped; explicit sibling integration → 35 passed.
-- `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` → 499 JSON, 72 JSONL rows, 17 payload hashes, 0 failures.
+- `venv/Scripts/python.exe -m pytest -q` → 724 passed, 1 skipped.
+- Post-review focused boundary → 129 passed; explicit sibling integration → 36 passed.
+- `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` → 579 JSON, 72 JSONL rows, 19 payload hashes, 0 failures.
 
 ## Next time (for a weaker model)
 - Do: inspect the audit and ledger, identify exact producer inputs, then isolate refreshed outputs.

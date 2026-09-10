@@ -1,6 +1,6 @@
 # v4.0 requirement evidence ledger
 
-Updated 2026-09-09 after the independent projection/mass/compiler/kernel repair pass. Statuses are strict:
+Updated 2026-09-10 after the independent projection/mass/compiler/kernel repair pass and the bounded post-review correction pass. Statuses are strict:
 
 - `PASS`: the bounded criterion has direct implementation and verification evidence.
 - `FAIL`: an attempted acceptance check produced a contrary result.
@@ -152,4 +152,4 @@ An incomplete row includes the missing item, next concrete action, and owner dep
 | COMPARE-03 | PASS | Common 20,000 accepted-sample evaluation budget, exact controls and acceptance accounting are recorded. | Add sampled uncertainty only when a sampled arm is authorized. | None for current exact scope |
 | COMPARE-04 | PASS (registered supported scope); INCONCLUSIVE (broader physical/missing-input rows) | Artifact-backed ring and sibling/substrate reports are present with profile-qualified IDs, input/output hashes, Hamming metrics, and explicit unsupported/reference-only labels. Unavailable source rows and direct full-Fock n=9 claims remain excluded. | Reconcile broader rows only when their missing inputs or physical capability become available; do not relabel model-derived maps as hardware evidence. | External source inputs and physical validation for broader rows |
 
-The default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, the current integrated full suite passed `687` tests with one optional source-integration skip in `918.94s`. The explicit sibling integration plus the comparison gate passed `28` tests with one optional source-integration skip in `175.16s`. Artifact validation passed with `355` JSON files, `72` JSONL rows, `9` payload hashes, and zero failures. This is an environment note, not a requirement PASS for physical validation.
+Historical closure readback: the default full-suite command initially failed because Perceval could not open its default log path. With `PCVL_PERSISTENT_PATH` redirected to a writable temporary directory, that closure run passed `687` tests with one optional source-integration skip in `918.94s`; the explicit sibling integration plus comparison gate passed `28` tests with one optional skip; artifact validation then covered `355` JSON files, `72` JSONL rows, and `9` payload hashes. The current post-review verification is recorded at the top of this ledger and in the dated handoff.

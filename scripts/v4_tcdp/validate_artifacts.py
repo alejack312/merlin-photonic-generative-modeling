@@ -72,6 +72,12 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
         if not isinstance(arms, list) or not isinstance(metrics, dict) or not arms:
             failures.append(f"{path}: matched comparison must contain non-empty arms and metrics")
             return
+        if _is_current_comparison_artifact(path):
+            target_hash = value.get("target_hash")
+            if not isinstance(target_hash, str) or len(target_hash) != 64 or any(
+                character not in "0123456789abcdef" for character in target_hash.lower()
+            ):
+                failures.append(f"{path}: current matched comparison lacks a valid target_hash")
         arm_keys = set()
         for arm in arms:
             if not isinstance(arm, dict):
@@ -104,6 +110,11 @@ def _validate_semantics(value: Any, path: Path, failures: list[str]) -> None:
                     failures.append(f"{path}: support_validity_basis is missing or inconsistent for {key}")
                 if row.get("support_threshold") != 1e-6:
                     failures.append(f"{path}: support_threshold is missing or inconsistent for {key}")
+                if not isinstance(row.get("target_support_size"), int) or isinstance(row.get("target_support_size"), bool) or row["target_support_size"] < 1:
+                    failures.append(f"{path}: target_support_size evidence is missing or invalid for {key}")
+                target_mass = row.get("target_support_mass")
+                if not _finite_number(target_mass) or not 0.0 <= float(target_mass) <= 1.0:
+                    failures.append(f"{path}: target_support_mass evidence is missing or invalid for {key}")
     elif schema in {"v4_tcdp.photonic_ring.v1", "v4_tcdp.photonic_ring.v2"}:
         direct = value.get("direct")
         if isinstance(direct, dict):

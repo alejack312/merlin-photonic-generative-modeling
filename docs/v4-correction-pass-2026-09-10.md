@@ -6,7 +6,7 @@ This note records the correction pass following the 2026-09-09 independent audit
 
 | Finding | Disposition | Evidence and consequence |
 |---|---|---|
-| F1 resource pilot measured the launcher and masked worker growth | FIXED | The pilot now identifies the allocating interpreter, records worker OS peak/high-water RSS, validates the Windows structure, and requires all registered sizes. [`resource_budget_correction_20260910.json`](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json) is a fresh n=4/6/8/10 PASS artifact. |
+| F1 resource pilot measured the launcher and masked worker growth | FIXED | The pilot now identifies the allocating interpreter, records worker OS peak/high-water RSS, validates the Windows structure, and requires all registered sizes. [`resource_budget_correction_20260910_final2.json`](../results/v4_tcdp/deploy/resource_budget_correction_20260910_final2.json) is a fresh n=4/6/8/10 PASS artifact. |
 | F2 mutation controls used constants | FIXED | Success and map controls now recompute derived metrics from the mutated objects. A no-op or invalid mutation fails; metric saturation is reported separately from mutation application. |
 | F3 support validity was hard-coded | FIXED | Support validity is computed from target support `p > 1e-6` and is labeled as probability-vector support, not empirical sampled support. |
 | F4 NAT was described as a noise-adaptation comparison | CLAIM CORRECTED | Under fixed-photon uniform loss, matched NAT arms are a same-procedure reproducibility/continuation control. The deployed arm differs by the scalar `eta**n` acceptance factor; no noise-adaptation claim is made. |
@@ -23,7 +23,7 @@ This note records the correction pass following the 2026-09-09 independent audit
 
 ## Implementation evidence
 
-The following changes are in the working tree for this pass:
+The following changes are committed for this pass:
 
 - worker-identity and peak-RSS measurement in `scripts/v4_tcdp/resource_pilot.py`;
 - recomputed mutation controls, target-support metrics, and complete Windows RSS structure in `src/merlin_iqp/experiments/comparison.py`;
@@ -44,7 +44,7 @@ The refreshed metrics compare raw, unquantized compiled control, quantized compi
 ## Verification run record
 
 - Focused correction suite: `venv/Scripts/python.exe -m pytest -q tests/v4_tcdp/test_artifact_semantics.py tests/v4_tcdp/test_comparison.py tests/v4_tcdp/test_deploy.py tests/v4_tcdp/test_classical_core.py tests/v4_tcdp/test_sibling_inventory.py tests/v4_tcdp/test_sibling_replay.py tests/v4_tcdp/test_sibling_retrain.py tests/v4_tcdp/test_rings_pipeline.py tests/v4_tcdp/test_resource_pilot.py` → `186 passed, 1 skipped`.
-- Artifact validator: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` → `499` JSON files, `72` JSONL rows, `17` payload hashes, `0` failures (`PASS`).
+- Artifact validator: `venv/Scripts/python.exe scripts/v4_tcdp/validate_artifacts.py --root results/v4_tcdp` → `579` JSON files, `72` JSONL rows, `19` payload hashes, `0` failures (`PASS`).
 - Sibling checkout: verified separately as the pinned clean checkpoint; no sibling files were changed.
 
 ## Remaining gaps

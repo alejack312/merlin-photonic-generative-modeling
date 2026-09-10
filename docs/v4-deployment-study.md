@@ -21,4 +21,4 @@ Run the bounded smoke with:
 
 The smoke writes results/v4_tcdp/deploy/validation_manifest.json. It is a validation manifest, not a production map sweep.
 
-The 2026-09-10 correction pass also strengthened finite-input erasure validation, corrected the analytic tomography readout aggregation, checked both lower and upper `E†I` physicality bounds, and refreshed the bounded resource pilot at [`resource_budget_correction_20260910.json`](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json). These checks do not extend the direct physical boundary beyond the registered small-n controls.
+The 2026-09-10 correction pass also strengthened finite-input erasure validation, corrected the analytic tomography readout aggregation, checked both lower and upper `E†I` physicality bounds, and refreshed the bounded resource pilot at [`resource_budget_correction_20260910_final2.json`](../results/v4_tcdp/deploy/resource_budget_correction_20260910_final2.json). These checks do not extend the direct physical boundary beyond the registered small-n controls.

@@ -10,7 +10,7 @@ As of 2026-08-24 the repo has shipped three milestones (v1.0 generator, v2.0 enc
 
 - **Python env:** `venv/Scripts/python.exe` (Python 3.12; MerLin caps `python>=3.10,<=3.12`, `torch<2.13`).
 - **Install (editable):** `venv/Scripts/python.exe -m pip install -e . --no-deps` — required once per venv for `import merlin_iqp` to resolve; `pytest.ini`'s `pythonpath = src` is a fallback for test runs without it.
-- **Tests:** `venv/Scripts/python.exe -m pytest -q` — full-suite execution remains the required gate; the latest correction-pass gate is `719 passed, 1 skipped`; v4 focused evidence is recorded in the ledger. (`testpaths = tests` per `pytest.ini`.)
+- **Tests:** `venv/Scripts/python.exe -m pytest -q` — full-suite execution remains the required gate; the latest correction-pass gate is `724 passed, 1 skipped`; v4 focused evidence is recorded in the ledger. (`testpaths = tests` per `pytest.ini`.)
 - **Library code:** `src/merlin_iqp/` — `encoding/` (shared IQP-to-photonic circuits), `generator/` (v1.0), `trainability/` (v3.0), `hardness/` (v3.0), `classical/` (v4 NumPy trainer), `experiments/` (v4 rings and sibling inventory), and `deploy/` (v4 compiler/qualified CP-map boundary). No existing pipeline was migrated.
 - **Study scripts:** `scripts/` — phase-tagged sweep/analysis/de-risking CLIs, not library code. Run from repo root, e.g. `python scripts/natural_order_train.py`.
 - **Trainability study:** `scripts/gradient_variance_sweep.py` (raw sweep) → `scripts/trainability_analysis.py` / `scripts/trainability_analysis_1701.py` (curve-fit analysis).
