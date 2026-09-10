@@ -1,5 +1,7 @@
 # v4.0 milestone completion report
 
+> **Documentation reconciliation, 2026-09-10.** This is a chronological completion record. Earlier counts and artifact versions below describe their dated checkpoints. The final clean-checkout implementation gate is 726 passed, 1 skipped, with 37 explicit sibling integration tests. Current selected-scope closure and evidence are in [the bounded release](v4-bounded-release.md); full scientific acceptance is not achieved.
+
 Date: 2026-09-09. Branch: `codex/v4-implementation`. Base: `de80e9313beed614528fd6332b2f78aab83c0b50`. The current integration point and remaining-work map are recorded in [.planning/v4-closure-checklist.md](../.planning/v4-closure-checklist.md). This report separates implementation completion from scientific acceptance.
 
 ## 2026-09-10 bounded correction pass

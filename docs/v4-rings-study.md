@@ -1,5 +1,7 @@
 # Phase 28: classically trained IQP rings
 
+Current numerical results and expected postselection costs are consolidated in [the bounded release](v4-bounded-release.md). Training here uses exact finite enumeration; it does not implement or benchmark the large-scale sampled estimator from the literature. Five deterministic seed labels per profile are not five independent repetitions.
+
 ## D3 initialization and replication note
 
 The settled D3 choice makes sibling-style data-dependent parity initialization at scale `0.1` the primary initialization for both two-ring profiles. `small_angle` and `uniform` remain explicit CLI/configuration ablations. The data-dependent path derives moments only from the exact train target after grid projection; it does not use test data or raw continuous coordinates. Every run artifact records the initialization method and scale, seed, initial/final parameter hashes, target provenance, and replication identity. Seeds that reproduce the same deterministic parameterization are labeled `duplicate_deterministic` and are not treated as independent replicas.

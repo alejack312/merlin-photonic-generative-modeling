@@ -20,6 +20,8 @@ The logical-1 rail uses `PS(-2t)` for the single-qubit compensation. Pair keys a
 
 Logical `0` is `(1,0)`, and output qubit 0 is the most significant bit. These conventions are part of the comparison contract, not presentation details.
 
+**Repository annotation correction (2026-09-10):** The preceding sentence conflates preparation with readout. In the v4 full-Fock adapter, the prepared physical input is `(1,0)` per qubit, while `_valid_bitstring` decodes output `(0,1)` as logical `0` and `(1,0)` as logical `1`. The beam-splitter sandwich and phase convention account for this distinction. Qubit 0 remains the most significant bit. See [fock.py](../src/merlin_iqp/deploy/fock.py); this correction leaves the recorded owner wording above intact.
+
 ## Source error versus gate/compiler error
 
 A source error means that the prepared state is imperfect before the intended circuit acts. A gate or device error means that the physical device performs something closer to `U_tilde` instead of the intended `U`. A compiler error is different again: the compiler may map the intended abstract operation to the wrong physical circuit even when the physical components execute that circuit perfectly.

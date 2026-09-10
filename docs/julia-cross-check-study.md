@@ -1,5 +1,7 @@
 # Independent Julia cross-check study (Phase 19)
 
+> **Documentation reconciliation, 2026-09-10.** This records the Phase 19 checks and their original execution evidence, not a new Julia run during v4 closure. Agreement in a separate toolchain is useful corroboration but can share mathematical assumptions or mistakes. The concluding requirement completion applies only to Phase 19; it does not validate larger v4 optical circuits, source imperfections or quantum advantage.
+
 The phase's canonical reference document: methodology, per-requirement results, and honest scope statement for VERIFY-02/VERIFY-03/VERIFY-04. Phase 20 (Technical Write-Up) treats this as supplementary evidence per `ROADMAP.md` and can cite it directly rather than re-deriving any of it.
 
 ## Methodology
@@ -12,7 +14,7 @@ For the loss-model cross-check (VERIFY-04), a **single fixed theta draw per scop
 
 ### Independent build, not a mechanical port
 
-The single most load-bearing decision in this phase (`19-CONTEXT.md`'s own framing): every Julia circuit was built from its own library's native API and idioms: Yao.jl's `H`/`Rz`/`put`/`chain` for the qubit-side circuit, BosonSampling.jl's `beam_splitter`/`phase_shift`/ `UserDefinedInterferometer` for the photonic-level circuits; never by extracting a matrix or structure from Perceval's own circuit and replaying it in Julia. This is what makes agreement meaningful. If a bug existed in `merlin_iqp/encoding/iqp_photonic.py`'s math, a mechanical port would silently reproduce it in both languages, while an independent build sourced from first principles (phase-convention algebra, literature-sourced gate matrices) would not.
+The single most load-bearing decision in this phase (`19-CONTEXT.md`'s own framing): every Julia circuit was built from its own library's native API and idioms: Yao.jl's `H`/`Rz`/`put`/`chain` for the qubit-side circuit, BosonSampling.jl's `beam_splitter`/`phase_shift`/ `UserDefinedInterferometer` for the photonic-level circuits; never by extracting a matrix or structure from Perceval's own circuit and replaying it in Julia. This is what makes agreement meaningful. If a bug existed in `merlin_iqp/encoding/iqp_photonic.py`'s math, a mechanical port would silently reproduce it in both languages, while a separate build can expose such a mistake. Independence of software does not prevent both implementations from sharing an incorrect mathematical assumption.
 
 Every phase-convention or bit-ordering translation between the two languages' native conventions (Yao's `Rz` vs. this repo's `WP`; BosonSampling's mode-orientation convention vs. Perceval's) was derived algebraically first, then confirmed numerically against a known closed-form case (typically n=1) before being trusted for the full n=2/n=3 comparison, never assumed from surface-level similarity.
 

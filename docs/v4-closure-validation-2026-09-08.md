@@ -1,5 +1,7 @@
 # v4.0 closure validation note
 
+> **Documentation reconciliation, 2026-09-10.** Historical validation at the stated date. Later repairs and final clean-checkout evidence supersede this checkpoint for release acceptance; use [the bounded release](v4-bounded-release.md).
+
 Date: 2026-09-08 · Scope: registered sibling validation closure
 
 ## Purpose

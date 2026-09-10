@@ -1,5 +1,7 @@
 # v4.0 Plan: Train Classically, Deploy Photonically (TCDP)
 
+> **Documentation reconciliation, 2026-09-10.** Historical planning contract: statements below about work not yet started describe the planning date. The selected bounded release is now implemented and verified, while original broader scientific acceptance remains incomplete. Proposed experiments and budgets below are not evidence that they were executed. Current dispositions are in [the ledger](../.planning/v4-requirement-evidence.md) and [bounded release](v4-bounded-release.md).
+
 **Status: revision 4, 2026-09-05 — owner vision integrated; planning complete, implementation not started.** Retains revision 3's safeguards and supersedes revision 2 in commit `3f9cb92`. The original review and disposition remain historical records. See [audit](audits/2026-09-05-v4-plan-audit.md), [probes](audits/2026-09-05-v4-plan-probes.py), and [results](audits/2026-09-05-v4-plan-probe-results.json).
 
 The owner now requests three additive deliverables: a classically trained IQP ring pipeline, a sibling-experiment reproduction pipeline, and matched photonic/non-photonic Hamming-kernel comparisons, sharing extensible modules. The binding [additive pipelines design](v4-additive-pipelines-design.md) specifies data contracts, actual sibling experiments, interfaces, phase tasks and acceptance tests. It takes precedence for workstream scope and sequencing; the physical safeguards below remain binding. No old pipeline is replaced. This turn plans the work, not implements it; owner checkpoint answers remain unwritten.

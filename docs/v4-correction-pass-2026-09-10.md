@@ -1,5 +1,7 @@
 # v4.0 bounded correction pass — 2026-09-10
 
+> **Documentation reconciliation, 2026-09-10.** Correction-pass checkpoint, followed by additional release validation and portability repairs. Earlier counts here are historical; [the bounded release](v4-bounded-release.md) records the final 726-test gate and remaining scientific qualifications.
+
 This note records the correction pass following the 2026-09-09 independent audit. It is an implementation and evidence-integrity update; it does not upgrade the unresolved scientific scope to full v4 acceptance. The implementation/test changes are committed in `c76f0ea`.
 
 ## Disposition

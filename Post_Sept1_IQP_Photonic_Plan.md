@@ -1,4 +1,6 @@
 # Stretch Plan: IQP → Photonic Encoding Research Project
+
+> **Historical record, reconciled 2026-09-10.** Original decisions, hypotheses and owner attempts are preserved below. For current scientific claims use [the corrected synthesis](docs/technical-findings.md), [mapping limitations](docs/raster-order.md) and [bounded release](docs/v4-bounded-release.md). Earlier causal explanations and proposed work are not additional release evidence.
 **Status:** Not started. Does not begin before **September 2, 2026** at the earliest, and only once [MerLin_SMART_Spec_Sept1.md](MerLin_SMART_Spec_Sept1.md) is actually complete (public repo, README, benchmark, note to Vincent, case study, all checked off).
 **Relationship to other parked work (decided 2026-07-19):** This project runs **immediately after MerLin**, before PennyLane. PennyLane independent contributions are sequenced after this project wraps. ket.jl/SDP is informal free-time research only (no artifact), and runs ambiently rather than competing for a slot.
 

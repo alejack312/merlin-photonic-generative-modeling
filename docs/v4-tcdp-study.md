@@ -1,5 +1,7 @@
 # v4.0 TCDP implementation report
 
+Current numerical results and expected postselection costs are consolidated in [the bounded release](v4-bounded-release.md). Training here uses exact finite enumeration; it does not implement or benchmark the large-scale sampled estimator from the literature. Five deterministic seed labels per profile are not five independent repetitions.
+
 Status: reviewable implementation branch, with scientific interpretation provisional.
 
 Owner decisions are now recorded: D1 selects fixed-photon `g2=0` with explicit uniform loss; D2 selects discrete alpha-key NAT with continuous singles; D3 selects sibling-style parity initialization from exact train-target moments at scale `0.1`. The implementation and bounded verification pass are complete for the declared scopes; broader scientific claims remain explicitly qualified below.

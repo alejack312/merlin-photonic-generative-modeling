@@ -1,5 +1,7 @@
 # v4.0 wrap-up recommendation and broader-scope feasibility
 
+> **Documentation reconciliation, 2026-09-10.** Historical recommendation and estimates, superseded by [the bounded release](v4-bounded-release.md). Earlier memory/timing observations below predate the corrected worker-RSS measurement and must not be used as current resource evidence or promises of hardware feasibility. The corrected pilot measures the analytic path only.
+
 Date: 2026-09-09  
 Repository snapshot assessed: `40df0dc`  
 Status: recommendation for owner review; this document does not change acceptance criteria or close the milestone.

@@ -1,5 +1,7 @@
 # v4.0 additive pipelines and sibling reproduction design
 
+> **Documentation reconciliation, 2026-09-10.** Historical design proposal. Later registered decisions, implementation and evidence supersede proposed defaults below. In particular, the selected initialization is parity-based and deterministic duplicates are labeled. Unrun inventory candidates are not completed reproductions. See [the bounded release](v4-bounded-release.md) and [ledger](../.planning/v4-requirement-evidence.md).
+
 **Revision 1, 2026-09-05.** Owner-requested expansion of the [canonical v4 plan](v4-plan-train-classical-deploy-photonic.md), now revision 4. This document is binding for workstream scope, modular interfaces, experiment selection and phase deliverables. The canonical plan retains the physical, compilation and audit safeguards. This is a plan, not implementation or owner-authored scientific interpretation.
 
 ## 1. The owner's three deliverables
