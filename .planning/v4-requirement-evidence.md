@@ -1,8 +1,10 @@
 # v4.0 requirement evidence ledger
 
+Final release gate at `a8db410`: **726 passed, 1 skipped**; explicit sibling integration **37 passed**. Committed-only artifacts and release provenance checks pass. Subsequent closure edits are documentation only.
+
 ## Selected release scope closed for PR review — 2026-09-10
 
-Following the user's explicit scope selection, clean-checkout verification passed at `a732d65` (725 tests, 1 skipped; 36 explicit sibling integration tests). Two demonstrated artifact-validator omissions were repaired. See the [bounded release summary](../docs/v4-bounded-release.md) for fit quality, support validity, expected sampling costs, committed-only evidence, and the distinction between analytic references and direct optical simulations. This closes the selected software/evidence release scope only. All broader scientific statuses and dependencies below remain in force; original full v4.0 acceptance is not achieved.
+Following the user's explicit scope selection, clean-checkout verification passed at `a732d65` (725 tests, 1 skipped; 36 explicit sibling integration tests). Two demonstrated artifact-validator omissions were repaired. The subsequent portability repair `a8db410` fixes comparison JSON line endings and eight manifest hashes, preserving original hashes and numerical results. See the [bounded release summary](../docs/v4-bounded-release.md) for fit quality, support validity, expected sampling costs, committed-only evidence, and the distinction between analytic references and direct optical simulations. This closes the selected software/evidence release scope only. All broader scientific statuses and dependencies below remain in force; original full v4.0 acceptance is not achieved.
 
 Updated 2026-09-10 after the independent projection/mass/compiler/kernel repair pass and the bounded post-review correction pass. Statuses are strict:
 

@@ -46,7 +46,7 @@ The n=6 target has full support, so its support validity of one coexists with po
 
 ## Final correction review and clean-checkout gate
 
-Reviewed the correction changes through `d3d6ff6`, then fixed two demonstrated validation defects in `a732d65`: current comparison rows could omit support validity, or disagree with their arm's acceptance probability, and still pass. The new regression checks reject both. No optimizer, circuit, dataset, or frozen result was changed in this closure pass.
+Reviewed the correction changes through `d3d6ff6`, then fixed two demonstrated validation defects in `a732d65`: current comparison rows could omit support validity, or disagree with their arm's acceptance probability, and still pass. The new regression checks reject both. A third demonstrated defect appeared in a strict LF checkout: sibling manifests hashed Windows CRLF bytes, while Git stored LF bytes. Repair `a8db410` writes LF JSON, pins comparison line endings in Git, and corrects the eight current manifest hashes while retaining each original hash in `serialization_correction`. No optimizer, circuit, dataset, or numerical result changed.
 
 | Repaired failure case | Release check |
 |---|---|
@@ -61,7 +61,7 @@ Mutation tests recompute changed distributions and accepted mass and reject an i
 
 The live memory probe touched a 64 MiB allocation in PID 40180; the allocating, measured, and worker PIDs agreed. RSS rose from 153,608,192 to 220,725,248 bytes, approximately 64 MiB. The [committed resource pilot](../results/v4_tcdp/deploy/resource_budget_correction_20260910_final2.json) records n=4/6/8/10 with an n=10 peak growth of approximately 110 MiB, below its 400 MiB bound. This is resource evidence for the analytic path, not an optical scaling proof.
 
-Clean-checkout verification at implementation commit `a732d65`: full suite **725 passed, 1 skipped in 407.99 s**; explicit sibling integration **36 passed in 66.53 s**. The optional sibling integration is the default-suite skip and was exercised separately. Later closure changes are documentation and the read-only evidence probe.
+Clean-checkout verification at implementation commit `a732d65`: full suite **725 passed, 1 skipped in 407.99 s**; explicit sibling integration **36 passed in 66.53 s**. The optional sibling integration is the default-suite skip and was exercised separately. The subsequent portability repair at `a8db410` adds a byte-serialization regression; final clean-checkout verification at that implementation passed **726 tests, 1 skipped in 721.70 s**, and **37 explicit sibling integration tests in 141.51 s**. Artifact validation, the release probe, compilation, and whitespace checks also pass.
 
 Reproduction commands (Python environment must provide the repository dependencies):
 
@@ -76,7 +76,7 @@ python docs/audits/2026-09-10-release-probes.py
 python scripts/v4_tcdp/resource_pilot.py --memory-probe-worker --allocation-bytes 67108864
 ```
 
-The detached checkout contains only committed inputs. It reuses the installed Python 3.12 environment, with imports explicitly directed to the checkout's `src`; this is not a fresh dependency-install test. Git LF blob bytes are used for byte-level provenance verification. A process-local `safe.directory` exception is limited to this checkout because the checkout creator and test account differ; no global Git trust setting was changed.
+The detached checkout contains only committed inputs. It reuses the installed Python 3.12 environment, with imports explicitly directed to the checkout's `src`; this is not a fresh dependency-install test. Comparison JSON uses explicit LF serialization and a Git attribute to preserve byte-hash identity across checkout settings. Resource source hashes are checked against Git blob bytes. A process-local `safe.directory` exception is limited to this checkout because the checkout creator and test account differ; no global Git trust setting was changed.
 
 Earlier totals of 579 JSON files and 19 payload hashes included untracked working-directory artifacts. Clean verification finds 486 JSON files, 72 JSONL rows, and 18 embedded payload hashes, with zero failures. The separate release probe checks 64 sibling payload hashes. The untracked audit, temporary Perceval/pytest directories, and earlier metrics/resource/sibling versions remain preserved in the original working directory and are excluded from this release. Historical absolute producer paths in sibling summaries are provenance metadata; the probe resolves payloads relative to the committed summary directory.
 

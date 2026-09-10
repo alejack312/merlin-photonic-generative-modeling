@@ -42,5 +42,7 @@ Date: 2026-09-10 · Scope: project · Recurs when: an independent audit finds th
 - IF validation counts include untracked outputs, THEN rerun from a detached committed checkout and report its counts separately; preserve the leftovers.
 - IF the editable environment points to the original checkout, THEN explicitly set the clean checkout's `src` import path and verify the imported location.
 - IF a required metric is absent or contradicts its arm, THEN reject it; range and reciprocal checks alone miss these cases.
-- IF provenance hashes use Git blob bytes, THEN use an LF checkout for byte-level checks; do not confuse CRLF conversion with changed scientific source.
+- IF serialized artifacts are byte-hashed, THEN pin writer newlines and Git checkout attributes; compare actual LF and CRLF bytes before blaming provenance. The release probe exposed Windows-only sibling JSON hashes, repaired with LF output and original hashes retained.
 - Verification: clean implementation `a732d65` passed 725 tests with 1 optional skip; explicit sibling integration passed 36; committed artifact validation passed 486 JSON, 72 JSONL rows, 18 payload hashes. Live 64 MiB allocation increased measured worker RSS by approximately 64 MiB.
+
+- Final LF-checkout repair verification: `a8db410` passed 726 tests, 1 skipped; explicit sibling integration passed 37. Eight manifests changed only their comparison byte hash and serialization-correction metadata.
