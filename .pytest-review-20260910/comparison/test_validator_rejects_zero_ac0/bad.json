@@ -1,0 +1,1 @@
+{"schema_version": "v4_tcdp.matched_comparison.v1", "arms": [{"stage": "deployed", "backend_id": "p", "acceptance_mass": 0.0}], "metrics": {"deployed:p": {"acceptance_mass": 0.5, "attempts_per_accepted_sample": 0.0}}}
