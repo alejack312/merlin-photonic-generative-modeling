@@ -1,6 +1,6 @@
 {
   "artifact_hashes": {
-    "comparison": "1c7a00fb1bc4b565d45d8ac65a257273d0d12d41ccd251a4849bc8f13c6f5c29",
+    "comparison": "06782c08fa6862504126af1d641868791e310603d3efba5c0763d9760ee16bb7",
     "compiled": "58568156ead072b88fc4fe82eb57507dbe74e6f0a176cc845edc612b227d6666",
     "data": "8e5d8ff1576da07086e730163a5212163fb17db37807e5fd670896cf2a11d7a7",
     "deployed": "58568156ead072b88fc4fe82eb57507dbe74e6f0a176cc845edc612b227d6666",
@@ -491,5 +491,11 @@
     "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\ac_ghosh_kim\\small_n_exact\\runs\\lattice__n9__gaussian__uniform__binary_mixture__sigma3p0\\trajectory.jsonl",
     "source_trajectory_sha256": "9f89a3f90706e1e5d3e678ca86c36d080f7b7b10d60c3affe1c645bfeb589bf2",
     "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc"
+  },
+  "serialization_correction": {
+    "comparison_encoding": "utf-8 LF",
+    "date": "2026-09-10",
+    "original_comparison_crlf_sha256": "1c7a00fb1bc4b565d45d8ac65a257273d0d12d41ccd251a4849bc8f13c6f5c29",
+    "reason": "Canonical LF serialization matches committed Git bytes; scientific payload unchanged."
   }
 }

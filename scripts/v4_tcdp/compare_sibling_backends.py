@@ -135,7 +135,7 @@ def _write_immutable_json(path: Path, payload: dict[str, Any]) -> None:
     temporary: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(
-            mode="w", encoding="utf-8", dir=path.parent,
+            mode="w", encoding="utf-8", newline="\n", dir=path.parent,
             prefix=f".{path.name}.", suffix=".tmp", delete=False,
         ) as handle:
             handle.write(encoded)

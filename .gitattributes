@@ -1,0 +1,2 @@
+# Keep byte-hashed comparison JSON stable across Windows and Unix checkouts.
+results/v4_tcdp/sibling_comparisons/**/comparison.json text eol=lf

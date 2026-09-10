@@ -1,6 +1,6 @@
 {
   "artifact_hashes": {
-    "comparison": "6e736b69f6f7fd25cf0ef60cf0b06201aecaea3b01bba02fe5e59b541e92195f",
+    "comparison": "0bbec11f0aee13852962f33218f465487b8d644fdd6e470313989964f10caf0c",
     "compiled": "776f9dc1c43cd377504508d03dac9278d22fb79805a58ab363ecb602e8281158",
     "data": "2478d139486017da129b3fce3995aaece23c914ef74524ee284707a13d47d58f",
     "deployed": "776f9dc1c43cd377504508d03dac9278d22fb79805a58ab363ecb602e8281158",
@@ -491,5 +491,11 @@
     "source_trajectory": "C:\\Users\\cuqui\\iqp-mmd-barren-plateau\\results\\training_smoke\\runs\\product_state__n6__gaussian__small_angle__product_bernoulli__sigma4p0__theta0p15\\trajectory.jsonl",
     "source_trajectory_sha256": "9f29e6b1687e60ec655687f146f3b4b595cf64b232ae932f0f763d739db02dc5",
     "source_tree_identity": "12843f05ea590fae6c3f007c4d681f93075dcbbc"
+  },
+  "serialization_correction": {
+    "comparison_encoding": "utf-8 LF",
+    "date": "2026-09-10",
+    "original_comparison_crlf_sha256": "6e736b69f6f7fd25cf0ef60cf0b06201aecaea3b01bba02fe5e59b541e92195f",
+    "reason": "Canonical LF serialization matches committed Git bytes; scientific payload unchanged."
   }
 }

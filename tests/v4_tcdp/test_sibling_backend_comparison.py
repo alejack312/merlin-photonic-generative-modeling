@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import json
 
 from scripts.v4_tcdp.compare_sibling_backends import (
     PROBABILITY_TOLERANCE,
@@ -11,7 +12,18 @@ from scripts.v4_tcdp.compare_sibling_backends import (
     _target_histogram,
     _validate_unquantized_compilation,
     _vector_from_mapping,
+    _write_immutable_json,
 )
+
+
+def test_hashed_comparison_json_uses_checkout_stable_lf_bytes(tmp_path) -> None:
+    path = tmp_path / "comparison.json"
+    payload = {"values": [0.1, 0.9]}
+    _write_immutable_json(path, payload)
+    expected = (json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
+    assert path.read_bytes() == expected
+    _write_immutable_json(path, payload)
+    assert path.read_bytes() == expected
 
 
 def test_source_sample_histogram_uses_explicit_msb_first_codec() -> None:
