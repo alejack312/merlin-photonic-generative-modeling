@@ -9,8 +9,8 @@ The F1–F14 findings in [the dated correction note](v4-correction-pass-2026-09-
 - Full suite: `venv/Scripts/python.exe -m pytest -q` → `719 passed, 1 skipped` with a writable `PCVL_PERSISTENT_PATH`.
 - Focused correction suite → `186 passed, 1 skipped`; explicit sibling integration → `35 passed`.
 - Artifact validation → `499` JSON files, `72` JSONL rows, `17` payload hashes, `0` failures.
-- Resource pilot [correction artifact](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json) → n=4/6/8/10 registered measurements, `PASS`.
-- Fresh [22-cell ring comparison namespace](../results/v4_tcdp/corrections_20260910/metrics_v3/) and [eight-cell sibling comparison](../results/v4_tcdp/sibling_comparisons/correction_20260910_v3/summary.json) → `PASS` within their declared analytic/fixed-photon scopes.
+- Resource pilot [correction artifact](../results/v4_tcdp/deploy/resource_budget_correction_20260910_final2.json) → n=4/6/8/10 registered measurements, `PASS`, generated from the committed source.
+- Fresh [22-cell ring comparison namespace](../results/v4_tcdp/corrections_20260910/metrics_v5/) and [eight-cell sibling comparison](../results/v4_tcdp/sibling_comparisons/correction_20260910_v5/summary.json) → `PASS` within their declared analytic/fixed-photon scopes, generated from the committed source.
 
 These checks close the identified implementation and evidence-integrity defects. They do not convert bounded model-derived controls into general full-Fock validation, larger-n photonic deployment, or an experimentally adjudicated NULL-07 result. The authoritative ledger remains the source for each requirement’s five-state status.
 

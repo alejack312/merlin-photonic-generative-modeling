@@ -35,9 +35,9 @@ The following changes are in the working tree for this pass:
 
 ## Refreshed artifacts
 
-- [Resource pilot](../results/v4_tcdp/deploy/resource_budget_correction_20260910.json): registered n=4/6/8/10 pilot, status `PASS`.
-- [Ring comparison refresh](../results/v4_tcdp/corrections_20260910/metrics_v3/): 22 existing ring cells regenerated against the final control logic; historical outputs were not overwritten.
-- [Sibling comparison refresh](../results/v4_tcdp/sibling_comparisons/correction_20260910_v3/summary.json): eight registered available cells, status `PASS`, using the pinned sibling checkpoint/retraining evidence and eta=0.9 model-derived deployment arm.
+- [Resource pilot](../results/v4_tcdp/deploy/resource_budget_correction_20260910_final2.json): registered n=4/6/8/10 pilot, status `PASS`, generated from the committed source.
+- [Ring comparison refresh](../results/v4_tcdp/corrections_20260910/metrics_v5/): 22 existing ring cells regenerated against the final committed control logic; historical outputs were not overwritten.
+- [Sibling comparison refresh](../results/v4_tcdp/sibling_comparisons/correction_20260910_v5/summary.json): eight registered available cells, status `PASS`, using the pinned sibling checkpoint/retraining evidence and eta=0.9 model-derived deployment arm, generated from the committed source.
 
 The refreshed metrics compare raw, unquantized compiled control, quantized compiled reference, and deployed fixed-photon reference with the same frozen inputs and budgets. Acceptance and conditional quality are separate. The project-wide deterministic checks remain at `1.0e-16`; probability-vector and source trajectory checks retain their documented `1.0e-12` tolerances.
 
