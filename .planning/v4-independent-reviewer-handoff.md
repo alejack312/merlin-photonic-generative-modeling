@@ -1,5 +1,11 @@
 # v4.0 independent reviewer handoff
 
+## Bounded release closure review — 2026-09-10
+
+The user selected bounded release closure. The final correction review reproduced the repaired contracts and found two additional semantic-validator defects, fixed at `a732d65`: missing support validity and disagreement between arm/metric acceptance could pass. Clean-checkout verification at that implementation passed **725 tests, 1 skipped**, plus **36 explicit sibling integration tests**. Committed-only artifact validation passed **486 JSON, 72 JSONL rows, 18 payload hashes**; the separate release probe verifies **64 sibling payload hashes** and **99 canonical committed evidence files**, plus frozen ring support/TVD and resource source identities. The live 64 MiB worker-allocation probe passed.
+
+The authoritative current result tables, canonical artifact paths, reproduction commands, and remaining research boundaries are in [the bounded release summary](../docs/v4-bounded-release.md). The following dated sections preserve historical reviews and counts; their older “final” paths are superseded by that summary. Untracked audits and earlier artifact versions remain preserved outside the release. Selected scope is closed for PR review; original full-scope scientific acceptance remains incomplete.
+
 ## Scope
 
 Review the additive v4.0 implementation against the binding plan, additive design, audit, and the five-state evidence ledger. Treat scientific interpretation as provisional. Do not modify the sibling repository, merge, publish, or launch unapproved sweeps.

@@ -37,3 +37,10 @@ Date: 2026-09-10 · Scope: project · Recurs when: an independent audit finds th
 
 ## Changed files
 - `scripts/v4_tcdp/`, `src/merlin_iqp/`, `tests/v4_tcdp/` — hardened measurement, control, checkpoint, deployment, and artifact contracts.
+
+## Clean-release addendum — 2026-09-10
+- IF validation counts include untracked outputs, THEN rerun from a detached committed checkout and report its counts separately; preserve the leftovers.
+- IF the editable environment points to the original checkout, THEN explicitly set the clean checkout's `src` import path and verify the imported location.
+- IF a required metric is absent or contradicts its arm, THEN reject it; range and reciprocal checks alone miss these cases.
+- IF provenance hashes use Git blob bytes, THEN use an LF checkout for byte-level checks; do not confuse CRLF conversion with changed scientific source.
+- Verification: clean implementation `a732d65` passed 725 tests with 1 optional skip; explicit sibling integration passed 36; committed artifact validation passed 486 JSON, 72 JSONL rows, 18 payload hashes. Live 64 MiB allocation increased measured worker RSS by approximately 64 MiB.
