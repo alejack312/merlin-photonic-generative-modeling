@@ -1,5 +1,7 @@
 # MerLin Photonic Generative Modeling
 
+**2026-09-24 continuation:** the bounded v4 release is complete within its recorded scope; full scientific acceptance is open. See the [scope reconciliation](../docs/v4-full-completion-audit.md) and [completion/extension roadmap](v4-full-completion-roadmap.md) for the new documentation-led continuation. MBQC, adaptivity, and quantum-advantage benchmarks are proposals, not delivered capabilities.
+
 ## What This Is
 
 A photonic quantum machine learning project built on MerLin (Quandela's PyTorch-based photonic QML framework): an MMD-trained generative model on MerLin's `QuantumLayer`, learning the sklearn `circles` dataset's two-ring shape via a closed-form MMD² loss over spatial bin-centers, with a custom radius/center-of-mass output-correspondence fix (K=462, no `ModGrouping` fold) as the project's key technical contribution. Reuses MMD-loss and generative-eval methodology from a prior IQP (gate-model) generative modeling project, applied here to a photonic circuit instead. Built as a credential and portfolio piece ahead of conversations with Vincent Espitalier and a Spring 2027 Quandela placement search.

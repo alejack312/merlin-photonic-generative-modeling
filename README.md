@@ -4,6 +4,8 @@
 
 **Current release:** [v4.0 bounded results](docs/v4-bounded-release.md) adds classical IQP training and matched analytic comparisons, with separate small-circuit optical simulations. Target fit remains poor in several profiles and postselection costs are substantial. Full original scientific acceptance and quantum advantage are not established.
 
+**Continuation plan (2026-09-24):** [Full v4.0 scope audit and reading guide](docs/v4-full-completion-audit.md) connects the remaining work to correlator-based benchmarking, generalization critiques, bosonic second moments, and a proposed MBQC/adaptivity extension. The [execution roadmap](.planning/v4-full-completion-roadmap.md) separates original completion from new research; these extensions are planned, not implemented results.
+
 A project built on Quandela's MerLin photonic framework. Its earlier milestones include: an MMD-trained generative model that learns a two-ring dataset from a single quantum circuit (v1.0); a from-scratch IQP-to-photonic encoding design and its weight-2 gate implementation (v2.0/v2.1); a follow-on study of that circuit family's trainability and sampling-hardness-under-photon-loss (v3.0); and a correction to that study's headline findings after an external audit found two of them were pipeline artifacts (v3.1, see below).
 
 **How this was built:** I used Claude Code assistance under a rule I hold myself to. I verify every AI-assisted component against my own unaided explanation before it ships. Full framing in [Process & AI Use](#process--ai-use) below.

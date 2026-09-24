@@ -8,7 +8,7 @@
 - ✅ **v3.0 IQP Circuit Study & Write-Up** — Phases 14-21 + 17.1 + 22 + 23 (shipped 2026-08-24)
 - ✅ **v3.1 Correction** — Phase 24 (shipped 2026-09-04; corrected two v3.0 findings an external audit found to be pipeline artifacts)
 - ✅ **v3.2 Correction (Audit Response)** — Phase 25 (shipped 2026-09-05; corrected overreach in the v3.1 correction itself plus code-level defects a second independent audit found)
-- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 26-32 (queued 2026-09-03, requeued 2026-09-05 behind v3.2; requirements parked at `.planning/REQUIREMENTS-v4.0-queued.md`; plan: `docs/v4-plan-train-classical-deploy-photonic.md`)
+- ⏳ **v4.0 Train Classically, Deploy Photonically (TCDP)** — Phases 26-32: bounded release closed 2026-09-10; full scientific acceptance remains incomplete. [2026-09-24 continuation roadmap](v4-full-completion-roadmap.md) covers original gaps and separately identified literature/MBQC extensions. Original requirements and binding plan retain their historical paths and acceptance contracts.
 
 ## Phases
 

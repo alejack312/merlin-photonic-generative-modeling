@@ -32,3 +32,16 @@ Date: 2026-09-10 · Scope: project · Recurs when: a release follows corrected s
 ## Next-time checklist
 - Do: report source assumptions, evidence scope, fit, support and expected attempts together.
 - Do not: turn nominal shot budgets into collected samples or historical verdicts into new evidence.
+
+## 2026-09-24 literature-extension addendum
+
+- If a bounded release is reopened, map every active original ID before adding literature-driven requirements. Count retired IDs separately; current v4 has 51 active plus retired COMM-02.
+- If a theorem uses Haar interferometers, fixed photons and full Fock outputs, do not transfer it to trained, post-selected, lossy IQP solely because modes grow linearly with photons.
+- If a Fourier truncation has negative entries, treat it as a signed reconstruction; probability repair and sampling are additional algorithms with costs.
+- If adding MBQC, verify frozen-model equivalence before testing a new adaptive model. Correctness feed-forward and increased generative expressivity are different hypotheses.
+- Verification: 51/51 active IDs mapped once; 19 new-document local links resolve; artifact validator passes 579 JSON/72 JSONL/19 hashes; committed-evidence probe passes 99 files/64 hashes. Full pytest is blocked at Perceval log initialization in the current sandbox, not a new green suite.
+
+## 2026-09-24 audit-revision learning
+- If compiling IQP sampling to MBQC, check the non-adaptive incidence graph before generic teleportation. Final XOR is not basis feedback.
+- If comparing same-q classical approximations, label reproducibility/cost controls; require a changed measured object for a mechanism intervention.
+- Verification: direct n=1–3 graph projections passed 26 branches at maximum residual 5.56e-17; five documents passed 21 local-link and fence checks. No research runs or new suite PASS.
