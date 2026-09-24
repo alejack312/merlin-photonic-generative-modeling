@@ -12,3 +12,5 @@ julia/.install_log_*.txt
 # Perceval persistent data (logs) redirected by conftest.py
 .pcvl-data/
 .pytest-tmp/
+.pytest-focused-*/
+.pytest-review-*/
