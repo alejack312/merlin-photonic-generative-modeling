@@ -8,3 +8,7 @@ dist/
 .ipynb_checkpoints/
 julia/Manifest.toml
 julia/.install_log_*.txt
+
+# Perceval persistent data (logs) redirected by conftest.py
+.pcvl-data/
+.pytest-tmp/
