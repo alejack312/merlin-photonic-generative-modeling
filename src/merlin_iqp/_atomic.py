@@ -17,7 +17,7 @@ def rename_no_overwrite(source: str | Path, destination: str | Path) -> None:
     preserve immediate ``FileExistsError`` behavior for collision detection.
     """
 
-    for attempt, delay in enumerate((0.0, *_RENAME_RETRY_DELAYS_SECONDS)):
+    for attempt in range(len(_RENAME_RETRY_DELAYS_SECONDS) + 1):
         try:
             os.rename(source, destination)
             return
