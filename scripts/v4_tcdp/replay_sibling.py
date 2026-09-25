@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import os
 import sys
 import tempfile
 from pathlib import Path
@@ -26,6 +25,7 @@ MAX_COMPILED_N = 10
 from merlin_iqp.classical import IQPModel  # noqa: E402
 from merlin_iqp.classical._validation import binary_matrix, finite_vector  # noqa: E402
 from merlin_iqp.deploy import apply_compiled_density, compile_generators  # noqa: E402
+from merlin_iqp._atomic import rename_no_overwrite  # noqa: E402
 from merlin_iqp.experiments.sibling_import import (  # noqa: E402
     PINNED_SIBLING_COMMIT,
     git_source_identity,
@@ -272,7 +272,7 @@ def replay_export(
         (staging / "manifest.json").write_text(
             json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
         )
-        os.rename(staging, destination)
+        rename_no_overwrite(staging, destination)
         return result
     compiled = compile_generators(generator, theta, quantize=True)
     compiled_vector = _vector(apply_compiled_density(compiled)[0])
@@ -353,7 +353,7 @@ def replay_export(
     (staging / "manifest.json").write_text(
         json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8"
     )
-    os.rename(staging, destination)
+    rename_no_overwrite(staging, destination)
     return result
 
 

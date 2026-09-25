@@ -16,7 +16,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 import math
-import os
 import platform
 import tempfile
 import time
@@ -28,6 +27,7 @@ import numpy as np
 from merlin_iqp.classical import KernelSpec, generators_from_pairs, initialize_theta
 from merlin_iqp.classical._validation import hash_array, hash_json
 from merlin_iqp.classical.objectives import objective_and_gradient_exact
+from merlin_iqp._atomic import rename_no_overwrite
 from merlin_iqp.deploy.compile import (
     ALPHA_KEYS,
     ALPHA_STEP,
@@ -681,7 +681,7 @@ def _write_immutable_json(destination: Path, payload: Mapping[str, Any]) -> None
         ) as handle:
             handle.write(encoded)
             temporary = Path(handle.name)
-        os.rename(temporary, destination)
+        rename_no_overwrite(temporary, destination)
     except FileExistsError:
         if temporary is not None:
             temporary.unlink(missing_ok=True)

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import builtins
 import json
-import os
 import platform
 import shutil
 import tempfile
@@ -18,6 +17,7 @@ import numpy as np
 from merlin_iqp.classical import IQPModel, KernelSpec, Trainer, chain_1d, initialize_theta, target_moments
 from merlin_iqp.classical._validation import hash_array, hash_json
 from merlin_iqp.classical.objectives import hamming_mmd2, spatial_mmd2
+from merlin_iqp._atomic import rename_no_overwrite
 
 from .datasets import RingsDataset, load_rings_dataset
 from .sibling_import import git_source_identity
@@ -581,7 +581,7 @@ def write_run_artifacts(run: RingRun, output_root: str | Path) -> dict[str, Path
             + "\n",
             encoding="utf-8",
         )
-        os.rename(temporary_directory, destination)
+        rename_no_overwrite(temporary_directory, destination)
     except Exception:
         if temporary_directory.exists():
             shutil.rmtree(temporary_directory)

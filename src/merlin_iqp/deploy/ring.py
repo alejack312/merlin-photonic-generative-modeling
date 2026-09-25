@@ -16,6 +16,7 @@ import numpy as np
 
 from merlin_iqp.classical._validation import binary_matrix, finite_vector, hash_array, hash_json
 from merlin_iqp.classical.objectives import hamming_mmd2, spatial_mmd2
+from merlin_iqp._atomic import rename_no_overwrite
 
 from .compile import compile_iqp
 from .density import apply_compiled_density, ideal_iqp_distribution
@@ -422,7 +423,7 @@ def write_ring_evaluation(result: dict[str, Any], output_path: str | Path) -> Pa
     temporary = Path(temporary_name)
     try:
         temporary.write_text(serialized, encoding="utf-8")
-        os.rename(temporary, destination)
+        rename_no_overwrite(temporary, destination)
     except FileExistsError:
         if destination.is_file() and _load_json(destination) == result:
             return destination
