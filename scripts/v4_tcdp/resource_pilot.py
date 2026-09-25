@@ -31,6 +31,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from merlin_iqp.deploy.compile import CompiledCircuit, compile_iqp  # noqa: E402
 from merlin_iqp.deploy.maps import GateMap, ideal_single_map, reconstruct_cp_map  # noqa: E402
+from merlin_iqp._atomic import rename_no_overwrite  # noqa: E402
 
 
 PILOT_SIZES = (4, 6, 8, 10)
@@ -629,7 +630,7 @@ def _write_immutable_json(path: Path, report: dict[str, Any]) -> None:
         ) as handle:
             handle.write(encoded)
             temporary = Path(handle.name)
-        os.rename(temporary, path)
+        rename_no_overwrite(temporary, path)
     except FileExistsError:
         if temporary is not None:
             temporary.unlink(missing_ok=True)

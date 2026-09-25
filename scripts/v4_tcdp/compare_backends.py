@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import tempfile
 import time
@@ -19,6 +18,7 @@ from merlin_iqp.classical import IQPModel  # noqa: E402
 from merlin_iqp.classical._validation import binary_matrix, finite_vector, hash_array, hash_json  # noqa: E402
 from merlin_iqp.deploy import apply_compiled_density, compile_generators  # noqa: E402
 from merlin_iqp.experiments.comparison import DistributionArm, MatchedComparison, process_rss_bytes  # noqa: E402
+from merlin_iqp._atomic import rename_no_overwrite  # noqa: E402
 
 
 def _vector_from_mapping(mapping: dict[str, float]) -> np.ndarray:
@@ -51,7 +51,7 @@ def _write_immutable_json(path: Path, payload: dict[str, object]) -> None:
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False) as handle:
             handle.write(encoded)
             temporary = Path(handle.name)
-        os.rename(temporary, path)
+        rename_no_overwrite(temporary, path)
     except FileExistsError:
         if temporary is not None:
             temporary.unlink(missing_ok=True)

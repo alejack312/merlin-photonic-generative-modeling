@@ -21,6 +21,7 @@ import tempfile
 from typing import Any
 
 from merlin_iqp.deploy import direct_fock_cp_reference, ideal_cp_map, ideal_iqp_distribution
+from merlin_iqp._atomic import rename_no_overwrite
 
 
 ETA = 0.9
@@ -207,7 +208,7 @@ def _write_immutable_manifest(path: Path, manifest: dict[str, Any]) -> None:
         ) as handle:
             handle.write(encoded)
             temporary = Path(handle.name)
-        os.rename(temporary, path)
+        rename_no_overwrite(temporary, path)
     except FileExistsError:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
