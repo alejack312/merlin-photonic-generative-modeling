@@ -9,9 +9,14 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
+
+import pytest
 
 
 SCRIPT = Path(__file__).parents[2] / "scripts" / "v4_tcdp" / "resource_pilot.py"
+# Covers interpreter plus scientific-stack import time on cold Windows starts.
+MEMORY_PROBE_STARTUP_TIMEOUT_SECONDS = 180
 SPEC = importlib.util.spec_from_file_location("resource_pilot", SCRIPT)
 assert SPEC is not None and SPEC.loader is not None
 resource_pilot = importlib.util.module_from_spec(SPEC)
@@ -111,7 +116,17 @@ def test_memory_probe_measures_the_allocating_interpreter() -> None:
         stderr=subprocess.PIPE,
         text=True,
     )
-    stdout, stderr = process.communicate(timeout=30)
+    started = time.perf_counter()
+    try:
+        stdout, stderr = process.communicate(timeout=MEMORY_PROBE_STARTUP_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired as exc:
+        elapsed = time.perf_counter() - started
+        process.kill()
+        process.communicate()
+        pytest.fail(
+            f"memory probe timed out after {elapsed:.2f}s: {exc}",
+            pytrace=False,
+        )
     assert process.returncode == 0, stderr
     payload = json.loads(stdout.strip().splitlines()[-1])
     assert payload["status"] == "PASS"
