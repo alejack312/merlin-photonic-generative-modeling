@@ -6,6 +6,12 @@ Final release gate at `a8db410`: **726 passed, 1 skipped**; explicit sibling int
 
 Commit `59ab9ef` records the owner-final R2 nulls in `.planning/v4-owner-nulls/R2-final-2026-09-27.md` and preserves the owner-gated Defender/import-slowness note in `.planning/todos/pending/2026-09-26-slow-python-imports-defender.md`. On that commit, the full suite passed **729 passed, 1 skipped** in `451.03s`; the artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`. Pytest emitted the existing `conftest.py` invalid-escape `SyntaxWarning`; no test failed.
 
+## 2026-09-28 R2 nulls, B0, and B1 verification
+
+Commit `ff27525` adds the owner-final R2 null gates, deterministic B0 metric fixtures, and the exact-feasible B1 frozen-model correlator audit. The required red-first focused run failed before implementation during collection with `ModuleNotFoundError: No module named 'merlin_iqp.experiments.correlator_audit'`; the green focused run then passed **13 passed in 3.18s**, covering the analytic fixture, dropped-moment, missing `2^-n`, flipped-bit-order, and wrong-sign corruptions, plus B0/B1 contracts. Exact target coefficients are labeled `oracle`; no B2 surrogate was implemented because the owner approximation-boundary sketch is still pending.
+
+After the commit, the full suite passed **747 passed, 1 skipped in 429.63s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
 ## Selected release scope closed for PR review — 2026-09-10
 
 Following the user's explicit scope selection, clean-checkout verification passed at `a732d65` (725 tests, 1 skipped; 36 explicit sibling integration tests). Two demonstrated artifact-validator omissions were repaired. The subsequent portability repair `a8db410` fixes comparison JSON line endings and eight manifest hashes, preserving original hashes and numerical results. See the [bounded release summary](../docs/v4-bounded-release.md) for fit quality, support validity, expected sampling costs, committed-only evidence, and the distinction between analytic references and direct optical simulations. This closes the selected software/evidence release scope only. All broader scientific statuses and dependencies below remain in force; original full v4.0 acceptance is not achieved.
