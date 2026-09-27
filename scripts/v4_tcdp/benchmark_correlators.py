@@ -12,7 +12,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from merlin_iqp.experiments.correlator_audit import frozen_model_correlator_audit
+from merlin_iqp.experiments.correlator_audit import (
+    b2_capacity_ladder_audit,
+    b2_paired_comparison,
+    frozen_model_correlator_audit,
+)
 
 
 def _load_distribution(path: Path) -> dict[str, float]:
@@ -55,6 +59,30 @@ def build_report(
     )
 
 
+def build_b2_report(
+    target_path: Path,
+    model_path: Path,
+    *,
+    max_order: int,
+    subset_seed: int,
+    learned_model_path: Path | None = None,
+) -> dict[str, Any]:
+    """Build the B2 ladder report without selecting TN/PPS dependencies."""
+
+    target = _load_distribution(target_path)
+    model = _load_distribution(model_path)
+    learned_model = None if learned_model_path is None else _load_distribution(learned_model_path)
+    report = b2_capacity_ladder_audit(
+        target,
+        model,
+        max_order=max_order,
+        subset_seed=subset_seed,
+        learned_model=learned_model,
+    )
+    report["paired_comparison"] = b2_paired_comparison(report)
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", type=Path, required=True)
@@ -63,17 +91,32 @@ def main() -> int:
     parser.add_argument("--retained-order", type=int)
     parser.add_argument("--sigma", type=float)
     parser.add_argument("--target-coefficient-access", choices=("oracle", "observed"), default="oracle")
+    parser.add_argument("--b2-max-order", type=int)
+    parser.add_argument("--subset-seed", type=int, default=0)
+    parser.add_argument("--learned-model", type=Path)
     args = parser.parse_args()
-    report = build_report(
-        args.target,
-        args.model,
-        retained_order=args.retained_order,
-        sigma=args.sigma,
-        target_coefficient_access=args.target_coefficient_access,
-    )
+    if args.b2_max_order is not None:
+        report = build_b2_report(
+            args.target,
+            args.model,
+            max_order=args.b2_max_order,
+            subset_seed=args.subset_seed,
+            learned_model_path=args.learned_model,
+        )
+    else:
+        report = build_report(
+            args.target,
+            args.model,
+            retained_order=args.retained_order,
+            sigma=args.sigma,
+            target_coefficient_access=args.target_coefficient_access,
+        )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(json.dumps({key: report[key] for key in ("identity_residual_max", "uniform_reference_sse")}, sort_keys=True))
+    if args.b2_max_order is not None:
+        print(json.dumps(report["paired_comparison"], sort_keys=True))
+    else:
+        print(json.dumps({key: report[key] for key in ("identity_residual_max", "uniform_reference_sse")}, sort_keys=True))
     return 0
 
 

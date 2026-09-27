@@ -23,6 +23,13 @@ from merlin_iqp.experiments.comparison import expected_coverage, expected_occupa
 
 BitOrder = Literal["msb", "lsb"]
 R2_NULL_TOLERANCE = 1.0e-9
+B2_RUNG_LABELS = {
+    1: "Exact reference and oracle diagnostic",
+    2: "Approximation",
+    3: "Approximation (control for rung 2: does choosing by order matter?)",
+    4: "Approximation",
+    5: "Approximation",
+}
 
 
 def _validate_bit_order(bit_order: str) -> BitOrder:
@@ -395,8 +402,225 @@ def b0_metric_fixtures() -> dict[str, Any]:
     }
 
 
+def _distribution_sse(left: Mapping[str, float], right: Mapping[str, float]) -> float:
+    if set(left) != set(right):
+        raise ValueError("distributions must have identical support")
+    return float(sum((float(left[key]) - float(right[key])) ** 2 for key in left))
+
+
+def _distribution_tvd(left: Mapping[str, float], right: Mapping[str, float]) -> float:
+    if set(left) != set(right):
+        raise ValueError("distributions must have identical support")
+    return float(0.5 * sum(abs(float(left[key]) - float(right[key])) for key in left))
+
+
+def _b2_rung_metrics(
+    *,
+    rung: int,
+    label: str,
+    target: Mapping[str, float],
+    target_moments: Mapping[tuple[int, ...], float],
+    frozen_model: Mapping[str, float],
+    frozen_model_moments: Mapping[tuple[int, ...], float],
+    selected_subsets: Sequence[tuple[int, ...]],
+    subset_seed: int,
+    reference_only: bool,
+    learned_model: Mapping[str, float] | None,
+) -> dict[str, Any]:
+    selected = tuple(selected_subsets)
+    reconstruction_moments = {(): frozen_model_moments[()]}
+    reconstruction_moments.update({subset: frozen_model_moments[subset] for subset in selected if subset})
+    reconstruction = reconstruct_from_moments(reconstruction_moments, n=len(next(iter(target))))
+    nonidentity = tuple(subset for subset in selected if subset)
+    omitted = tuple(subset for subset in frozen_model_moments if subset and subset not in nonidentity)
+    coefficient_errors = [target_moments[subset] - frozen_model_moments[subset] for subset in nonidentity]
+    learned_sse = None
+    learned_tvd = None
+    if learned_model is not None:
+        learned_sse = _distribution_sse(learned_model, frozen_model)
+        learned_tvd = _distribution_tvd(learned_model, frozen_model)
+    return {
+        "rung": rung,
+        "label": label,
+        "status": "PASS",
+        "reference_only": reference_only,
+        "oracle_target_coefficients": True,
+        "target_coefficient_access": "oracle",
+        "subset_seed": subset_seed,
+        "selected_subsets": [list(subset) for subset in selected],
+        "nonidentity_count": len(nonidentity),
+        "frozen_theta_coefficient_sse": float(sum(error**2 for error in coefficient_errors)),
+        "frozen_theta_coefficient_max_abs": float(max((abs(error) for error in coefficient_errors), default=0.0)),
+        "frozen_theta_omitted_coefficient_energy": float(
+            2.0 ** (-len(next(iter(target)))) * sum(frozen_model_moments[subset] ** 2 for subset in omitted)
+        ),
+        "frozen_theta_reconstruction_sse": _distribution_sse(frozen_model, reconstruction),
+        "frozen_theta_negative_reconstruction_mass": negative_reconstruction_mass(tuple(reconstruction.values())),
+        "learned_theta_exact_sse": learned_sse,
+        "learned_theta_exact_tvd": learned_tvd,
+    }
+
+
+def b2_dependency_checkpoint() -> dict[str, Any]:
+    """Report unselected TN/PPS candidates without importing or installing them."""
+
+    return {
+        "status": "selection_pending",
+        "candidates": [
+            {
+                "rung": 4,
+                "kind": "tensor_network",
+                "candidate": "registered tensor-network contraction backend",
+                "installed": False,
+                "license_review_required": True,
+                "required_registration": ["bond_dimension", "truncation_tolerance", "contraction_order", "discarded_weight"],
+            },
+            {
+                "rung": 5,
+                "kind": "pauli_propagation",
+                "candidate": "registered Pauli-propagation evaluator",
+                "installed": False,
+                "license_review_required": True,
+                "required_registration": ["truncation_or_cutoff", "error_diagnostics", "parameter_convention"],
+            },
+        ],
+    }
+
+
+def b2_capacity_ladder_audit(
+    target: Mapping[str, float],
+    frozen_model: Mapping[str, float],
+    *,
+    max_order: int,
+    subset_seed: int,
+    learned_model: Mapping[str, float] | None = None,
+) -> dict[str, Any]:
+    """Audit B2 rungs 1--3 and register dependency-pending rungs 4--5.
+
+    Rung 1 is a small-n exact reference only. Rungs 2 and 3 use the same
+    frozen model and paired subset seed, so their difference isolates ordered
+    feature selection from choosing the same number of features at random.
+    """
+
+    n_target, _ = _validate_distribution(target)
+    n_model, _ = _validate_distribution(frozen_model)
+    if n_target != n_model:
+        raise ValueError("target and frozen_model must have the same n")
+    if isinstance(max_order, bool) or int(max_order) != max_order or not 0 <= max_order <= n_target:
+        raise ValueError("max_order must be an integer in [0, n]")
+    if isinstance(subset_seed, bool) or int(subset_seed) != subset_seed or subset_seed < 0:
+        raise ValueError("subset_seed must be a non-negative integer")
+    if learned_model is not None:
+        n_learned, _ = _validate_distribution(learned_model)
+        if n_learned != n_target:
+            raise ValueError("learned_model must have the same n")
+
+    target_moments = walsh_moments(target)
+    frozen_model_moments = walsh_moments(frozen_model)
+    all_nonidentity = tuple(subset for subset in _subset_keys(n_target) if subset)
+    order_selected = tuple(subset for subset in all_nonidentity if len(subset) <= max_order)
+    rng = np.random.default_rng(int(subset_seed))
+    random_indices = rng.choice(len(all_nonidentity), size=len(order_selected), replace=False)
+    random_selected = tuple(all_nonidentity[int(index)] for index in sorted(random_indices.tolist()))
+    rung_one = _b2_rung_metrics(
+        rung=1,
+        label=B2_RUNG_LABELS[1],
+        target=target,
+        target_moments=target_moments,
+        frozen_model=frozen_model,
+        frozen_model_moments=frozen_model_moments,
+        selected_subsets=all_nonidentity,
+        subset_seed=int(subset_seed),
+        reference_only=True,
+        learned_model=learned_model,
+    )
+    rung_two = _b2_rung_metrics(
+        rung=2,
+        label=B2_RUNG_LABELS[2],
+        target=target,
+        target_moments=target_moments,
+        frozen_model=frozen_model,
+        frozen_model_moments=frozen_model_moments,
+        selected_subsets=order_selected,
+        subset_seed=int(subset_seed),
+        reference_only=False,
+        learned_model=learned_model,
+    )
+    rung_three = _b2_rung_metrics(
+        rung=3,
+        label=B2_RUNG_LABELS[3],
+        target=target,
+        target_moments=target_moments,
+        frozen_model=frozen_model,
+        frozen_model_moments=frozen_model_moments,
+        selected_subsets=random_selected,
+        subset_seed=int(subset_seed),
+        reference_only=False,
+        learned_model=learned_model,
+    )
+    dependency = b2_dependency_checkpoint()
+    rung_four = {"rung": 4, "label": B2_RUNG_LABELS[4], "status": "dependency_pending", **dependency["candidates"][0]}
+    rung_five = {"rung": 5, "label": B2_RUNG_LABELS[5], "status": "dependency_pending", **dependency["candidates"][1]}
+    report = {
+        "n": n_target,
+        "max_order": int(max_order),
+        "subset_seed": int(subset_seed),
+        "target_coefficient_access": "oracle",
+        "oracle_target_coefficients": True,
+        "rungs": [1, 2, 3, 4, 5],
+        "rungs_by_number": {"1": rung_one, "2": rung_two, "3": rung_three, "4": rung_four, "5": rung_five},
+        "dependency_checkpoint": dependency,
+    }
+    validate_b2_report(report)
+    return report
+
+
+def validate_b2_report(report: Mapping[str, Any]) -> None:
+    """Reject altered rung labels, oracle status, or paired-control metadata."""
+
+    if tuple(report.get("rungs", ())) != (1, 2, 3, 4, 5):
+        raise AssertionError("B2 report must contain rungs 1 through 5")
+    rungs = report.get("rungs_by_number")
+    if not isinstance(rungs, Mapping):
+        raise AssertionError("B2 report is missing rungs_by_number")
+    for rung in range(1, 6):
+        entry = rungs.get(str(rung))
+        if not isinstance(entry, Mapping) or entry.get("label") != B2_RUNG_LABELS[rung]:
+            raise AssertionError(f"rung {rung} label is invalid")
+    if rungs["1"].get("reference_only") is not True or rungs["1"].get("oracle_target_coefficients") is not True:
+        raise AssertionError("rung 1 must be an oracle-only reference")
+    if rungs["2"].get("subset_seed") != rungs["3"].get("subset_seed"):
+        raise AssertionError("rungs 2 and 3 must use the same subset seed")
+    if rungs["2"].get("nonidentity_count") != rungs["3"].get("nonidentity_count"):
+        raise AssertionError("rungs 2 and 3 must use the same number of nonidentity correlators")
+    if rungs["4"].get("status") != "dependency_pending" or rungs["5"].get("status") != "dependency_pending":
+        raise AssertionError("TN/PPS rungs must remain dependency-pending until selected")
+
+
+def b2_paired_comparison(report: Mapping[str, Any]) -> dict[str, Any]:
+    """Compare order-selected and paired random-subset reconstruction error."""
+
+    validate_b2_report(report)
+    rungs = report["rungs_by_number"]
+    order = rungs["2"]
+    random = rungs["3"]
+    return {
+        "paired": True,
+        "subset_seed": order["subset_seed"],
+        "nonidentity_count": order["nonidentity_count"],
+        "order_error": float(order["frozen_theta_reconstruction_sse"]),
+        "random_error": float(random["frozen_theta_reconstruction_sse"]),
+        "order_beats_random": float(order["frozen_theta_reconstruction_sse"])
+        < float(random["frozen_theta_reconstruction_sse"]),
+    }
+
+
 __all__ = [
     "R2_NULL_TOLERANCE",
+    "B2_RUNG_LABELS",
+    "b2_capacity_ladder_audit",
+    "b2_dependency_checkpoint",
+    "b2_paired_comparison",
     "b0_metric_fixtures",
     "expected_coverage",
     "expected_occupancy",
@@ -411,6 +635,7 @@ __all__ = [
     "spatial_walsh_quadratic_form",
     "sparse_moment_matching_distribution",
     "true_forward_kl",
+    "validate_b2_report",
     "uniform_reference_sse",
     "validate_r2_nulls",
     "walsh_moments",
