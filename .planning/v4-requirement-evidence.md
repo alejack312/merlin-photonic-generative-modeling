@@ -12,6 +12,12 @@ Commit `ff27525` adds the owner-final R2 null gates, deterministic B0 metric fix
 
 After the commit, the full suite passed **747 passed, 1 skipped in 429.63s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
 
+## 2026-09-28 R1 independent ideal full-Fock verification
+
+Commit `bc73f1c` adds test-only ideal no-noise n=2/3 full-Fock fixtures for no-gate, bystander, shared-gate, and asymmetric/wrap cases, plus validation that the existing physical manifest remains explicitly scope-labeled. This follows the roadmap's owner-independent first-run line: “Small n=2/3 source-once fixtures with no gate, a bystander and shared gates. Vary asymmetric angles and zero/wrap boundaries.” The focused run passed **5 passed in 12.01s**. No noisy profile or D1 decision was added.
+
+After the commit, the full suite passed **747 passed, 1 skipped in 391.27s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
 ## Selected release scope closed for PR review — 2026-09-10
 
 Following the user's explicit scope selection, clean-checkout verification passed at `a732d65` (725 tests, 1 skipped; 36 explicit sibling integration tests). Two demonstrated artifact-validator omissions were repaired. The subsequent portability repair `a8db410` fixes comparison JSON line endings and eight manifest hashes, preserving original hashes and numerical results. See the [bounded release summary](../docs/v4-bounded-release.md) for fit quality, support validity, expected sampling costs, committed-only evidence, and the distinction between analytic references and direct optical simulations. This closes the selected software/evidence release scope only. All broader scientific statuses and dependencies below remain in force; original full v4.0 acceptance is not achieved.
