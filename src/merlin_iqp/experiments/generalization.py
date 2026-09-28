@@ -3,15 +3,16 @@
 The historical rings pipeline keeps its point-level split for continuity.
 R3 generalization instead pools all 400 points, assigns them with the
 existing :class:`GridCodec`, and holds out whole data-hit cells. This module
-contains only that split and its manifest; it does not train a model or use
-model outputs to define validity.
+contains only that split, its manifest, and the owner-selected coverage /
+precision computation; it does not train a model or use model outputs to define
+validity.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 
@@ -83,6 +84,47 @@ class RingCellHoldout:
         labels[self.held_out_cells] = "unseen-valid"
         return labels
 
+    def compute_cell_coverage_precision(self, sampled_cells: Sequence[int] | np.ndarray) -> dict[str, Any]:
+        """Compute R3 coverage and precision from observed cell IDs.
+
+        Coverage is the fraction of held-out cells hit at least once. Precision
+        is the fraction of samples landing in any data-hit cell. An empty
+        held-out set makes coverage undefined, and zero samples make precision
+        undefined; both cases return ``None`` rather than inventing a value.
+        A non-empty sample with no held-out hits has coverage ``0.0``.
+        """
+
+        try:
+            numeric = np.asarray(sampled_cells, dtype=np.float64)
+        except (TypeError, ValueError) as error:
+            raise ValueError("sampled_cells must be a one-dimensional integer sequence") from error
+        if numeric.ndim != 1 or not np.all(np.isfinite(numeric)):
+            raise ValueError("sampled_cells must be a one-dimensional finite integer sequence")
+        integer = numeric.astype(np.int64)
+        if not np.all(integer == numeric) or np.any(integer < 0) or np.any(integer >= self.cell_count):
+            raise ValueError("sampled_cells must contain integer cell IDs in range")
+
+        sample_count = int(len(integer))
+        valid_mask = np.isin(integer, self.valid_cells)
+        held_out_hits = np.unique(integer[np.isin(integer, self.held_out_cells)])
+        coverage = (
+            None
+            if len(self.held_out_cells) == 0
+            else float(len(held_out_hits) / len(self.held_out_cells))
+        )
+        precision = None if sample_count == 0 else float(np.count_nonzero(valid_mask) / sample_count)
+        return {
+            "primary_endpoint": "coverage",
+            "safeguard": "precision",
+            "coverage": coverage,
+            "precision": precision,
+            "sample_count": sample_count,
+            "valid_sample_count": int(np.count_nonzero(valid_mask)),
+            "invalid_sample_count": int(sample_count - np.count_nonzero(valid_mask)),
+            "held_out_cells_hit": held_out_hits.tolist(),
+            "held_out_cell_count": int(len(self.held_out_cells)),
+        }
+
     def manifest(self) -> dict[str, Any]:
         """Serialize the registered split, including the per-n held-out list."""
 
@@ -124,6 +166,14 @@ class RingCellHoldout:
                 }
             ),
         }
+
+
+def compute_cell_coverage_precision(
+    holdout: RingCellHoldout, sampled_cells: Sequence[int] | np.ndarray
+) -> dict[str, Any]:
+    """Compute the registered R3 endpoints for an observed sample sequence."""
+
+    return holdout.compute_cell_coverage_precision(sampled_cells)
 
 
 def build_ring_cell_holdout(
@@ -178,4 +228,5 @@ __all__ = [
     "RingCellHoldout",
     "SCHEMA_VERSION",
     "build_ring_cell_holdout",
+    "compute_cell_coverage_precision",
 ]

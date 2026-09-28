@@ -223,6 +223,22 @@ Still undecided by owner: R3 training objectives, primary endpoint and effect si
 Don't implement R3 comparisons until those are recorded. You may implement and test
 the holdout/validity split itself.
 
+### OWNER FINAL, 2026-09-28 — R3 objectives and endpoint
+
+Owner decisions (2026-09-28), R3:
+
+- Training objectives: MMD (as used so far); TVD and MMD are reported as
+  diagnostics. Neither is the endpoint, because both are measured against the
+  training distribution, which has zero mass on held-out cells.
+- Primary endpoint: COVERAGE, the fraction of held-out cells hit at least once
+  within the sample budget. Safeguard: PRECISION, the share of samples that land
+  in valid (data-hit) cells.
+- Deferred until the owner's R3 null session: sample budget N, precision floor,
+  effect size. Don't pick defaults for them.
+  You may implement the coverage/precision computation with adversarial tests
+  (GATE-03: empty held-out set, all samples invalid, N=0, duplicate hits) and
+  the cell-holdout split. Don't run any model comparison. Commit locally, don't push.
+
 ## Immediate next execution slice
 
 Start R0. Only after a fresh baseline passes, begin the registered B0 fixtures in R2 with the owner null and approximation-boundary checkpoint satisfied. They require no hardware, source-mixture choice, or missing genomic data. Then use measured costs and the owner decisions to schedule R1/R3/R5. This keeps full v4 completion visible while ensuring the literature extension produces falsifiable evidence rather than only a new narrative.
