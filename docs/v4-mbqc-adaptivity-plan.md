@@ -1,6 +1,6 @@
 # MBQC and adaptivity: proposed extension of the case study
 
-Date: 2026-09-24. **Conceptual design proposal; no MBQC code or adaptive experiment exists yet.** This accompanies the [benchmark specification](v4-advantage-benchmark-spec.md). Mathematical source locations and reading limits are in the [crosswalk](v4-literature-crosswalk.md).
+Date: 2026-09-24. **Conceptual design proposal; no R5 benchmark, physical graph-preparation model, or adaptive experiment exists yet.** The owner-approved logical M1 null reference is implemented separately and remains a code check, not an experiment. This accompanies the [benchmark specification](v4-advantage-benchmark-spec.md). Mathematical source locations and reading limits are in the [crosswalk](v4-literature-crosswalk.md).
 
 ## 1. What changes, and what stays comparable
 
