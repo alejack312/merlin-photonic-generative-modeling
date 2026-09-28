@@ -193,3 +193,9 @@ Historical closure readback: the default full-suite command initially failed bec
 Commit `b8e340c` records a read-only audit of all 14 blocked or missing-input inventory rows against the sibling checkout at `f6d6ebe87e4ee1de10893c6ea2f0ffa367493336`. The requested path was corrected from `src/iqp/_mmd/datasets` to the actual `src/iqp_mmd/datasets` package path. No sibling files were modified, downloaded, regenerated, or substituted. The audit leaves output-directory, checkpoint/provenance, Qiskit, and gradient-label blockers classified as unrelated to the sibling loaders; the exact Ising graph and complete, source-version-resolved Pauli-estimator dataset set remain missing.
 
 The full suite on `codex/v4-full-completion` passed **753 passed, 1 skipped in 555.17s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
+## 2026-09-28 owner-final R3 validity and cell holdout
+
+The owner-final R3 validity definition is recorded verbatim in the roadmap under `OWNER FINAL, 2026-09-28 — R3 validity definition`. Commit `fd49e21` adds an isolated `RingCellHoldout` contract: it pools all 400 ring points through the existing `GridCodec`, selects a deterministic 20% whole-cell holdout with a minimum of three cells, exposes training point IDs only from non-held-out cells, defines valid/unseen-valid/invalid from data-hit membership, and records the held-out cell list, seed, and RNG role in the split manifest. R3 comparisons, training objectives, primary endpoint, and effect size remain unimplemented pending the owner decisions.
+
+Focused R3 contract tests passed **9 passed**. The full suite passed **762 passed, 1 skipped in 561.97s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
