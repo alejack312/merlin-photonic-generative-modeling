@@ -179,6 +179,12 @@ These are not unanswered prerequisites to finish today's documentation. They ide
 | Adaptive research | Correctness feed-forward and model-changing adaptation differ | Graph-policy or SI first; owner hypothesis and falsifier | M1 equivalence plan |
 | Scope/compute | Full original and extension tracks remain separate | Total pilot/main budget; any explicit amendments for inaccessible source rows | Bounded read-only source inventory |
 
+### OWNER FINAL, 2026-09-28 — compute budget
+
+The compute budget is **APPROVED** as proposed in the roadmap's first tranche: R0 3 h (complete), R2 then R3 7 h, R1 5 h, R5 5 h, review/synthesis 4 h (~24 h total).
+
+Each figure is a cap per stage. If a pilot's measured cost projects past its stage cap, stop and report the projection before continuing; do not borrow time from another stage. Budget beyond this tranche and any amendments for inaccessible sibling-source rows remain undecided.
+
 Ask once at the relevant checkpoint with these concrete documents available. Do not require the owner to repeat historical NULL-03–06/08 answers or WRITE-07 just because the project resumes.
 
 ## Immediate next execution slice
