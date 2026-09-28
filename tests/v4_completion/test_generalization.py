@@ -16,6 +16,7 @@ from merlin_iqp.experiments.generalization import (
     build_ring_cell_holdout,
     compute_cell_coverage_precision,
     r3_coverage_anchors,
+    r3_known_support_null,
     r3_memorizer_null,
     r3_sample_budget_grid,
     r3_uniform_sprayer_null,
@@ -177,6 +178,43 @@ def test_r3_uniform_sprayer_monte_carlo_agrees_with_closed_form_within_sampling_
     precision_se = np.sqrt(expected["precision"] * (1.0 - expected["precision"]) / (repetitions * 10))
     assert abs(coverage - expected["coverage"]) <= 4.0 * coverage_se
     assert abs(precision - expected["precision"]) <= 4.0 * precision_se
+
+
+def test_r3_known_support_null_is_red_first_and_between_floor_and_ceiling() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+    expected = r3_known_support_null(split, 10)
+    floor = 1.0 - (15.0 / 16.0) ** 10
+    ceiling = 1.0 - (2.0 / 3.0) ** 10
+
+    assert expected["valid_cell_count"] == 12
+    assert expected["coverage"] == pytest.approx(1.0 - (11.0 / 12.0) ** 10, abs=1e-9)
+    assert expected["precision"] == pytest.approx(1.0, abs=1e-9)
+    assert floor <= expected["coverage"] <= ceiling
+
+    for wrong_valid_count in (16, 3):
+        corrupted = dict(expected)
+        corrupted["coverage"] = 1.0 - (1.0 - 1.0 / wrong_valid_count) ** 10
+        with pytest.raises(AssertionError):
+            validate_r3_null_metrics(corrupted, expected)
+
+    validate_r3_null_metrics(expected, expected)
+
+
+def test_r3_known_support_monte_carlo_agrees_with_closed_form() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+    expected = r3_known_support_null(split, 10)
+    rng = np.random.default_rng(20260930)
+    repetitions = 5000
+    draws = rng.choice(split.valid_cells, size=(repetitions, 10), replace=True)
+    coverage_values = np.mean(
+        np.array([len(np.intersect1d(np.unique(row), split.held_out_cells)) / len(split.held_out_cells) for row in draws])
+    )
+    coverage_se = np.std(
+        np.array([len(np.intersect1d(np.unique(row), split.held_out_cells)) / len(split.held_out_cells) for row in draws]),
+        ddof=1,
+    ) / np.sqrt(repetitions)
+    assert abs(coverage_values - expected["coverage"]) <= 4.0 * coverage_se
+    assert np.all(np.isin(draws, split.valid_cells))
 
 
 def test_r3_anchors_guard_degenerate_gap_and_k_one() -> None:

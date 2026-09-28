@@ -354,6 +354,38 @@ def r3_uniform_sprayer_null(holdout: RingCellHoldout, sample_count: int) -> dict
     }
 
 
+def r3_known_support_null(holdout: RingCellHoldout, sample_count: int) -> dict[str, Any]:
+    """Return the known-support reference over all valid data-hit cells."""
+
+    if not isinstance(sample_count, (int, np.integer)) or sample_count < 0:
+        raise ValueError("sample_count must be a non-negative integer")
+    valid_count = len(holdout.valid_cells)
+    expected_coverage = float(1.0 - (1.0 - 1.0 / valid_count) ** int(sample_count))
+    per_ring = {
+        ring: None if len(cells) == 0 else expected_coverage
+        for ring, cells in holdout.held_out_cells_by_ring.items()
+    }
+    anchors = r3_coverage_anchors(
+        n=holdout.n,
+        held_out_cell_count=len(holdout.held_out_cells),
+        sample_count=int(sample_count),
+        coverage=expected_coverage if len(holdout.held_out_cells) else None,
+    )
+    floor = anchors["floor"]
+    ceiling = anchors["ceiling"]
+    if ceiling is not None and not floor - R3_NULL_TOLERANCE <= expected_coverage <= ceiling + R3_NULL_TOLERANCE:
+        raise AssertionError("known-support reference must lie between sprayer floor and oracle ceiling")
+    return {
+        "coverage": None if len(holdout.held_out_cells) == 0 else expected_coverage,
+        "precision": 1.0,
+        "per_ring_coverage": per_ring,
+        "sample_count": int(sample_count),
+        "valid_cell_count": int(valid_count),
+        "floor": floor,
+        "ceiling": ceiling,
+    }
+
+
 def validate_r3_null_metrics(
     observed: dict[str, Any], expected: dict[str, Any], *, tolerance: float = R3_NULL_TOLERANCE
 ) -> None:
@@ -437,6 +469,7 @@ __all__ = [
     "build_ring_cell_holdout",
     "compute_cell_coverage_precision",
     "r3_coverage_anchors",
+    "r3_known_support_null",
     "r3_memorizer_null",
     "r3_sample_budget_grid",
     "r3_uniform_sprayer_null",

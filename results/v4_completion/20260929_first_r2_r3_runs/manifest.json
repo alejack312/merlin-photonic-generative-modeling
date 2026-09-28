@@ -1,0 +1,27 @@
+{
+  "measured_elapsed_seconds": 51.70929299999261,
+  "pilot": {
+    "all_n4_n6_n8_r3_reference_seconds": 0.1089036000194028,
+    "one_n6_b1_b2_seconds": 0.2640228999662213,
+    "projected_seconds": 5.389361599343829,
+    "projection_basis": "20 n=6/n=8 profile-seed checkpoints plus n=4/6/8 R3 references"
+  },
+  "rows": {
+    "b1": 20,
+    "b2": 180,
+    "r3": 36
+  },
+  "schema_version": "v4_completion.first_r2_r3_runs.v1",
+  "scope": {
+    "b1": "existing frozen rings checkpoints, n=6 and n=8, both profiles, seeds 0-4",
+    "b2": "rungs 1-3 only, L=1,2,n, paired subset seed 17; rungs 4-5 pending dependency review",
+    "oracle_label": "exact target coefficient access is oracle",
+    "r3": "memorizer, uniform sprayer, known-support, and ceiling references at registered N grid; no model comparison",
+    "target_role": "train histogram used by each frozen checkpoint"
+  },
+  "source_git": {
+    "commit": "07eb4c785cfb79b2cacf3cbee685df8de91a29ae",
+    "status": " M src/merlin_iqp/experiments/generalization.py\n M tests/v4_completion/test_generalization.py\n?? scripts/v4_completion/\n"
+  },
+  "stage_cap_hours": 7
+}

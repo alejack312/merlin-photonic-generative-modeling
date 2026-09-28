@@ -36,3 +36,18 @@ Date: 2026-09-28 · Scope: project · Recurs when: a held-out-cell benchmark nee
 ## Changed files
 - `src/merlin_iqp/experiments/generalization.py` — coverage/precision computation.
 - `tests/v4_completion/test_generalization.py` — adversarial endpoint tests.
+
+## 2026-09-29 addendum: known-support null and bounded first-run panel
+
+## Decision rules that generalize
+- IF a reference samples uniformly over all valid cells, THEN use `V = len(valid_cells)`, precision `1.0`, and coverage `1 - (1 - 1/V)^N`; do not substitute total cells or held-out cells.
+- IF a reference is compared with sprayer/oracle anchors, THEN assert `floor <= known_support <= ceiling` and test corrupted denominators before accepting the fixture.
+- IF a staged experiment has an approved time cap, THEN measure one representative pilot first and record the projected cost before running the panel.
+- IF the owner requests raw benchmark output, THEN write machine-readable rows and labelled MEASURED/AGAINST NULLS/EXPLORATORY tables without interpretation or model comparison.
+
+## Verification
+- `venv\Scripts\python.exe -m pytest -q tests\v4_completion\test_generalization.py` → 23 passed, including corrupted `V=2^n` and `V=k` rejection and 5,000-repetition Monte Carlo agreement.
+- Pilot: one n=6 B1+B2 checkpoint `0.2640228999662213 s`; all R3 reference rows `0.1089036000194028 s`; projected panel `5.389361599343829 s` against the 7-hour cap.
+- First-run artifacts: 20 B1 rows, 180 B2 rung-1–3 rows, 36 R3 reference rows; no model comparison; TN/PPS pending.
+- `venv\Scripts\python.exe -m pytest -q` → 794 passed, 1 skipped in 503.27s.
+- `venv\Scripts\python.exe scripts\v4_tcdp\validate_artifacts.py --root results\v4_tcdp` → PASS, 579 JSON files, 72 JSONL rows, 19 payload hashes.
