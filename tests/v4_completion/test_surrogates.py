@@ -13,7 +13,9 @@ from merlin_iqp.experiments.correlator_audit import (
     B2_RUNG_LABELS,
     b2_capacity_ladder_audit,
     b2_dependency_checkpoint,
+    b2_exact_asymmetric_fixtures,
     b2_paired_comparison,
+    validate_b2_exact_asymmetric_fixtures,
     validate_b2_report,
 )
 
@@ -109,10 +111,31 @@ def test_b2_paired_comparison_is_explicit_about_direction() -> None:
 def test_b2_dependency_checkpoint_reports_candidates_without_installing() -> None:
     checkpoint = b2_dependency_checkpoint()
 
-    assert checkpoint["status"] == "selection_pending"
+    assert checkpoint["status"] == "selected_optional_dependencies_pending_installation"
     assert {candidate["rung"] for candidate in checkpoint["candidates"]} == {4, 5}
     assert all(candidate["installed"] is False for candidate in checkpoint["candidates"])
-    assert all(candidate["license_review_required"] is True for candidate in checkpoint["candidates"])
+    assert all(candidate["optional_only"] is True for candidate in checkpoint["candidates"])
+    assert {candidate["version"] for candidate in checkpoint["candidates"]} == {"1.15.0", "0.8.2"}
+    assert all(candidate["license"] == "Apache-2.0" for candidate in checkpoint["candidates"])
+    assert checkpoint["author_code"]["status"] == "unavailable"
+    assert checkpoint["exact_fixture_gate"]["required_before_run"] is True
+
+
+def test_b2_exact_asymmetric_fixture_gate_passes_exact_outputs() -> None:
+    result = validate_b2_exact_asymmetric_fixtures(b2_exact_asymmetric_fixtures())
+
+    assert result["status"] == "PASS"
+    assert result["fixture_ids"] == ["n2_asymmetric", "n3_asymmetric"]
+    assert result["max_abs_probability_residual"] == 0.0
+
+
+def test_b2_exact_asymmetric_fixture_gate_rejects_corrupted_output() -> None:
+    outputs = b2_exact_asymmetric_fixtures()
+    outputs["n3_asymmetric"]["111"] += 1.0e-6
+    outputs["n3_asymmetric"]["110"] -= 1.0e-6
+
+    with pytest.raises(AssertionError, match="n3_asymmetric"):
+        validate_b2_exact_asymmetric_fixtures(outputs)
 
 
 def test_b2_cli_builder_emits_all_rungs_and_paired_comparison(tmp_path: Path) -> None:

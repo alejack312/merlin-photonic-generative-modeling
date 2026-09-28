@@ -102,6 +102,24 @@ Finish: exact-vs-surrogate fixed-theta curves, trained-transfer comparison with 
 
 Stop: approximation cannot be independently validated, probability repair is hidden, or candidate baseline requires unavailable/unlicensed code. Record author-code unavailability without blocking an independent fixture-based implementation.
 
+### OWNER FINAL, 2026-09-28 — B2 dependencies
+
+Owner decision (2026-09-28), B2 dependencies: the owner delegates library choice
+to these two, verified 2026-09-28:
+
+- Tensor networks: quimb (github.com/jcmgray/quimb), Apache-2.0 per LICENSE.txt
+  (GitHub metadata shows NOASSERTION), v1.15.0.
+- Pauli propagation: PauliPropagation.jl (github.com/SparqleSim/PauliPropagation.jl,
+  formerly MSRudolph/), Apache-2.0, v0.8.2, via the existing julia/ environment.
+  Cite arXiv:2505.21606.
+  The BU authors' repo (quantumsoftwarelab/QCBM_correlator_surrogates) contains only
+  a README; record author code as unavailable. Pin these exact versions and record
+  the licenses. Install as optional extras only; the default suite must pass without
+  them. Register bond dimension, truncation tolerance, contraction order and
+  discarded weight (TN), and cutoff and error diagnostics (PPS), before any run.
+  Each rung must first agree with the exact asymmetric fixtures. Commit locally,
+  don't push.
+
 ## R3 — Challenge generalization and quantify sampled uncertainty
 
 **New requirements:** BENCH-03 generalization controls; BENCH-04 classical generator comparison; BENCH-05 calibrated sampling intervals. **Original links:** SWEEP-03/04 and COMPARE-03. **Dependencies:** R2 for correlator panels; owner approves validity/objective/primary endpoint definitions for new models.

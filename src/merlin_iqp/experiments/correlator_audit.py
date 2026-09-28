@@ -30,6 +30,41 @@ B2_RUNG_LABELS = {
     4: "Approximation",
     5: "Approximation",
 }
+B2_EXACT_ASYMMETRIC_FIXTURE_TOLERANCE = 1.0e-12
+B2_EXACT_ASYMMETRIC_FIXTURES: dict[str, dict[str, float]] = {
+    "n2_asymmetric": {"00": 0.1, "01": 0.2, "10": 0.3, "11": 0.4},
+    "n3_asymmetric": {
+        "000": 0.04,
+        "001": 0.08,
+        "010": 0.12,
+        "011": 0.16,
+        "100": 0.18,
+        "101": 0.17,
+        "110": 0.13,
+        "111": 0.12,
+    },
+}
+B2_DEPENDENCY_REGISTRATION: dict[str, dict[str, Any]] = {
+    "tensor_network": {
+        "rung": 4,
+        "package": "quimb",
+        "version": "1.15.0",
+        "license": "Apache-2.0",
+        "source": "https://github.com/jcmgray/quimb",
+        "optional_install": "pip install -e .[b2-tn]",
+        "registration": ["bond_dimension", "truncation_tolerance", "contraction_order", "discarded_weight"],
+    },
+    "pauli_propagation": {
+        "rung": 5,
+        "package": "PauliPropagation.jl",
+        "version": "0.8.2",
+        "license": "Apache-2.0",
+        "source": "https://github.com/SparqleSim/PauliPropagation.jl",
+        "citation": "arXiv:2505.21606",
+        "optional_install": "julia --project=julia -e 'using Pkg; Pkg.add(Pkg.PackageSpec(name=\"PauliPropagation\", version=\"0.8.2\"))'",
+        "registration": ["cutoff", "error_diagnostics", "parameter_convention"],
+    },
+}
 
 
 def _validate_bit_order(bit_order: str) -> BitOrder:
@@ -461,29 +496,80 @@ def _b2_rung_metrics(
     }
 
 
-def b2_dependency_checkpoint() -> dict[str, Any]:
-    """Report unselected TN/PPS candidates without importing or installing them."""
+def b2_exact_asymmetric_fixtures() -> dict[str, dict[str, float]]:
+    """Return copies of the exact asymmetric pre-run validation fixtures."""
 
+    return {fixture_id: dict(distribution) for fixture_id, distribution in B2_EXACT_ASYMMETRIC_FIXTURES.items()}
+
+
+def validate_b2_exact_asymmetric_fixtures(
+    outputs: Mapping[str, Mapping[str, float]],
+    *,
+    tolerance: float = B2_EXACT_ASYMMETRIC_FIXTURE_TOLERANCE,
+) -> dict[str, Any]:
+    """Require a surrogate candidate to match every exact asymmetric fixture.
+
+    This is a gate for a future TN/PPS run, not a surrogate comparison. The
+    candidate must provide complete probability vectors before any capacity
+    or resource measurement is considered.
+    """
+
+    if not math.isfinite(tolerance) or tolerance < 0.0:
+        raise ValueError("tolerance must be finite and non-negative")
+    if set(outputs) != set(B2_EXACT_ASYMMETRIC_FIXTURES):
+        raise AssertionError("candidate outputs must cover every exact asymmetric fixture")
+    residuals: dict[str, float] = {}
+    for fixture_id, expected in B2_EXACT_ASYMMETRIC_FIXTURES.items():
+        _, expected_values = _validate_distribution(expected)
+        _, actual_values = _validate_distribution(outputs[fixture_id])
+        residual = max(abs(expected_values[key] - actual_values[key]) for key in expected_values)
+        residuals[fixture_id] = float(residual)
+        if residual > tolerance:
+            raise AssertionError(f"{fixture_id} exceeds exact asymmetric fixture tolerance")
     return {
-        "status": "selection_pending",
-        "candidates": [
+        "status": "PASS",
+        "fixture_ids": sorted(residuals),
+        "tolerance": float(tolerance),
+        "max_abs_probability_residual": float(max(residuals.values(), default=0.0)),
+        "residuals": residuals,
+    }
+
+
+def b2_dependency_checkpoint() -> dict[str, Any]:
+    """Report the owner-selected optional dependencies without importing them."""
+
+    candidates = []
+    for kind, registration in B2_DEPENDENCY_REGISTRATION.items():
+        candidates.append(
             {
-                "rung": 4,
-                "kind": "tensor_network",
-                "candidate": "registered tensor-network contraction backend",
+                "kind": kind,
+                "candidate": registration["package"],
+                "rung": registration["rung"],
+                "version": registration["version"],
+                "license": registration["license"],
+                "source": registration["source"],
+                "citation": registration.get("citation"),
                 "installed": False,
-                "license_review_required": True,
-                "required_registration": ["bond_dimension", "truncation_tolerance", "contraction_order", "discarded_weight"],
-            },
-            {
-                "rung": 5,
-                "kind": "pauli_propagation",
-                "candidate": "registered Pauli-propagation evaluator",
-                "installed": False,
-                "license_review_required": True,
-                "required_registration": ["truncation_or_cutoff", "error_diagnostics", "parameter_convention"],
-            },
-        ],
+                "optional_only": True,
+                "license_review_required": False,
+                "required_registration": list(registration["registration"]),
+                "optional_install": registration["optional_install"],
+            }
+        )
+    return {
+        "status": "selected_optional_dependencies_pending_installation",
+        "author_code": {
+            "repository": "https://github.com/quantumsoftwarelab/QCBM_correlator_surrogates",
+            "status": "unavailable",
+            "reason": "public repository contains only a README",
+        },
+        "exact_fixture_gate": {
+            "required_before_run": True,
+            "validator": "validate_b2_exact_asymmetric_fixtures",
+            "fixture_ids": sorted(B2_EXACT_ASYMMETRIC_FIXTURES),
+            "tolerance": B2_EXACT_ASYMMETRIC_FIXTURE_TOLERANCE,
+        },
+        "candidates": candidates,
     }
 
 
@@ -595,6 +681,12 @@ def validate_b2_report(report: Mapping[str, Any]) -> None:
         raise AssertionError("rungs 2 and 3 must use the same number of nonidentity correlators")
     if rungs["4"].get("status") != "dependency_pending" or rungs["5"].get("status") != "dependency_pending":
         raise AssertionError("TN/PPS rungs must remain dependency-pending until selected")
+    checkpoint = report.get("dependency_checkpoint")
+    gate = checkpoint.get("exact_fixture_gate") if isinstance(checkpoint, Mapping) else None
+    if not isinstance(gate, Mapping) or gate.get("required_before_run") is not True:
+        raise AssertionError("TN/PPS rungs must require the exact asymmetric fixture gate")
+    if tuple(gate.get("fixture_ids", ())) != tuple(sorted(B2_EXACT_ASYMMETRIC_FIXTURES)):
+        raise AssertionError("TN/PPS exact fixture registration is incomplete")
 
 
 def b2_paired_comparison(report: Mapping[str, Any]) -> dict[str, Any]:
@@ -618,8 +710,12 @@ def b2_paired_comparison(report: Mapping[str, Any]) -> dict[str, Any]:
 __all__ = [
     "R2_NULL_TOLERANCE",
     "B2_RUNG_LABELS",
+    "B2_EXACT_ASYMMETRIC_FIXTURE_TOLERANCE",
+    "B2_EXACT_ASYMMETRIC_FIXTURES",
+    "B2_DEPENDENCY_REGISTRATION",
     "b2_capacity_ladder_audit",
     "b2_dependency_checkpoint",
+    "b2_exact_asymmetric_fixtures",
     "b2_paired_comparison",
     "b0_metric_fixtures",
     "expected_coverage",
@@ -635,6 +731,7 @@ __all__ = [
     "spatial_walsh_quadratic_form",
     "sparse_moment_matching_distribution",
     "true_forward_kl",
+    "validate_b2_exact_asymmetric_fixtures",
     "validate_b2_report",
     "uniform_reference_sse",
     "validate_r2_nulls",

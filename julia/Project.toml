@@ -1,3 +1,7 @@
 [deps]
 BosonSampling = "4f11539d-f4e6-47f3-a15e-0809978c3ed1"
+PauliPropagation = "293282d5-3c99-4fb6-92d0-fd3280a19750"
 Yao = "5872b779-8223-5990-8dd0-5abbb0748c8c"
+
+[compat]
+PauliPropagation = "=0.8.2"

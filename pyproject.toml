@@ -28,6 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=9.1.1"]
+b2-tn = ["quimb==1.15.0"]
 
 [project.urls]
 Homepage = "https://github.com/alejack312/merlin-photonic-generative-modeling"
