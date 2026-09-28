@@ -239,6 +239,75 @@ Owner decisions (2026-09-28), R3:
   (GATE-03: empty held-out set, all samples invalid, N=0, duplicate hits) and
   the cell-holdout split. Don't run any model comparison. Commit locally, don't push.
 
+### OWNER-FINAL R3 DECISIONS (2026-09-28). This message supersedes all earlier R3 messages.
+
+Record verbatim in the owner-decision record.
+
+1. VALIDITY (cell-level holdout). Pool all 400 points, encode with the existing
+   GridCodec. Data-hit cells = cells hit by any point. Hold out 20% of data-hit
+   cells, minimum 3, scattered at random (interpolation test); own registered seed,
+   separate from fit and sampling RNGs; record held-out cells per n in the manifest.
+   Train only on points in non-held-out cells. Valid = any data-hit cell.
+   Unseen-valid = held-out cells (count k). Invalid = cells no data point hit.
+   Validity is never defined from model outputs.
+   Reason: point-level split leaves almost no unseen cells (test-only cells:
+   n=4: 0, n=6: 0, n=8: 1).
+
+2. TRAINING OBJECTIVE: MMD. TVD and MMD are diagnostics only, never the endpoint
+   (both are measured against the training distribution, which has zero mass on
+   held-out cells).
+
+3. METRICS. Primary endpoint: AGGREGATE COVERAGE C = (held-out cells hit at least once
+   in N draws) / k. Also reported, equal in status: PRECISION (share of the N draws
+   landing in any valid cell; NO floor), PER-RING COVERAGE (inner/outer; a cell that
+   holds points from both rings is assigned to the ring of the majority of its
+   points), and normalized coverage C\~ = C / ceiling(N).
+
+4. N GRID. For each n, the N at which the uniform sprayer's expected coverage is
+   \~10%, \~50%, \~90%: N = ln(1-c) / ln(1 - 1/2^n). Approx: n=4: 2, 11, 36;
+   n=6: 7, 44, 146; n=8: 27, 177, 588. Levels with N < 5 are reported but marked
+   "degenerate" (reported, not interpreted).
+
+5. ANCHORS (descriptive only, no threshold). For each model and N:
+   floor(N)   = 1 - (1 - 1/2^n)^N        (uniform sprayer, expected coverage)
+   ceiling(N) = 1 - (1 - 1/k)^N          (ideal uniform sampler over held-out cells;
+   label ORACLE: needs the held-out set)
+   gap\_closed = (C - floor) / (ceiling - floor), with an EXPLICIT "undefined" when
+   ceiling - floor is \~0; never divide by \~0.
+   Owner note: the owner does not claim expertise to set a meaningful-gap threshold,
+   and none of the cited sources sets one. A threshold may be added later only from
+   a cited source or a named domain expert, and must be recorded before any
+   comparison it would judge.
+
+6. REPORTING: THREE LABELLED TIERS. Confidence level 95%; bootstrap across
+   independent model fits, per the benchmark spec.
+   MEASURED: coverage, precision, per-ring coverage, C\~, gap\_closed, each with a 95%
+   interval, plus floor and ceiling.
+   AGAINST NULLS: whether each interval excludes the sprayer floor and the memorizer's
+   values. A match is a pipeline check, not a finding.
+   EXPLORATORY: model-vs-model contrasts (paired bootstrap over independent fits).
+   Every one labelled EXPLORATORY with the sentence "importance unknown; few seeds;
+   may not replicate". Never use "beats", "better" or "wins"; say whether the
+   interval of the difference includes 0. No multiplicity correction is claimed;
+   the exploratory label stands in for it. No winner is selected.
+
+7. NULLS AS RED-FIRST TESTS (implement before any comparison; show each failing on
+   deliberately corrupted output, then passing on the fixture):
+   Memorizer: coverage = 0, precision = 1, for any N.
+   Uniform sprayer: expected coverage = 1 - (1 - 1/2^n)^N; precision =
+   (data-hit cells) / 2^n.
+   Fixture n=4: 16 cells, 12 data-hit, k=3 held out, 9 training cells.
+   Sprayer precision = 12/16 = 0.75; sprayer coverage at N=10 = 1 - (15/16)^10
+   (\~0.4755), tolerance 1e-9 on the formula, plus a Monte Carlo agreement check
+   within sampling error.
+
+8. ADVERSARIAL TESTS (GATE-03): empty held-out set, N=0, all samples invalid,
+   duplicate hits, mixed-ring cells, ceiling == floor (gap\_closed = "undefined"),
+   k=1.
+
+Do not run any model comparison until item 7 is green. You may implement and test the
+holdout split, the metrics, and the anchors now. Commit locally, don't push.
+
 ## Immediate next execution slice
 
 Start R0. Only after a fresh baseline passes, begin the registered B0 fixtures in R2 with the owner null and approximation-boundary checkpoint satisfied. They require no hardware, source-mixture choice, or missing genomic data. Then use measured costs and the owner decisions to schedule R1/R3/R5. This keeps full v4 completion visible while ensuring the literature extension produces falsifiable evidence rather than only a new narrative.

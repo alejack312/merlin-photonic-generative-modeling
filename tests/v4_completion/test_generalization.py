@@ -15,6 +15,11 @@ from merlin_iqp.experiments.generalization import (
     SCHEMA_VERSION,
     build_ring_cell_holdout,
     compute_cell_coverage_precision,
+    r3_coverage_anchors,
+    r3_memorizer_null,
+    r3_sample_budget_grid,
+    r3_uniform_sprayer_null,
+    validate_r3_null_metrics,
 )
 
 
@@ -61,6 +66,27 @@ def test_r3_coverage_deduplicates_held_out_hits_and_precision_counts_samples() -
     assert metrics["coverage"] == pytest.approx(1.0 / len(split.held_out_cells))
     assert metrics["precision"] == pytest.approx(3.0 / 4.0)
     assert metrics["held_out_cells_hit"] == [int(split.held_out_cells[0])]
+    assert metrics["normalized_coverage"] is not None
+    assert metrics["anchor_labels"]["ceiling"].startswith("ORACLE:")
+
+
+def test_r3_per_ring_coverage_uses_majority_assignment_for_mixed_cells() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+
+    mixed_cells = [
+        int(cell)
+        for cell in split.data_hit_cells
+        if np.unique(split.point_rings[split.point_cells == cell]).size == 2
+    ]
+    assert mixed_cells
+    for cell in mixed_cells:
+        point_rings = split.point_rings[split.point_cells == cell]
+        expected = "inner" if np.count_nonzero(point_rings == "inner") > np.count_nonzero(point_rings == "outer") else "outer"
+        assert split.cell_rings[cell] == expected
+
+    metrics = compute_cell_coverage_precision(split, split.held_out_cells)
+    assert metrics["per_ring_coverage"]["outer"] == pytest.approx(1.0)
+    assert metrics["per_ring_coverage"]["inner"] is None
 
 
 def test_r3_all_invalid_samples_have_zero_coverage_and_precision() -> None:
@@ -96,6 +122,78 @@ def test_r3_empty_held_out_set_leaves_coverage_undefined() -> None:
 
     assert metrics["coverage"] is None
     assert metrics["precision"] == 1.0
+    assert metrics["ceiling"] is None
+    assert metrics["gap_closed"] == "undefined"
+
+
+def test_r3_memorizer_null_is_red_first_then_green() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+    sample_count = 10
+    observed = compute_cell_coverage_precision(split, [int(split.training_cells[0])] * sample_count)
+    expected = r3_memorizer_null(split, sample_count)
+
+    corrupted = dict(observed)
+    corrupted["coverage"] = 1.0
+    with pytest.raises(AssertionError):
+        validate_r3_null_metrics(corrupted, expected)
+    validate_r3_null_metrics(observed, expected)
+    assert expected["coverage"] == 0.0
+    assert expected["precision"] == 1.0
+
+
+def test_r3_uniform_sprayer_null_is_red_first_then_green_on_n4_fixture() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+    assert split.cell_count == 16
+    assert len(split.data_hit_cells) == 12
+    assert len(split.held_out_cells) == 3
+    assert len(split.training_cells) == 9
+
+    expected = r3_uniform_sprayer_null(split, 10)
+    exact_formula = 1.0 - (15.0 / 16.0) ** 10
+    assert expected["coverage"] == pytest.approx(exact_formula, abs=1e-9)
+    assert expected["precision"] == pytest.approx(12.0 / 16.0, abs=1e-9)
+
+    corrupted = dict(expected)
+    corrupted["precision"] = 1.0
+    with pytest.raises(AssertionError):
+        validate_r3_null_metrics(corrupted, expected)
+    validate_r3_null_metrics(expected, expected)
+
+
+def test_r3_uniform_sprayer_monte_carlo_agrees_with_closed_form_within_sampling_error() -> None:
+    split = build_ring_cell_holdout(load_rings_dataset(4))
+    expected = r3_uniform_sprayer_null(split, 10)
+    rng = np.random.default_rng(20260929)
+    repetitions = 5000
+    draws = rng.integers(0, split.cell_count, size=(repetitions, 10))
+    coverage = np.mean(
+        np.array([len(np.intersect1d(np.unique(row), split.held_out_cells)) / len(split.held_out_cells) for row in draws])
+    )
+    precision = np.mean(np.isin(draws, split.valid_cells))
+    coverage_se = np.std(
+        np.array([len(np.intersect1d(np.unique(row), split.held_out_cells)) / len(split.held_out_cells) for row in draws]),
+        ddof=1,
+    ) / np.sqrt(repetitions)
+    precision_se = np.sqrt(expected["precision"] * (1.0 - expected["precision"]) / (repetitions * 10))
+    assert abs(coverage - expected["coverage"]) <= 4.0 * coverage_se
+    assert abs(precision - expected["precision"]) <= 4.0 * precision_se
+
+
+def test_r3_anchors_guard_degenerate_gap_and_k_one() -> None:
+    anchors = r3_coverage_anchors(n=4, held_out_cell_count=1, sample_count=0, coverage=0.0)
+
+    assert anchors["floor"] == 0.0
+    assert anchors["ceiling"] == 0.0
+    assert anchors["gap_closed"] == "undefined"
+    assert anchors["normalized_coverage"] is None
+
+
+@pytest.mark.parametrize("n, expected", [(4, [2, 11, 36]), (6, [7, 44, 146]), (8, [27, 177, 588])])
+def test_r3_sample_budget_grid_matches_registered_levels(n: int, expected: list[int]) -> None:
+    grid = r3_sample_budget_grid(n)
+
+    assert [record["N"] for record in grid] == expected
+    assert [record["degenerate"] for record in grid] == [budget < 5 for budget in expected]
 
 
 def test_r3_holdout_is_deterministic_and_manifest_records_registered_list() -> None:
