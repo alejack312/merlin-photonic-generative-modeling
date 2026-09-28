@@ -24,6 +24,12 @@ Commit `410f84e` records the owner-final B2 boundary verbatim in `.planning/v4-o
 
 After the commit, the full suite passed **753 passed, 1 skipped in 450.55s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
 
+## 2026-09-28 owner-approved first-tranche compute budget
+
+Commit `8618057` records the owner-final budget decision in the roadmap: R0 **3 h (complete)**, R2 then R3 **7 h**, R1 **5 h**, R5 **5 h**, and review/synthesis **4 h**, approximately **24 h total**. Each figure is a per-stage cap; a pilot that projects beyond its cap must stop and report the projection before continuing, with no borrowing across stages. Budget beyond this tranche and amendments for inaccessible sibling-source rows remain undecided.
+
+The documentation-only change was verified by a full suite of **753 passed, 1 skipped in 600.99s** and the artifact validator with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
 ## Selected release scope closed for PR review — 2026-09-10
 
 Following the user's explicit scope selection, clean-checkout verification passed at `a732d65` (725 tests, 1 skipped; 36 explicit sibling integration tests). Two demonstrated artifact-validator omissions were repaired. The subsequent portability repair `a8db410` fixes comparison JSON line endings and eight manifest hashes, preserving original hashes and numerical results. See the [bounded release summary](../docs/v4-bounded-release.md) for fit quality, support validity, expected sampling costs, committed-only evidence, and the distinction between analytic references and direct optical simulations. This closes the selected software/evidence release scope only. All broader scientific statuses and dependencies below remain in force; original full v4.0 acceptance is not achieved.
