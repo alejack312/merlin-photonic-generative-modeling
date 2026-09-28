@@ -187,6 +187,24 @@ Each figure is a cap per stage. If a pilot's measured cost projects past its sta
 
 Ask once at the relevant checkpoint with these concrete documents available. Do not require the owner to repeat historical NULL-03–06/08 answers or WRITE-07 just because the project resumes.
 
+### OWNER FINAL, 2026-09-28 — R3 validity definition
+
+- Rings generalization uses a CELL-level holdout, not the point-level 80/20 split.
+  Reason: point-level test cells almost all coincide with training cells
+  (test-only cells: n=4 → 0, n=6 → 0, n=8 → 1), so point-level validity cannot
+  measure generalization.
+- Pool the data-hit cells (all 400 points, encoded with the existing GridCodec).
+  Hold out 20% of them, minimum 3, chosen scattered-at-random (interpolation test).
+  Training uses only points in non-held-out cells.
+- Valid = any data-hit cell. Unseen-valid = held-out cells. Invalid = cells hit by
+  no data point. Validity is never defined from model outputs.
+- The holdout RNG is a registered fixed seed, separate from fit and sampling RNGs.
+  Record the held-out cell list per n in the manifest.
+
+Still undecided by owner: R3 training objectives, primary endpoint and effect size.
+Don't implement R3 comparisons until those are recorded. You may implement and test
+the holdout/validity split itself.
+
 ## Immediate next execution slice
 
 Start R0. Only after a fresh baseline passes, begin the registered B0 fixtures in R2 with the owner null and approximation-boundary checkpoint satisfied. They require no hardware, source-mixture choice, or missing genomic data. Then use measured costs and the owner decisions to schedule R1/R3/R5. This keeps full v4 completion visible while ensuring the literature extension produces falsifiable evidence rather than only a new narrative.
