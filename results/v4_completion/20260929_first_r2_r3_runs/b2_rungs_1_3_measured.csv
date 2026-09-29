@@ -1,181 +1,37 @@
-L,frozen_theta_coefficient_sse,frozen_theta_negative_reconstruction_mass,frozen_theta_reconstruction_sse,label,n,nonidentity_count,oracle_target_coefficients,profile,reference_only,rung,seed,subset_seed
-1,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,0,17
-1,0.002018103381016135,0.0,0.007294351606762304,Approximation,6,6,True,rings_hamming,False,2,0,17
-1,0.10364264568961665,0.0,0.006657310351152718,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_hamming,False,3,0,17
-2,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,0,17
-2,0.4187415359812074,0.0,0.0019448232022302595,Approximation,6,21,True,rings_hamming,False,2,0,17
-2,0.8369530958650905,0.0,0.002187202286003206,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_hamming,False,3,0,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,0,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation,6,63,True,rings_hamming,False,2,0,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_hamming,False,3,0,17
-1,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,1,17
-1,0.002018103381016135,0.0,0.007294351606762304,Approximation,6,6,True,rings_hamming,False,2,1,17
-1,0.10364264568961665,0.0,0.006657310351152718,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_hamming,False,3,1,17
-2,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,1,17
-2,0.4187415359812074,0.0,0.0019448232022302595,Approximation,6,21,True,rings_hamming,False,2,1,17
-2,0.8369530958650905,0.0,0.002187202286003206,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_hamming,False,3,1,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,1,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation,6,63,True,rings_hamming,False,2,1,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_hamming,False,3,1,17
-1,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,2,17
-1,0.002018103381016135,0.0,0.007294351606762304,Approximation,6,6,True,rings_hamming,False,2,2,17
-1,0.10364264568961665,0.0,0.006657310351152718,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_hamming,False,3,2,17
-2,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,2,17
-2,0.4187415359812074,0.0,0.0019448232022302595,Approximation,6,21,True,rings_hamming,False,2,2,17
-2,0.8369530958650905,0.0,0.002187202286003206,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_hamming,False,3,2,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,2,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation,6,63,True,rings_hamming,False,2,2,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_hamming,False,3,2,17
-1,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,3,17
-1,0.002018103381016135,0.0,0.007294351606762304,Approximation,6,6,True,rings_hamming,False,2,3,17
-1,0.10364264568961665,0.0,0.006657310351152718,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_hamming,False,3,3,17
-2,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,3,17
-2,0.4187415359812074,0.0,0.0019448232022302595,Approximation,6,21,True,rings_hamming,False,2,3,17
-2,0.8369530958650905,0.0,0.002187202286003206,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_hamming,False,3,3,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,3,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation,6,63,True,rings_hamming,False,2,3,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_hamming,False,3,3,17
-1,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,4,17
-1,0.002018103381016135,0.0,0.007294351606762304,Approximation,6,6,True,rings_hamming,False,2,4,17
-1,0.10364264568961665,0.0,0.006657310351152718,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_hamming,False,3,4,17
-2,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,4,17
-2,0.4187415359812074,0.0,0.0019448232022302595,Approximation,6,21,True,rings_hamming,False,2,4,17
-2,0.8369530958650905,0.0,0.002187202286003206,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_hamming,False,3,4,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Exact reference and oracle diagnostic,6,63,True,rings_hamming,True,1,4,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation,6,63,True,rings_hamming,False,2,4,17
-6,2.0284490394481463,0.0,1.421877966754639e-34,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_hamming,False,3,4,17
-1,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,0,17
-1,0.00013609850261425964,0.0,0.002245233196499421,Approximation,8,8,True,rings_hamming,False,2,0,17
-1,0.04479932856309732,0.0,0.00218937197785543,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_hamming,False,3,0,17
-2,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,0,17
-2,0.27016234708146947,0.010130316989224808,0.000913768304906908,Approximation,8,36,True,rings_hamming,False,2,0,17
-2,0.23994659276281147,0.0,0.0019605987805665927,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_hamming,False,3,0,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,0,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation,8,255,True,rings_hamming,False,2,0,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_hamming,False,3,0,17
-1,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,1,17
-1,0.00013609850261425964,0.0,0.002245233196499421,Approximation,8,8,True,rings_hamming,False,2,1,17
-1,0.04479932856309732,0.0,0.00218937197785543,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_hamming,False,3,1,17
-2,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,1,17
-2,0.27016234708146947,0.010130316989224808,0.000913768304906908,Approximation,8,36,True,rings_hamming,False,2,1,17
-2,0.23994659276281147,0.0,0.0019605987805665927,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_hamming,False,3,1,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,1,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation,8,255,True,rings_hamming,False,2,1,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_hamming,False,3,1,17
-1,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,2,17
-1,0.00013609850261425964,0.0,0.002245233196499421,Approximation,8,8,True,rings_hamming,False,2,2,17
-1,0.04479932856309732,0.0,0.00218937197785543,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_hamming,False,3,2,17
-2,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,2,17
-2,0.27016234708146947,0.010130316989224808,0.000913768304906908,Approximation,8,36,True,rings_hamming,False,2,2,17
-2,0.23994659276281147,0.0,0.0019605987805665927,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_hamming,False,3,2,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,2,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation,8,255,True,rings_hamming,False,2,2,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_hamming,False,3,2,17
-1,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,3,17
-1,0.00013609850261425964,0.0,0.002245233196499421,Approximation,8,8,True,rings_hamming,False,2,3,17
-1,0.04479932856309732,0.0,0.00218937197785543,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_hamming,False,3,3,17
-2,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,3,17
-2,0.27016234708146947,0.010130316989224808,0.000913768304906908,Approximation,8,36,True,rings_hamming,False,2,3,17
-2,0.23994659276281147,0.0,0.0019605987805665927,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_hamming,False,3,3,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,3,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation,8,255,True,rings_hamming,False,2,3,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_hamming,False,3,3,17
-1,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,4,17
-1,0.00013609850261425964,0.0,0.002245233196499421,Approximation,8,8,True,rings_hamming,False,2,4,17
-1,0.04479932856309732,0.0,0.00218937197785543,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_hamming,False,3,4,17
-2,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,4,17
-2,0.27016234708146947,0.010130316989224808,0.000913768304906908,Approximation,8,36,True,rings_hamming,False,2,4,17
-2,0.23994659276281147,0.0,0.0019605987805665927,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_hamming,False,3,4,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Exact reference and oracle diagnostic,8,255,True,rings_hamming,True,1,4,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation,8,255,True,rings_hamming,False,2,4,17
-8,2.7335865536546273,0.0,6.329118724216438e-36,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_hamming,False,3,4,17
-1,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,0,17
-1,0.02415894634249528,0.0,0.01015175714855034,Approximation,6,6,True,rings_spatial_exact,False,2,0,17
-1,0.109262251162705,0.0,0.0099786176670975,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_spatial_exact,False,3,0,17
-2,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,0,17
-2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,Approximation,6,21,True,rings_spatial_exact,False,2,0,17
-2,0.7409400322204244,0.008610325349700186,0.004124991448437177,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_spatial_exact,False,3,0,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,0,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation,6,63,True,rings_spatial_exact,False,2,0,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_spatial_exact,False,3,0,17
-1,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,1,17
-1,0.02415894634249528,0.0,0.01015175714855034,Approximation,6,6,True,rings_spatial_exact,False,2,1,17
-1,0.109262251162705,0.0,0.0099786176670975,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_spatial_exact,False,3,1,17
-2,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,1,17
-2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,Approximation,6,21,True,rings_spatial_exact,False,2,1,17
-2,0.7409400322204244,0.008610325349700186,0.004124991448437177,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_spatial_exact,False,3,1,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,1,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation,6,63,True,rings_spatial_exact,False,2,1,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_spatial_exact,False,3,1,17
-1,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,2,17
-1,0.02415894634249528,0.0,0.01015175714855034,Approximation,6,6,True,rings_spatial_exact,False,2,2,17
-1,0.109262251162705,0.0,0.0099786176670975,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_spatial_exact,False,3,2,17
-2,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,2,17
-2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,Approximation,6,21,True,rings_spatial_exact,False,2,2,17
-2,0.7409400322204244,0.008610325349700186,0.004124991448437177,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_spatial_exact,False,3,2,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,2,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation,6,63,True,rings_spatial_exact,False,2,2,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_spatial_exact,False,3,2,17
-1,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,3,17
-1,0.02415894634249528,0.0,0.01015175714855034,Approximation,6,6,True,rings_spatial_exact,False,2,3,17
-1,0.109262251162705,0.0,0.0099786176670975,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_spatial_exact,False,3,3,17
-2,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,3,17
-2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,Approximation,6,21,True,rings_spatial_exact,False,2,3,17
-2,0.7409400322204244,0.008610325349700186,0.004124991448437177,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_spatial_exact,False,3,3,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,3,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation,6,63,True,rings_spatial_exact,False,2,3,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_spatial_exact,False,3,3,17
-1,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,4,17
-1,0.02415894634249528,0.0,0.01015175714855034,Approximation,6,6,True,rings_spatial_exact,False,2,4,17
-1,0.109262251162705,0.0,0.0099786176670975,Approximation (control for rung 2: does choosing by order matter?),6,6,True,rings_spatial_exact,False,3,4,17
-2,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,4,17
-2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,Approximation,6,21,True,rings_spatial_exact,False,2,4,17
-2,0.7409400322204244,0.008610325349700186,0.004124991448437177,Approximation (control for rung 2: does choosing by order matter?),6,21,True,rings_spatial_exact,False,3,4,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Exact reference and oracle diagnostic,6,63,True,rings_spatial_exact,True,1,4,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation,6,63,True,rings_spatial_exact,False,2,4,17
-6,1.7143207860127867,0.0,2.732546821081797e-35,Approximation (control for rung 2: does choosing by order matter?),6,63,True,rings_spatial_exact,False,3,4,17
-1,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,0,17
-1,0.0055237547707225705,0.0,0.006450334523772709,Approximation,8,8,True,rings_spatial_exact,False,2,0,17
-1,0.386093681805324,0.0,0.005056910798338814,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_spatial_exact,False,3,0,17
-2,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,0,17
-2,0.7670795756046777,0.12816895588615373,0.001566910533172702,Approximation,8,36,True,rings_spatial_exact,False,2,0,17
-2,0.22721438483673018,0.0,0.00622618131984828,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_spatial_exact,False,3,0,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,0,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation,8,255,True,rings_spatial_exact,False,2,0,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_spatial_exact,False,3,0,17
-1,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,1,17
-1,0.0055237547707225705,0.0,0.006450334523772709,Approximation,8,8,True,rings_spatial_exact,False,2,1,17
-1,0.386093681805324,0.0,0.005056910798338814,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_spatial_exact,False,3,1,17
-2,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,1,17
-2,0.7670795756046777,0.12816895588615373,0.001566910533172702,Approximation,8,36,True,rings_spatial_exact,False,2,1,17
-2,0.22721438483673018,0.0,0.00622618131984828,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_spatial_exact,False,3,1,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,1,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation,8,255,True,rings_spatial_exact,False,2,1,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_spatial_exact,False,3,1,17
-1,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,2,17
-1,0.0055237547707225705,0.0,0.006450334523772709,Approximation,8,8,True,rings_spatial_exact,False,2,2,17
-1,0.386093681805324,0.0,0.005056910798338814,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_spatial_exact,False,3,2,17
-2,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,2,17
-2,0.7670795756046777,0.12816895588615373,0.001566910533172702,Approximation,8,36,True,rings_spatial_exact,False,2,2,17
-2,0.22721438483673018,0.0,0.00622618131984828,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_spatial_exact,False,3,2,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,2,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation,8,255,True,rings_spatial_exact,False,2,2,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_spatial_exact,False,3,2,17
-1,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,3,17
-1,0.0055237547707225705,0.0,0.006450334523772709,Approximation,8,8,True,rings_spatial_exact,False,2,3,17
-1,0.386093681805324,0.0,0.005056910798338814,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_spatial_exact,False,3,3,17
-2,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,3,17
-2,0.7670795756046777,0.12816895588615373,0.001566910533172702,Approximation,8,36,True,rings_spatial_exact,False,2,3,17
-2,0.22721438483673018,0.0,0.00622618131984828,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_spatial_exact,False,3,3,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,3,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation,8,255,True,rings_spatial_exact,False,2,3,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_spatial_exact,False,3,3,17
-1,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,4,17
-1,0.0055237547707225705,0.0,0.006450334523772709,Approximation,8,8,True,rings_spatial_exact,False,2,4,17
-1,0.386093681805324,0.0,0.005056910798338814,Approximation (control for rung 2: does choosing by order matter?),8,8,True,rings_spatial_exact,False,3,4,17
-2,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,4,17
-2,0.7670795756046777,0.12816895588615373,0.001566910533172702,Approximation,8,36,True,rings_spatial_exact,False,2,4,17
-2,0.22721438483673018,0.0,0.00622618131984828,Approximation (control for rung 2: does choosing by order matter?),8,36,True,rings_spatial_exact,False,3,4,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Exact reference and oracle diagnostic,8,255,True,rings_spatial_exact,True,1,4,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation,8,255,True,rings_spatial_exact,False,2,4,17
-8,3.394381483281877,0.0,1.8033742851741042e-35,Approximation (control for rung 2: does choosing by order matter?),8,255,True,rings_spatial_exact,False,3,4,17
+L,frozen_theta_coefficient_sse,frozen_theta_negative_reconstruction_mass,frozen_theta_reconstruction_sse,interval,label,n,n_unique_fits,nonidentity_count,oracle_target_coefficients,profile,reference_only,rung,source_checkpoint_seeds,subset_seed
+1,2.0284490394481463,0.0,1.421877966754639e-34,none,Exact reference and oracle diagnostic,6,1,63,True,rings_hamming,True,1,"0,1,2,3,4",17
+1,0.002018103381016135,0.0,0.007294351606762304,none,Approximation,6,1,6,True,rings_hamming,False,2,"0,1,2,3,4",17
+1,0.10364264568961665,0.0,0.006657310351152718,none,Approximation (control for rung 2: does choosing by order matter?),6,1,6,True,rings_hamming,False,3,"0,1,2,3,4",17
+2,2.0284490394481463,0.0,1.421877966754639e-34,none,Exact reference and oracle diagnostic,6,1,63,True,rings_hamming,True,1,"0,1,2,3,4",17
+2,0.4187415359812074,0.0,0.0019448232022302595,none,Approximation,6,1,21,True,rings_hamming,False,2,"0,1,2,3,4",17
+2,0.8369530958650905,0.0,0.002187202286003206,none,Approximation (control for rung 2: does choosing by order matter?),6,1,21,True,rings_hamming,False,3,"0,1,2,3,4",17
+6,2.0284490394481463,0.0,1.421877966754639e-34,none,Exact reference and oracle diagnostic,6,1,63,True,rings_hamming,True,1,"0,1,2,3,4",17
+6,2.0284490394481463,0.0,1.421877966754639e-34,none,Approximation,6,1,63,True,rings_hamming,False,2,"0,1,2,3,4",17
+6,2.0284490394481463,0.0,1.421877966754639e-34,none,Approximation (control for rung 2: does choosing by order matter?),6,1,63,True,rings_hamming,False,3,"0,1,2,3,4",17
+1,2.7335865536546273,0.0,6.329118724216438e-36,none,Exact reference and oracle diagnostic,8,1,255,True,rings_hamming,True,1,"0,1,2,3,4",17
+1,0.00013609850261425964,0.0,0.002245233196499421,none,Approximation,8,1,8,True,rings_hamming,False,2,"0,1,2,3,4",17
+1,0.04479932856309732,0.0,0.00218937197785543,none,Approximation (control for rung 2: does choosing by order matter?),8,1,8,True,rings_hamming,False,3,"0,1,2,3,4",17
+2,2.7335865536546273,0.0,6.329118724216438e-36,none,Exact reference and oracle diagnostic,8,1,255,True,rings_hamming,True,1,"0,1,2,3,4",17
+2,0.27016234708146947,0.010130316989224808,0.000913768304906908,none,Approximation,8,1,36,True,rings_hamming,False,2,"0,1,2,3,4",17
+2,0.23994659276281147,0.0,0.0019605987805665927,none,Approximation (control for rung 2: does choosing by order matter?),8,1,36,True,rings_hamming,False,3,"0,1,2,3,4",17
+8,2.7335865536546273,0.0,6.329118724216438e-36,none,Exact reference and oracle diagnostic,8,1,255,True,rings_hamming,True,1,"0,1,2,3,4",17
+8,2.7335865536546273,0.0,6.329118724216438e-36,none,Approximation,8,1,255,True,rings_hamming,False,2,"0,1,2,3,4",17
+8,2.7335865536546273,0.0,6.329118724216438e-36,none,Approximation (control for rung 2: does choosing by order matter?),8,1,255,True,rings_hamming,False,3,"0,1,2,3,4",17
+1,1.7143207860127867,0.0,2.732546821081797e-35,none,Exact reference and oracle diagnostic,6,1,63,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+1,0.02415894634249528,0.0,0.01015175714855034,none,Approximation,6,1,6,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+1,0.109262251162705,0.0,0.0099786176670975,none,Approximation (control for rung 2: does choosing by order matter?),6,1,6,True,rings_spatial_exact,False,3,"0,1,2,3,4",17
+2,1.7143207860127867,0.0,2.732546821081797e-35,none,Exact reference and oracle diagnostic,6,1,63,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+2,0.2650434165666695,0.03826494115745726,0.0013929309724363234,none,Approximation,6,1,21,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+2,0.7409400322204244,0.008610325349700186,0.004124991448437177,none,Approximation (control for rung 2: does choosing by order matter?),6,1,21,True,rings_spatial_exact,False,3,"0,1,2,3,4",17
+6,1.7143207860127867,0.0,2.732546821081797e-35,none,Exact reference and oracle diagnostic,6,1,63,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+6,1.7143207860127867,0.0,2.732546821081797e-35,none,Approximation,6,1,63,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+6,1.7143207860127867,0.0,2.732546821081797e-35,none,Approximation (control for rung 2: does choosing by order matter?),6,1,63,True,rings_spatial_exact,False,3,"0,1,2,3,4",17
+1,3.394381483281877,0.0,1.8033742851741042e-35,none,Exact reference and oracle diagnostic,8,1,255,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+1,0.0055237547707225705,0.0,0.006450334523772709,none,Approximation,8,1,8,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+1,0.386093681805324,0.0,0.005056910798338814,none,Approximation (control for rung 2: does choosing by order matter?),8,1,8,True,rings_spatial_exact,False,3,"0,1,2,3,4",17
+2,3.394381483281877,0.0,1.8033742851741042e-35,none,Exact reference and oracle diagnostic,8,1,255,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+2,0.7670795756046777,0.12816895588615373,0.001566910533172702,none,Approximation,8,1,36,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+2,0.22721438483673018,0.0,0.00622618131984828,none,Approximation (control for rung 2: does choosing by order matter?),8,1,36,True,rings_spatial_exact,False,3,"0,1,2,3,4",17
+8,3.394381483281877,0.0,1.8033742851741042e-35,none,Exact reference and oracle diagnostic,8,1,255,True,rings_spatial_exact,True,1,"0,1,2,3,4",17
+8,3.394381483281877,0.0,1.8033742851741042e-35,none,Approximation,8,1,255,True,rings_spatial_exact,False,2,"0,1,2,3,4",17
+8,3.394381483281877,0.0,1.8033742851741042e-35,none,Approximation (control for rung 2: does choosing by order matter?),8,1,255,True,rings_spatial_exact,False,3,"0,1,2,3,4",17

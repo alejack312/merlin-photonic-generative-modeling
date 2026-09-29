@@ -51,3 +51,17 @@ Date: 2026-09-28 · Scope: project · Recurs when: a held-out-cell benchmark nee
 - First-run artifacts: 20 B1 rows, 180 B2 rung-1–3 rows, 36 R3 reference rows; no model comparison; TN/PPS pending.
 - `venv\Scripts\python.exe -m pytest -q` → 794 passed, 1 skipped in 503.27s.
 - `venv\Scripts\python.exe scripts\v4_tcdp\validate_artifacts.py --root results\v4_tcdp` → PASS, 579 JSON files, 72 JSONL rows, 19 payload hashes.
+
+## 2026-09-29 addendum: deterministic-fit deduplication
+
+## Decision rules that generalize
+- IF repeated checkpoint IDs have identical measured rows, THEN report one fit per experimental family and record `n_unique_fits = 1`; never bootstrap across duplicate rows.
+- IF a subset-seed sweep is intended to measure selection variability, THEN assert distinct measured values for groups where variation is mathematically expected.
+- IF the selected subset is the complete moment set, THEN mark `L=n` as deterministic rather than treating zero spread as failed sampling.
+- IF a costly sweep recomputes invariant transforms, THEN cache the target/model transforms once per family before expanding seeds.
+
+## Verification
+- Deduplicated outputs: B1 4 rows, B2 36 rows, with `interval = none`; rung-3 raw sweep 2,400 rows and summaries 12 rows.
+- Rung-3 sweep runtime: `136.50392250006553 s`; variable-seed groups have 200 seeds and paired rung-2 values; `L=n` groups are marked deterministic.
+- `venv\Scripts\python.exe -m pytest -q` → 796 passed, 1 skipped.
+- `venv\Scripts\python.exe scripts\v4_tcdp\validate_artifacts.py --root results\v4_tcdp` → PASS, 579 JSON files, 72 JSONL rows, 19 payload hashes.

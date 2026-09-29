@@ -237,3 +237,13 @@ Before the first runs, a pilot measured **0.2640228999662213 s** for one n=6 B1+
 The raw first-run tables are in [raw_tables.md](../results/v4_completion/20260929_first_r2_r3_runs/raw_tables.md), with machine-readable rows in `b1_measured.csv`, `b2_rungs_1_3_measured.csv`, and `r3_references_measured.csv`, plus the run manifest. MEASURED contains 20 B1 frozen-checkpoint rows for n=6/n=8 across both profiles and seeds 0–4, 180 B2 rows for rungs 1–3 at `L={1,2,n}` with paired subset seed 17, and 36 R3 reference rows for memorizer, sprayer, known-support, and ceiling at the registered N grid. Exact-target coefficient access is labelled oracle. AGAINST NULLS records the closed-form anchor checks; EXPLORATORY records that no model-vs-model comparison was run. TN/PPS rungs remain pending dependency review.
 
 The full suite passed **794 passed, 1 skipped in 503.27s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
+## 2026-09-29 B1/B2 checkpoint deduplication and subset-seed distribution
+
+B1/B2 checkpoint rows were deduplicated after verifying that the five source checkpoint seed IDs produce identical values. The raw tables now contain one fit per profile/n family with `n_unique_fits = 1` and `interval = none`: B1 has **4 rows**, and B2 rungs 1–3 has **36 rows** (profile × n × L × rung). The source seed IDs remain recorded as provenance; no interval was computed across them.
+
+Rung 3 now uses **200 subset seeds per profile/n/L**, paired to the same rung-2 order-selected reconstruction. The raw paired distribution has **2,400 rows** and the median/IQR summary has **12 rows**. The `L=n` groups are recorded as full-set deterministic; the multi-seed variation guard applies to `L<n`. The guard test rejects a table with distinct seed IDs but identical measured rows. The runner completed in **136.50392250006553 s**; the earlier single-seed pilot projection was **5.389361599343829 s** against the approved 7-hour cap.
+
+The machine-readable outputs are `b2_rung3_subset_distribution.csv` and `b2_rung3_distribution_summary.csv` under [the first-run artifact directory](../results/v4_completion/20260929_first_r2_r3_runs/); the deduplicated B1/B2 and R3 tables remain in the same directory. No model-vs-model comparison was run and no scientific interpretation was added.
+
+The full suite passed **796 passed, 1 skipped in 483.75s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
