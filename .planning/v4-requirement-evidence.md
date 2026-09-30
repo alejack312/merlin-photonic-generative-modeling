@@ -257,3 +257,15 @@ Red-first evidence ran before the restored correction: the deliberately dropped-
 Green numeric evidence: (a) q_A versus the equal-weight q_theta mixture was `1.1102230246251565e-16` for both sign-flip and +pi/2 variants; (b) maximum branch-weight gap was `5.551115123125783e-17`; (c) total-mass gaps were `2.220446049250313e-16` and `0.0`; (d) equal-angle q_A versus plain q_theta was `1.1102230246251565e-16`. For (e), the non-vacuous +pi/2 fixture had single-table gap `0.8432948775963962` and q_A-to-each-table gaps `0.4216474387981982` and `0.42164743879819816`. The sign-flip variant was also run through the identity checks; its ordinary q_theta tables coincide (gap `0.0`), so the non-vacuity assertion is registered on the +pi/2 variant.
 
 The R6 fixture passed **12 tests**; all MBQC tests passed **28 tests**. The full suite passed **808 passed, 1 skipped in 435.37s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
+## 2026-09-30 R6 graph-route disposition
+
+ADAPT-01..03 on commuting IQP M1: **answered NEGATIVELY**, per the [owner disposition](v4-owner-nulls/R6-route-and-null-2026-09-30.md). A equals matched D by construction; A/B/D training **NOT RUN**. SI/non-commuting gates are deferred outside v4, not silently completed. Original requirements remain in the [roadmap](v4-full-completion-roadmap.md).
+
+The [assistant-drafted derivation and numerical report](../docs/v4-r6-graph-mixture-derivation.md) remain owner-review pending. New n=3/M=3 chain fixture: **14 tests**; all MBQC: **42 passed in 1.62s**. Correct implementation passes branch identity and mixture at unchanged 1e-9 tolerance. Red run with deliberately dropped XOR: **3 failed, 11 deselected**, gaps 0.6420052349566796 (sign/pi) and 0.3151413666763097 (pi/2); restored implementation green. Initial non-vacuity probe: **1 failed, 13 passed**, because sign flip was identical; explicitly relabeled `sign_identical_vacuous`, rather than changing the fixture or tolerance to hide it. This is the required vacuity report, not a failed mixture identity.
+
+Largest correct mixture gap 3.3307e-16. Isolated sign/pi table gaps 1.1102e-16 (both vacuous); pi/2 0.709304263544835. Empirical random sample N=100: maximum single-generator sign-flip gap 0.8137486499024578; plus-pi gap 7.771561172376096e-16. No universal sign symmetry claim. No new src/model code, training or sweeps.
+
+Final MBQC run after adding mixture-to-every-branch non-vacuity: **42 passed in 1.85s** (new file separately: **14 passed in 1.44s**). Zero-distance non-vacuity red probe: **3 failed, 11 deselected in 1.50s**, then restored. Minimum branch distances: sign/pi 0.001134762192701061; pi/2 0.32799863047307065. TypeScript/npm gates do not apply: no package.json or tsconfig.json; no Python lint/type-check configuration found. `git diff --check` passed.
+
+Full-suite gate: `venv/Scripts/python.exe -m pytest -q` — **822 passed, 1 skipped in 594.62s**. The full suite collected the fixture before the final additional mixture-distance assertions; those final assertions are covered by the subsequent focused **42 passed** run.

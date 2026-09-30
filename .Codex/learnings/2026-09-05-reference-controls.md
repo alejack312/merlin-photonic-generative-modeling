@@ -32,3 +32,9 @@ Date: 2026-09-05 · Scope: project · Recurs when: a classical IQP calculation r
 ## Next time
 - Do: compare contracts, smallest cases, and active claims before larger sweeps.
 - Do not: treat classical evaluability as proof that loss-induced concentration is absent.
+
+## 2026-09-30 addendum: causal mixture fixtures
+- IF angle rules are claimed non-vacuous, THEN compare isolated tables with other angles fixed and name identical cases explicitly; a downstream policy can conceal vacuity.
+- IF sign symmetry holds on a full-rank fixture, THEN do not extrapolate: random asymmetric matrices with dependent generators can refute it.
+- IF converting measurement angles, THEN derive basis rays and frame first: H b0(theta) has equatorial angle -2*theta, so an equatorial pi shift gives a theta half-pi shift. Slide convention mapping is unverified.
+- Verify: venv/Scripts/python.exe -m pytest tests/mbqc -q -s gives 42 passed; deliberately dropped XOR gives three failures at unchanged 1e-9 tolerance. Numerical evidence: docs/v4-r6-graph-mixture-derivation.md.

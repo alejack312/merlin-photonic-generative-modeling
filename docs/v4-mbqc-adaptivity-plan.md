@@ -121,3 +121,7 @@ Before M1 implementation, use the existing vault understanding: the owner explai
 Optional Gibbs reflection after that choice: What happened? How did it feel? What worked or failed? Why? What did you learn? What will you change next time? These remain questions for the owner, not agent-written answers.
 
 UBQC blindness, trap-based verification, fault tolerance and hardware acquisition are outside this extension's current acceptance scope. They can become later work only with their own trust and resource contracts.
+
+## 2026-09-30 disposition (supersedes graph-route M2 proposal)
+
+The owner closed R6 for causal angle policies on commuting IQP M1 with a negative answer: A equals D. A/B/D sweeps were NOT RUN. The proposal above remains historical; adaptive SI and non-commuting graph gates are deferred outside v4, with three open design items in the [roadmap](../.planning/v4-full-completion-roadmap.md). See the [derivation and convention qualification](v4-r6-graph-mixture-derivation.md). This does not close physical M1 validation or the owner's pending takeaway.

@@ -62,3 +62,24 @@ for i in range(len(p\_branch)):
 for x in tables[i]:
 q[x] = q.get(x, 0.0) + p\_branch[i] \* tables[i][x]
 return q
+
+R6 disposition (owner decision, 2026-09-30). Reason in the owner's words: "the graph
+route doesn't benefit from adaptivity because the graph route with IQP circuits doesn't
+benefit from adaptivity." Evidence: R6 null #2 fixture (commit 86955ff) confirmed that
+causal graph-route policies on commuting IQP M1 give an exact uniform mixture of IQP
+tables (gap 1.1e-16), so model A equals control D by construction. Disposition:
+  - ADAPT-01..03 on the graph route: answered NEGATIVELY for commuting IQP M1, scoped to
+    the tested fixtures plus the derivation below. Not a claim about non-commuting
+    models.
+  - A/B/D training sweeps: NOT RUN (A equals D by construction; no budget spent).
+  - Adaptive SI (or non-commuting graph gates) for IQP-style generative modeling:
+    DEFERRED to a separate future milestone, not part of v4. Open design items:
+    (1) how count-and-reinject acts on a dual-rail qubit; (2) definition of control D for
+    SI (branch tables must come from the non-adaptive family); (3) whether the trainable
+    layer can do the branch sum (MerLin 0.4.0 has no feed-forward mention; Perceval
+    1.2.4 has FFConfigurator, scope vs. SI reinjection unverified).
+Owner's takeaway sentence for the portfolio/case-study reader: to be appended by the owner.
+Unverified owner recollection (not a source): Kashefi's remark to Hela Mhiri about
+adaptivity. PQCNN (arXiv 2504.20989) is a classification paper; its advantage wording in
+the abstract summary (vs other QNN proposals) differs from FQC25 slide p44 (vs classical
+CNNs); unresolved.

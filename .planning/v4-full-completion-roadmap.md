@@ -41,7 +41,7 @@ Findings 1–5 are addressed here and in the linked specifications: non-adaptive
 | P2: R5 | 5 hours | Non-adaptive incidence-graph identity and corruption test at n=1–3; logical-only resource report |
 | P2: review/synthesis | 4 hours | Owner interpretation of available evidence and next-tranche decision |
 
-R4 closure sweeps, broader surrogate tournaments, n=6/8 photonic runs and R6 adaptive training remain explicitly in the full backlog, outside this first tranche. Missing original requirements remain open; timeboxing is not scope closure. The two conceptual priorities are physical-model fluency for the photonic case study and the non-adaptive/adaptive distinction for an MBQC discussion. Progress is measured by explainable evidence, not the number of architectures added.
+R4 closure sweeps, broader surrogate tournaments, n=6/8 photonic runs and R6 adaptive training (subsequently dispositioned below on 2026-09-30) remain explicitly in the full backlog, outside this first tranche. Missing original requirements remain open; timeboxing is not scope closure. The two conceptual priorities are physical-model fluency for the photonic case study and the non-adaptive/adaptive distinction for an MBQC discussion. Progress is measured by explainable evidence, not the number of architectures added.
 
 ### Null-result gate before R2, R3, R5 and R6
 
@@ -166,6 +166,20 @@ Files proposed: `src/merlin_iqp/mbqc/adaptive.py` for the graph route **or** a s
 Finish: a complete new-model definition, branch-complete simulator, training estimator validation, paired open-loop and classical-mixture controls, registered held-out effect and resource report. The case study can conclude that adaptivity offers no useful benefit in the tested regime.
 
 Stop: uncharged photon/feedback costs, policy uses future outcomes, no fair classical comparator, or the apparent gain comes only from extra training/parameters/target access. Do not infer a sampling speedup from the SI paper's distinct probability-estimation task.
+
+### R6 disposition — owner decision, 2026-09-30
+
+ADAPT-01 instrument/model contract, ADAPT-02 matched ablations and ADAPT-03 quality/resources evaluation on the **commuting IQP M1 graph route are answered NEGATIVELY**, scoped to the tested fixtures and [project derivation](../docs/v4-r6-graph-mixture-derivation.md). A equals matched uniform-mixture control D by construction. A/B/D training sweeps: **NOT RUN**, no budget spent. This disposition supersedes the proposed graph-route training work above; it does not establish a non-commuting or physical-resource result. The original requirement text remains visible. See the [verbatim owner record](v4-owner-nulls/R6-route-and-null-2026-09-30.md) and [test evidence](v4-requirement-evidence.md#2026-09-30-r6-graph-route-disposition).
+
+### Deferred backlog — adaptive SI / non-commuting graph gates
+
+Separate future milestone, **outside v4**; no implementation or scientific closure implied. Open design items:
+
+1. How count-and-reinject acts on a dual-rail qubit.
+2. Definition of control D for SI: branch tables must come from the non-adaptive family.
+3. Whether the trainable layer can perform the branch sum: the recorded MerLin 0.4.0 feed-forward absence and Perceval 1.2.4 FFConfigurator scope versus SI reinjection remain unverified here.
+
+Missing original requirements remain visible and open; this R6 disposition does not close R1–R5, physical deployment, or owner-authored interpretation.
 
 ## R7 — Synthesize evidence and close the appropriate scope
 
