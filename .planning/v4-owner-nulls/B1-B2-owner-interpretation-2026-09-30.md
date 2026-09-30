@@ -13,3 +13,9 @@ which holds about 60% of the target's energy.
 B2: Keeping the low orders beats random subsets at L = 2 but not at L = 1, because
 odd-order moments add nothing to the rebuilt distribution since they cancel out
 (parity) and even-order moments do add to the rebuilt distribution.
+
+## R3 reference table (analytic, n = 8)
+
+At n = 8, N = 177, a real model has to reach coverage above 0.50 and precision above 0.31
+to beat both nulls. A model that knows only which cells are valid would get coverage
+about 0.89 with precision 1.
