@@ -45,3 +45,20 @@ registered as general, with rings as the first test target. Not exploratory.
 DEPENDENCIES/OPEN: R5, R3, relevant R1 noise contract; charge photons per graph state,
 feed-forward rounds, delays and losses (D1 physical contract still open). Policy must
 use only earlier outcomes.
+
+R6 null #2 (owner, 2026-09-30). Prediction: in the M1 incidence-graph model, any
+causal graph-route policy (a later ancilla's angle depends only on EARLIER outcomes)
+gives x-distribution q\_A(x) = 2^-M \* sum over s of q\_{theta(s)}(x), a uniform classical
+mixture of ordinary IQP tables. Branch weights are P(s) = 2^-M whatever the angles are
+(from p(s,y) = 2^-M q\_theta(y XOR G^T s) in docs/v4-mbqc-adaptivity-plan.md section 2).
+So control D (classical mixture with the same weights) equals model A exactly for this
+policy class: score(A) - score(D) = 0 within 1e-9. This is a derivation, not yet tested.
+GATE-02 label: exact-reference check of the same construction (the mixture is built from
+the same q\_theta family). It confirms the collapse claim for commuting diagonal
+M1 gates. It does not show adaptivity is absent from non-commuting models such as SI.
+Owner sketch of the branch sum (verbatim, passes the toy checks):
+q = {}
+for i in range(len(p\_branch)):
+for x in tables[i]:
+q[x] = q.get(x, 0.0) + p\_branch[i] \* tables[i][x]
+return q

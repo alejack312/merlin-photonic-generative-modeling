@@ -247,3 +247,13 @@ Rung 3 now uses **200 subset seeds per profile/n/L**, paired to the same rung-2 
 The machine-readable outputs are `b2_rung3_subset_distribution.csv` and `b2_rung3_distribution_summary.csv` under [the first-run artifact directory](../results/v4_completion/20260929_first_r2_r3_runs/); the deduplicated B1/B2 and R3 tables remain in the same directory. No model-vs-model comparison was run and no scientific interpretation was added.
 
 The full suite passed **796 passed, 1 skipped in 483.75s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
+
+## 2026-09-30 R6 null #2 red-first mixture fixture
+
+The owner’s R6 null #2 record is appended verbatim to [R6-route-and-null-2026-09-30.md](v4-owner-nulls/R6-route-and-null-2026-09-30.md). No `src/` model code, training code, or experiment run was added. The test-local fixture uses MSB-first bits, the existing M1 `b(theta)` convention, n=2 data qubits, M=2 ancillas, and asymmetric non-symmetric generator `G`.
+
+Red-first evidence ran before the restored correction: the deliberately dropped-XOR core fixture failed for both angle variants with max gaps `0.6632449333318264` and `0.24159749453362833`. The explicit corrupted-control probe then produced nonzero gaps: dropped XOR `0.24159749453362836`, wrong branch weights `[0.3, 0.3, 0.2, 0.2]` `0.08432948775963967`, and reversed bit order `0.2415974945336284`. Invalid policy dependencies were rejected with messages naming `s2` and `s3`.
+
+Green numeric evidence: (a) q_A versus the equal-weight q_theta mixture was `1.1102230246251565e-16` for both sign-flip and +pi/2 variants; (b) maximum branch-weight gap was `5.551115123125783e-17`; (c) total-mass gaps were `2.220446049250313e-16` and `0.0`; (d) equal-angle q_A versus plain q_theta was `1.1102230246251565e-16`. For (e), the non-vacuous +pi/2 fixture had single-table gap `0.8432948775963962` and q_A-to-each-table gaps `0.4216474387981982` and `0.42164743879819816`. The sign-flip variant was also run through the identity checks; its ordinary q_theta tables coincide (gap `0.0`), so the non-vacuity assertion is registered on the +pi/2 variant.
+
+The R6 fixture passed **12 tests**; all MBQC tests passed **28 tests**. The full suite passed **808 passed, 1 skipped in 435.37s**. The artifact validator passed with `failure_count=0`, `json_files=579`, `jsonl_rows=72`, and `payload_hashes=19`.
