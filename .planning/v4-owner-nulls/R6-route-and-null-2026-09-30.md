@@ -78,7 +78,7 @@ tables (gap 1.1e-16), so model A equals control D by construction. Disposition:
     SI (branch tables must come from the non-adaptive family); (3) whether the trainable
     layer can do the branch sum (MerLin 0.4.0 has no feed-forward mention; Perceval
     1.2.4 has FFConfigurator, scope vs. SI reinjection unverified).
-Owner's takeaway sentence for the portfolio/case-study reader: to be appended by the owner.
+Owner's takeaway sentence for the portfolio/case-study reader: I tested whether adding outcome-dependent measurements to IQP circuits helps. Because s is a fair coin that only picks which IQP table to use, the adaptive model is just a mixture of ordinary IQP circuits, so it can do nothing a classical mixture of IQP circuits couldn't. I did not test SI circuits and circuits whose gates don't commute.
 Unverified owner recollection (not a source): Kashefi's remark to Hela Mhiri about
 adaptivity. PQCNN (arXiv 2504.20989) is a classification paper; its advantage wording in
 the abstract summary (vs other QNN proposals) differs from FQC25 slide p44 (vs classical
