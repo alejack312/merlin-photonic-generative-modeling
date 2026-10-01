@@ -39,6 +39,16 @@ from .throughput import (
     heralded_cz_attempts_per_sample,
 )
 from .erasure import conditional_erasure_distribution
+from .noisy import (
+    EXTRA_PHOTON_MODEL,
+    G2_P2_EQUATION,
+    G2_P2_SOURCE_NOTE,
+    IGNORED_MASS_FLAG_THRESHOLD,
+    NoisyProfile,
+    NoisyRunReport,
+    make_noisy_run_report,
+    p2_from_g2,
+)
 from .fock import (
     FullFockResult,
     direct_fock_compiled_distribution,
@@ -73,6 +83,14 @@ __all__ = [
     "general_attempts_per_sample",
     "heralded_cz_attempts_per_sample",
     "conditional_erasure_distribution",
+    "EXTRA_PHOTON_MODEL",
+    "G2_P2_EQUATION",
+    "G2_P2_SOURCE_NOTE",
+    "IGNORED_MASS_FLAG_THRESHOLD",
+    "NoisyProfile",
+    "NoisyRunReport",
+    "make_noisy_run_report",
+    "p2_from_g2",
     "FullFockResult",
     "direct_fock_compiled_distribution",
     "direct_fock_cp_reference",
