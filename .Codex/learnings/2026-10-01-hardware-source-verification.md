@@ -31,3 +31,11 @@ Date: 2026-10-01 · Scope: project · Recurs when: hardware parameters are propo
 ## Next time (for a weaker model)
 - Do: locate the exact supplement; distinguish raw and corrected metrics; date each configuration.
 - Don't: turn a simulation example, proposed catalogue feature, or unnamed setup into live hardware evidence.
+
+## Addendum: multiphoton overlap (2026-10-01)
+- If a paper reports desired-photon overlap M_s, do not relabel it signal-noise overlap M_sn.
+- If a simulation cites another source model, trace that model's appendix and label the resulting hardware-model attribution as a citation-chain inference.
+- If a notebook omits a flag, verify the versioned descriptor default and conversion code before identifying its effective model.
+- If g2 appears, retain the paper's relation to p2; do not treat autocorrelation as a two-photon emission probability.
+- If re-excitation emissions are time-correlated, preserve the paper's approximation boundary for separable noise.
+- Verified: source-model papers, Ascella citation chain, Perceval v1.2.1/v1.2.4 source and v1.2 tomography defaults; no named-QPU unwanted-pair overlap calibration found.
