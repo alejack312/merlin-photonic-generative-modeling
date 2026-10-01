@@ -1,0 +1,39 @@
+# Hidden-label Fock density and cutoff accounting
+Date: 2026-10-01 · Scope: project · Recurs when: noisy source sectors and hidden labels enter passive full-Fock controls.
+
+## Context & constraints
+- Representation A only, registered n=2,3, source once, vacuum gate ancillas.
+- Source cutoff is n+c emitted photons; omitted branches stay omitted after loss.
+- Desired common/private labels and fully distinguishable extras persist across gates.
+
+## Approach
+1. Test ideal and uniform-loss nulls against the existing full-Fock probability oracle.
+2. Build source density, apply per-mode loss Kraus maps, then propagate density via creation-operator Fock transitions.
+3. Preserve tensor-product species factors until the final diagonal detector measurement.
+4. Check the owner's pulse polynomial by independent convolution, with a cutoff that retains every branch.
+5. Run process-local wrong-p2, wrong-exponent, posthoc-loss, normalization, and detector-mass mutations; rerun unmutated oracles.
+
+## Decision rules that generalize
+- IF attenuation is uniform on all modes and the circuit is passive with final-only projection, THEN loss may commute to the source; otherwise prove the move separately.
+- IF the cutoff omits emission branches, THEN keep absolute subnormalized detector masses and report the source tail, independent of loss.
+- IF a two-pulse oracle includes four emitted photons, THEN use c=2 for its exact check; c=1 requires subtracting the omitted branch explicitly.
+- IF detectors are threshold, THEN distinguish click acceptance from conditioning on true total photon number.
+- IF V fixes only pair overlap, THEN document the higher-order hidden-label convention and the missing independent oracle.
+
+## Mistakes avoided / dead ends
+- Applying eta^n after g2>0 loses the n+1-emitted/one-lost contribution.
+- Normalizing retained emission mass hides the cutoff tail.
+- Convolving species diagonals is valid at final number measurement; doing it between gates destroys interference.
+
+## Verification
+- Focused green and actual mutant failures: docs/audits/r1-a-evidence/.
+- Analytic two-photon splitter, V=0 categorical convolution, pulse totals, density coherence, and Kraus completeness pass.
+- Full-suite and final elapsed-time evidence: docs/audits/2026-10-01-r1-representation-a.md.
+
+## Next time (for a weaker model)
+- Do: inspect noisy.py, owner addenda, Fock source rail conventions, and the exact conditional event first.
+- Don't: call a retained-tail normalization or a self-comparison an independent noisy-distribution oracle.
+
+## Changed files
+- src/merlin_iqp/deploy/noisy_fock.py — additive small-n density evaluator and accounting.
+- tests/v4_completion/test_r1_representation_a.py — independent oracles and deliberate mutations.

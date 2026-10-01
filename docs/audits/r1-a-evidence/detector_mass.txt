@@ -1,0 +1,25 @@
+THRESHOLD max gap=0.027562500000000045; mass gap=0.1000000000000002; merges={(0, 0, 0, 1): [(0, 0, 0, 1), (0, 0, 0, 2)], (0, 1, 0, 0): [(0, 1, 0, 0), (0, 2, 0, 0)], (0, 1, 0, 1): [(0, 1, 0, 1), (0, 1, 0, 2), (0, 2, 0, 1), (0, 2, 0, 2)]}
+F
+================================== FAILURES ===================================
+__________________ test_threshold_merges_and_conserves_mass ___________________
+
+        fixture = FIXTURES[0]
+        lossless = run(fixture, profile(p2=.1))
+        lossy = run(fixture, profile(p2=.1, eta=.152))
+        gap = _tvd(lossless.conditional_on_detected_photons(fixture.n),
+                   lossy.conditional_on_detected_photons(fixture.n))
+        print(f"G2 LOSS no_gate_n2: true-n-detected conditional TVD={gap:.17g}")
+        assert gap > 1e-3
+
+
+    def test_threshold_merges_and_conserves_mass():
+        fixture = FIXTURES[0]
+        pnr = run(fixture, profile(p2=0.1, eta=0.5, c=2))
+>       threshold = run(fixture, profile(p2=0.1, eta=0.5, c=2, detector="threshold"))
+        ^^^^^^^^^^^^^^^^^^
+E       assert 0.027562500000000045 < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:127: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/v4_completion/test_r1_representation_a.py::test_threshold_merges_and_conserves_mass
+1 failed, 23 deselected in 21.59s

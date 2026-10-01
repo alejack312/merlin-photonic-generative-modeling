@@ -1,0 +1,33 @@
+G2 LOSS bystander_n3: conditional TVD=0
+FG2 LOSS no_gate_n2: true-n-detected conditional TVD=0
+F
+================================== FAILURES ===================================
+________________ test_g2_loss_changes_conditional_distribution ________________
+
+    def test_g2_loss_changes_conditional_distribution():
+        fixture = FIXTURES[1]
+        left = run(fixture, profile(p2=0.1, c=1))
+        right = run(fixture, profile(p2=0.1, eta=0.152, c=1))
+        gap = _tvd(left.distribution, right.distribution)
+        print(f"G2 LOSS {fixture.name}: conditional TVD={gap:.17g}")
+>       assert gap > 1e-3
+E       assert 0.0 > 0.001
+
+tests\v4_completion\test_r1_representation_a.py:111: AssertionError
+_____________ test_no_gate_g2_changes_true_n_detected_conditional _____________
+
+    def test_no_gate_g2_changes_true_n_detected_conditional():
+        fixture = FIXTURES[0]
+        lossless = run(fixture, profile(p2=.1))
+        lossy = run(fixture, profile(p2=.1, eta=.152))
+        gap = _tvd(lossless.conditional_on_detected_photons(fixture.n),
+                   lossy.conditional_on_detected_photons(fixture.n))
+        print(f"G2 LOSS no_gate_n2: true-n-detected conditional TVD={gap:.17g}")
+>       assert gap > 1e-3
+E       assert 0.0 > 0.001
+
+tests\v4_completion\test_r1_representation_a.py:121: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/v4_completion/test_r1_representation_a.py::test_g2_loss_changes_conditional_distribution
+FAILED tests/v4_completion/test_r1_representation_a.py::test_no_gate_g2_changes_true_n_detected_conditional
+2 failed, 33 deselected in 23.12s

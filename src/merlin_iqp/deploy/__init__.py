@@ -55,6 +55,7 @@ from .fock import (
     direct_fock_cp_reference,
     full_fock_cp_reference,
 )
+from .noisy_fock import NoisyFockResult, run_noisy_fock_density
 from .ring import LoadedRingArtifact, evaluate_ring_artifact, load_ring_artifact
 
 __all__ = [
@@ -92,6 +93,8 @@ __all__ = [
     "make_noisy_run_report",
     "p2_from_g2",
     "FullFockResult",
+    "NoisyFockResult",
+    "run_noisy_fock_density",
     "direct_fock_compiled_distribution",
     "direct_fock_cp_reference",
     "full_fock_cp_reference",

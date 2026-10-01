@@ -1,0 +1,72 @@
+NULL2 no_gate_n2: TVD=0.48844800000000044; acceptance gap=0
+FNULL2 bystander_n3: TVD=0.051154584484450608; acceptance gap=0
+FNULL2 shared_gate_n3: TVD=0.0067442477842650549; acceptance gap=0
+FNULL2 asymmetric_wrap_n3: TVD=0.043010769330716653; acceptance gap=5.4210108624275222e-20
+F
+================================== FAILURES ===================================
+___________________________ test_null_2[no_gate_n2] ___________________________
+
+fixture = Fixture(name='no_gate_n2', n=2, singles=(0.0, 0.0), pairs=())
+
+    @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda f: f.name)
+    def test_null_2(fixture):
+        ideal = run(fixture, profile())
+        actual = run(fixture, profile(eta=0.152))
+        gap = _tvd(actual.distribution, ideal.distribution)
+        mass_gap = abs(actual.accepted_mass - ideal.accepted_mass * 0.152**fixture.n)
+        print(f"NULL2 {fixture.name}: TVD={gap:.17g}; acceptance gap={mass_gap:.17g}")
+>       assert gap < 1e-9
+E       assert 0.48844800000000044 < 1e-09
+
+tests\v4_completion\test_r1_representation_a.py:76: AssertionError
+__________________________ test_null_2[bystander_n3] __________________________
+
+fixture = Fixture(name='bystander_n3', n=3, singles=(0.17, -0.29, 0.31), pairs=((0, 2, 0.3),))
+
+    @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda f: f.name)
+    def test_null_2(fixture):
+        ideal = run(fixture, profile())
+        actual = run(fixture, profile(eta=0.152))
+        gap = _tvd(actual.distribution, ideal.distribution)
+        mass_gap = abs(actual.accepted_mass - ideal.accepted_mass * 0.152**fixture.n)
+        print(f"NULL2 {fixture.name}: TVD={gap:.17g}; acceptance gap={mass_gap:.17g}")
+>       assert gap < 1e-9
+E       assert 0.05115458448445061 < 1e-09
+
+tests\v4_completion\test_r1_representation_a.py:76: AssertionError
+_________________________ test_null_2[shared_gate_n3] _________________________
+
+fixture = Fixture(name='shared_gate_n3', n=3, singles=(0.17, -0.24, 0.36), pairs=((0, 1, 0.2), (1, 2, 0.3)))
+
+    @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda f: f.name)
+    def test_null_2(fixture):
+        ideal = run(fixture, profile())
+        actual = run(fixture, profile(eta=0.152))
+        gap = _tvd(actual.distribution, ideal.distribution)
+        mass_gap = abs(actual.accepted_mass - ideal.accepted_mass * 0.152**fixture.n)
+        print(f"NULL2 {fixture.name}: TVD={gap:.17g}; acceptance gap={mass_gap:.17g}")
+>       assert gap < 1e-9
+E       assert 0.006744247784265055 < 1e-09
+
+tests\v4_completion\test_r1_representation_a.py:76: AssertionError
+_______________________ test_null_2[asymmetric_wrap_n3] _______________________
+
+fixture = Fixture(name='asymmetric_wrap_n3', n=3, singles=(-0.31, 0.23, 0.17), pairs=((2, 0, 5.8131853071795865),))
+
+    @pytest.mark.parametrize("fixture", FIXTURES, ids=lambda f: f.name)
+    def test_null_2(fixture):
+        ideal = run(fixture, profile())
+        actual = run(fixture, profile(eta=0.152))
+        gap = _tvd(actual.distribution, ideal.distribution)
+        mass_gap = abs(actual.accepted_mass - ideal.accepted_mass * 0.152**fixture.n)
+        print(f"NULL2 {fixture.name}: TVD={gap:.17g}; acceptance gap={mass_gap:.17g}")
+>       assert gap < 1e-9
+E       assert 0.04301076933071665 < 1e-09
+
+tests\v4_completion\test_r1_representation_a.py:76: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/v4_completion/test_r1_representation_a.py::test_null_2[no_gate_n2]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_null_2[bystander_n3]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_null_2[shared_gate_n3]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_null_2[asymmetric_wrap_n3]
+4 failed, 20 deselected in 18.95s

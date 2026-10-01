@@ -1,0 +1,106 @@
+PULSE n=2 eta=0.5: max gap=0.016322314049586846; masses={0: 0.21038521958882592, 1: 0.4586776859504135, 2: 0.28790724677276175, 3: 0.04132231404958685, 4: 0.0017075336384126804}
+FPULSE n=3 eta=0.5: max gap=0.022859670616761085; masses={0: 0.09649900567917223, 1: 0.315577829383239, 2: 0.3700890768085324, 3: 0.1818608701591424, 4: 0.033341358271039, 5: 0.002561300457619022, 6: 7.055924125672239e-05}
+FPULSE n=2 eta=1.0: max gap=0.11325797418209083; masses={2: 0.6967420258179092, 3: 0.27593743596748893, 4: 0.02732053821460287}
+FPULSE n=3 eta=1.0: max gap=0.14742194539166242; masses={3: 0.5815780546083377, 4: 0.34549191362871556, 5: 0.06841424032251796, 6: 0.0045157914404302295}
+FPULSE n=2 eta=0.152: max gap=0.013984962128847256; masses={0: 0.6834244180593128, 1: 0.28022688010753366, 2: 0.03503963528436585, 3: 0.0012944829871183677, 4: 1.4583561669284903e-05}
+FPULSE n=3 eta=0.152: max gap=0.01743036188717817; masses={0: 0.5649834645655082, 1: 0.3474931888674422, 2: 0.07907158922898573, 3: 0.008079022376779404, 4: 0.00036526412805957707, 5: 7.415140892822178e-06, 6: 5.569233203424109e-08}
+F
+================================== FAILURES ===================================
+_______________________ test_owner_pulse_oracle[0.5-2] ________________________
+
+n = 2, eta = 0.5
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.016322314049586846) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+_______________________ test_owner_pulse_oracle[0.5-3] ________________________
+
+n = 3, eta = 0.5
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.022859670616761085) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+_______________________ test_owner_pulse_oracle[1.0-2] ________________________
+
+n = 2, eta = 1.0
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.11325797418209083) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+_______________________ test_owner_pulse_oracle[1.0-3] ________________________
+
+n = 3, eta = 1.0
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.14742194539166242) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+______________________ test_owner_pulse_oracle[0.152-2] _______________________
+
+n = 2, eta = 0.152
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.013984962128847256) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+______________________ test_owner_pulse_oracle[0.152-3] _______________________
+
+n = 3, eta = 0.152
+
+    @pytest.mark.parametrize("n", [2, 3])
+    @pytest.mark.parametrize("eta", [0.5, 1.0, 0.152])
+    def test_owner_pulse_oracle(n, eta):
+        actual = model.run_noisy_fock_density(n, (0.0,)*n, (), profile(p2=0.1, eta=eta, c=n))
+        expected = pulse_oracle(n, 0.1, eta)
+        gap = max(abs(actual.detected_photon_masses.get(k, 0)-v) for k, v in expected.items())
+        print(f"PULSE n={n} eta={eta}: max gap={gap:.17g}; masses={actual.detected_photon_masses}")
+>       assert gap < 1e-12
+E       assert np.float64(0.01743036188717817) < 1e-12
+
+tests\v4_completion\test_r1_representation_a.py:99: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[0.5-2]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[0.5-3]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[1.0-2]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[1.0-3]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[0.152-2]
+FAILED tests/v4_completion/test_r1_representation_a.py::test_owner_pulse_oracle[0.152-3]
+6 failed, 18 deselected in 20.33s
