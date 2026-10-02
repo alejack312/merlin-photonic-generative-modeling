@@ -1,0 +1,80 @@
+{
+  "NULL 1": {
+    "fixtures": [
+      {
+        "acceptance_gap": 8.881784197001252e-16,
+        "conditional_tvd": 0.0,
+        "fixture": "no_gate_n2"
+      },
+      {
+        "acceptance_gap": 2.7755575615628914e-17,
+        "conditional_tvd": 1.973247953923618e-17,
+        "fixture": "bystander_n3"
+      },
+      {
+        "acceptance_gap": 5.204170427930421e-18,
+        "conditional_tvd": 2.949029909160572e-17,
+        "fixture": "shared_gate_n3"
+      },
+      {
+        "acceptance_gap": 8.326672684688674e-17,
+        "conditional_tvd": 7.37257477290143e-18,
+        "fixture": "asymmetric_wrap_n3"
+      }
+    ],
+    "status": "PASS",
+    "tolerance": 1e-09
+  },
+  "NULL 2": {
+    "fixtures": [
+      {
+        "acceptance_gap": 0.0,
+        "conditional_tvd": 0.0,
+        "fixture": "no_gate_n2"
+      },
+      {
+        "acceptance_gap": 0.0,
+        "conditional_tvd": 6.505213034913027e-19,
+        "fixture": "bystander_n3"
+      },
+      {
+        "acceptance_gap": 0.0,
+        "conditional_tvd": 5.204170427930421e-18,
+        "fixture": "shared_gate_n3"
+      },
+      {
+        "acceptance_gap": 5.421010862427522e-20,
+        "conditional_tvd": 8.109832250191573e-17,
+        "fixture": "asymmetric_wrap_n3"
+      }
+    ],
+    "status": "PASS",
+    "tolerance": 1e-09
+  },
+  "NULL 3": {
+    "V": 0.4,
+    "absolute_gap": 1.6653345369377348e-16,
+    "coincidence_probability": 0.2999999999999998,
+    "expected_coincidence_probability": 0.3,
+    "scope": "exactly solvable balanced beam splitter only",
+    "status": "PASS",
+    "tolerance": 1e-09
+  },
+  "NULL 4": {
+    "max_total_detected_sector_gap": 1.0547118733938987e-15,
+    "p2": 0.1,
+    "profile_cutoff_extra_photons": 1,
+    "status": "PASS",
+    "tolerance": 1e-09,
+    "validated_eta": [
+      0.5,
+      1,
+      0.152
+    ],
+    "validated_n": [
+      2,
+      3
+    ],
+    "validation_cutoff_extra_photons": "c=n: all n-pulse emission branches; same representation-A evaluator"
+  }
+}

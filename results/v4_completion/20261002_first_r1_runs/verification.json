@@ -1,0 +1,35 @@
+{
+  "artifact_sha256": {
+    "cells_not_defined.csv": "7c748ecd1288caa880c031ee810a730bd4317535fc9d263d421ee4f1e564e2af",
+    "full_suite.log": "9dcedef66e2efc37edc63a4ddced6089209438e813d864c345e249c628ba52d4",
+    "manifest.json": "343c884c682665fe4bf97085302a540f6801e70a8a4a405290702f34e858325c",
+    "null_1_4.log": "e98d6117a00d3501ac5554a62171bc1009e47009218edfda89b9579754e84ce3",
+    "null_checks.json": "898208d2134ed2f3fee0a73aef1e69c4507038f7c675e13797944355f759b77b",
+    "profiles_measured.csv": "1f5d3eb5038f3d3c2a92e7cecc846bd47ae26e28f9b218b2624bfc3d9fa085cf",
+    "raw_tables.md": "86ccc8e3496010760d0eb31e56d2ffde866f2e16277188d46534b4424cff1ec8",
+    "run_accounting.md": "4c420f00fdc382ab56c31d64fb6c0e5b3349f68f3f933775e0a337712e95bdbf"
+  },
+  "checks": [
+    "unique cells",
+    "conditional normalization and occupations",
+    "PNR-to-threshold coarse-graining",
+    "source mass reconciliation and ignored flags",
+    "acceptance baseline scope",
+    "per-row null evidence hash",
+    "Belenos eta and nonmeasurement statement",
+    "g2 extra-photon assumption statement",
+    "source and artifact hashes",
+    "owner NULL 3 exact insertion-only diff"
+  ],
+  "defined_unrun": 0,
+  "full_suite": {
+    "exit_code": 0,
+    "passed": 875,
+    "seconds": 621.35,
+    "skipped": 1
+  },
+  "null_checks": "NULL 1-4 PASS before accepting rows",
+  "profile_rows_verified": 32,
+  "status": "PASS",
+  "undefined_cells": 32
+}

@@ -43,3 +43,8 @@ Date: 2026-10-01 · Scope: project · Recurs when: noisy source sectors and hidd
 - IF a required owner null is absent, THEN mark it NOT_REGISTERED, ask for its definition, and preserve pilot/null-check evidence without accepting profile results.
 - Keep preflight manifests immutable and separate from later accepted-run directories; hash the source files and freeze the exact profile table and tolerances.
 - Verification: results/v4_completion/20261002_first_r1_preflight/ records four timing measurements, 14 passing NULL 1/2/4 checks, and no accepted profile rows. NULL 3 remains unregistered.
+
+## Profile execution addendum (2026-10-02)
+- Owner NULL 3 was subsequently registered at 45a2ab9: balanced beam splitter, V=.4, coincidence .3, tolerance 1e-9; generic partial-V n3 CP distribution validation remains unavailable.
+- Reuse a committed pilot only after matching simulation/test code hashes. Preserve its preflight snapshot and write accepted runs to a separate immutable directory.
+- Verification: all four nulls passed before 32 defined profile cells; saved distributions normalize, threshold true-n conditionals coarse-grain their PNR companions, and every Belenos/g2 row carries the required measurement/assumption qualifiers. See results/v4_completion/20261002_first_r1_runs/.
