@@ -1,0 +1,407 @@
+{
+  "acceptance_columns": {
+    "acceptance_after_source_eta_n": "contract fixed-photon source-loss baseline eta**n only",
+    "after_source_acceptance": "measured detector-logical absolute acceptance after source loss, including the final ancillary-vacuum/data-rail selection",
+    "source_n_detected_mass": "absolute mass of the retained true total-n detected sector, all modes",
+    "with_brightness_acceptance": "Ascella: after_source_acceptance * 0.55**n; assistant definition, owner may revise. Ideal: N/A, not applicable. Belenos: N/A, no published brightness."
+  },
+  "artifact_sha256": {
+    "brightness_green.log": "9d696606b8d97a96623074842d744e2e1ec0e01548000a5a584318c2d5577db2",
+    "brightness_red.log": "e1489baafcf4c2a3023e40192bfe824ac3370b98c2cc5ab33cbff1fe9e4761e6",
+    "cells_not_defined.csv": "7c748ecd1288caa880c031ee810a730bd4317535fc9d263d421ee4f1e564e2af",
+    "full_suite.log": "4ad0598304d3831feecc36e049a515d329e8b1294e6562ffee416617f7c640a0",
+    "null_1_4.log": "e98d6117a00d3501ac5554a62171bc1009e47009218edfda89b9579754e84ce3",
+    "null_checks.json": "898208d2134ed2f3fee0a73aef1e69c4507038f7c675e13797944355f759b77b",
+    "profiles_measured.csv": "e4117bf5aab8020d6f52a627ecb15429e39ecdb9fe70dc47efde193a68928953",
+    "raw_tables.md": "1db190cfc02d716ed2ff86b5f2b3d9fa819e958d89ea10f047486558f8085183"
+  },
+  "brightness_policy": {
+    "Ascella": {
+      "assumption": "n independent pulses each emitting with probability 0.55",
+      "brightness": 0.55,
+      "formula": "after_source_acceptance * 0.55**n",
+      "label": "assistant definition, owner may revise",
+      "source": "Ascella supplement S-I / Table S1; first-lens brightness"
+    },
+    "Belenos": "N/A: no published brightness",
+    "Ideal": "N/A: not applicable"
+  },
+  "code_sha256": {
+    "conftest.py": "3e307cfe0461433074127eddaf5c89809bf0d3bedf2c6814295510b09fbb2925",
+    "src/merlin_iqp/deploy/density.py": "054f91e8fcf49f9a135542677af18f59f0b87e3be68f800e6127baacd3071841",
+    "src/merlin_iqp/deploy/fock.py": "5032f30f17596ac59f9ea3973835ef91e1d5612cdd4a9c19c973b24efbf49509",
+    "src/merlin_iqp/deploy/noisy.py": "027765bef11bed59ded1d242ac5be555e85d5630e8f1a0e90df59836a16afc06",
+    "src/merlin_iqp/deploy/noisy_fock.py": "3381891d9b9e616513f1d3c12c74f933447a4c20c0129c08f831218b5f3e58c9",
+    "tests/v4_completion/test_r1_noisy_profile_nulls.py": "cf3eec34aa45881700d8f8bb2fec7a3625790c85a4d5ed4c3b207c87f7131e14",
+    "tests/v4_completion/test_r1_representation_a.py": "4651ae30fa0e677c7550f028d192daf3bd2617a498e9c882e22e2664e3e9ffe9"
+  },
+  "conditioning": {
+    "PNR": "normalized full-Fock occupancy distribution given exactly n true detected photons across all modes",
+    "threshold": "same latent true-n conditioning, then click coarse-graining; reused PNR companion from same profile and circuit"
+  },
+  "cutoff_extra_photons": 1,
+  "date": "2026-10-02",
+  "dependencies": {
+    "numpy": "2.5.1",
+    "perceval-quandela": "1.2.4",
+    "python": "3.12.1 (tags/v3.12.1:2305ca5, Dec  7 2023, 22:03:25) [MSC v.1937 64 bit (AMD64)]"
+  },
+  "detectors": [
+    "PNR",
+    "threshold"
+  ],
+  "distribution_scope": "generic partial-V n=3 CP distributions are pipeline checks, not independently validated distributions",
+  "extra_photon_overlap_attribution": "published simulation assumption, not a device measurement",
+  "fixtures": [
+    {
+      "n": 2,
+      "name": "no_gate_n2",
+      "pairs": [],
+      "singles": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "n": 3,
+      "name": "bystander_n3",
+      "pairs": [
+        [
+          0,
+          2,
+          0.3
+        ]
+      ],
+      "singles": [
+        0.17,
+        -0.29,
+        0.31
+      ]
+    },
+    {
+      "n": 3,
+      "name": "shared_gate_n3",
+      "pairs": [
+        [
+          0,
+          1,
+          0.2
+        ],
+        [
+          1,
+          2,
+          0.3
+        ]
+      ],
+      "singles": [
+        0.17,
+        -0.24,
+        0.36
+      ]
+    },
+    {
+      "n": 3,
+      "name": "asymmetric_wrap_n3",
+      "pairs": [
+        [
+          2,
+          0,
+          5.8131853071795865
+        ]
+      ],
+      "singles": [
+        -0.31,
+        0.23,
+        0.17
+      ]
+    }
+  ],
+  "focused_minutes_through_final_commit": "recorded in run_accounting.md; excludes owner waiting and prior transit",
+  "ignored_mass_range": [
+    0.0,
+    0.0002795752742321819
+  ],
+  "interpretation": "none; owner interprets first",
+  "measured_profile_elapsed_seconds": 15.584709399961866,
+  "null_checks": {
+    "NULL 1": {
+      "fixtures": [
+        {
+          "acceptance_gap": 8.881784197001252e-16,
+          "conditional_tvd": 0.0,
+          "fixture": "no_gate_n2"
+        },
+        {
+          "acceptance_gap": 2.7755575615628914e-17,
+          "conditional_tvd": 1.973247953923618e-17,
+          "fixture": "bystander_n3"
+        },
+        {
+          "acceptance_gap": 5.204170427930421e-18,
+          "conditional_tvd": 2.949029909160572e-17,
+          "fixture": "shared_gate_n3"
+        },
+        {
+          "acceptance_gap": 8.326672684688674e-17,
+          "conditional_tvd": 7.37257477290143e-18,
+          "fixture": "asymmetric_wrap_n3"
+        }
+      ],
+      "status": "PASS",
+      "tolerance": 1e-09
+    },
+    "NULL 2": {
+      "fixtures": [
+        {
+          "acceptance_gap": 0.0,
+          "conditional_tvd": 0.0,
+          "fixture": "no_gate_n2"
+        },
+        {
+          "acceptance_gap": 0.0,
+          "conditional_tvd": 6.505213034913027e-19,
+          "fixture": "bystander_n3"
+        },
+        {
+          "acceptance_gap": 0.0,
+          "conditional_tvd": 5.204170427930421e-18,
+          "fixture": "shared_gate_n3"
+        },
+        {
+          "acceptance_gap": 5.421010862427522e-20,
+          "conditional_tvd": 8.109832250191573e-17,
+          "fixture": "asymmetric_wrap_n3"
+        }
+      ],
+      "status": "PASS",
+      "tolerance": 1e-09
+    },
+    "NULL 3": {
+      "V": 0.4,
+      "absolute_gap": 1.6653345369377348e-16,
+      "coincidence_probability": 0.2999999999999998,
+      "expected_coincidence_probability": 0.3,
+      "scope": "exactly solvable balanced beam splitter only",
+      "status": "PASS",
+      "tolerance": 1e-09
+    },
+    "NULL 4": {
+      "max_total_detected_sector_gap": 1.0547118733938987e-15,
+      "p2": 0.1,
+      "profile_cutoff_extra_photons": 1,
+      "status": "PASS",
+      "tolerance": 1e-09,
+      "validated_eta": [
+        0.5,
+        1,
+        0.152
+      ],
+      "validated_n": [
+        2,
+        3
+      ],
+      "validation_cutoff_extra_photons": "c=n: all n-pulse emission branches; same representation-A evaluator"
+    }
+  },
+  "owner_registration_sha256": "bacf60752491c7ab3827189d7e1a190f03cc4a41e640cc7683a6b3b064a33bd5",
+  "preflight": {
+    "commit": "e7a07e7",
+    "manifest_path": "results/v4_completion/20261002_first_r1_preflight/manifest.json",
+    "manifest_sha256": "2a7c1e3f720c7ba784950d8fbdc2e51eec886dc51d8f229b05c5cd623b550c6a",
+    "pilot": {
+      "failed_sandbox_attempt": "Perceval AppData log permission; no cell completed; retried with logging permission, no environment change",
+      "profile": {
+        "V": 0.923,
+        "cutoff_extra_photons": 1,
+        "detector": "PNR",
+        "eta": 0.152,
+        "g2": 0.019
+      },
+      "projected_32_cells_seconds": 75.29372000135481,
+      "projected_with_threshold_pnr_companions_seconds": 112.94058000203222,
+      "projection_fits_cap": true,
+      "rows": [
+        {
+          "circuit": "no_gate",
+          "density_block_bytes": 3600,
+          "n": 2,
+          "seconds": 7.713176600052975
+        },
+        {
+          "circuit": "bystander",
+          "density_block_bytes": 1308736,
+          "n": 3,
+          "seconds": 0.18262860004324466
+        },
+        {
+          "circuit": "shared_gate",
+          "density_block_bytes": 7398400,
+          "n": 3,
+          "seconds": 1.3374871000414714
+        },
+        {
+          "circuit": "asymmetric_wrap",
+          "density_block_bytes": 1308736,
+          "n": 3,
+          "seconds": 0.1784227000316605
+        }
+      ],
+      "total_seconds": 9.411715000169352
+    },
+    "pilot_reused": true,
+    "reason": "simulation and test code hashes unchanged"
+  },
+  "prior_preflight_focused_minutes_estimate": 16,
+  "profile_table": [
+    {
+      "V": 1.0,
+      "eta": 1.0,
+      "g2": 0.0,
+      "profile": "Ideal"
+    },
+    {
+      "V": 0.9438,
+      "brightness_accounting": {
+        "assumption": "n independent pulses each emitting with probability 0.55",
+        "brightness": 0.55,
+        "formula": "after_source_acceptance * 0.55**n",
+        "label": "assistant definition, owner may revise",
+        "source": "Ascella supplement S-I / Table S1; first-lens brightness"
+      },
+      "eta": 0.152,
+      "g2": 0.00732,
+      "profile": "Ascella_eta_0.152"
+    },
+    {
+      "V": 0.923,
+      "eta": 1.0,
+      "g2": 0.019,
+      "profile": "Belenos_eta_1"
+    },
+    {
+      "V": 0.923,
+      "eta": 0.152,
+      "g2": 0.019,
+      "profile": "Belenos_eta_0.152"
+    }
+  ],
+  "revision": {
+    "all_other_csv_cells_unchanged": true,
+    "base_manifest_path": "results/v4_completion/20261002_first_r1_runs/manifest.json",
+    "base_manifest_sha256": "343c884c682665fe4bf97085302a540f6801e70a8a4a405290702f34e858325c",
+    "base_results_commit": "ac94f84",
+    "base_table_sha256": "1f5d3eb5038f3d3c2a92e7cecc846bd47ae26e28f9b218b2624bfc3d9fa085cf",
+    "cell_definitions": [
+      {
+        "circuit": "no_gate",
+        "detector": "PNR",
+        "label": "assistant definition, owner may revise",
+        "n": 2,
+        "profile": "Ascella_eta_0.152",
+        "value": 0.007024602582384311
+      },
+      {
+        "circuit": "no_gate",
+        "detector": "threshold",
+        "label": "assistant definition, owner may revise",
+        "n": 2,
+        "profile": "Ascella_eta_0.152",
+        "value": 0.0070324073438760215
+      },
+      {
+        "circuit": "bystander",
+        "detector": "PNR",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 6.205909056422232e-05
+      },
+      {
+        "circuit": "bystander",
+        "detector": "threshold",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 6.212697228726655e-05
+      },
+      {
+        "circuit": "shared_gate",
+        "detector": "PNR",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 8.409819579319474e-06
+      },
+      {
+        "circuit": "shared_gate",
+        "detector": "threshold",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 8.41957053714325e-06
+      },
+      {
+        "circuit": "asymmetric_wrap",
+        "detector": "PNR",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 5.3381903811435635e-05
+      },
+      {
+        "circuit": "asymmetric_wrap",
+        "detector": "threshold",
+        "label": "assistant definition, owner may revise",
+        "n": 3,
+        "profile": "Ascella_eta_0.152",
+        "value": 5.34489264290893e-05
+      }
+    ],
+    "changed_cells": 8,
+    "changed_column": "with_brightness_acceptance",
+    "definition_label": "assistant definition, owner may revise",
+    "historical_notes": "All other CSV fields, including source_emission_probability and brightness_note, are preserved verbatim; revised definition is supplied here and in the table caption.",
+    "inherited_artifacts": [
+      "cells_not_defined.csv",
+      "null_checks.json",
+      "null_1_4.log"
+    ],
+    "kind": "derived accounting correction only; no simulation rerun",
+    "null_evidence": "Inherited unchanged from the base run; not rerun for this accounting-only revision.",
+    "owner_text_commit": "e9bf7335c56d1f96e6d0a1b1d705306fa27d3f51",
+    "revision_base_commit": "e9bf7335c56d1f96e6d0a1b1d705306fa27d3f51",
+    "simulation_code_hashes_match_base": true,
+    "test_sha256": {
+      "tests/v4_completion/test_r1_brightness_table.py": "faadf703e88b8ce7708ff2245e744785495c6748a5286425138bddec9778f5bc"
+    },
+    "verification": {
+      "full_suite": "908 passed, 1 skipped",
+      "green": "33 passed; maximum product gap 0",
+      "product_tolerance": 1e-09,
+      "red": "wrong exponent n+1: 8 failed, 25 passed",
+      "red_gap_range": [
+        3.784418810693764e-06,
+        0.003164583304744209
+      ]
+    }
+  },
+  "rows": {
+    "cells_not_defined": 32,
+    "defined_not_run": 0,
+    "profiles_measured": 32
+  },
+  "schema_version": "v4_completion.first_r1_runs.brightness_revision.v1",
+  "source_git": {
+    "commit": "45a2ab9abdfdac8d9642ffa63ebb54fe01b39fd0",
+    "production_code_changed": false
+  },
+  "stage_cap_hours": 1.25,
+  "sum_profile_evaluation_seconds": 15.395264799473807,
+  "tolerances": {
+    "NULL 1": 1e-09,
+    "NULL 2": 1e-09,
+    "NULL 3": 1e-09,
+    "NULL 4": 1e-09,
+    "brightness_product": 1e-09
+  }
+}

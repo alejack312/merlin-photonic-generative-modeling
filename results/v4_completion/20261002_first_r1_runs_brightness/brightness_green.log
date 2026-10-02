@@ -1,0 +1,10 @@
+........Ascella no_gate n=2 PNR: gap=0
+.Ascella no_gate n=2 threshold: gap=0
+.Ascella bystander n=3 PNR: gap=0
+.Ascella bystander n=3 threshold: gap=0
+.Ascella shared_gate n=3 PNR: gap=0
+.Ascella shared_gate n=3 threshold: gap=0
+.Ascella asymmetric_wrap n=3 PNR: gap=0
+.Ascella asymmetric_wrap n=3 threshold: gap=0
+..................
+33 passed in 1.41s

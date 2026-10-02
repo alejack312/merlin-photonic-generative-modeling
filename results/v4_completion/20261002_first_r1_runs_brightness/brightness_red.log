@@ -1,0 +1,204 @@
+........Ascella no_gate n=2 PNR: gap=0.0031610711620729394
+FAscella no_gate n=2 threshold: gap=0.0031645833047442089
+FAscella bystander n=3 PNR: gap=2.7926590753900046e-05
+FAscella bystander n=3 threshold: gap=2.7957137529269945e-05
+FAscella shared_gate n=3 PNR: gap=3.784418810693764e-06
+FAscella shared_gate n=3 threshold: gap=3.788806741714462e-06
+FAscella asymmetric_wrap n=3 PNR: gap=2.4021856715146035e-05
+FAscella asymmetric_wrap n=3 threshold: gap=2.4052016893090187e-05
+F.................
+================================== FAILURES ===================================
+___________ test_brightness_product_and_other_columns_unchanged[8] ____________
+
+index = 8
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 0.0031610711620729394 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[9] ____________
+
+index = 9
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 0.003164583304744209 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[10] ___________
+
+index = 10
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 2.7926590753900046e-05 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[11] ___________
+
+index = 11
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 2.7957137529269945e-05 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[12] ___________
+
+index = 12
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 3.784418810693764e-06 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[13] ___________
+
+index = 13
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 3.788806741714462e-06 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[14] ___________
+
+index = 14
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 2.4021856715146035e-05 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+___________ test_brightness_product_and_other_columns_unchanged[15] ___________
+
+index = 15
+
+    @pytest.mark.parametrize("index", range(32))
+    def test_brightness_product_and_other_columns_unchanged(index: int) -> None:
+        original = _read(ORIGINAL)[index]
+        table = Path(os.environ.get("R1_BRIGHTNESS_TABLE", str(UPDATED)))
+        revised = _read(table)[index]
+        assert original.keys() == revised.keys()
+        for column in original:
+            if column != "with_brightness_acceptance":
+                assert revised[column] == original[column], column
+        if original["profile"].startswith("Ascella"):
+            expected = float(original["after_source_acceptance"]) * 0.55 ** int(original["n"])
+            observed = float(revised["with_brightness_acceptance"])
+            gap = abs(observed - expected)
+            print(f"Ascella {original['circuit']} n={original['n']} {original['detector']}: gap={gap:.17g}")
+            assert math.isfinite(observed)
+>           assert gap <= 1e-9
+E           assert 2.4052016893090187e-05 <= 1e-09
+
+tests\v4_completion\test_r1_brightness_table.py:36: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[8]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[9]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[10]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[11]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[12]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[13]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[14]
+FAILED tests/v4_completion/test_r1_brightness_table.py::test_brightness_product_and_other_columns_unchanged[15]
+8 failed, 25 passed in 1.92s

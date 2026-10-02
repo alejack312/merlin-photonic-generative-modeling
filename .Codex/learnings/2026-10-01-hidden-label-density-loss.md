@@ -48,3 +48,8 @@ Date: 2026-10-01 · Scope: project · Recurs when: noisy source sectors and hidd
 - Owner NULL 3 was subsequently registered at 45a2ab9: balanced beam splitter, V=.4, coincidence .3, tolerance 1e-9; generic partial-V n3 CP distribution validation remains unavailable.
 - Reuse a committed pilot only after matching simulation/test code hashes. Preserve its preflight snapshot and write accepted runs to a separate immutable directory.
 - Verification: all four nulls passed before 32 defined profile cells; saved distributions normalize, threshold true-n conditionals coarse-grain their PNR companions, and every Belenos/g2 row carries the required measurement/assumption qualifiers. See results/v4_completion/20261002_first_r1_runs/.
+
+## Brightness accounting addendum (2026-10-02)
+- IF published first-lens brightness is used as independent pulse emission probability, THEN label that mapping as an assistant definition that the owner may revise.
+- IF only one results column may change, THEN compare every other CSV cell as strings, preserve historical notes, and put the revised definition in the new manifest and table caption.
+- Verification: wrong n+1 exponent fails all eight Ascella rows; correct n exponent passes 33 checks with zero product gap. Original results remain immutable; null evidence is inherited, not rerun.
