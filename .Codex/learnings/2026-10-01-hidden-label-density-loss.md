@@ -37,3 +37,9 @@ Date: 2026-10-01 · Scope: project · Recurs when: noisy source sectors and hidd
 ## Changed files
 - src/merlin_iqp/deploy/noisy_fock.py — additive small-n density evaluator and accounting.
 - tests/v4_completion/test_r1_representation_a.py — independent oracles and deliberate mutations.
+
+## Profile preflight addendum (2026-10-02)
+- IF a profile grid requests every circuit/size combination, THEN enumerate the existing fixture registry first; four registered combinations yield 32 cells here, with 32 other grid cells explicitly undefined.
+- IF a required owner null is absent, THEN mark it NOT_REGISTERED, ask for its definition, and preserve pilot/null-check evidence without accepting profile results.
+- Keep preflight manifests immutable and separate from later accepted-run directories; hash the source files and freeze the exact profile table and tolerances.
+- Verification: results/v4_completion/20261002_first_r1_preflight/ records four timing measurements, 14 passing NULL 1/2/4 checks, and no accepted profile rows. NULL 3 remains unregistered.
